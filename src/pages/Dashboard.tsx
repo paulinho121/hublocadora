@@ -41,6 +41,7 @@ export default function Dashboard() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingEquipment, setEditingEquipment] = useState<Equipment | undefined>();
+  const [activeTab, setActiveTab] = useState<'overview' | 'inventory' | 'bookings' | 'settings'>('overview');
 
   if (isLoadingCompany) {
     return (
@@ -130,7 +131,6 @@ export default function Dashboard() {
     }
   };
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'inventory' | 'bookings' | 'settings'>('overview');
 
   return (
     <div className="flex flex-col md:flex-row min-h-[calc(100vh-4rem)]">
