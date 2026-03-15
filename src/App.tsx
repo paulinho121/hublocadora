@@ -17,6 +17,7 @@ import Admin from '@/pages/Admin';
 import Docs from '@/pages/Docs';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
+import EquipmentDetails from '@/pages/EquipmentDetails';
 
 function Navbar() {
   const { user, signOut } = useAuth();
@@ -126,6 +127,7 @@ function MainLayout() {
       <main className="flex-1 pb-20 md:pb-0">
         <Routes>
           <Route path="/" element={<Marketplace />} />
+          <Route path="/equipment/:id" element={<EquipmentDetails />} />
           <Route path="/docs" element={<Docs />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

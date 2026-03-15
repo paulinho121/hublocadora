@@ -106,7 +106,11 @@ export default function Marketplace() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
             {equipments?.map((item) => (
-              <Card key={item.id} className="group overflow-hidden border-zinc-800 bg-zinc-950/30 hover:bg-zinc-950/80 hover:border-primary/50 transition-all duration-300 cursor-pointer shadow-xl">
+              <Card 
+                key={item.id} 
+                className="group overflow-hidden border-zinc-800 bg-zinc-950/30 hover:bg-zinc-950/80 hover:border-primary/50 transition-all duration-300 cursor-pointer shadow-xl"
+                onClick={() => navigate(`/equipment/${item.id}`)}
+              >
                 <div className="aspect-[4/3] overflow-hidden bg-zinc-900 relative">
                   {item.images?.[0] ? (
                     <img 
