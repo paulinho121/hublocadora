@@ -397,6 +397,17 @@ export default function Admin() {
                             </td>
                             <td className="px-6 py-4 text-right">
                               <div className="flex items-center justify-end gap-2">
+                                {company.status === 'pending' && (
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline" 
+                                    className="text-[10px] h-7 px-2 border-emerald-500/50 text-emerald-500 hover:bg-emerald-500 hover:text-white uppercase font-black italic tracking-tighter"
+                                    onClick={() => handleApprove(company.id)}
+                                    disabled={approveMutation.isPending}
+                                  >
+                                    Aprovar
+                                  </Button>
+                                )}
                                 <Button 
                                   size="icon" 
                                   variant="ghost" 
@@ -409,6 +420,7 @@ export default function Admin() {
                                   variant="ghost" 
                                   className="h-8 w-8 text-destructive/40 hover:text-destructive hover:bg-destructive/10"
                                   onClick={() => handleDelete(company.id)}
+                                  disabled={deleteMutation.isPending}
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
