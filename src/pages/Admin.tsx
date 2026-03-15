@@ -71,51 +71,74 @@ export default function Admin() {
   );
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)]">
-      {/* Sidebar */}
-      <aside className="w-64 border-r bg-zinc-950 hidden md:block">
+    <div className="flex flex-col md:flex-row min-h-[calc(100vh-4rem)]">
+      {/* Mobile Tab Switcher */}
+      <div className="md:hidden sticky top-16 z-30 bg-zinc-950/90 backdrop-blur-md border-b border-zinc-800 overflow-x-auto hide-scrollbar">
+        <div className="flex p-2 min-w-max gap-2">
+          {(['overview', 'companies', 'users', 'finance', 'insurance'] as AdminTab[]).map((tab) => (
+            <Button
+              key={tab}
+              size="sm"
+              variant={activeTab === tab ? 'secondary' : 'ghost'}
+              className={`capitalize text-xs font-bold tracking-widest ${activeTab === tab ? 'text-primary' : 'text-zinc-500'}`}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab === 'overview' ? <Activity className="w-3 h-3 mr-1" /> : 
+               tab === 'companies' ? <Building2 className="w-3 h-3 mr-1" /> :
+               tab === 'users' ? <Users className="w-3 h-3 mr-1" /> :
+               tab === 'finance' ? <DollarSign className="w-3 h-3 mr-1" /> :
+               <ShieldCheck className="w-3 h-3 mr-1" />}
+              {tab}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {/* Sidebar (Desktop) */}
+      <aside className="w-64 border-r bg-zinc-950 hidden md:block shrink-0">
         <div className="p-6">
-          <h2 className="text-lg font-semibold tracking-tight text-emerald-500">CINEHUB Admin</h2>
-          <p className="text-sm text-zinc-400">Gestão da Plataforma</p>
+          <h2 className="text-lg font-semibold tracking-tight text-emerald-500 uppercase italic">Gestão HUB</h2>
+          <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.2em]">Cinehub Authority</p>
         </div>
         <nav className="space-y-1 px-3">
           <Button 
             variant={activeTab === 'overview' ? 'secondary' : 'ghost'} 
-            className="w-full justify-start transition-all"
+            className="w-full justify-start transition-all font-bold text-xs uppercase tracking-widest"
             onClick={() => setActiveTab('overview')}
           >
             <Activity className="mr-2 h-4 w-4" /> Overview
           </Button>
           <Button 
             variant={activeTab === 'companies' ? 'secondary' : 'ghost'} 
-            className="w-full justify-start transition-all text-zinc-400 hover:text-white"
+            className="w-full justify-start transition-all text-zinc-400 hover:text-white font-bold text-xs uppercase tracking-widest"
             onClick={() => setActiveTab('companies')}
           >
             <Building2 className="mr-2 h-4 w-4" /> Locadoras
           </Button>
           <Button 
             variant={activeTab === 'users' ? 'secondary' : 'ghost'} 
-            className="w-full justify-start transition-all text-zinc-400 hover:text-white"
+            className="w-full justify-start transition-all text-zinc-400 hover:text-white font-bold text-xs uppercase tracking-widest"
             onClick={() => setActiveTab('users')}
           >
             <Users className="mr-2 h-4 w-4" /> Usuários
           </Button>
           <Button 
             variant={activeTab === 'finance' ? 'secondary' : 'ghost'} 
-            className="w-full justify-start transition-all text-zinc-400 hover:text-white"
+            className="w-full justify-start transition-all text-zinc-400 hover:text-white font-bold text-xs uppercase tracking-widest"
             onClick={() => setActiveTab('finance')}
           >
-            <DollarSign className="mr-2 h-4 w-4" /> Financeiro (Stripe)
+            <DollarSign className="mr-2 h-4 w-4" /> Financeiro
           </Button>
           <Button 
             variant={activeTab === 'insurance' ? 'secondary' : 'ghost'} 
-            className="w-full justify-start transition-all text-zinc-400 hover:text-white"
+            className="w-full justify-start transition-all text-zinc-400 hover:text-white font-bold text-xs uppercase tracking-widest"
             onClick={() => setActiveTab('insurance')}
           >
             <ShieldCheck className="mr-2 h-4 w-4" /> Seguros
           </Button>
         </nav>
       </aside>
+
 
       {/* Main Content */}
       <main className="flex-1 p-8 overflow-auto bg-zinc-900/10">

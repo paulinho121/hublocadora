@@ -1,5 +1,6 @@
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Camera, LogOut } from 'lucide-react';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, NavLink } from 'react-router-dom';
+import { Camera, LogOut, LayoutDashboard, Settings, ShoppingBag, User } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { useEffect } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -27,43 +28,45 @@ function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-background border-b border-border/40">
-      <div className="container flex h-20 items-center justify-between mx-auto px-4 max-w-6xl">
+    <header className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-md border-b border-border/40">
+      <div className="container flex h-16 md:h-20 items-center justify-between mx-auto px-4 max-w-6xl">
         <div className="flex items-center gap-8">
           <Link to="/" className="flex items-center space-x-2 text-primary">
-            <Camera className="h-8 w-8" />
-            <span className="font-bold text-2xl tracking-tighter lowercase">
+            <Camera className="h-6 w-6 md:h-8 md:w-8" />
+            <span className="font-bold text-xl md:text-2xl tracking-tighter lowercase">
               cinehub
             </span>
           </Link>
-          <nav className="hidden md:flex items-center space-x-6 text-base font-medium text-muted-foreground">
-            <Link to="/dashboard" className="hover:text-foreground transition-colors">Locadora</Link>
-            <Link to="/admin" className="hover:text-foreground transition-colors">Produtora e Estúdio</Link>
+          <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-muted-foreground uppercase tracking-widest">
+            <NavLink to="/dashboard" className={({isActive}) => isActive ? "text-foreground" : "hover:text-foreground transition-colors"}>Locadora</NavLink>
+            <NavLink to="/admin" className={({isActive}) => isActive ? "text-foreground" : "hover:text-foreground transition-colors"}>Gestão HUB</NavLink>
           </nav>
         </div>
 
         <div className="flex items-center space-x-4">
           {user ? (
             <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground hidden sm:inline-block">
+              <span className="text-xs text-muted-foreground hidden lg:inline-block">
                 {user.email}
               </span>
-              <Button variant="ghost" onClick={handleLogout} className="text-muted-foreground hover:text-foreground">
-                <LogOut className="h-4 w-4 mr-2" />
-                Sair
+              <Button size="sm" variant="ghost" onClick={handleLogout} className="text-muted-foreground hover:text-foreground h-9 md:h-10">
+                <LogOut className="h-4 w-4 md:mr-2" />
+                <span className="hidden md:inline">Sair</span>
               </Button>
             </div>
           ) : (
             <>
               <Button
                 variant="ghost"
-                className="text-base font-medium text-primary hover:text-primary/80 hover:bg-transparent hidden sm:flex"
+                size="sm"
+                className="text-sm font-medium text-primary hover:text-primary/80 hover:bg-transparent hidden md:flex"
                 onClick={() => navigate('/register')}
               >
                 criar conta
               </Button>
               <Button
-                className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 rounded-lg text-base h-11"
+                size="sm"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 md:px-8 rounded-lg text-sm md:text-base h-9 md:h-11 font-bold"
                 onClick={() => navigate('/login')}
               >
                 Entrar
@@ -76,6 +79,43 @@ function Navbar() {
   );
 }
 
+function BottomNav() {
+  const { user } = useAuth();
+  
+  if (!user) return null;
+
+  return (
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-t border-border/40 px-6 py-3 pb-8 flex items-center justify-between shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
+      <NavLink 
+        to="/" 
+        className={({isActive}) => `flex flex-col items-center gap-1 transition-all ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
+      >
+        <ShoppingBag className="w-6 h-6" />
+        <span className="text-[10px] font-bold uppercase tracking-tighter">Market</span>
+      </NavLink>
+      <NavLink 
+        to="/dashboard" 
+        className={({isActive}) => `flex flex-col items-center gap-1 transition-all ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
+      >
+        <LayoutDashboard className="w-6 h-6" />
+        <span className="text-[10px] font-bold uppercase tracking-tighter">Locadora</span>
+      </NavLink>
+      <NavLink 
+        to="/admin" 
+        className={({isActive}) => `flex flex-col items-center gap-1 transition-all ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
+      >
+        <Settings className="w-6 h-6" />
+        <span className="text-[10px] font-bold uppercase tracking-tighter">Admin</span>
+      </NavLink>
+      <button className="flex flex-col items-center gap-1 text-muted-foreground">
+        <User className="w-6 h-6" />
+        <span className="text-[10px] font-bold uppercase tracking-tighter">Perfil</span>
+      </button>
+    </nav>
+  );
+}
+
+
 function MainLayout() {
   const location = useLocation();
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
@@ -83,14 +123,12 @@ function MainLayout() {
   return (
     <div className="min-h-screen bg-background font-sans antialiased flex flex-col">
       {!isAuthPage && <Navbar />}
-      <main className="flex-1">
+      <main className="flex-1 pb-20 md:pb-0">
         <Routes>
           <Route path="/" element={<Marketplace />} />
           <Route path="/docs" element={<Docs />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-
-          {/* Protected Routes */}
           <Route
             path="/dashboard"
             element={
@@ -109,9 +147,11 @@ function MainLayout() {
           />
         </Routes>
       </main>
+      {!isAuthPage && <BottomNav />}
     </div>
   );
 }
+
 
 export default function App() {
   // Force dark mode for this prototype

@@ -30,32 +30,32 @@ export default function Marketplace() {
   ];
 
   return (
-    <div className="flex flex-col items-center pt-20 pb-10 px-4 w-full max-w-7xl mx-auto">
-      <div className="text-center mb-12 animate-in fade-in slide-in-from-top-4 duration-500">
-        <h1 className="text-4xl md:text-6xl font-black mb-4 tracking-tighter uppercase italic">
+    <div className="flex flex-col items-center pt-12 md:pt-20 pb-10 px-4 w-full max-w-7xl mx-auto">
+      <div className="text-center mb-10 md:mb-12 animate-in fade-in slide-in-from-top-4 duration-500">
+        <h1 className="text-3xl sm:text-4xl md:text-6xl font-black mb-4 tracking-tighter uppercase italic leading-[0.9]">
           O HUB da sua <span className="text-primary italic">produção</span>
         </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+        <p className="text-sm md:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
           Encontre câmeras, iluminação, áudio e agora <strong>telões de LED</strong> de alta definição para o seu set.
         </p>
       </div>
       
-      <div className="flex w-full max-w-3xl items-center space-x-2 mb-16 px-4">
+      <div className="flex flex-col sm:flex-row w-full max-w-3xl items-stretch sm:items-center gap-3 mb-12 md:mb-16 px-0 md:px-4">
         <div className="relative flex-1 group">
           <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-primary h-5 w-5 group-focus-within:scale-110 transition-transform" />
           <Input 
-            className="h-14 pl-12 text-lg rounded-xl bg-zinc-950/50 border-zinc-800 focus:border-primary/50 transition-all font-medium" 
+            className="h-12 md:h-14 pl-12 text-base md:text-lg rounded-xl bg-zinc-950/50 border-zinc-800 focus:border-primary/50 transition-all font-medium" 
             placeholder="O que você está procurando hoje?"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <Button className="h-14 px-8 text-lg rounded-xl bg-primary hover:bg-primary/90 font-bold px-10">
-          Buscar
+        <Button className="h-12 md:h-14 px-8 text-base md:text-lg rounded-xl bg-primary hover:bg-primary/90 font-bold sm:px-10">
+          Buscar Agora
         </Button>
       </div>
 
-      <div className="w-full mb-20">
+      <div className="w-full mb-16 md:mb-20">
         <BrandMarquee />
       </div>
 
