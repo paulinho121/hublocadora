@@ -18,18 +18,24 @@ import {
   Trash2,
   MoreVertical,
   MapPin,
-  Calendar
+  Calendar,
+  Package,
+  Truck,
+  Store,
+  Hash
 } from 'lucide-react';
 import { 
   useAdminStats, 
   usePendingCompanies, 
   useApproveCompany,
   useAllCompanies,
-  useDeleteCompany
+  useDeleteCompany,
+  useAllBookings,
+  useUpdateBookingStatus
 } from '@/hooks/useAdmin';
 import { Input } from '@/components/ui/input';
 
-type AdminTab = 'overview' | 'companies' | 'users' | 'finance' | 'insurance';
+type AdminTab = 'overview' | 'companies' | 'bookings' | 'users' | 'finance' | 'insurance';
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
@@ -41,6 +47,8 @@ export default function Admin() {
   
   const approveMutation = useApproveCompany();
   const deleteMutation = useDeleteCompany();
+  const { data: allBookings, isLoading: isLoadingBookings } = useAllBookings();
+  const updateBookingStatus = useUpdateBookingStatus();
 
   const handleApprove = async (id: string) => {
     if (confirm('Aprovar esta locadora para operar no marketplace?')) {
@@ -58,6 +66,10 @@ export default function Admin() {
     if (confirm('ATENÇÃO: Isso excluirá permanentemente esta locadora e todos os seus equipamentos do banco de dados. Deseja continuar?')) {
       await deleteMutation.mutateAsync(id);
     }
+  };
+
+  const handleUpdateBookingStatus = async (id: string, status: any) => {
+    await updateBookingStatus.mutateAsync({ id, status });
   };
 
   const formatCurrency = (value: number) => {
@@ -85,10 +97,11 @@ export default function Admin() {
             >
               {tab === 'overview' ? <Activity className="w-3 h-3 mr-1" /> : 
                tab === 'companies' ? <Building2 className="w-3 h-3 mr-1" /> :
+               tab === 'bookings' ? <Calendar className="w-3 h-3 mr-1" /> :
                tab === 'users' ? <Users className="w-3 h-3 mr-1" /> :
                tab === 'finance' ? <DollarSign className="w-3 h-3 mr-1" /> :
                <ShieldCheck className="w-3 h-3 mr-1" />}
-              {tab}
+              {tab === 'bookings' ? 'Suplementos' : tab}
             </Button>
           ))}
         </div>
@@ -114,6 +127,13 @@ export default function Admin() {
             onClick={() => setActiveTab('companies')}
           >
             <Building2 className="mr-2 h-4 w-4" /> Locadoras
+          </Button>
+          <Button 
+            variant={activeTab === 'bookings' ? 'secondary' : 'ghost'} 
+            className="w-full justify-start transition-all text-zinc-400 hover:text-white font-bold text-xs uppercase tracking-widest"
+            onClick={() => setActiveTab('bookings')}
+          >
+            <Calendar className="mr-2 h-4 w-4" /> Suplementos
           </Button>
           <Button 
             variant={activeTab === 'users' ? 'secondary' : 'ghost'} 
@@ -437,8 +457,114 @@ export default function Admin() {
           </div>
         )}
 
+        {/* Tab: Bookings / Supplements */}
+        {activeTab === 'bookings' && (
+          <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+             <div className="flex items-center justify-between mb-8">
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Suplementos & Reservas</h1>
+                <p className="text-muted-foreground">Monitore pedidos de locadoras e logística de entrega.</p>
+              </div>
+            </div>
+
+            <div className="grid gap-6">
+              {isLoadingBookings ? (
+                <div className="flex justify-center p-12"><Loader2 className="animate-spin text-primary h-10 w-10" /></div>
+              ) : allBookings?.length === 0 ? (
+                <Card><CardContent className="p-12 text-center text-zinc-500">Nenhuma solicitação no momento.</CardContent></Card>
+              ) : (
+                allBookings?.map((booking: any) => (
+                  <Card key={booking.id} className="border-zinc-800 bg-zinc-950/40">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col lg:flex-row justify-between gap-6">
+                        <div className="flex gap-4">
+                          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                            <Package className="w-6 h-6" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="font-bold text-lg">{booking.equipment?.name}</h3>
+                              <Badge variant="outline" className="text-[10px] uppercase">{booking.equipment?.category}</Badge>
+                            </div>
+                            <p className="text-sm text-zinc-400">Solicitado por: <span className="text-zinc-200 font-bold italic uppercase">{booking.company?.name || 'Locadora'}</span></p>
+                            <div className="flex items-center gap-4 mt-2">
+                               <div className="flex items-center gap-1 text-xs text-zinc-500">
+                                  <Clock className="w-3 h-3" />
+                                  {new Date(booking.start_date).toLocaleDateString('pt-BR')} - {new Date(booking.end_date).toLocaleDateString('pt-BR')}
+                               </div>
+                               <div className="flex items-center gap-1 text-xs text-emerald-500 font-bold">
+                                  <Hash className="w-3 h-3" />
+                                  Qtd: {booking.quantity || 1}
+                               </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row gap-4 lg:items-center">
+                           <div className="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800 min-w-[200px]">
+                              <p className="text-[10px] uppercase font-black text-zinc-500 mb-2 tracking-widest">Logística</p>
+                              <div className="flex items-center gap-2">
+                                 {booking.delivery_method === 'delivery' ? (
+                                   <>
+                                     <Truck className="w-4 h-4 text-primary" />
+                                     <span className="text-xs font-bold uppercase italic">Entrega no Local</span>
+                                   </>
+                                 ) : (
+                                   <>
+                                     <Store className="w-4 h-4 text-emerald-500" />
+                                     <span className="text-xs font-bold uppercase italic">Retirada no HUB</span>
+                                   </>
+                                 )}
+                              </div>
+                              {booking.delivery_address && (
+                                <p className="text-[10px] text-zinc-500 mt-2 line-clamp-1">{booking.delivery_address}</p>
+                              )}
+                           </div>
+
+                           <div className="flex flex-col gap-2">
+                              {booking.status === 'pending' ? (
+                                <div className="flex gap-2">
+                                   <Button 
+                                     size="sm" 
+                                     className="bg-emerald-600 hover:bg-emerald-500 font-black italic uppercase tracking-tighter"
+                                     onClick={() => handleUpdateBookingStatus(booking.id, 'approved')}
+                                   >
+                                     Aprovar
+                                   </Button>
+                                   <Button 
+                                     size="sm" 
+                                     variant="ghost" 
+                                     className="text-destructive font-bold uppercase"
+                                     onClick={() => handleUpdateBookingStatus(booking.id, 'rejected')}
+                                   >
+                                     Recusar
+                                   </Button>
+                                </div>
+                              ) : (
+                                <Badge className="mx-auto uppercase font-black italic">{booking.status}</Badge>
+                              )}
+                              <p className="text-center font-black text-lg tracking-tighter">
+                                {formatCurrency(booking.total_amount || 0)}
+                              </p>
+                           </div>
+                        </div>
+                      </div>
+                      {booking.notes && (
+                        <div className="mt-4 p-3 bg-zinc-900/30 rounded-lg border border-dashed border-zinc-800">
+                           <p className="text-[10px] uppercase font-bold text-zinc-500 mb-1">Notas da Locadora:</p>
+                           <p className="text-xs italic text-zinc-400">"{booking.notes}"</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Outros Módulos em Desenvolvimento */}
-        {activeTab !== 'overview' && activeTab !== 'companies' && (
+        {activeTab !== 'overview' && activeTab !== 'companies' && activeTab !== 'bookings' && (
           <div className="flex flex-col items-center justify-center h-full text-center animate-in fade-in zoom-in-95 duration-300">
             <div className="bg-emerald-500/10 p-6 rounded-full mb-6">
               <Clock className="w-12 h-12 text-emerald-500 animate-pulse" />

@@ -14,15 +14,27 @@ import {
   ArrowRight,
   Info,
   Loader2,
-  Camera
+  Camera,
+  Truck,
+  Hash
 } from 'lucide-react';
 import { useState } from 'react';
+import { useEquipmentAvailability } from '@/hooks/useAvailability';
 
 export default function EquipmentDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: equipment, isLoading } = useEquipment(id || '');
   const [activeImage, setActiveImage] = useState(0);
+  
+  // Controle de datas para checagem de disponibilidade
+  const today = new Date().toISOString().split('T')[0];
+  const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  
+  const [startDate, setStartDate] = useState(today);
+  const [endDate, setEndDate] = useState(nextWeek);
+  
+  const { data: availability, isLoading: isLoadingAvail } = useEquipmentAvailability(id || '', startDate, endDate);
 
   if (isLoading) {
     return (
@@ -187,9 +199,57 @@ export default function EquipmentDetails() {
                    </div>
                 </div>
 
+                <div className="mt-8 p-4 bg-zinc-900/50 rounded-2xl border border-zinc-800 space-y-4">
+                   <p className="text-[10px] uppercase font-black italic text-zinc-500 tracking-widest text-center">Consultar Calendário</p>
+                   <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                         <label className="text-[9px] uppercase font-bold text-zinc-500 ml-1">Retirada</label>
+                         <input 
+                           type="date" 
+                           value={startDate} 
+                           onChange={(e) => setStartDate(e.target.value)}
+                           className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2 text-xs font-bold text-zinc-100 focus:outline-none focus:ring-1 focus:ring-primary"
+                         />
+                      </div>
+                      <div className="space-y-1">
+                         <label className="text-[9px] uppercase font-bold text-zinc-500 ml-1">Devolução</label>
+                         <input 
+                           type="date" 
+                           value={endDate} 
+                           onChange={(e) => setEndDate(e.target.value)}
+                           className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2 text-xs font-bold text-zinc-100 focus:outline-none focus:ring-1 focus:ring-primary"
+                         />
+                      </div>
+                   </div>
+
+                   {isLoadingAvail ? (
+                     <div className="flex justify-center p-2"><Loader2 className="w-4 h-4 animate-spin text-primary" /></div>
+                   ) : availability && (
+                     <div className="flex items-center justify-between px-2 pt-2 border-t border-zinc-800/50">
+                        <div className="flex items-center gap-2">
+                           <div className={`w-2 h-2 rounded-full ${availability.isAvailable ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+                           <span className={`text-[11px] font-black uppercase italic ${availability.isAvailable ? 'text-emerald-500' : 'text-red-500'}`}>
+                              {availability.isAvailable ? 'Equipamento Disponível' : 'Indisponível no Período'}
+                           </span>
+                        </div>
+                        <div className="flex items-center gap-1 text-[11px] font-bold text-zinc-500">
+                           <Hash className="w-3 h-3" />
+                           Estoque: <span className="text-zinc-200">{availability.available} / {availability.total}</span>
+                        </div>
+                     </div>
+                   )}
+                </div>
+
                 <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                   <Button className="h-14 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black italic uppercase tracking-tighter text-lg group shadow-[0_10px_30px_rgba(var(--primary),0.3)]">
-                      Alugar Agora <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                   <Button 
+                     disabled={!availability?.isAvailable}
+                     className={`h-14 rounded-2xl font-black italic uppercase tracking-tighter text-lg group shadow-2xl transition-all
+                       ${availability?.isAvailable 
+                         ? 'bg-primary hover:bg-primary/90 text-white shadow-[0_10px_30px_rgba(var(--primary),0.3)]' 
+                         : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'}`}
+                   >
+                      {availability?.isAvailable ? 'Alugar Agora' : 'Indisponível'}
+                      <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                    </Button>
                    <Button variant="outline" className="h-14 rounded-2xl border-zinc-800 bg-transparent text-zinc-200 font-bold uppercase tracking-tighter hover:bg-zinc-900/50">
                       <MessageSquare className="mr-2 w-5 h-5" /> Falar com Locadora

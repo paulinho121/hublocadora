@@ -115,3 +115,42 @@ export function useApproveCompany() {
         },
     });
 }
+
+export function useAllBookings() {
+    return useQuery({
+        queryKey: ['all-bookings'],
+        queryFn: async () => {
+            const { data, error } = await supabase
+                .from('bookings')
+                .select(`
+                    *,
+                    equipment:equipments(name, category),
+                    renter:profiles(full_name, email),
+                    company:companies(name)
+                `)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            return data;
+        },
+    });
+}
+
+export function useUpdateBookingStatus() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ id, status }: { id: string; status: Booking['status'] }) => {
+            const { error } = await supabase
+                .from('bookings')
+                .update({ status })
+                .eq('id', id);
+
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['all-bookings'] });
+            queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+        },
+    });
+}

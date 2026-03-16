@@ -18,6 +18,7 @@ const equipmentSchema = z.object({
   daily_rate: z.coerce.number().min(1, 'Valor diário deve ser maior que 0'),
   condition: z.enum(['excellent', 'good', 'fair', 'maintenance']),
   status: z.enum(['available', 'rented', 'maintenance', 'unavailable']),
+  stock_quantity: z.coerce.number().min(1, 'Quantidade deve ser pelo menos 1'),
 });
 
 interface EquipmentFormValues {
@@ -27,6 +28,7 @@ interface EquipmentFormValues {
   daily_rate: number;
   condition: 'excellent' | 'good' | 'fair' | 'maintenance';
   status: 'available' | 'rented' | 'maintenance' | 'unavailable';
+  stock_quantity: number;
 }
 
 interface EquipmentFormProps {
@@ -55,6 +57,7 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
       daily_rate: equipment?.daily_rate || 0,
       condition: equipment?.condition || 'good',
       status: equipment?.status || 'available',
+      stock_quantity: equipment?.stock_quantity || 1,
     },
   });
 
@@ -150,7 +153,7 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
             <option value="maintenance">Em Manutenção</option>
           </select>
         </div>
-        <div className="space-y-2">
+         <div className="space-y-2">
           <Label htmlFor="status">Status</Label>
           <select 
             id="status" 
@@ -162,6 +165,15 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
             <option value="maintenance">Manutenção</option>
             <option value="unavailable">Indisponível</option>
           </select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="stock_quantity">Quantidade Total em Estoque</Label>
+          <Input id="stock_quantity" type="number" {...register('stock_quantity')} placeholder="Ex: 5" />
+          {errors.stock_quantity && <p className="text-xs text-red-500">{errors.stock_quantity.message}</p>}
+          <p className="text-[10px] text-muted-foreground italic">Quantos itens desse modelo você possui para alugar.</p>
         </div>
       </div>
 
