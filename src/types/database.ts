@@ -36,6 +36,7 @@ export interface Equipment {
     status: 'available' | 'rented' | 'maintenance' | 'unavailable';
     images: string[]; // URLs of images
     features: Record<string, any>; // JSONB para flexibilidade (resolução, mount, peso etc)
+    stock_quantity: number;
     created_at: string;
 }
 
@@ -49,5 +50,8 @@ export interface Booking {
     total_amount: number;
     status: 'pending' | 'approved' | 'rejected' | 'active' | 'completed' | 'cancelled';
     notes: string | null;
+    quantity: number;
+    delivery_method: 'pickup' | 'delivery';
+    delivery_address: string | null;
     created_at: string;
 }

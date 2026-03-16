@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Booking } from '@/types/database';
 
@@ -36,6 +36,38 @@ export function useBookings(options?: {
 
             if (error) throw error;
             return data;
+        },
+    });
+}
+
+export function useCreateBooking() {
+    return useMutation({
+        mutationFn: async (booking: Omit<Booking, 'id' | 'created_at'>) => {
+            const { data, error } = await supabase
+                .from('bookings')
+                .insert([booking])
+                .select()
+                .single();
+
+            if (error) throw error;
+            return data;
+        },
+    });
+}
+export function useUpdateBookingStatus() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ id, status }: { id: string; status: Booking['status'] }) => {
+            const { error } = await supabase
+                .from('bookings')
+                .update({ status })
+                .eq('id', id);
+
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['bookings'] });
         },
     });
 }
