@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Booking } from '@/types/database';
+import { BookingService } from '@/services/BookingService';
 
 export function useBookings(options?: {
     companyId?: string; // Para locadoras verem reservas recebidas
@@ -41,19 +42,18 @@ export function useBookings(options?: {
 }
 
 export function useCreateBooking() {
-    return useMutation({
-        mutationFn: async (booking: Omit<Booking, 'id' | 'created_at'>) => {
-            const { data, error } = await supabase
-                .from('bookings')
-                .insert([booking])
-                .select()
-                .single();
+    const queryClient = useQueryClient();
 
-            if (error) throw error;
-            return data;
+    return useMutation({
+        mutationFn: (booking: Omit<Booking, 'id' | 'created_at'>) => {
+            return BookingService.createBooking(booking);
         },
+        onSuccess: () => {
+           queryClient.invalidateQueries({ queryKey: ['bookings'] });
+        }
     });
 }
+
 export function useUpdateBookingStatus() {
     const queryClient = useQueryClient();
 
@@ -69,5 +69,13 @@ export function useUpdateBookingStatus() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['bookings'] });
         },
+    });
+}
+
+export function useEquipmentOccupiedDates(id: string) {
+    return useQuery({
+        queryKey: ['equipment-occupied', id],
+        queryFn: () => BookingService.getOccupiedDates(id),
+        enabled: !!id,
     });
 }
