@@ -7,6 +7,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 
 // Context & Auth
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { TenantProvider } from '@/contexts/TenantContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { queryClient } from '@/lib/react-query';
 
@@ -164,9 +165,11 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Router>
-          <MainLayout />
-        </Router>
+        <TenantProvider>
+          <Router>
+            <MainLayout />
+          </Router>
+        </TenantProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

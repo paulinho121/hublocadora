@@ -41,7 +41,7 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
   const [images, setImages] = useState<string[]>(equipment?.images || []);
   const [uploading, setUploading] = useState(false);
 
-  const createMutation = useCreateEquipment();
+  const createMutation = useCreateEquipment(companyId);
   const updateMutation = useUpdateEquipment();
 
   const {

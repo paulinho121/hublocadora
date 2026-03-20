@@ -99,30 +99,37 @@ export function CompanySetup({ ownerId }: { ownerId: string }) {
     setSubmitError(null);
     
     try {
-      // 1. Garantir que o perfil existe (para evitar erro de FK)
-      const { data: profile } = await supabase
+      // 1. Garantir que o perfil existe ou atualizá-lo (Upsert é mais resiliente)
+      const { error: profileError } = await supabase
         .from('profiles')
-        .select('id')
-        .eq('id', ownerId)
-        .single();
+        .upsert({ 
+          id: ownerId, 
+          email: (await supabase.auth.getUser()).data.user?.email || '',
+          full_name: values.name,
+          updated_at: new Date().toISOString()
+        });
 
-      if (!profile) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([{ 
-            id: ownerId, 
-            email: (await supabase.auth.getUser()).data.user?.email || '',
-            full_name: values.name
-          }]);
-        if (profileError) throw profileError;
+      if (profileError) {
+        console.error('Erro ao salvar perfil:', profileError);
+        throw new Error('Não foi possível salvar seu perfil de usuário. Verifique as permissões de banco de dados.');
       }
 
       // 2. Inserir a empresa
-      const { error } = await supabase
+      const { error: companyError } = await supabase
         .from('companies')
-        .insert([{ ...values, owner_id: ownerId, status: 'pending' }]);
+        .insert([{ 
+          ...values, 
+          owner_id: ownerId, 
+          status: 'pending' 
+        }]);
 
-      if (error) throw error;
+      if (companyError) {
+        console.error('Erro ao salvar empresa:', companyError);
+        if (companyError.code === '42703') { // Coluna inexistente
+           throw new Error('Erro técnico: A coluna "status" está faltando na tabela "companies". Execute o script SQL de correção.');
+        }
+        throw new Error(companyError.message || 'Erro ao cadastrar empresa. Verifique as políticas RLS.');
+      }
       
       queryClient.invalidateQueries({ queryKey: ['company', ownerId] });
     } catch (error: any) {

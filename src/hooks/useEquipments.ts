@@ -1,20 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Equipment, Company } from '@/types/database';
+import { EquipmentService } from '@/services/EquipmentService';
 
 export function useEquipment(id: string) {
     return useQuery({
         queryKey: ['equipment', id],
-        queryFn: async () => {
-            const { data, error } = await supabase
-                .from('equipments')
-                .select('*, company:companies(*)') // Puxando dados da locadora
-                .eq('id', id)
-                .single();
-
-            if (error) throw error;
-            return data;
-        },
+        queryFn: () => EquipmentService.getById(id),
         enabled: !!id,
     });
 }
@@ -27,6 +19,12 @@ export function useEquipments(options?: {
     return useQuery({
         queryKey: ['equipments', options],
         queryFn: async () => {
+             // Caso base: se temos companyId, usamos o serviço otimizado
+             if (options?.companyId && !options.category && !options.searchQuery) {
+                 return EquipmentService.getAllByTenant(options.companyId);
+             }
+
+            // Fallback para filtros complexos (Marketplace)
             let query = supabase
                 .from('equipments')
                 .select('*');
@@ -43,30 +41,22 @@ export function useEquipments(options?: {
                 query = query.ilike('name', `%${options.searchQuery}%`);
             }
 
-            // Ordem decrescente de criação
             query = query.order('created_at', { ascending: false });
 
             const { data, error } = await query;
-
             if (error) throw error;
             return data as Equipment[];
         },
     });
 }
 
-export function useCreateEquipment() {
+export function useCreateEquipment(companyId?: string) {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (equipment: Omit<Equipment, 'id' | 'created_at'>) => {
-            const { data, error } = await supabase
-                .from('equipments')
-                .insert([equipment])
-                .select()
-                .single();
-
-            if (error) throw error;
-            return data;
+        mutationFn: async (equipment: Omit<Equipment, 'id' | 'created_at' | 'company_id'>) => {
+            if (!companyId) throw new Error('Empresa não identificada para o cadastro.');
+            return EquipmentService.create(companyId, equipment);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['equipments'] });
@@ -79,15 +69,7 @@ export function useUpdateEquipment() {
 
     return useMutation({
         mutationFn: async ({ id, ...updates }: Partial<Equipment> & { id: string }) => {
-            const { data, error } = await supabase
-                .from('equipments')
-                .update(updates)
-                .eq('id', id)
-                .select()
-                .single();
-
-            if (error) throw error;
-            return data;
+            return EquipmentService.update(id, updates);
         },
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ['equipments'] });
@@ -101,12 +83,7 @@ export function useDeleteEquipment() {
 
     return useMutation({
         mutationFn: async (id: string) => {
-            const { error } = await supabase
-                .from('equipments')
-                .delete()
-                .eq('id', id);
-
-            if (error) throw error;
+            return EquipmentService.delete(id);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['equipments'] });
@@ -133,19 +110,5 @@ export function useCompany(ownerId?: string) {
 }
 
 export async function uploadEquipmentImage(file: File) {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Math.random()}.${fileExt}`;
-    const filePath = `equipment-images/${fileName}`;
-
-    const { error: uploadError } = await supabase.storage
-        .from('images')
-        .upload(filePath, file);
-
-    if (uploadError) throw uploadError;
-
-    const { data: { publicUrl } } = supabase.storage
-        .from('images')
-        .getPublicUrl(filePath);
-
-    return publicUrl;
+    return EquipmentService.uploadImage(file);
 }
