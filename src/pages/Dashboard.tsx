@@ -21,7 +21,8 @@ import { ptBR } from 'date-fns/locale';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useBookings, useUpdateBookingStatus } from '@/hooks/useBookings';
-import { useEquipments, useCompany, useDeleteEquipment } from '@/hooks/useEquipments';
+import { useEquipments, useDeleteEquipment } from '@/hooks/useEquipments';
+import { useTenant } from '@/contexts/TenantContext';
 import { Dialog } from '@/components/ui/dialog';
 import { EquipmentForm } from '@/components/inventory/EquipmentForm';
 import { Equipment } from '@/types/database';
@@ -31,11 +32,11 @@ import { HubSupplementRequest } from '@/components/inventory/HubSupplementReques
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { data: company, isLoading: isLoadingCompany } = useCompany(user?.id);
+  const { company, isLoading: isLoadingTenant, tenantId } = useTenant();
   
   // Reservas que minha empresa RECEBEU (Dinheiro entrando)
   const { data: bookingsReceived, isLoading: isLoadingReceived } = useBookings({
-    companyId: company?.id
+    companyId: tenantId || undefined
   });
 
   // Reservas que minha empresa FEZ (Dinheiro saindo / Suplemento do HUB)
@@ -44,7 +45,7 @@ export default function Dashboard() {
   });
 
   const { data: equipments, isLoading: isLoadingEquipments } = useEquipments({
-    companyId: company?.id
+    companyId: tenantId || undefined
   });
   
   const deleteMutation = useDeleteEquipment();
@@ -56,7 +57,7 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'inventory' | 'bookings' | 'logistics' | 'settings'>('overview');
   const [bookingFilter, setBookingFilter] = useState<'received' | 'requested'>('received');
 
-  if (isLoadingCompany) {
+  if (isLoadingTenant) {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

@@ -7,17 +7,30 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { MapPin, ChevronRight, Camera, Loader2, Package } from 'lucide-react';
 import { BrandMarquee } from '@/components/home/BrandMarquee';
+import { QuickBookingModal } from '@/components/marketplace/QuickBookingModal';
+import { Equipment } from '@/types/database';
 
 
 export default function Marketplace() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>();
+  const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
   const { data: equipments, isLoading } = useEquipments({
     searchQuery: search,
     category: selectedCategory
   });
+
+  const handleSearch = () => {
+    if (equipments && equipments.length === 1) {
+      setSelectedEquipment(equipments[0]);
+      setIsModalOpen(true);
+    } else {
+      document.getElementById('results-section')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   const categories = [
     { name: 'Drones', color: 'bg-blue-500/10 hover:bg-blue-500/20', text: 'text-blue-400', value: 'drones' },
@@ -48,9 +61,13 @@ export default function Marketplace() {
             placeholder="O que você está procurando hoje?"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
           />
         </div>
-        <Button className="h-12 md:h-14 px-8 text-base md:text-lg rounded-xl bg-primary hover:bg-primary/90 font-bold sm:px-10">
+        <Button 
+          className="h-12 md:h-14 px-8 text-base md:text-lg rounded-xl bg-primary hover:bg-primary/90 font-bold sm:px-10"
+          onClick={handleSearch}
+        >
           Buscar Agora
         </Button>
       </div>
@@ -77,7 +94,7 @@ export default function Marketplace() {
         </div>
       </div>
 
-      <div className="w-full mb-12">
+      <div id="results-section" className="w-full mb-12 scroll-mt-24">
         <div className="flex items-center justify-between mb-8">
           <h3 className="text-2xl font-bold tracking-tight">
             {selectedCategory ? `Resultados em ${categories.find(c => c.value === selectedCategory)?.name}` : 'Equipamentos em Destaque'}
@@ -109,7 +126,10 @@ export default function Marketplace() {
               <Card 
                 key={item.id} 
                 className="group overflow-hidden border-zinc-800 bg-zinc-950/30 hover:bg-zinc-950/80 hover:border-primary/50 transition-all duration-300 cursor-pointer shadow-xl"
-                onClick={() => navigate(`/equipment/${item.id}`)}
+                onClick={() => {
+                   setSelectedEquipment(item);
+                   setIsModalOpen(true);
+                }}
               >
                 <div className="aspect-[4/3] overflow-hidden bg-zinc-900 relative">
                   {item.images?.[0] ? (
@@ -181,6 +201,12 @@ export default function Marketplace() {
           />
         </div>
       </div>
+
+      <QuickBookingModal 
+        equipment={selectedEquipment} 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
     </div>
   );
 }
