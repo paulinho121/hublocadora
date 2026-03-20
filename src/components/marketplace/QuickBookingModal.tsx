@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Package, 
@@ -6,20 +6,22 @@ import {
   Store, 
   ChevronRight, 
   ArrowRight, 
-  Info, 
   CheckCircle2, 
   Clock,
   ShieldCheck,
-  Calendar as CalendarIcon
+  Calendar as CalendarIcon,
+  AlertCircle
 } from 'lucide-react';
 import { 
   Dialog 
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Equipment } from '@/types/database';
-import { useCreateBooking } from '@/hooks/useBookings';
+import { useCreateBooking, useEquipmentOccupiedDates } from '@/hooks/useBookings';
 import { useTenant } from '@/contexts/TenantContext';
+import { format, differenceInDays, isWithinInterval, parseISO, isAfter, startOfDay, addDays } from 'date-fns';
 
 interface QuickBookingModalProps {
     equipment: Equipment | null;
@@ -30,23 +32,62 @@ interface QuickBookingModalProps {
 export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingModalProps) {
     const { tenantId, company } = useTenant();
     const createBooking = useCreateBooking();
+    
+    const [startDate, setStartDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+    const [endDate, setEndDate] = useState(format(addDays(new Date(), 1), 'yyyy-MM-dd'));
     const [deliveryMethod, setDeliveryMethod] = useState<'pickup' | 'delivery'>('pickup');
     const [quantity, setQuantity] = useState(1);
     const [isSuccess, setIsSuccess] = useState(false);
 
+    const { data: occupiedDates } = useEquipmentOccupiedDates(equipment?.id || '');
+
+    const totalDays = useMemo(() => {
+        const start = parseISO(startDate);
+        const end = parseISO(endDate);
+        if (isAfter(start, end)) return 0;
+        const diff = differenceInDays(end, start);
+        return diff === 0 ? 1 : diff;
+    }, [startDate, endDate]);
+
+    const isAvailable = useMemo(() => {
+        if (!occupiedDates || !equipment) return true;
+        
+        const start = startOfDay(parseISO(startDate));
+        const end = startOfDay(parseISO(endDate));
+
+        let current = start;
+        while (current <= end) {
+            const bookedThatDay = occupiedDates.reduce((acc, booking) => {
+                const bStart = startOfDay(parseISO(booking.start_date));
+                const bEnd = startOfDay(parseISO(booking.end_date));
+                
+                if (isWithinInterval(current, { start: bStart, end: bEnd })) {
+                    return acc + booking.quantity;
+                }
+                return acc;
+            }, 0);
+
+            if (bookedThatDay + quantity > equipment.stock_quantity) {
+                return false;
+            }
+            current = addDays(current, 1);
+        }
+        return true;
+    }, [occupiedDates, equipment, startDate, endDate, quantity]);
+
     if (!equipment) return null;
 
     const handleReserve = async () => {
-        if (!tenantId) return;
+        if (!tenantId || !isAvailable) return;
 
         try {
             await createBooking.mutateAsync({
                 equipment_id: equipment.id,
                 company_id: equipment.company_id,
-                renter_id: company?.owner_id || '', // Renter is the current user/company
-                start_date: new Date().toISOString(), // Mocking dates for now
-                end_date: new Date(Date.now() + 86400000).toISOString(),
-                total_amount: equipment.daily_rate * quantity,
+                renter_id: company?.owner_id || '', 
+                start_date: parseISO(startDate).toISOString(),
+                end_date: parseISO(endDate).toISOString(),
+                total_amount: equipment.daily_rate * totalDays * quantity,
                 status: 'pending',
                 quantity,
                 delivery_method: deliveryMethod,
@@ -89,7 +130,6 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95 }}
                         >
-                            {/* Hero Header */}
                             <div className="relative h-48 bg-zinc-900 overflow-hidden">
                                 {equipment.images?.[0] && (
                                     <img 
@@ -100,8 +140,8 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                 )}
                                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 to-transparent" />
                                 <div className="absolute bottom-6 left-6 right-6">
-                                    <Badge className="bg-primary/20 text-primary border-primary/20 mb-2 uppercase font-black tracking-widest text-[10px]">
-                                        Disponível no HUB
+                                    <Badge className={`${isAvailable ? 'bg-primary/20 text-primary border-primary/20' : 'bg-red-500/20 text-red-500 border-red-500/20'} mb-2 uppercase font-black tracking-widest text-[10px]`}>
+                                        {isAvailable ? 'Disponível no HUB' : 'Indisponível nestas datas'}
                                     </Badge>
                                     <h2 className="text-3xl font-black tracking-tighter text-white uppercase italic leading-none">
                                         {equipment.name}
@@ -110,28 +150,61 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                             </div>
 
                             <div className="p-8 space-y-8">
-                                {/* Stats Bar */}
+                                <div className="space-y-4">
+                                    <h4 className="text-[10px] uppercase font-black text-zinc-500 tracking-widest flex items-center gap-2">
+                                        <CalendarIcon className="w-3 h-3" /> Período da Reserva
+                                    </h4>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <p className="text-[10px] text-zinc-400 font-bold uppercase">Retirada</p>
+                                            <Input 
+                                                type="date" 
+                                                value={startDate} 
+                                                onChange={(e) => setStartDate(e.target.value)}
+                                                className="bg-zinc-900 border-zinc-800 rounded-xl"
+                                                min={format(new Date(), 'yyyy-MM-dd')}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <p className="text-[10px] text-zinc-400 font-bold uppercase">Devolução</p>
+                                            <Input 
+                                                type="date" 
+                                                value={endDate} 
+                                                onChange={(e) => setEndDate(e.target.value)}
+                                                className="bg-zinc-900 border-zinc-800 rounded-xl"
+                                                min={startDate}
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    {!isAvailable && (
+                                        <div className="bg-red-500/10 p-3 rounded-xl border border-red-500/20 flex items-center gap-3 text-red-500">
+                                            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                                            <p className="text-[11px] font-bold italic">Opa! Este item já está reservado por outra produtora neste período.</p>
+                                        </div>
+                                    )}
+                                </div>
+
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="bg-zinc-900/50 rounded-2xl p-4 border border-zinc-900">
-                                        <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest mb-1">Estoque HUB</p>
+                                        <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest mb-1">Duração</p>
                                         <div className="flex items-center gap-2">
-                                            <Package className="w-4 h-4 text-emerald-500" />
-                                            <span className="text-lg font-black text-zinc-100 italic">{equipment.stock_quantity || 0} Unidades</span>
+                                            <Clock className="w-4 h-4 text-emerald-500" />
+                                            <span className="text-lg font-black text-zinc-100 italic">{totalDays} Diárias</span>
                                         </div>
                                     </div>
                                     <div className="bg-zinc-900/50 rounded-2xl p-4 border border-zinc-900">
                                         <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest mb-1">Custo Diária</p>
                                         <div className="flex items-center gap-2">
-                                            <Clock className="w-4 h-4 text-primary" />
+                                            <Package className="w-4 h-4 text-primary" />
                                             <span className="text-lg font-black text-zinc-100 italic">R$ {equipment.daily_rate}</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Logistics Selector */}
                                 <div>
                                     <h4 className="text-[10px] uppercase font-black text-zinc-500 mb-4 tracking-widest flex items-center gap-2">
-                                        <Truck className="w-3 h-3" /> Escolha como deseja receber
+                                        <Truck className="w-3 h-3" /> Logística Flexível
                                     </h4>
                                     <div className="grid grid-cols-2 gap-4">
                                         <button 
@@ -143,8 +216,8 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                             }`}
                                         >
                                             <Store className={`w-6 h-6 mb-3 ${deliveryMethod === 'pickup' ? 'text-emerald-500' : 'text-zinc-500'}`} />
-                                            <p className="font-bold text-sm mb-1">Retirada no HUB</p>
-                                            <p className="text-[10px] text-zinc-500 line-clamp-1 italic">Grátis - Disponível Hoje</p>
+                                            <p className="font-bold text-sm mb-1 uppercase tracking-tighter">Retirada HUB</p>
+                                            <p className="text-[10px] text-zinc-500 line-clamp-1 italic">Grátis - Próximo ao set</p>
                                             {deliveryMethod === 'pickup' && (
                                                 <div className="absolute top-2 right-2 bg-emerald-500 rounded-full p-0.5">
                                                     <CheckCircle2 className="w-3 h-3 text-black" />
@@ -161,8 +234,8 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                             }`}
                                         >
                                             <Truck className={`w-6 h-6 mb-3 ${deliveryMethod === 'delivery' ? 'text-primary' : 'text-zinc-500'}`} />
-                                            <p className="font-bold text-sm mb-1">Entrega Local</p>
-                                            <p className="text-[10px] text-zinc-500 line-clamp-1 italic">Frete fixo na sua locadora</p>
+                                            <p className="font-bold text-sm mb-1 uppercase tracking-tighter">Na Locadora</p>
+                                            <p className="text-[10px] text-zinc-500 line-clamp-1 italic">Frete fixo simplificado</p>
                                             {deliveryMethod === 'delivery' && (
                                                 <div className="absolute top-2 right-2 bg-primary rounded-full p-0.5">
                                                     <CheckCircle2 className="w-3 h-3 text-white" />
@@ -172,45 +245,51 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                     </div>
                                 </div>
 
-                                {/* Value Info */}
                                 <div className="bg-zinc-900/50 p-6 rounded-3xl border border-dashed border-zinc-800 flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <div className="p-2 bg-emerald-500/10 rounded-lg">
                                             <ShieldCheck className="w-5 h-5 text-emerald-500" />
                                         </div>
                                         <div>
-                                            <p className="text-xs font-bold text-zinc-200">Garantia Cinehub Authority</p>
-                                            <p className="text-[10px] text-zinc-500 uppercase tracking-tighter">Equipamento revisado e segurado</p>
+                                            <p className="text-xs font-bold text-zinc-200 uppercase tracking-tighter">Proteção Cinehub</p>
+                                            <p className="text-[10px] text-zinc-500 uppercase tracking-tighter">Seguro incluso no período</p>
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-[10px] text-zinc-500 uppercase font-bold">Investimento Total</p>
-                                        <p className="text-2xl font-black text-white tracking-tighter italic">R$ {equipment.daily_rate * quantity}</p>
+                                        <p className="text-[10px] text-zinc-500 uppercase font-bold">Total do Aluguel</p>
+                                        <p className="text-2xl font-black text-white tracking-tighter italic">
+                                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(equipment.daily_rate * totalDays * quantity)}
+                                        </p>
                                     </div>
                                 </div>
 
-                                {/* CTA Button */}
                                 <div className="flex gap-4">
                                     <Button 
-                                        className="flex-1 h-14 rounded-2xl bg-white text-black hover:bg-zinc-200 font-black italic uppercase tracking-tighter group transition-all"
+                                        className={`flex-1 h-14 rounded-2xl font-black italic uppercase tracking-tighter group transition-all ${
+                                            isAvailable 
+                                            ? 'bg-white text-black hover:bg-zinc-200' 
+                                            : 'bg-zinc-800 text-zinc-500 cursor-not-allowed border-zinc-700'
+                                        }`}
                                         onClick={handleReserve}
-                                        disabled={createBooking.isPending}
+                                        disabled={createBooking.isPending || !isAvailable}
                                     >
                                         {createBooking.isPending ? (
-                                            <Loader2 className="w-5 h-5 animate-spin" />
-                                        ) : (
+                                            <Clock className="w-5 h-5 animate-spin" />
+                                        ) : isAvailable ? (
                                             <>
-                                                Confirmar Reserva Agora
+                                                Confirmar Reserva para o Futuro
                                                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                                             </>
+                                        ) : (
+                                            'Equipamento Indisponível'
                                         )}
                                     </Button>
                                     <Button 
                                         variant="outline" 
-                                        className="h-14 w-14 rounded-2xl border-zinc-800 bg-transparent"
+                                        className="h-14 w-14 rounded-2xl border-zinc-800 bg-transparent flex-shrink-0"
                                         onClick={onClose}
                                     >
-                                        <X className="w-5 h-5" />
+                                        <ChevronRight className="w-5 h-5 rotate-180" />
                                     </Button>
                                 </div>
                             </div>
@@ -220,12 +299,4 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
             </div>
         </Dialog>
     );
-}
-
-function Loader2({ className }: { className?: string }) {
-    return <Clock className={`${className} animate-spin`} />;
-}
-
-function X({ className }: { className?: string }) {
-    return <ChevronRight className={`${className} rotate-180`} />;
 }
