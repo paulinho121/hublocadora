@@ -148,18 +148,33 @@ export default function Marketplace() {
                         <Camera className="h-12 w-12" />
                       </div>
                     )}
-                    <Badge className="absolute top-3 right-3 bg-black/60 backdrop-blur-md text-zinc-200 border-zinc-800 font-bold uppercase text-[10px]">
-                      {item.category}
-                    </Badge>
-                  </div>
-                  <div className="p-5 flex-1 flex flex-col justify-between">
-                    <h4 className="text-lg font-bold leading-tight mb-4 group-hover:text-primary transition-colors line-clamp-2">{item.name}</h4>
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="min-w-0 pr-4">
+                        <h4 className="text-lg font-black leading-tight italic uppercase tracking-tighter group-hover:text-primary transition-colors line-clamp-2">
+                          {item.name}
+                        </h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          {(() => {
+                            const isAvailable = (item.stock_quantity || 0) > 0;
+                            return (
+                              <Badge className={`${isAvailable ? 'bg-emerald-500/20 text-emerald-500 border-emerald-500/20' : 'bg-red-500/20 text-red-500 border-red-500/20'} mb-2 uppercase font-black tracking-widest text-[10px]`}>
+                                {isAvailable ? `${item.stock_quantity || 0} Unidades Disponíveis no HUB` : 'Limite de Estoque do HUB Atingido'}
+                              </Badge>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    </div>
                     <div className="flex justify-between items-center bg-zinc-900/50 p-3 rounded-xl border border-zinc-800/50 mt-auto">
                       <div className="flex flex-col">
                         <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-widest">Diária</span>
                         <div className="text-lg font-black text-zinc-100 tracking-tighter">
                           {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.daily_rate)}
                         </div>
+                      </div>
+                      <div className="text-right hidden sm:block">
+                        <span className="text-[10px] uppercase text-zinc-600 font-black tracking-widest">Estoque</span>
+                        <div className="text-sm font-bold text-emerald-500">{item.stock_quantity || 0} Disponíveis</div>
                       </div>
                       <Button size="icon" className="h-10 w-10 rounded-lg bg-zinc-800 group-hover:bg-primary transition-all shadow-lg text-white">
                         <ChevronRight className="h-5 w-5" />
