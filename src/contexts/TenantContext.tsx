@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { useAuth } from './AuthContext';
 import { supabase } from '@/lib/supabase';
 import { Profile, Company } from '@/types/database';
+import { isMasterUser } from '@/lib/masterUsers';
 
 interface TenantContextType {
     tenantId: string | null;
@@ -142,7 +143,7 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
             tenantId: company?.id || profile?.company_id || null,
             profile, 
             company, 
-            isAdmin: profile?.role === 'admin',
+            isAdmin: profile?.role === 'admin' || isMasterUser(user?.email),
             isLoading: isLoading || authLoading,
             refreshTenant 
         }}>
