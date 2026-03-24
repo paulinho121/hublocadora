@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Equipment } from "@/types/database";
 import { Edit2, Trash2, Package, Info } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface InventoryCardProps {
   item: Equipment;
@@ -11,6 +12,8 @@ interface InventoryCardProps {
 }
 
 export function InventoryCard({ item, onEdit, onDelete }: InventoryCardProps) {
+  const navigate = useNavigate();
+  
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
   };
@@ -28,10 +31,13 @@ export function InventoryCard({ item, onEdit, onDelete }: InventoryCardProps) {
 
   return (
     <Card className="group relative overflow-hidden bg-zinc-950/40 border-zinc-800/50 hover:border-primary/30 transition-all duration-300">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
       
       {/* Item Image or Placeholder */}
-      <div className="relative h-48 w-full overflow-hidden bg-zinc-900 flex items-center justify-center">
+      <div 
+        className="relative h-48 w-full overflow-hidden bg-zinc-900 flex items-center justify-center cursor-pointer"
+        onClick={() => navigate(`/equipment/${item.id}`)}
+      >
         {imageUrl ? (
           <img 
             src={imageUrl} 
@@ -56,7 +62,12 @@ export function InventoryCard({ item, onEdit, onDelete }: InventoryCardProps) {
       <CardContent className="p-5">
         <div className="mb-4">
           <p className="text-[10px] uppercase text-zinc-500 font-bold tracking-widest mb-1">{item.category}</p>
-          <h3 className="font-bold text-lg leading-tight truncate group-hover:text-primary transition-colors">{item.name}</h3>
+          <h3 
+            className="font-bold text-lg leading-tight truncate group-hover:text-primary transition-colors cursor-pointer"
+            onClick={() => navigate(`/equipment/${item.id}`)}
+          >
+            {item.name}
+          </h3>
         </div>
 
         <div className="flex items-end justify-between mt-auto">
@@ -93,7 +104,12 @@ export function InventoryCard({ item, onEdit, onDelete }: InventoryCardProps) {
 
         {/* Action Reveal Overlay (optional, but nice) */}
         <div className="mt-4 pt-4 border-t border-zinc-900 hidden group-hover:block animate-in fade-in slide-in-from-top-2 duration-300">
-           <Button variant="outline" size="sm" className="w-full text-[10px] uppercase font-bold h-8 gap-1.5 border-zinc-800 hover:bg-zinc-900">
+           <Button 
+            variant="outline" 
+            size="sm" 
+            className="w-full text-[10px] uppercase font-bold h-8 gap-1.5 border-zinc-800 hover:bg-zinc-900"
+            onClick={() => navigate(`/equipment/${item.id}`)}
+           >
              <Info className="h-3 w-3" /> Ver Detalhes
            </Button>
         </div>
