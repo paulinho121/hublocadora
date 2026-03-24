@@ -140,8 +140,8 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                 )}
                                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 to-transparent" />
                                 <div className="absolute bottom-6 left-6 right-6">
-                                    <Badge className={`${isAvailable ? 'bg-primary/20 text-primary border-primary/20' : 'bg-red-500/20 text-red-500 border-red-500/20'} mb-2 uppercase font-black tracking-widest text-[10px]`}>
-                                        {isAvailable ? 'Disponível no HUB' : 'Indisponível nestas datas'}
+                                    <Badge className={`${isAvailable ? 'bg-emerald-500/20 text-emerald-500 border-emerald-500/20' : 'bg-red-500/20 text-red-500 border-red-500/20'} mb-2 uppercase font-black tracking-widest text-[10px]`}>
+                                        {isAvailable ? `${equipment.stock_quantity || 0} Disponíveis no HUB` : 'Limite de Estoque Atingido'}
                                     </Badge>
                                     <h2 className="text-3xl font-black tracking-tighter text-white uppercase italic leading-none">
                                         {equipment.name}
