@@ -107,7 +107,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
 
     return (
         <Dialog isOpen={isOpen} onClose={onClose}>
-            <div className="max-w-xl bg-zinc-950 border-zinc-800 p-0 overflow-y-auto rounded-3xl -m-6 max-h-[90vh] scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
+            <div className="w-full max-w-xl bg-zinc-950 border-zinc-800 p-0 overflow-y-auto rounded-3xl max-h-[90vh] scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
                 <AnimatePresence mode="wait">
                     {isSuccess ? (
                         <motion.div 
@@ -209,7 +209,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                     <div className="grid grid-cols-2 gap-4">
                                         <button 
                                             onClick={() => setDeliveryMethod('pickup')}
-                                            className={`group relative p-6 rounded-2xl border-2 transition-all text-left ${
+                                            className={`group relative p-4 sm:p-6 rounded-2xl border-2 transition-all text-left ${
                                                 deliveryMethod === 'pickup' 
                                                 ? 'bg-emerald-500/10 border-emerald-500' 
                                                 : 'bg-zinc-900/30 border-zinc-800 hover:border-zinc-700'
@@ -227,7 +227,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
 
                                         <button 
                                             onClick={() => setDeliveryMethod('delivery')}
-                                            className={`group relative p-6 rounded-2xl border-2 transition-all text-left ${
+                                            className={`group relative p-4 sm:p-6 rounded-2xl border-2 transition-all text-left ${
                                                 deliveryMethod === 'delivery' 
                                                 ? 'bg-primary/10 border-primary' 
                                                 : 'bg-zinc-900/30 border-zinc-800 hover:border-zinc-700'
@@ -277,7 +277,8 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                             <Clock className="w-5 h-5 animate-spin" />
                                         ) : isAvailable ? (
                                             <>
-                                                Confirmar Reserva para o Futuro
+                                                <span className="hidden sm:inline">Confirmar Reserva para o Futuro</span>
+                                                <span className="sm:hidden">Confirmar Reserva</span>
                                                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                                             </>
                                         ) : (

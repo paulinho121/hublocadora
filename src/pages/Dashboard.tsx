@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { 
   Loader2, 
   Plus, 
@@ -33,9 +34,18 @@ import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar';
 import { InventoryTab } from '@/components/dashboard/InventoryTab';
 import { ConfirmDeleteModal } from '@/components/dashboard/ConfirmDeleteModal';
 
+type TabType = 'overview' | 'inventory' | 'bookings' | 'logistics' | 'settings';
+const VALID_TABS: TabType[] = ['overview', 'inventory', 'bookings', 'logistics', 'settings'];
+
 export default function Dashboard() {
   const { user } = useAuth();
   const { company, isLoading: isLoadingTenant, tenantId } = useTenant();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Tab is driven by URL ?tab= param — enables mobile BottomNav to switch tabs
+  const rawTab = searchParams.get('tab') as TabType | null;
+  const activeTab: TabType = rawTab && VALID_TABS.includes(rawTab) ? rawTab : 'overview';
+  const setActiveTab = (tab: TabType) => setSearchParams({ tab }, { replace: true });
   
   const { data: bookingsReceived, isLoading: isLoadingReceived } = useBookings({
     companyId: tenantId || undefined
@@ -52,8 +62,7 @@ export default function Dashboard() {
   const deleteMutation = useDeleteEquipment();
   const updateStatusMutation = useUpdateBookingStatus();
 
-  // State
-  const [activeTab, setActiveTab] = useState<'overview' | 'inventory' | 'bookings' | 'logistics' | 'settings'>('overview');
+  // Other UI state
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isHubDialogOpen, setIsHubDialogOpen] = useState(false);
   const [trackingBookingId, setTrackingBookingId] = useState<string | null>(null);
@@ -183,7 +192,7 @@ export default function Dashboard() {
         </header>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-6 md:p-10 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-6 pb-24 md:pb-10 md:p-10 custom-scrollbar">
            
            {/* Tab Rendering */}
            {activeTab === 'overview' && (

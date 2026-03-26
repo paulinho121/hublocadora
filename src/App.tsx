@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, NavLink } from 'react-router-dom';
-import { Camera, LogOut, LayoutDashboard, Settings, ShoppingBag, User } from 'lucide-react';
+import { Camera, LogOut, LayoutDashboard, Settings, ShoppingBag, User, BarChart3, Package, CalendarDays, Truck } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useEffect } from 'react';
@@ -83,8 +83,38 @@ function Navbar() {
 
 function BottomNav() {
   const { user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   
   if (!user) return null;
+
+  const isDashboard = location.pathname === '/dashboard';
+
+  // When inside the dashboard, show tab navigation instead of page navigation
+  if (isDashboard) {
+    const currentTab = new URLSearchParams(location.search).get('tab') || 'overview';
+    const tabs = [
+      { id: 'overview', label: 'Visão', icon: BarChart3 },
+      { id: 'inventory', label: 'Inventário', icon: Package },
+      { id: 'bookings', label: 'Reservas', icon: CalendarDays },
+      { id: 'logistics', label: 'Logística', icon: Truck },
+      { id: 'settings', label: 'Ajustes', icon: Settings },
+    ];
+    return (
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-t border-border/40 px-2 py-2 pb-8 flex items-center justify-around shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
+        {tabs.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            onClick={() => navigate(`/dashboard?tab=${id}`, { replace: true })}
+            className={`flex flex-col items-center gap-1 transition-all px-2 ${currentTab === id ? 'text-primary' : 'text-muted-foreground'}`}
+          >
+            <Icon className="w-5 h-5" />
+            <span className="text-[9px] font-bold uppercase tracking-tighter">{label}</span>
+          </button>
+        ))}
+      </nav>
+    );
+  }
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-t border-border/40 px-6 py-3 pb-8 flex items-center justify-between shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
