@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEquipments } from '@/hooks/useEquipments';
 import { Card, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +9,88 @@ import { MapPin, ChevronRight, Camera, Loader2, Package } from 'lucide-react';
 import { BrandMarquee } from '@/components/home/BrandMarquee';
 import { QuickBookingModal } from '@/components/marketplace/QuickBookingModal';
 import { Equipment } from '@/types/database';
+
+// ─── Equipment Card with auto-rotating image carousel ───────────────────────
+function EquipmentCard({ item, onClick }: { item: Equipment; onClick: () => void }) {
+  const images = item.images ?? [];
+  const hasMultiple = images.length > 1;
+  const [activeIdx, setActiveIdx] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (!hasMultiple) return;
+    timerRef.current = setInterval(() => {
+      setActiveIdx(prev => (prev + 1) % images.length);
+    }, 3000);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [hasMultiple, images.length]);
+
+  const isAvailable = (item.stock_quantity || 0) > 0;
+
+  return (
+    <Card
+      onClick={onClick}
+      className="group overflow-hidden border-zinc-800 bg-zinc-950/30 hover:bg-zinc-950/80 hover:border-primary/50 transition-all duration-300 cursor-pointer shadow-xl flex flex-col"
+    >
+      {/* ── Image area ── */}
+      <div className="relative w-full h-32 overflow-hidden bg-zinc-900 shrink-0">
+        {images.length > 0 ? (
+          images.map((src, i) => (
+            <img
+              key={i}
+              src={src}
+              alt={item.name}
+              className={`absolute inset-0 w-full h-full object-contain p-3 transition-all duration-700 ease-in-out
+                ${i === activeIdx ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+            />
+          ))
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-zinc-700">
+            <Camera className="h-12 w-12" />
+          </div>
+        )}
+
+        {/* Dot indicators */}
+        {hasMultiple && (
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+            {images.map((_, i) => (
+              <span
+                key={i}
+                className={`block h-1.5 rounded-full transition-all duration-300 ${i === activeIdx ? 'w-4 bg-white' : 'w-1.5 bg-white/40'}`}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Availability badge overlay */}
+        <div className="absolute top-3 left-3 z-10">
+          <Badge className={`${isAvailable ? 'bg-emerald-500/80 text-white border-emerald-500/20' : 'bg-red-500/80 text-white border-red-500/20'} uppercase font-black tracking-widest text-[9px] backdrop-blur-sm`}>
+            {isAvailable ? `${item.stock_quantity} Disponíveis` : 'Esgotado'}
+          </Badge>
+        </div>
+      </div>
+
+      {/* ── Card body ── */}
+      <div className="flex flex-col flex-1 p-4 gap-3">
+        <h4 className="text-sm font-black leading-tight italic uppercase tracking-tighter group-hover:text-primary transition-colors line-clamp-2">
+          {item.name}
+        </h4>
+
+        <div className="mt-auto flex items-center justify-between bg-zinc-900/50 p-3 rounded-xl border border-zinc-800/50">
+          <div className="flex flex-col">
+            <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-widest">Diária</span>
+            <div className="text-base font-black text-zinc-100 tracking-tighter">
+              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.daily_rate)}
+            </div>
+          </div>
+          <Button size="icon" className="h-9 w-9 rounded-lg bg-zinc-800 group-hover:bg-primary transition-all shadow-lg text-white">
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
+}
 
 
 export default function Marketplace() {
@@ -126,62 +208,16 @@ export default function Marketplace() {
           </div>
         ) : (
           <div className="flex flex-col items-center">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full">
               {displayedEquipments?.map((item) => (
-                <Card 
-                  key={item.id} 
-                  className="group overflow-hidden border-zinc-800 bg-zinc-950/30 hover:bg-zinc-950/80 hover:border-primary/50 transition-all duration-300 cursor-pointer shadow-xl flex flex-col"
+                <EquipmentCard
+                  key={item.id}
+                  item={item}
                   onClick={() => {
-                     setSelectedEquipment(item);
-                     setIsModalOpen(true);
+                    setSelectedEquipment(item);
+                    setIsModalOpen(true);
                   }}
-                >
-                  <div className="aspect-[4/3] overflow-hidden bg-zinc-900 relative">
-                    {item.images?.[0] ? (
-                      <img 
-                        src={item.images[0]} 
-                        alt={item.name} 
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-zinc-700">
-                        <Camera className="h-12 w-12" />
-                      </div>
-                    )}
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="min-w-0 pr-4">
-                        <h4 className="text-lg font-black leading-tight italic uppercase tracking-tighter group-hover:text-primary transition-colors line-clamp-2">
-                          {item.name}
-                        </h4>
-                        <div className="flex items-center gap-2 mt-1">
-                          {(() => {
-                            const isAvailable = (item.stock_quantity || 0) > 0;
-                            return (
-                              <Badge className={`${isAvailable ? 'bg-emerald-500/20 text-emerald-500 border-emerald-500/20' : 'bg-red-500/20 text-red-500 border-red-500/20'} mb-2 uppercase font-black tracking-widest text-[10px]`}>
-                                {isAvailable ? `${item.stock_quantity || 0} Unidades Disponíveis no HUB` : 'Limite de Estoque do HUB Atingido'}
-                              </Badge>
-                            );
-                          })()}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center bg-zinc-900/50 p-3 rounded-xl border border-zinc-800/50 mt-auto">
-                      <div className="flex flex-col">
-                        <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-widest">Diária</span>
-                        <div className="text-lg font-black text-zinc-100 tracking-tighter">
-                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.daily_rate)}
-                        </div>
-                      </div>
-                      <div className="text-right hidden sm:block">
-                        <span className="text-[10px] uppercase text-zinc-600 font-black tracking-widest">Estoque</span>
-                        <div className="text-sm font-bold text-emerald-500">{item.stock_quantity || 0} Disponíveis</div>
-                      </div>
-                      <Button size="icon" className="h-10 w-10 rounded-lg bg-zinc-800 group-hover:bg-primary transition-all shadow-lg text-white">
-                        <ChevronRight className="h-5 w-5" />
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
+                />
               ))}
             </div>
 

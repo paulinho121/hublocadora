@@ -35,14 +35,14 @@ export function InventoryCard({ item, onEdit, onDelete }: InventoryCardProps) {
       
       {/* Item Image or Placeholder */}
       <div 
-        className="relative h-48 w-full overflow-hidden bg-zinc-900 flex items-center justify-center cursor-pointer"
+        className="relative h-32 w-full overflow-hidden bg-zinc-900 flex items-center justify-center cursor-pointer"
         onClick={() => navigate(`/equipment/${item.id}`)}
       >
         {imageUrl ? (
           <img 
             src={imageUrl} 
             alt={item.name} 
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-contain p-3 transition-all duration-500"
           />
         ) : (
           <div className="flex flex-col items-center gap-2 text-zinc-700">

@@ -91,7 +91,7 @@ export default function EquipmentDetails() {
       </div>
 
       <div className="container mx-auto px-4 pt-8 max-w-6xl">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           
           {/* Galeria de Imagens */}
           <div className="space-y-4">
@@ -100,7 +100,7 @@ export default function EquipmentDetails() {
                 <img 
                   src={equipment.images[activeImage]} 
                   alt={equipment.name} 
-                  className="w-full h-full object-cover animate-in fade-in duration-500"
+                  className="w-full h-full object-contain p-4 animate-in fade-in duration-500"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-zinc-700">
