@@ -38,6 +38,17 @@ export interface Equipment {
     images: string[]; // URLs of images
     features: Record<string, any>; // JSONB para flexibilidade (resolução, mount, peso etc)
     stock_quantity: number;
+    master_item_id?: string; // referece to master_catalog
+    created_at: string;
+}
+
+export interface MasterCatalog {
+    id: string;
+    name: string;
+    brand: string;
+    category: string;
+    description: string;
+    image_url: string;
     created_at: string;
 }
 
