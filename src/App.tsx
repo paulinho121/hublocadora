@@ -21,7 +21,7 @@ import Register from '@/pages/Register';
 import EquipmentDetails from '@/pages/EquipmentDetails';
 
 function Navbar() {
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -41,7 +41,9 @@ function Navbar() {
           </Link>
           <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-muted-foreground uppercase tracking-widest">
             <NavLink to="/dashboard" className={({isActive}) => isActive ? "text-foreground" : "hover:text-foreground transition-colors"}>Locadora</NavLink>
-            <NavLink to="/admin" className={({isActive}) => isActive ? "text-foreground" : "hover:text-foreground transition-colors"}>Gestão HUB</NavLink>
+            {profile?.role === 'admin' && (
+              <NavLink to="/admin" className={({isActive}) => isActive ? "text-foreground" : "hover:text-foreground transition-colors"}>Gestão HUB</NavLink>
+            )}
           </nav>
         </div>
 
@@ -82,7 +84,7 @@ function Navbar() {
 }
 
 function BottomNav() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -132,13 +134,15 @@ function BottomNav() {
         <LayoutDashboard className="w-6 h-6" />
         <span className="text-[10px] font-bold uppercase tracking-tighter">Locadora</span>
       </NavLink>
-      <NavLink 
-        to="/admin" 
-        className={({isActive}) => `flex flex-col items-center gap-1 transition-all ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
-      >
-        <Settings className="w-6 h-6" />
-        <span className="text-[10px] font-bold uppercase tracking-tighter">Admin</span>
-      </NavLink>
+      {profile?.role === 'admin' && (
+        <NavLink 
+          to="/admin" 
+          className={({isActive}) => `flex flex-col items-center gap-1 transition-all ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
+        >
+          <Settings className="w-6 h-6" />
+          <span className="text-[10px] font-bold uppercase tracking-tighter">Admin</span>
+        </NavLink>
+      )}
       <button className="flex flex-col items-center gap-1 text-muted-foreground">
         <User className="w-6 h-6" />
         <span className="text-[10px] font-bold uppercase tracking-tighter">Perfil</span>
