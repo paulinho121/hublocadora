@@ -9,10 +9,10 @@ export interface Profile {
 }
 
 export interface Company {
-    id: string; // uuid
-    owner_id: string; // references profile.id
+    id: string; 
+    owner_id: string; 
     name: string;
-    document: string; // CNPJ / CPF
+    document: string; 
     description: string | null;
     logo_url: string | null;
     address_street: string;
@@ -28,43 +28,25 @@ export interface Company {
 
 export interface Equipment {
     id: string;
-    company_id: string; // references company.id
+    company_id: string; 
     name: string;
-    category: string; // e.g., 'Camera', 'Lenses', 'Lighting'
+    category: string; 
     description: string;
     daily_rate: number;
     condition: 'excellent' | 'good' | 'fair' | 'maintenance';
     status: 'available' | 'rented' | 'maintenance' | 'unavailable';
-    images: string[]; // URLs of images
-    features: Record<string, any>; // JSONB para flexibilidade (resolução, mount, peso etc)
+    images: string[]; 
+    features: Record<string, any>; 
     stock_quantity: number;
-    master_item_id?: string; // referece to master_catalog
-    created_at: string;
-}
-
-export interface MasterCatalog {
-    id: string;
-    name: string;
-    brand: string;
-    category: string;
-    description: string;
-    image_url: string;
-    created_at: string;
-}
-
-export interface Category {
-    id: string;
-    name: string;
-    slug: string;
-    description: string | null;
+    master_item_id?: string;
     created_at: string;
 }
 
 export interface Booking {
     id: string;
-    equipment_id: string; // references equipment.id
-    renter_id: string; // references profile.id (quem está alugando)
-    company_id: string; // references company.id (dono do item)
+    equipment_id: string; 
+    renter_id: string; 
+    company_id: string; 
     start_date: string;
     end_date: string;
     total_amount: number;
@@ -73,5 +55,44 @@ export interface Booking {
     quantity: number;
     delivery_method: 'pickup' | 'delivery';
     delivery_address: string | null;
+    created_at: string;
+}
+
+export interface Payment {
+    id: string;
+    booking_id: string;
+    tenant_id: string;
+    amount: number;
+    payment_method: 'pix' | 'credit_card' | 'gateway';
+    status: 'pending' | 'approved' | 'rejected' | 'refunded';
+    external_id: string | null;
+    qr_code: string | null;
+    qr_code_base64: string | null;
+    payment_link: string | null;
+    created_at: string;
+}
+
+export interface LogisticsTracking {
+    id: string;
+    booking_id: string;
+    status: 'ready_for_pickup' | 'checked_out' | 'returned' | 'damages_found' | 'completed';
+    checkout_inspector_id: string | null;
+    checkin_inspector_id: string | null;
+    checkout_at: string | null;
+    checkin_at: string | null;
+    checkout_notes: string | null;
+    checkin_notes: string | null;
+    checkout_images: string[];
+    checkin_images: string[];
+    created_at: string;
+}
+
+export interface Notification {
+    id: string;
+    user_id: string;
+    title: string;
+    message: string;
+    type: 'booking' | 'payment' | 'logistics';
+    read: boolean;
     created_at: string;
 }
