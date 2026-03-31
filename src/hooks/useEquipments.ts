@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { Equipment, Company } from '@/types/database';
+import { Equipment, Company, MasterCatalog } from '@/types/database';
 import { EquipmentService } from '@/services/EquipmentService';
 
 export function useEquipment(id: string) {
@@ -46,6 +46,22 @@ export function useEquipments(options?: {
             const { data, error } = await query;
             if (error) throw error;
             return data as Equipment[];
+        },
+    });
+}
+
+export function useMasterCatalog() {
+    return useQuery({
+        queryKey: ['master-catalog'],
+        queryFn: async () => {
+            const { data, error } = await supabase
+                .from('master_catalog')
+                .select('*')
+                .order('brand', { ascending: true })
+                .order('name', { ascending: true });
+
+            if (error) throw error;
+            return data as MasterCatalog[];
         },
     });
 }

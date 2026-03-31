@@ -27,6 +27,7 @@ import { Dialog } from '@/components/ui/dialog';
 import { EquipmentForm } from '@/components/inventory/EquipmentForm';
 import { CompanySetup } from '@/components/auth/CompanySetup';
 import { HubSupplementRequest } from '@/components/inventory/HubSupplementRequest';
+import { MasterCatalogSelector } from '@/components/inventory/MasterCatalogSelector';
 import { DeliveryMap } from '@/components/DeliveryMap';
 
 // New Professional Components
@@ -65,6 +66,7 @@ export default function Dashboard() {
   // Other UI state
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isHubDialogOpen, setIsHubDialogOpen] = useState(false);
+  const [isCatalogDialogOpen, setIsCatalogDialogOpen] = useState(false);
   const [trackingBookingId, setTrackingBookingId] = useState<string | null>(null);
   const [editingEquipment, setEditingEquipment] = useState<any | undefined>();
   const [bookingFilter, setBookingFilter] = useState<'received' | 'requested'>('received');
@@ -178,6 +180,13 @@ export default function Dashboard() {
            </div>
 
            <div className="flex items-center gap-4">
+              <Button 
+                onClick={() => setIsCatalogDialogOpen(true)} 
+                variant="outline"
+                className="h-10 text-[10px] font-black uppercase tracking-widest border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/5 rounded-xl hidden sm:flex"
+              >
+                Importar Catálogo
+              </Button>
               <Button 
                 onClick={() => setIsHubDialogOpen(true)} 
                 variant="outline"
@@ -441,6 +450,19 @@ export default function Dashboard() {
         title="Solicitar Suplemento do HUB"
       >
         <HubSupplementRequest onSuccess={() => setIsHubDialogOpen(false)} />
+      </Dialog>
+
+      <Dialog 
+        isOpen={isCatalogDialogOpen} 
+        onClose={() => setIsCatalogDialogOpen(false)}
+        title="Catálogo Master Aputure"
+      >
+        {company && (
+          <MasterCatalogSelector 
+            companyId={company.id} 
+            onSuccess={() => setIsCatalogDialogOpen(false)} 
+          />
+        )}
       </Dialog>
 
       <Dialog 

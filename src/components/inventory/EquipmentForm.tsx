@@ -24,6 +24,14 @@ const equipmentSchema = z.object({
   state: z.string().optional(),
 });
 
+const CITY_STATE_MAP: Record<string, string> = {
+  'SÃO PAULO': 'SP', 'SAO PAULO': 'SP', 'SP': 'SP', 'RIOCENTRO': 'RJ', 
+  'RIO DE JANEIRO': 'RJ', 'RIO': 'RJ', 'BELO HORIZONTE': 'MG', 'BH': 'MG',
+  'CURITIBA': 'PR', 'PORTO ALEGRE': 'RS', 'POA': 'RS', 'SALVADOR': 'BA',
+  'FORTALEZA': 'CE', 'RECIFE': 'PE', 'MANAUS': 'AM', 'BRASÍLIA': 'DF', 'BRASILIA': 'DF',
+  'GOIÂNIA': 'GO', 'GOIANIA': 'GO', 'BELÉM': 'PA', 'BELEM': 'PA'
+};
+
 interface EquipmentFormValues {
   name: string;
   category: string;
@@ -53,6 +61,8 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<EquipmentFormValues>({
     resolver: zodResolver(equipmentSchema) as any,
@@ -90,6 +100,13 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleCityBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const city = e.target.value.toUpperCase().trim();
+    if (CITY_STATE_MAP[city]) {
+      setValue('state', CITY_STATE_MAP[city]);
+    }
+  };
+
   const onSubmit = async (values: EquipmentFormValues) => {
     try {
       const { location, city, state, ...dbValues } = values;
@@ -121,8 +138,14 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="name">Nome do Equipamento</Label>
-          <Input id="name" {...register('name')} placeholder="Ex: Sony A7IV" />
+          <Label htmlFor="name">Nome do Equipamento {equipment?.master_item_id && <span className="text-[10px] text-primary italic">(Catálogo Oficial)</span>}</Label>
+          <Input 
+            id="name" 
+            {...register('name')} 
+            placeholder="Ex: Sony A7IV" 
+            disabled={!!equipment?.master_item_id}
+            className={equipment?.master_item_id ? "bg-zinc-900 border-zinc-800 opacity-70 cursor-not-allowed" : ""}
+          />
           {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
         </div>
         <div className="space-y-2">
@@ -130,7 +153,10 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
           <select 
             id="category" 
             {...register('category')}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            disabled={!!equipment?.master_item_id}
+            className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+              equipment?.master_item_id ? "bg-zinc-900 border-zinc-800 opacity-70 cursor-not-allowed" : ""
+            }`}
           >
             <option value="">Selecione...</option>
             <option value="Cameras">Câmeras</option>
@@ -145,7 +171,13 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
 
       <div className="space-y-2">
         <Label htmlFor="description">Descrição</Label>
-        <Textarea id="description" {...register('description')} placeholder="Detalhes técnicos, o que acompanha etc." />
+        <Textarea 
+          id="description" 
+          {...register('description')} 
+          placeholder="Detalhes técnicos, o que acompanha etc." 
+          disabled={!!equipment?.master_item_id}
+          className={equipment?.master_item_id ? "bg-zinc-900 border-zinc-800 opacity-70 cursor-not-allowed" : ""}
+        />
         {errors.description && <p className="text-xs text-red-500">{errors.description.message}</p>}
       </div>
 
@@ -199,7 +231,12 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
         </div>
         <div className="space-y-2">
           <Label htmlFor="city">Cidade</Label>
-          <Input id="city" {...register('city')} placeholder="Ex: São Paulo" />
+          <Input 
+            id="city" 
+            {...register('city')} 
+            onBlur={handleCityBlur}
+            placeholder="Ex: São Paulo" 
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="state">Estado</Label>
@@ -216,23 +253,26 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
               <button 
                 type="button"
                 onClick={() => removeImage(index)}
-                className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                disabled={!!equipment?.master_item_id}
+                className={`absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 ${equipment?.master_item_id ? "hidden" : ""}`}
               >
                 <X className="h-3 w-3" />
               </button>
             </div>
           ))}
-          <label className="flex flex-col items-center justify-center aspect-square rounded-md border-2 border-dashed border-muted-foreground/25 hover:border-primary/50 cursor-pointer transition-colors">
-            {uploading ? (
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            ) : (
-              <>
-                <Upload className="h-6 w-6 text-muted-foreground" />
-                <span className="text-[10px] mt-1 text-muted-foreground">Upload</span>
-              </>
-            )}
-            <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" disabled={uploading} />
-          </label>
+          {!equipment?.master_item_id && (
+            <label className="flex flex-col items-center justify-center aspect-square rounded-md border-2 border-dashed border-muted-foreground/25 hover:border-primary/50 cursor-pointer transition-colors">
+              {uploading ? (
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              ) : (
+                <>
+                  <Upload className="h-6 w-6 text-muted-foreground" />
+                  <span className="text-[10px] mt-1 text-muted-foreground">Upload</span>
+                </>
+              )}
+              <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" disabled={uploading} />
+            </label>
+          )}
         </div>
       </div>
 
