@@ -52,6 +52,14 @@ export interface MasterCatalog {
     created_at: string;
 }
 
+export interface Category {
+    id: string;
+    name: string;
+    slug: string;
+    description: string | null;
+    created_at: string;
+}
+
 export interface Booking {
     id: string;
     equipment_id: string; // references equipment.id

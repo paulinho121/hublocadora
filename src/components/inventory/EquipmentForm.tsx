@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Equipment } from '@/types/database';
 import { useCreateEquipment, useUpdateEquipment, uploadEquipmentImage } from '@/hooks/useEquipments';
+import { useCategories } from '@/hooks/useCategories';
 
 const equipmentSchema = z.object({
   name: z.string().min(3, 'Nome deve ter pelo menos 3 caracteres'),
@@ -57,6 +58,7 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
 
   const createMutation = useCreateEquipment(companyId);
   const updateMutation = useUpdateEquipment();
+  const { data: categories, isLoading: isLoadingCategories } = useCategories();
 
   const {
     register,
@@ -159,11 +161,15 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
             }`}
           >
             <option value="">Selecione...</option>
-            <option value="Cameras">Câmeras</option>
-            <option value="Lenses">Lentes</option>
-            <option value="Lighting">Iluminação</option>
-            <option value="Audio">Áudio</option>
-            <option value="Grip">Grip & Acessórios</option>
+            {isLoadingCategories ? (
+              <option disabled>Carregando...</option>
+            ) : (
+              categories?.map((cat) => (
+                <option key={cat.id} value={cat.name}>
+                  {cat.name}
+                </option>
+              ))
+            )}
           </select>
           {errors.category && <p className="text-xs text-red-500">{errors.category.message}</p>}
         </div>
