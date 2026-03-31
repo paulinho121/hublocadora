@@ -23,7 +23,8 @@ import {
   ChevronRight,
   Filter,
   Package2,
-  TrendingUp
+  TrendingUp,
+  Tag
 } from 'lucide-react';
 import { 
   useAdminStats, 
@@ -42,7 +43,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { Select } from '@/components/ui/select';
 
-type AdminTab = 'overview' | 'companies' | 'bookings' | 'users' | 'finance' | 'insurance';
+import { CategoryManagement } from '@/components/inventory/CategoryManagement';
+
+type AdminTab = 'overview' | 'companies' | 'bookings' | 'users' | 'finance' | 'insurance' | 'categories';
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
@@ -103,6 +106,7 @@ export default function Admin() {
     { id: 'companies', label: 'Locadoras', icon: Building2 },
     { id: 'bookings', label: 'Suplementos', icon: Calendar },
     { id: 'users', label: 'Usuários', icon: Users },
+    { id: 'categories', label: 'Categorias', icon: Tag },
     { id: 'finance', label: 'Financeiro', icon: DollarSign },
     { id: 'insurance', label: 'Seguros', icon: ShieldCheck },
   ];
@@ -559,8 +563,25 @@ export default function Admin() {
             </div>
           )}
 
+          {/* CATEGORIES TAB */}
+          {activeTab === 'categories' && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 max-w-4xl">
+               <header>
+                  <h1 className="text-3xl font-black italic tracking-tighter uppercase mb-1">Gestão de Categorias</h1>
+                  <p className="text-zinc-500 text-sm font-medium">Controle global das categorias de equipamentos do marketplace.</p>
+               </header>
+               
+               <Card className="bg-zinc-950 border-zinc-900 rounded-[32px] p-8 shadow-2xl">
+                  <CategoryManagement />
+               </Card>
+            </div>
+          )}
+
           {/* Fallback developing tabs */}
-          {activeTab !== 'overview' && activeTab !== 'companies' && activeTab !== 'bookings' && (
+          {activeTab !== 'overview' && 
+           activeTab !== 'companies' && 
+           activeTab !== 'bookings' && 
+           activeTab !== 'categories' && (
              <div className="h-full flex flex-col items-center justify-center py-20 animate-in zoom-in-95 duration-500">
                 <div className="h-24 w-24 rounded-[32px] bg-zinc-900/50 border border-zinc-900 flex items-center justify-center mb-6">
                    <Clock className="w-10 h-10 text-emerald-500/30 animate-spin-slow" />
