@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { NotificationCenter } from "./NotificationCenter";
 
 interface SidebarProps {
   activeTab: string;
@@ -81,6 +82,9 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
 
       {/* User Footer */}
       <div className="p-4 mt-auto border-t border-zinc-900/50 bg-zinc-950/80 backdrop-blur-md">
+        <div className="flex flex-col items-center gap-4 mb-4">
+           <NotificationCenter />
+        </div>
         <div className="p-4 rounded-2xl bg-zinc-900/40 border border-zinc-900 flex items-center gap-3 mb-3">
            <div className="h-9 w-9 rounded-full bg-zinc-800 flex items-center justify-center border border-zinc-700">
               <User className="h-4 w-4 text-zinc-400" />

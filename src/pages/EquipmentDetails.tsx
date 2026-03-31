@@ -20,6 +20,11 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useEquipmentAvailability } from '@/hooks/useAvailability';
+import { PixPaymentModal } from '@/components/checkout/PixPaymentModal';
+import { BookingService } from '@/services/BookingService';
+import { useAuth } from '@/contexts/AuthContext';
+import { ReviewService } from '@/services/ReviewService';
+import { useQuery } from '@tanstack/react-query';
 
 export default function EquipmentDetails() {
   const { id } = useParams<{ id: string }>();
@@ -35,6 +40,48 @@ export default function EquipmentDetails() {
   const [endDate, setEndDate] = useState(nextWeek);
   
   const { data: availability, isLoading: isLoadingAvail } = useEquipmentAvailability(id || '', startDate, endDate);
+  const { user } = useAuth();
+  const [isPixModalOpen, setIsPixModalOpen] = useState(false);
+  const [createdBookingId, setCreatedBookingId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { data: reviews } = useQuery({
+    queryKey: ['reviews', id],
+    queryFn: () => ReviewService.getByEquipment(id || ''),
+    enabled: !!id
+  });
+
+  const handleStartBooking = async () => {
+    if (!user) { navigate('/login'); return; }
+    try {
+      setIsSubmitting(true);
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const days = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
+      const totalAmount = equipment.daily_rate * days;
+
+      const booking = await BookingService.createBooking({
+        equipment_id: equipment.id,
+        renter_id: user.id,
+        company_id: equipment.company_id,
+        start_date: startDate,
+        end_date: endDate,
+        total_amount: totalAmount,
+        status: 'pending',
+        quantity: 1,
+        delivery_method: 'pickup',
+        delivery_address: null,
+        notes: null
+      });
+
+      setCreatedBookingId(booking.id);
+      setIsPixModalOpen(true);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -242,14 +289,15 @@ export default function EquipmentDetails() {
 
                 <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
                    <Button 
-                     disabled={!availability?.isAvailable}
+                     onClick={handleStartBooking}
+                     disabled={!availability?.isAvailable || isSubmitting}
                      className={`h-14 rounded-2xl font-black italic uppercase tracking-tighter text-lg group shadow-2xl transition-all
                        ${availability?.isAvailable 
-                         ? 'bg-primary hover:bg-primary/90 text-white shadow-[0_10px_30px_rgba(var(--primary),0.3)]' 
+                         ? 'bg-primary hover:bg-primary/90 text-white shadow-[0_10px_30px_rgba(234,88,12,0.3)]' 
                          : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'}`}
                    >
-                      {availability?.isAvailable ? 'Alugar Agora' : 'Indisponível'}
-                      <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      {isSubmitting ? <Loader2 className="h-6 w-6 animate-spin" /> : availability?.isAvailable ? 'Alugar Agora' : 'Indisponível'}
+                      {!isSubmitting && <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />}
                    </Button>
                    <Button variant="outline" className="h-14 rounded-2xl border-zinc-800 bg-transparent text-zinc-200 font-bold uppercase tracking-tighter hover:bg-zinc-900/50">
                       <MessageSquare className="mr-2 w-5 h-5" /> Falar com Locadora

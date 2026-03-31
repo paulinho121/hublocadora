@@ -34,6 +34,7 @@ import { DeliveryMap } from '@/components/DeliveryMap';
 import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar';
 import { InventoryTab } from '@/components/dashboard/InventoryTab';
 import { ConfirmDeleteModal } from '@/components/dashboard/ConfirmDeleteModal';
+import { LogisticsTab } from '@/components/dashboard/LogisticsTab';
 
 type TabType = 'overview' | 'inventory' | 'bookings' | 'logistics' | 'settings';
 const VALID_TABS: TabType[] = ['overview', 'inventory', 'bookings', 'logistics', 'settings'];
@@ -379,38 +380,7 @@ export default function Dashboard() {
            )}
 
            {activeTab === 'logistics' && (
-             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <header className="mb-10">
-                   <h2 className="text-4xl font-black italic tracking-tighter uppercase mb-2">Logística</h2>
-                   <p className="text-zinc-500 font-medium">Controle de entradas e saídas diárias.</p>
-                </header>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                   <Card className="bg-zinc-950 border-zinc-900 rounded-3xl overflow-hidden">
-                      <CardHeader className="p-8 border-b border-zinc-900">
-                         <div className="flex items-center gap-3">
-                            <ArrowRight className="h-5 w-5 text-emerald-500 rotate-45" />
-                            <CardTitle className="text-xl font-black italic tracking-tighter uppercase">Saídas Hoje</CardTitle>
-                         </div>
-                      </CardHeader>
-                      <CardContent className="p-8">
-                         <p className="text-zinc-600 text-sm font-medium italic">Nenhuma saída pendente para hoje.</p>
-                      </CardContent>
-                   </Card>
-
-                   <Card className="bg-zinc-950 border-zinc-900 rounded-3xl overflow-hidden">
-                      <CardHeader className="p-8 border-b border-zinc-900">
-                         <div className="flex items-center gap-3">
-                            <ArrowRight className="h-5 w-5 text-blue-500 -rotate-[135deg]" />
-                            <CardTitle className="text-xl font-black italic tracking-tighter uppercase">Retornos Hoje</CardTitle>
-                         </div>
-                      </CardHeader>
-                      <CardContent className="p-8">
-                         <p className="text-zinc-600 text-sm font-medium italic">Nenhum retorno esperado para hoje.</p>
-                      </CardContent>
-                   </Card>
-                </div>
-             </div>
+             <LogisticsTab tenantId={tenantId || ''} />
            )}
 
            {activeTab === 'settings' && (
