@@ -26,7 +26,7 @@ export default function Admin() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('companies')
-        .select('*, owner:profiles(full_name, email)');
+        .select('*, owner:profiles!companies_owner_id_fkey(full_name, email)');
       if (error) throw error;
       return data;
     },
