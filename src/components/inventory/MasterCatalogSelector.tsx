@@ -7,12 +7,14 @@ import {
   Info,
   Check,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  ImageOff
 } from 'lucide-react';
 import { useMasterCatalog, useCreateEquipment, useEquipments, useUpdateEquipment } from '@/hooks/useEquipments';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
 import { MasterCatalog } from '@/types/database';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -31,6 +33,8 @@ export function MasterCatalogSelector({ companyId, onSuccess }: MasterCatalogSel
   const [selectedItem, setSelectedItem] = useState<MasterCatalog | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [dailyRate, setDailyRate] = useState(0);
+  const [locationBase, setLocationBase] = useState('Sede Principal');
+  const [stateUf, setStateUf] = useState('SP');
 
   // Check if selected item already exists in inventory
   const existingItem = selectedItem 
@@ -66,13 +70,17 @@ export function MasterCatalogSelector({ companyId, onSuccess }: MasterCatalogSel
           condition: 'excellent',
           status: 'available',
           features: { brand: selectedItem.brand },
-          master_item_id: selectedItem.id
+          master_item_id: selectedItem.id,
+          location_base: locationBase,
+          state_uf: stateUf
         });
       }
 
       setSelectedItem(null);
       setQuantity(1);
       setDailyRate(0);
+      setLocationBase('Sede Principal');
+      setStateUf('SP');
       if (onSuccess) onSuccess();
     } catch (error) {
       console.error('Error adding equipment:', error);
@@ -114,8 +122,21 @@ export function MasterCatalogSelector({ companyId, onSuccess }: MasterCatalogSel
                 : 'border-zinc-900 bg-zinc-950 hover:border-zinc-700'
             }`}
           >
-            <div className="w-20 h-20 rounded-xl overflow-hidden bg-zinc-900 flex-shrink-0">
-              <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+            <div className="w-20 h-20 rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 flex flex-col items-center justify-center flex-shrink-0 relative group">
+                <img 
+                  src={item.image_url || ''} 
+                  alt={item.name} 
+                  className="w-full h-full object-cover z-10"
+                  onError={(e) => {
+                    // Fallback para quando a imagem da Aputure/Amaran estiver fora do ar
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.parentElement?.querySelector('.fallback-icon')?.classList.remove('hidden');
+                  }} 
+                />
+                <div className="fallback-icon absolute inset-0 hidden flex flex-col items-center justify-center text-zinc-700 bg-zinc-900 z-0">
+                  <ImageOff className="w-6 h-6 mb-1 opacity-50" />
+                  <span className="text-[8px] uppercase tracking-tighter font-bold opacity-30">Sem Foto</span>
+                </div>
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
@@ -156,7 +177,7 @@ export function MasterCatalogSelector({ companyId, onSuccess }: MasterCatalogSel
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
+              <div className="space-y-2 col-span-2 md:col-span-1">
                 <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
                   {existingItem ? 'Adicionar +' : 'Qtd no Estoque'}
                 </Label>
@@ -181,7 +202,7 @@ export function MasterCatalogSelector({ companyId, onSuccess }: MasterCatalogSel
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 col-span-2 md:col-span-1">
                 <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Valor Diária (R$)</Label>
                 <Input 
                   type="number"
@@ -190,6 +211,36 @@ export function MasterCatalogSelector({ companyId, onSuccess }: MasterCatalogSel
                   className="h-10 bg-zinc-900 border-zinc-800 font-bold"
                 />
               </div>
+
+              {!existingItem && (
+                <>
+                  <div className="space-y-2 col-span-2 md:col-span-1 border-t border-zinc-800/50 pt-4 md:border-0 md:pt-0">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Nome da Base</Label>
+                    <Input 
+                      placeholder="Ex: Sede, Filial Zona Sul..."
+                      value={locationBase}
+                      onChange={(e) => setLocationBase(e.target.value)}
+                      className="h-10 bg-zinc-900 border-zinc-800"
+                    />
+                  </div>
+                  <div className="space-y-2 col-span-2 md:col-span-1 border-t border-zinc-800/50 pt-4 md:border-0 md:pt-0">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Estado (UF)</Label>
+                    <Select 
+                      value={stateUf} 
+                      onChange={(e: any) => setStateUf(e.target.value)}
+                    >
+                      <option value="SP">São Paulo (SP)</option>
+                      <option value="RJ">Rio de Janeiro (RJ)</option>
+                      <option value="RS">Rio Grande do Sul (RS)</option>
+                      <option value="MG">Minas Gerais (MG)</option>
+                      <option value="PR">Paraná (PR)</option>
+                      <option value="SC">Santa Catarina (SC)</option>
+                      <option value="DF">Distrito Federal (DF)</option>
+                      <option value="BA">Bahia (BA)</option>
+                    </Select>
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-2xl flex gap-3">

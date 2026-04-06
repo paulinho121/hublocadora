@@ -20,9 +20,8 @@ const equipmentSchema = z.object({
   condition: z.enum(['excellent', 'good', 'fair', 'maintenance']),
   status: z.enum(['available', 'rented', 'maintenance', 'unavailable']),
   stock_quantity: z.coerce.number().min(1, 'Quantidade deve ser pelo menos 1'),
-  location: z.string().optional(),
-  city: z.string().optional(),
-  state: z.string().optional(),
+  location_base: z.string().min(2, 'A Cidade / Base Logística é obrigatória'),
+  state_uf: z.string().length(2, 'Insira a UF do estado, ex: SP'),
 });
 
 const CITY_STATE_MAP: Record<string, string> = {
@@ -41,9 +40,8 @@ interface EquipmentFormValues {
   condition: 'excellent' | 'good' | 'fair' | 'maintenance';
   status: 'available' | 'rented' | 'maintenance' | 'unavailable';
   stock_quantity: number;
-  location?: string;
-  city?: string;
-  state?: string;
+  location_base: string;
+  state_uf: string;
 }
 
 interface EquipmentFormProps {
@@ -76,9 +74,8 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
       condition: equipment?.condition || 'good',
       status: equipment?.status || 'available',
       stock_quantity: equipment?.stock_quantity || 1,
-      location: (equipment?.features as any)?.location || '',
-      city: (equipment?.features as any)?.city || '',
-      state: (equipment?.features as any)?.state || '',
+      location_base: equipment?.location_base || (equipment?.features as any)?.city || (equipment?.features as any)?.location || '',
+      state_uf: equipment?.state_uf || (equipment?.features as any)?.state || '',
     },
   });
 
@@ -105,22 +102,21 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
   const handleCityBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     const city = e.target.value.toUpperCase().trim();
     if (CITY_STATE_MAP[city]) {
-      setValue('state', CITY_STATE_MAP[city]);
+      setValue('state_uf', CITY_STATE_MAP[city]);
     }
   };
 
   const onSubmit = async (values: EquipmentFormValues) => {
     try {
-      const { location, city, state, ...dbValues } = values;
+      const { location_base, state_uf, ...dbValues } = values;
       const payload = {
         ...dbValues,
         company_id: companyId,
         images,
+        location_base,
+        state_uf,
         features: {
           ...(equipment?.features as object || {}),
-          location,
-          city,
-          state
         },
       };
 
@@ -230,23 +226,28 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="location">Local (Prateleira/Galpão)</Label>
-          <Input id="location" {...register('location')} placeholder="Ex: Prateleira A2" />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="city">Cidade</Label>
+          <Label htmlFor="location_base">Cidade / Nome da Base <span className="text-red-500">*</span></Label>
           <Input 
-            id="city" 
-            {...register('city')} 
+            id="location_base" 
+            {...register('location_base')} 
             onBlur={handleCityBlur}
-            placeholder="Ex: São Paulo" 
+            placeholder="Ex: São Paulo, Filial Centro..." 
+            className="border-zinc-800 bg-zinc-900"
           />
+          {errors.location_base && <p className="text-xs text-red-500">{errors.location_base.message}</p>}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="state">Estado</Label>
-          <Input id="state" {...register('state')} placeholder="Ex: SP" maxLength={2} className="uppercase" />
+          <Label htmlFor="state_uf">Estado (UF) <span className="text-red-500">*</span></Label>
+          <Input 
+            id="state_uf" 
+            {...register('state_uf')} 
+            placeholder="Ex: SP" 
+            maxLength={2} 
+            className="uppercase border-zinc-800 bg-zinc-900 font-bold" 
+          />
+          {errors.state_uf && <p className="text-xs text-red-500">{errors.state_uf.message}</p>}
         </div>
       </div>
 
