@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Camera, Loader2 } from 'lucide-react';
+import { Camera, Loader2, Sparkles } from 'lucide-react';
 
 export default function Login() {
     const navigate = useNavigate();
@@ -13,6 +13,7 @@ export default function Login() {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [message, setMessage] = useState<string | null>(null);
 
     const from = location.state?.from?.pathname || '/dashboard';
 
@@ -20,6 +21,7 @@ export default function Login() {
         e.preventDefault();
         setLoading(true);
         setError(null);
+        setMessage(null);
 
         const { error } = await supabase.auth.signInWithPassword({
             email,
@@ -32,6 +34,51 @@ export default function Login() {
         } else {
             navigate(from, { replace: true });
         }
+    };
+
+    const handleResetPassword = async () => {
+        if (!email) {
+            setError("Digite seu e-mail acima para recuperar a senha");
+            return;
+        }
+        setLoading(true);
+        setError(null);
+        setMessage(null);
+        
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin + '/reset-password',
+        });
+        
+        if (error) {
+            setError(error.message);
+        } else {
+            setMessage("As instruções foram enviadas para seu e-mail!");
+        }
+        setLoading(false);
+    };
+
+    const handleMagicLink = async () => {
+        if (!email) {
+            setError("Digite seu e-mail acima para receber o Link Mágico");
+            return;
+        }
+        setLoading(true);
+        setError(null);
+        setMessage(null);
+        
+        const { error } = await supabase.auth.signInWithOtp({
+            email,
+            options: {
+              emailRedirectTo: window.location.origin + '/dashboard',
+            }
+        });
+        
+        if (error) {
+            setError(error.message);
+        } else {
+            setMessage("Link Mágico enviado! Verifique sua caixa de entrada.");
+        }
+        setLoading(false);
     };
 
     return (
@@ -65,7 +112,18 @@ export default function Login() {
                                 required
                             />
                         </div>
-                        <div className="space-y-1.5">
+                        <div className="space-y-1.5 flex flex-col">
+                            <div className="flex justify-between items-center mb-1">
+                                <span className="text-xs text-zinc-400 font-bold uppercase tracking-widest pl-1">Senha</span>
+                                <Button 
+                                  variant="link" 
+                                  type="button" 
+                                  className="h-auto p-0 text-xs text-primary/70 hover:text-primary transition-colors"
+                                  onClick={handleResetPassword}
+                                >
+                                    Esqueci a senha
+                                </Button>
+                            </div>
                             <Input
                                 type="password"
                                 placeholder="Sua senha secreta"
@@ -75,11 +133,32 @@ export default function Login() {
                                 required
                             />
                         </div>
+                        {message && <p className="text-xs text-green-400 font-bold uppercase tracking-widest text-center mt-2">{message}</p>}
                         {error && <p className="text-xs text-red-400 font-bold uppercase tracking-widest text-center mt-2">{error}</p>}
-                        <Button className="w-full h-12 bg-primary hover:bg-primary/90 font-black uppercase italic tracking-tighter text-lg mt-4 shadow-lg shadow-primary/20" type="submit" disabled={loading}>
-                            {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
-                            {loading ? 'Sincronizando...' : 'Entrar no Hub'}
-                        </Button>
+                        
+                        <div className="flex flex-col gap-2 mt-6">
+                            <Button className="w-full h-12 bg-primary hover:bg-primary/90 font-black uppercase italic tracking-tighter text-lg shadow-lg shadow-primary/20" type="submit" disabled={loading}>
+                                {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
+                                {loading ? 'Sincronizando...' : 'Entrar no Hub'}
+                            </Button>
+
+                            <div className="relative flex items-center py-2 shrink-0">
+                                <div className="flex-grow border-t border-zinc-800"></div>
+                                <span className="flex-shrink-0 mx-4 text-zinc-500 text-xs uppercase font-bold tracking-widest">ou</span>
+                                <div className="flex-grow border-t border-zinc-800"></div>
+                            </div>
+
+                            <Button 
+                                type="button" 
+                                variant="outline" 
+                                className="w-full h-12 border-primary/20 bg-primary/5 hover:bg-primary/20 text-primary font-bold uppercase tracking-wider transition-colors" 
+                                onClick={handleMagicLink} 
+                                disabled={loading}
+                            >
+                                <Sparkles className="mr-2 h-4 w-4" />
+                                Receber Link Mágico
+                            </Button>
+                        </div>
                     </form>
                 </CardContent>
                 <CardFooter className="flex flex-col space-y-4 text-center pb-8">
