@@ -26,6 +26,16 @@ export interface Company {
     created_at: string;
 }
 
+export interface MasterCatalog {
+    id: string;
+    name: string;
+    brand: string;
+    category: string;
+    description: string;
+    image_url: string;
+    created_at: string;
+}
+
 export interface Equipment {
     id: string;
     company_id: string; 
@@ -39,6 +49,8 @@ export interface Equipment {
     features: Record<string, any>; 
     stock_quantity: number;
     master_item_id?: string;
+    location_base?: string;
+    state_uf?: string;
     created_at: string;
 }
 

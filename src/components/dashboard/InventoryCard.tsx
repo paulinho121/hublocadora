@@ -77,7 +77,19 @@ export function InventoryCard({ item, onEdit, onDelete }: InventoryCardProps) {
               {formatCurrency(item.daily_rate)}
               <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest ml-1">/ dia</span>
             </div>
-            <p className="text-[9px] text-emerald-500 font-bold uppercase tracking-widest mt-1">Estoque: {item.stock_quantity || 0} un</p>
+            <div className="flex flex-col gap-1 mt-2 mb-1">
+              {item.location_base && (
+                <div className="flex items-center gap-1.5 text-zinc-400 bg-zinc-900 w-max px-2 py-1 rounded border border-zinc-800">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0 animate-pulse"></span>
+                  <span className="text-[9px] font-bold uppercase tracking-widest leading-none">
+                    {item.location_base} {item.state_uf && `(${item.state_uf})`}
+                  </span>
+                </div>
+              )}
+              <p className="text-[9px] text-emerald-500 font-bold uppercase tracking-widest">
+                 Disponíveis: {item.stock_quantity || 0} unidades
+              </p>
+            </div>
           </div>
 
           <div className="flex gap-1">
