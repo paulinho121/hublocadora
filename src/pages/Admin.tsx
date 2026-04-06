@@ -8,7 +8,8 @@ import { Navigate } from 'react-router-dom';
 import { 
   Loader2, AlertTriangle, ShieldCheck, 
   BarChart3, Building2, Package, 
-  CheckCircle2, Search, ArrowUpRight, Ban, FileSignature, XCircle
+  CheckCircle2, Search, ArrowUpRight, Ban, FileSignature, XCircle,
+  Truck, MapPin, Navigation, Clock
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
@@ -20,6 +21,7 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBookingContract, setSelectedBookingContract] = useState<any | null>(null);
+  const [selectedLogisticsBooking, setSelectedLogisticsBooking] = useState<any | null>(null);
 
   // Fetch Companies
   const { data: companies, isLoading: companiesLoading, error } = useQuery({
@@ -425,14 +427,17 @@ export default function Admin() {
                            {/* Ações Gerenciais */}
                            <div className="w-full md:w-auto flex flex-col gap-2 shrink-0 border-t md:border-t-0 md:border-l border-zinc-900 pt-6 md:pt-0 md:pl-8">
                                <Button 
+                                  onClick={() => setSelectedLogisticsBooking(booking)}
+                                  className="w-full text-[10px] uppercase tracking-widest font-black h-10 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl"
+                               >
+                                  <Truck className="h-4 w-4 mr-2" /> Central de Despacho
+                               </Button>
+                               <Button 
                                   onClick={() => setSelectedBookingContract(booking)}
                                   variant="outline" 
                                   className="w-full text-[10px] uppercase tracking-widest font-black h-10 border-zinc-800 hover:bg-zinc-900 rounded-xl"
                                >
                                   Visualizar Contrato
-                               </Button>
-                               <Button variant="outline" className="w-full text-[10px] uppercase tracking-widest font-black h-10 border-destructive/20 text-destructive hover:bg-destructive/10 rounded-xl">
-                                  Interceder Conflito
                                </Button>
                            </div>
 
@@ -534,6 +539,114 @@ export default function Admin() {
                      </Button>
                      <Button onClick={() => { alert('Impressão de PDF enviada para emissão fiscal.'); setSelectedBookingContract(null); }} className="font-black uppercase tracking-widest text-[10px] h-12 px-8 rounded-xl bg-primary text-black hover:bg-primary/90">
                         Exportar PDF
+                     </Button>
+                  </div>
+               </div>
+            </div>
+         )}
+         {/* LOGISTICS MODAL OVERLAY */}
+         {selectedLogisticsBooking && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in">
+               <div className="bg-zinc-950 border border-zinc-800 w-full max-w-3xl rounded-3xl overflow-hidden shadow-2xl flex flex-col relative">
+                  
+                  {/* Header Logística */}
+                  <div className="p-6 border-b border-zinc-900 flex items-center justify-between">
+                     <div className="flex items-center gap-4">
+                        <div className="h-12 w-12 bg-emerald-500/10 rounded-full flex items-center justify-center">
+                           <Navigation className="h-5 w-5 text-emerald-500" />
+                        </div>
+                        <div>
+                           <h2 className="text-xl font-black uppercase tracking-widest text-white">Central de Despacho Inteligente</h2>
+                           <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest flex items-center gap-1 mt-1">
+                              OTIMIZAÇÃO ALGORÍTMICA DE ROTA <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse ml-2" />
+                           </p>
+                        </div>
+                     </div>
+                     <button onClick={() => setSelectedLogisticsBooking(null)} className="p-2 hover:bg-zinc-800 rounded-full transition-colors">
+                        <XCircle className="h-6 w-6 text-zinc-500" />
+                     </button>
+                  </div>
+
+                  <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                     {/* Info da Rota */}
+                     <div className="space-y-6 border-r border-zinc-900 pr-0 md:pr-8">
+                        <div>
+                           <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-3">Detalhes do Frete</p>
+                           <div className="bg-zinc-900/30 p-4 rounded-2xl border border-zinc-800 space-y-4">
+                              <div className="flex items-start gap-3">
+                                 <div className="mt-1"><MapPin className="h-4 w-4 text-emerald-500" /></div>
+                                 <div>
+                                    <p className="text-[9px] text-zinc-500 font-black uppercase tracking-widest">Origem (Locadora)</p>
+                                    <p className="text-xs text-white font-bold">{selectedLogisticsBooking.company?.name}</p>
+                                 </div>
+                              </div>
+                              <div className="border-l-2 border-dashed border-zinc-800 ml-2 h-4 my-1"></div>
+                              <div className="flex items-start gap-3">
+                                 <div className="mt-1"><MapPin className="h-4 w-4 text-primary" /></div>
+                                 <div>
+                                    <p className="text-[9px] text-zinc-500 font-black uppercase tracking-widest">Destino (Set de Filmagem)</p>
+                                    <p className="text-xs text-white font-bold">Residência Cineasta</p>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+
+                        <div>
+                           <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-3">Carga</p>
+                           <div className="bg-zinc-900/30 p-4 rounded-2xl border border-zinc-800 flex items-center justify-between">
+                               <div>
+                                  <p className="text-xs text-white font-bold">{selectedLogisticsBooking.equipment?.name}</p>
+                                  <p className="text-[10px] text-zinc-500 font-medium">Equipamento Frágil</p>
+                               </div>
+                               <Badge className="bg-primary/10 text-primary uppercase text-[9px] tracking-widest">Valioso</Badge>
+                           </div>
+                        </div>
+                     </div>
+
+                     {/* API de Cotação */}
+                     <div className="space-y-4">
+                        <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-2 flex justify-between items-center">
+                           Parceiros Disponíveis <span className="text-emerald-500 flex items-center gap-1"><Clock className="h-3 w-3"/> LIVE API</span>
+                        </p>
+                        
+                        <div className="p-4 border border-zinc-800 hover:border-orange-500 transition-all rounded-2xl cursor-pointer group hover:bg-orange-500/5">
+                           <div className="flex justify-between items-center bg-zinc-950 pb-2">
+                              <h3 className="text-lg font-black italic tracking-tighter text-orange-500">LALAMOVE</h3>
+                              <p className="text-xs text-zinc-400 font-bold">~15 min</p>
+                           </div>
+                           <div className="flex justify-between items-end mt-2 pt-2 border-t border-zinc-900">
+                              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest group-hover:text-orange-500/70">Carro Grande (Moto-Frete Inviável)</p>
+                              <p className="text-xl font-black text-white group-hover:text-orange-500 transition-colors">R$ 45,90</p>
+                           </div>
+                        </div>
+
+                        <div className="p-4 border border-zinc-800 hover:border-black/50 transition-all rounded-2xl cursor-pointer bg-zinc-900">
+                           <div className="flex justify-between items-center pb-2">
+                              <h3 className="text-lg font-black tracking-tighter text-white">Uber <span className="font-medium">Flash</span></h3>
+                              <p className="text-xs text-zinc-400 font-bold">~5 min</p>
+                           </div>
+                           <div className="flex justify-between items-end mt-2 pt-2 border-t border-zinc-800">
+                              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Veículo Padrão</p>
+                              <p className="text-xl font-black text-white">R$ 52,10</p>
+                           </div>
+                        </div>
+
+                        <div className="p-4 border border-zinc-800 hover:border-yellow-500 transition-all rounded-2xl cursor-pointer group hover:bg-yellow-500/5">
+                           <div className="flex justify-between items-center bg-zinc-950 pb-2">
+                              <h3 className="text-lg font-black tracking-tighter text-yellow-500">99<span className="font-medium text-white">Entrega</span></h3>
+                              <p className="text-xs text-zinc-400 font-bold">~25 min</p>
+                           </div>
+                           <div className="flex justify-between items-end mt-2 pt-2 border-t border-zinc-900">
+                              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest group-hover:text-yellow-500/70">Carro Hatch</p>
+                              <p className="text-xl font-black text-white group-hover:text-yellow-500 transition-colors">R$ 38,50</p>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div className="p-6 border-t border-zinc-900 bg-zinc-900/30 flex justify-end">
+                     <Button className="w-full font-black uppercase tracking-widest h-14 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-xl transition-all">
+                        Despachar via Lalamove (Melhor Custo-Benefício)
                      </Button>
                   </div>
                </div>
