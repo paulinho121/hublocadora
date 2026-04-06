@@ -82,7 +82,7 @@ function EquipmentCard({ item, onClick }: { item: Equipment; onClick: () => void
 
       {/* ── Card body ── */}
       <div className="flex flex-col flex-1 p-4 gap-3">
-        <h4 className="text-sm font-black leading-tight italic uppercase tracking-tighter group-hover:text-primary transition-colors line-clamp-2">
+        <h4 className="text-sm font-black leading-tight uppercase tracking-tighter group-hover:text-primary transition-colors line-clamp-2">
           {item.name}
         </h4>
 
@@ -141,8 +141,8 @@ export default function Marketplace() {
   return (
     <div className="flex flex-col items-center pt-12 md:pt-20 pb-10 px-4 w-full max-w-7xl mx-auto">
       <div className="text-center mb-10 md:mb-12 animate-in fade-in slide-in-from-top-4 duration-500">
-        <h1 className="text-3xl sm:text-4xl md:text-6xl font-black mb-4 tracking-tighter uppercase italic leading-[0.9]">
-          O HUB da sua <span className="text-primary italic">produção</span>
+        <h1 className="text-3xl sm:text-4xl md:text-6xl font-black mb-4 tracking-tighter uppercase leading-[0.9]">
+          O HUB da sua <span className="text-primary">produção</span>
         </h1>
         <p className="text-sm md:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
           Encontre câmeras, iluminação, áudio e agora <strong>telões de LED</strong> de alta definição para o seu set.
@@ -251,7 +251,7 @@ export default function Marketplace() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full mb-20 items-stretch">
         <div className="relative overflow-hidden rounded-3xl bg-zinc-950 border border-zinc-800 p-10 min-h-[320px] flex flex-col justify-between group cursor-pointer hover:border-primary/30 transition-all">
           <div className="z-10 max-w-[200px]">
-            <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase mb-4 leading-[0.9]">Câmeras & Lentes</h2>
+            <h2 className="text-4xl font-black text-white tracking-tighter uppercase mb-4 leading-[0.9]">Câmeras & Lentes</h2>
             <p className="text-zinc-500 mb-6 font-medium">O melhor do cinema mundial no seu set.</p>
             <Button className="w-fit bg-primary hover:bg-primary/80 text-white border-none rounded-xl font-bold h-12 px-6">
               Explorar <ChevronRight className="ml-2 h-4 w-4"/>
@@ -267,7 +267,7 @@ export default function Marketplace() {
         
         <div className="relative overflow-hidden rounded-3xl bg-zinc-950 border border-zinc-800 p-10 min-h-[320px] flex flex-col justify-between group cursor-pointer hover:border-emerald-500/30 transition-all">
           <div className="z-10 max-w-[200px]">
-            <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase mb-4 leading-[0.9]">Iluminação & Grip</h2>
+            <h2 className="text-4xl font-black text-white tracking-tighter uppercase mb-4 leading-[0.9]">Iluminação & Grip</h2>
             <p className="text-zinc-500 mb-6 font-medium">Controle total da luz com acessórios profissionais.</p>
             <Button className="w-fit bg-emerald-600 hover:bg-emerald-500 text-white border-none rounded-xl font-bold h-12 px-6">
               Buscar <ChevronRight className="ml-2 h-4 w-4"/>

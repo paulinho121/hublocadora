@@ -130,20 +130,20 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95 }}
                         >
-                            <div className="relative h-48 bg-zinc-900 overflow-hidden">
+                            <div className="relative h-56 bg-zinc-900 flex items-center justify-center overflow-hidden">
                                 {equipment.images?.[0] && (
                                     <img 
                                         src={equipment.images[0]} 
-                                        className="w-full h-full object-cover opacity-60 scale-105" 
+                                        className="w-full h-full object-contain p-4 scale-100 mix-blend-screen opacity-90 transition-all duration-300" 
                                         alt={equipment.name}
                                     />
                                 )}
-                                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 to-transparent" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
                                 <div className="absolute bottom-6 left-6 right-6">
                                     <Badge className={`${isAvailable ? 'bg-emerald-500/20 text-emerald-500 border-emerald-500/20' : 'bg-red-500/20 text-red-500 border-red-500/20'} mb-2 uppercase font-black tracking-widest text-[10px]`}>
                                         {isAvailable ? `${equipment.stock_quantity || 0} Disponíveis no HUB` : 'Limite de Estoque Atingido'}
                                     </Badge>
-                                    <h2 className="text-3xl font-black tracking-tighter text-white uppercase italic leading-none">
+                                    <h2 className="text-3xl font-black tracking-tighter text-white uppercase leading-none">
                                         {equipment.name}
                                     </h2>
                                 </div>
@@ -180,7 +180,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                     {!isAvailable && (
                                         <div className="bg-red-500/10 p-3 rounded-xl border border-red-500/20 flex items-center gap-3 text-red-500">
                                             <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                                            <p className="text-[11px] font-bold italic">Opa! Este item já está reservado por outra produtora neste período.</p>
+                                            <p className="text-[11px] font-bold">Opa! Este item já está reservado por outra produtora neste período.</p>
                                         </div>
                                     )}
                                 </div>
@@ -190,14 +190,14 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                         <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest mb-1">Duração</p>
                                         <div className="flex items-center gap-2">
                                             <Clock className="w-4 h-4 text-emerald-500" />
-                                            <span className="text-lg font-black text-zinc-100 italic">{totalDays} Diárias</span>
+                                            <span className="text-lg font-black text-zinc-100">{totalDays} Diárias</span>
                                         </div>
                                     </div>
                                     <div className="bg-zinc-900/50 rounded-2xl p-4 border border-zinc-900">
                                         <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest mb-1">Custo Diária</p>
                                         <div className="flex items-center gap-2">
                                             <Package className="w-4 h-4 text-primary" />
-                                            <span className="text-lg font-black text-zinc-100 italic">R$ {equipment.daily_rate}</span>
+                                            <span className="text-lg font-black text-zinc-100">R$ {equipment.daily_rate}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -217,7 +217,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                         >
                                             <Store className={`w-6 h-6 mb-3 ${deliveryMethod === 'pickup' ? 'text-emerald-500' : 'text-zinc-500'}`} />
                                             <p className="font-bold text-sm mb-1 uppercase tracking-tighter">Retirada HUB</p>
-                                            <p className="text-[10px] text-zinc-500 line-clamp-1 italic">Grátis - Próximo ao set</p>
+                                            <p className="text-[10px] text-zinc-500 line-clamp-1">Grátis - Próximo ao set</p>
                                             {deliveryMethod === 'pickup' && (
                                                 <div className="absolute top-2 right-2 bg-emerald-500 rounded-full p-0.5">
                                                     <CheckCircle2 className="w-3 h-3 text-black" />
@@ -235,7 +235,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                         >
                                             <Truck className={`w-6 h-6 mb-3 ${deliveryMethod === 'delivery' ? 'text-primary' : 'text-zinc-500'}`} />
                                             <p className="font-bold text-sm mb-1 uppercase tracking-tighter">Na Locadora</p>
-                                            <p className="text-[10px] text-zinc-500 line-clamp-1 italic">Frete fixo simplificado</p>
+                                            <p className="text-[10px] text-zinc-500 line-clamp-1">Frete fixo simplificado</p>
                                             {deliveryMethod === 'delivery' && (
                                                 <div className="absolute top-2 right-2 bg-primary rounded-full p-0.5">
                                                     <CheckCircle2 className="w-3 h-3 text-white" />
@@ -257,7 +257,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                     </div>
                                     <div className="text-right">
                                         <p className="text-[10px] text-zinc-500 uppercase font-bold">Total do Aluguel</p>
-                                        <p className="text-2xl font-black text-white tracking-tighter italic">
+                                        <p className="text-2xl font-black text-white tracking-tighter">
                                             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(equipment.daily_rate * totalDays * quantity)}
                                         </p>
                                     </div>
@@ -265,7 +265,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
 
                                 <div className="flex gap-4">
                                     <Button 
-                                        className={`flex-1 h-14 rounded-2xl font-black italic uppercase tracking-tighter group transition-all ${
+                                        className={`flex-1 h-14 rounded-2xl font-black uppercase tracking-tighter group transition-all ${
                                             isAvailable 
                                             ? 'bg-white text-black hover:bg-zinc-200' 
                                             : 'bg-zinc-800 text-zinc-500 cursor-not-allowed border-zinc-700'
