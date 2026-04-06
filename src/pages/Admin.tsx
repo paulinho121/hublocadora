@@ -8,7 +8,7 @@ import { Navigate } from 'react-router-dom';
 import { 
   Loader2, AlertTriangle, ShieldCheck, 
   BarChart3, Building2, Package, 
-  CheckCircle2, Search, ArrowUpRight, Ban
+  CheckCircle2, Search, ArrowUpRight, Ban, FileSignature, XCircle
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
@@ -19,6 +19,7 @@ export default function Admin() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedBookingContract, setSelectedBookingContract] = useState<any | null>(null);
 
   // Fetch Companies
   const { data: companies, isLoading: companiesLoading, error } = useQuery({
@@ -423,7 +424,11 @@ export default function Admin() {
 
                            {/* Ações Gerenciais */}
                            <div className="w-full md:w-auto flex flex-col gap-2 shrink-0 border-t md:border-t-0 md:border-l border-zinc-900 pt-6 md:pt-0 md:pl-8">
-                               <Button variant="outline" className="w-full text-[10px] uppercase tracking-widest font-black h-10 border-zinc-800 hover:bg-zinc-900 rounded-xl">
+                               <Button 
+                                  onClick={() => setSelectedBookingContract(booking)}
+                                  variant="outline" 
+                                  className="w-full text-[10px] uppercase tracking-widest font-black h-10 border-zinc-800 hover:bg-zinc-900 rounded-xl"
+                               >
                                   Visualizar Contrato
                                </Button>
                                <Button variant="outline" className="w-full text-[10px] uppercase tracking-widest font-black h-10 border-destructive/20 text-destructive hover:bg-destructive/10 rounded-xl">
@@ -434,6 +439,103 @@ export default function Admin() {
                         </Card>
                      ))
                   )}
+               </div>
+            </div>
+         )}
+
+         {/* CONTRACT MODAL OVERLAY */}
+         {selectedBookingContract && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
+               <div className="bg-zinc-950 border border-zinc-800 w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+                  
+                  {/* Header do Contrato */}
+                  <div className="p-6 border-b border-zinc-900 flex items-center justify-between bg-zinc-900/30">
+                     <div className="flex items-center gap-4">
+                        <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center">
+                           <FileSignature className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                           <h2 className="text-xl font-black uppercase tracking-widest text-white">Termo de Locação</h2>
+                           <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest">
+                              CÓD. REQ-{selectedBookingContract.id.split('-')[0].toUpperCase()}
+                           </p>
+                        </div>
+                     </div>
+                     <button onClick={() => setSelectedBookingContract(null)} className="p-2 hover:bg-zinc-800 rounded-full transition-colors">
+                        <XCircle className="h-6 w-6 text-zinc-500" />
+                     </button>
+                  </div>
+
+                  {/* Corpo do Contrato (Scrollable) */}
+                  <div className="p-8 overflow-y-auto custom-scrollbar space-y-8">
+                     
+                     <div className="space-y-4 text-sm text-zinc-400 leading-relaxed text-justify">
+                        <p>
+                           Pelo presente instrumento particular, de um lado, na qualidade de <strong>LOCADOR</strong>, a empresa corporativa 
+                           <span className="text-white font-bold ml-1">{selectedBookingContract.company?.name || 'Desconhecida'}</span>, e de outro lado, 
+                           na qualidade de <strong>LOCATÁRIO</strong>, o cliente 
+                           <span className="text-white font-bold ml-1">{(selectedBookingContract as any).renter?.full_name || 'Usuário CineHub'}</span>, 
+                           têm entre si justo e acertado o presente TERMO DE LOCAÇÃO DE EQUIPAMENTOS AUDIOVISUAIS, intermediado pela plataforma CINEHUB MASTER.
+                        </p>
+                     </div>
+
+                     <div className="bg-zinc-900/50 p-6 rounded-2xl border border-zinc-800">
+                        <h4 className="text-xs font-black uppercase tracking-widest text-primary mb-4 border-b border-zinc-800 pb-2">Cláusula 1ª - Do Objeto</h4>
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                           <div>
+                              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Equipamento</p>
+                              <p className="text-white font-bold">{selectedBookingContract.equipment?.name || 'N/A'}</p>
+                           </div>
+                           <div>
+                              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Quantidade</p>
+                              <p className="text-white font-bold">{selectedBookingContract.quantity} Unidade(s)</p>
+                           </div>
+                           <div>
+                              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Data Inicial</p>
+                              <p className="text-white font-bold">{new Date(selectedBookingContract.start_date).toLocaleDateString('pt-BR')}</p>
+                           </div>
+                           <div>
+                              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Data Final</p>
+                              <p className="text-white font-bold">{new Date(selectedBookingContract.end_date).toLocaleDateString('pt-BR')}</p>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div className="bg-zinc-900/50 p-6 rounded-2xl border border-zinc-800">
+                        <h4 className="text-xs font-black uppercase tracking-widest text-emerald-500 mb-4 border-b border-zinc-800 pb-2">Cláusula 2ª - Dos Valores</h4>
+                        <div className="flex justify-between items-center text-sm border-b border-zinc-800/50 pb-2 mb-2">
+                           <span className="text-zinc-400">Repasse Direto à Locadora (85%)</span>
+                           <span className="text-white font-bold">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(selectedBookingContract.total_amount * 0.85)}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm border-b border-zinc-800/50 pb-2 mb-2">
+                           <span className="text-zinc-400">Taxa de Operação CineHub (15%)</span>
+                           <span className="text-white font-bold">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(selectedBookingContract.total_amount * 0.15)}</span>
+                        </div>
+                        <div className="flex justify-between items-center pt-2">
+                           <span className="text-xs font-black uppercase tracking-widest text-zinc-300">Valor Total Bruto</span>
+                           <span className="text-xl font-black text-emerald-500">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(selectedBookingContract.total_amount)}</span>
+                        </div>
+                     </div>
+
+                     <div className="space-y-4 text-xs text-zinc-500 leading-relaxed text-justify mt-8">
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Cláusula 3ª - Das Obrigações</h4>
+                        <p>O LOCATÁRIO obriga-se a utilizar o equipamento de forma profissional, responsabilizando-se integralmente por danos, furtos ou extravios ocorridos durante a vigência deste termo. O LOCADOR garante que o equipamento encontra-se testado e em perfeito estado de funcionamento.</p>
+                        
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mt-4">Cláusula 4ª - Foro Legal</h4>
+                        <p>As partes elegem o foro de domicílio do CINEHUB SERVIÇOS DE TECNOLOGIA LTDA para resolução de quaisquer disputas geradas a partir desta locação, firmando este presente sob os selos de certificação digital de nossa rede.</p>
+                     </div>
+
+                  </div>
+
+                  {/* Footer Ações */}
+                  <div className="p-6 border-t border-zinc-900 bg-zinc-900/30 flex justify-end gap-4">
+                     <Button variant="outline" onClick={() => setSelectedBookingContract(null)} className="font-black uppercase tracking-widest text-[10px] h-12 px-8 rounded-xl bg-transparent border-zinc-700 text-white hover:bg-zinc-800">
+                        Fechar Histórico
+                     </Button>
+                     <Button onClick={() => { alert('Impressão de PDF enviada para emissão fiscal.'); setSelectedBookingContract(null); }} className="font-black uppercase tracking-widest text-[10px] h-12 px-8 rounded-xl bg-primary text-black hover:bg-primary/90">
+                        Exportar PDF
+                     </Button>
+                  </div>
                </div>
             </div>
          )}
