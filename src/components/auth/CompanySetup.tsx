@@ -99,15 +99,14 @@ export function CompanySetup({ ownerId }: { ownerId: string }) {
     setSubmitError(null);
     
     try {
-      // 1. Garantir que o perfil existe ou atualizá-lo (Upsert é mais resiliente)
+      // 1. Garantir que o perfil existe ou atualizá-lo (Update é mais seguro com RLS)
       const { error: profileError } = await supabase
         .from('profiles')
-        .upsert({ 
-          id: ownerId, 
-          email: (await supabase.auth.getUser()).data.user?.email || '',
+        .update({ 
           full_name: values.name,
           updated_at: new Date().toISOString()
-        });
+        })
+        .eq('id', ownerId);
 
       if (profileError) {
         console.error('Erro ao salvar perfil:', profileError);
