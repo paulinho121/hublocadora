@@ -96,6 +96,11 @@ export default function Admin() {
   const totalEquipments = equipments?.length || 0;
   const potentialGmv = equipments?.reduce((acc, eq) => acc + (eq.daily_rate || 0), 0) || 0;
 
+  // Bookings calculations
+  const totalVolume = bookings?.reduce((acc, b) => acc + (b.total_amount || 0), 0) || 0;
+  const hubRevenue = totalVolume * 0.15; // 15% taxa da plataforma
+  const partnerRevenue = totalVolume * 0.85; 
+
   const filteredCompanies = companies?.filter(c => 
     c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     c.document.includes(searchTerm)
@@ -330,42 +335,102 @@ export default function Admin() {
          {/* Tab Content: BOOKINGS (Operações Logísticas) */}
          {activeTab === 'bookings' && (
             <div className="max-w-7xl mx-auto px-10 pb-20 space-y-8 animate-in fade-in slide-in-from-bottom-4">
+               
+               {/* Financial Mini-Dashboard */}
+               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="bg-zinc-950 p-6 rounded-[24px] border border-zinc-900 flex flex-col justify-between">
+                     <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-2">Volume Transacionado (All-Time)</p>
+                     <p className="text-3xl font-black text-white tracking-tighter">
+                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalVolume)}
+                     </p>
+                  </div>
+                  <div className="bg-zinc-950 p-6 rounded-[24px] border border-zinc-900 flex flex-col justify-between">
+                     <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-2 flex items-center justify-between">
+                         Repasse a Locadoras <Badge className="bg-zinc-900 text-zinc-400 text-[8px]">85%</Badge>
+                     </p>
+                     <p className="text-3xl font-black text-zinc-300 tracking-tighter">
+                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(partnerRevenue)}
+                     </p>
+                  </div>
+                  <div className="bg-emerald-950/20 p-6 rounded-[24px] border border-emerald-900/30 flex flex-col justify-between">
+                     <p className="text-[10px] text-emerald-600 font-black uppercase tracking-widest mb-2 flex items-center justify-between">
+                         Receita CineHub Master <Badge className="bg-emerald-900/50 text-emerald-400 text-[8px]">15%</Badge>
+                     </p>
+                     <p className="text-3xl font-black text-emerald-500 tracking-tighter">
+                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(hubRevenue)}
+                     </p>
+                  </div>
+               </div>
+
                <div className="bg-zinc-950 p-4 rounded-3xl border border-zinc-900 flex items-center justify-between">
-                   <h2 className="text-xl font-black uppercase tracking-widest pl-4">Transações Hub</h2>
+                   <h2 className="text-xl font-black uppercase tracking-widest pl-4">Auditoria de Operações Globais</h2>
                </div>
 
                <div className="space-y-4">
                   {bookingsLoading ? (
                      <div className="py-20 text-center"><Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" /></div>
                   ) : bookings?.length === 0 ? (
-                     <div className="py-20 text-center text-zinc-600 font-black uppercase tracking-widest">Nenhuma operação.</div>
+                     <div className="py-20 text-center text-zinc-600 font-black uppercase tracking-widest">Nenhuma operação gravada no livro caixa.</div>
                   ) : (
                      bookings?.map(booking => (
-                        <Card key={booking.id} className="bg-zinc-950 border-zinc-900 rounded-[32px] overflow-hidden hover:border-zinc-800 transition-all p-8">
-                           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                              <div>
-                                 <div className="flex items-center gap-3 mb-1">
-                                    <h3 className="text-xl font-black uppercase tracking-widest text-zinc-100">
-                                       REQ-{booking.id.split('-')[0].toUpperCase()}
-                                    </h3>
-                                    <Badge className="bg-primary/10 text-primary border-primary/20 text-[9px] uppercase tracking-widest font-black shrink-0">
-                                       {booking.status}
-                                    </Badge>
-                                 </div>
-                                 <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest mb-1">
-                                    {booking.equipment?.name || 'Equipamento'} — Locadora: {booking.company?.name || 'CineHub'}
-                                 </p>
+                        <Card key={booking.id} className="bg-zinc-950 border-zinc-900 rounded-[32px] overflow-hidden hover:border-zinc-800 transition-all p-8 flex flex-col md:flex-row gap-8 items-start md:items-center">
+                           
+                           {/* Info Header */}
+                           <div className="flex-1 min-w-[200px]">
+                              <div className="flex items-center gap-3 mb-2">
+                                 <h3 className="text-2xl font-black uppercase tracking-tighter text-zinc-100">
+                                    REQ-{booking.id.split('-')[0].toUpperCase()}
+                                 </h3>
+                                 <Badge className={`${
+                                     booking.status === 'approved' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 
+                                     booking.status === 'pending' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 
+                                     'bg-primary/10 text-primary border-primary/20'
+                                   } text-[9px] uppercase tracking-widest font-black shrink-0`}>
+                                    {booking.status}
+                                 </Badge>
                               </div>
-                              <div className="text-left md:text-right w-full md:w-auto p-4 bg-zinc-900/50 rounded-2xl border border-zinc-800/50">
-                                 <p className="text-2xl font-black text-emerald-500 tracking-tighter">
-                                     {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(booking.total_amount)}
-                                 </p>
-                                 <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">
-                                     Data: {new Date(booking.start_date).toLocaleDateString('pt-BR')} 
-                                     {booking.quantity > 1 ? ` (${booking.quantity} unid)` : ''}
-                                 </p>
-                              </div>
+                              <p className="text-sm text-zinc-400 font-bold uppercase tracking-widest mb-1 truncate">
+                                 {booking.equipment?.name || 'Equipamento'}
+                              </p>
+                              <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">
+                                 Fornecedor: <span className="text-zinc-400">{booking.company?.name || 'CineHub Parceiro'}</span>
+                              </p>
                            </div>
+
+                           {/* Split Financeiro */}
+                           <div className="flex-1 grid grid-cols-2 gap-4 border-l border-zinc-900 pl-8">
+                               <div>
+                                  <p className="text-[9px] text-zinc-600 font-black uppercase tracking-widest mb-1">Repasse (85%)</p>
+                                  <p className="text-lg font-black text-zinc-300 tracking-tighter">
+                                     {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(booking.total_amount * 0.85)}
+                                  </p>
+                               </div>
+                               <div>
+                                  <p className="text-[9px] text-emerald-600/70 font-black uppercase tracking-widest mb-1">Taxa Master (15%)</p>
+                                  <p className="text-lg font-black text-emerald-500 tracking-tighter">
+                                     {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(booking.total_amount * 0.15)}
+                                  </p>
+                               </div>
+                               <div className="col-span-2 pt-2 border-t border-zinc-900 mt-2 flex justify-between items-center">
+                                  <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">
+                                      {new Date(booking.start_date).toLocaleDateString('pt-BR')} até {new Date(booking.end_date).toLocaleDateString('pt-BR')}
+                                  </p>
+                                  <p className="text-xs text-zinc-500 font-black uppercase tracking-widest">
+                                      Total: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(booking.total_amount)}
+                                  </p>
+                               </div>
+                           </div>
+
+                           {/* Ações Gerenciais */}
+                           <div className="w-full md:w-auto flex flex-col gap-2 shrink-0 border-t md:border-t-0 md:border-l border-zinc-900 pt-6 md:pt-0 md:pl-8">
+                               <Button variant="outline" className="w-full text-[10px] uppercase tracking-widest font-black h-10 border-zinc-800 hover:bg-zinc-900 rounded-xl">
+                                  Visualizar Contrato
+                               </Button>
+                               <Button variant="outline" className="w-full text-[10px] uppercase tracking-widest font-black h-10 border-destructive/20 text-destructive hover:bg-destructive/10 rounded-xl">
+                                  Interceder Conflito
+                               </Button>
+                           </div>
+
                         </Card>
                      ))
                   )}
