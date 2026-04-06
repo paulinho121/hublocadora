@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
-type TabType = 'overview' | 'companies' | 'inventory';
+type TabType = 'overview' | 'companies' | 'inventory' | 'bookings';
 
 export default function Admin() {
   const { profile, loading: authLoading } = useAuth();
@@ -38,6 +38,20 @@ export default function Admin() {
     queryKey: ['admin-equipments'],
     queryFn: async () => {
       const { data, error } = await supabase.from('equipments').select('id, name, status, daily_rate');
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!profile && profile.role === 'admin'
+  });
+
+  // Fetch Global Bookings
+  const { data: bookings, isLoading: bookingsLoading } = useQuery({
+    queryKey: ['admin-bookings'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+         .from('bookings')
+         .select('*, equipment:equipments(name), company:companies(name)')
+         .order('created_at', { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -127,10 +141,16 @@ export default function Admin() {
                 onClick={() => setActiveTab('companies')}
                 className={`pb-4 flex items-center gap-2 font-black uppercase text-sm tracking-widest transition-colors whitespace-nowrap ${activeTab === 'companies' ? 'text-primary border-b-2 border-primary' : 'text-zinc-600 hover:text-zinc-300'}`}
               >
-                 <Building2 className="h-4 w-4" /> Operações de Rede
+                 <Building2 className="h-4 w-4" /> Locadoras
                  {pendingCompanies.length > 0 && (
                     <span className="ml-2 bg-primary text-black px-2 py-0.5 rounded-full text-[10px]">{pendingCompanies.length}</span>
                  )}
+              </button>
+              <button 
+                onClick={() => setActiveTab('bookings')}
+                className={`pb-4 flex items-center gap-2 font-black uppercase text-sm tracking-widest transition-colors whitespace-nowrap ${activeTab === 'bookings' ? 'text-primary border-b-2 border-primary' : 'text-zinc-600 hover:text-zinc-300'}`}
+              >
+                 <Package className="h-4 w-4" /> Operações
               </button>
            </div>
 
@@ -306,6 +326,52 @@ export default function Admin() {
            )}
 
         </main>
+
+         {/* Tab Content: BOOKINGS (Operações Logísticas) */}
+         {activeTab === 'bookings' && (
+            <div className="max-w-7xl mx-auto px-10 pb-20 space-y-8 animate-in fade-in slide-in-from-bottom-4">
+               <div className="bg-zinc-950 p-4 rounded-3xl border border-zinc-900 flex items-center justify-between">
+                   <h2 className="text-xl font-black uppercase tracking-widest pl-4">Transações Hub</h2>
+               </div>
+
+               <div className="space-y-4">
+                  {bookingsLoading ? (
+                     <div className="py-20 text-center"><Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" /></div>
+                  ) : bookings?.length === 0 ? (
+                     <div className="py-20 text-center text-zinc-600 font-black uppercase tracking-widest">Nenhuma operação.</div>
+                  ) : (
+                     bookings?.map(booking => (
+                        <Card key={booking.id} className="bg-zinc-950 border-zinc-900 rounded-[32px] overflow-hidden hover:border-zinc-800 transition-all p-8">
+                           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                              <div>
+                                 <div className="flex items-center gap-3 mb-1">
+                                    <h3 className="text-xl font-black uppercase tracking-widest text-zinc-100">
+                                       REQ-{booking.id.split('-')[0].toUpperCase()}
+                                    </h3>
+                                    <Badge className="bg-primary/10 text-primary border-primary/20 text-[9px] uppercase tracking-widest font-black shrink-0">
+                                       {booking.status}
+                                    </Badge>
+                                 </div>
+                                 <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest mb-1">
+                                    {booking.equipment?.name || 'Equipamento'} — Locadora: {booking.company?.name || 'CineHub'}
+                                 </p>
+                              </div>
+                              <div className="text-left md:text-right w-full md:w-auto p-4 bg-zinc-900/50 rounded-2xl border border-zinc-800/50">
+                                 <p className="text-2xl font-black text-emerald-500 tracking-tighter">
+                                     {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(booking.total_amount)}
+                                 </p>
+                                 <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">
+                                     Data: {new Date(booking.start_date).toLocaleDateString('pt-BR')} 
+                                     {booking.quantity > 1 ? ` (${booking.quantity} unid)` : ''}
+                                 </p>
+                              </div>
+                           </div>
+                        </Card>
+                     ))
+                  )}
+               </div>
+            </div>
+         )}
     </div>
   );
 }
