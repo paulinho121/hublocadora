@@ -63,11 +63,21 @@ function EquipmentCard({ item, onClick }: { item: Equipment; onClick: () => void
         )}
 
         {/* Availability badge overlay */}
-        <div className="absolute top-3 left-3 z-10">
+        <div className="absolute top-3 left-3 z-10 flex gap-2">
           <Badge className={`${isAvailable ? 'bg-emerald-500/80 text-white border-emerald-500/20' : 'bg-red-500/80 text-white border-red-500/20'} uppercase font-black tracking-widest text-[9px] backdrop-blur-sm`}>
             {isAvailable ? `${item.stock_quantity} Disponíveis` : 'Esgotado'}
           </Badge>
         </div>
+        
+        {/* Location badge overlay */}
+        {item.state_uf && (
+          <div className="absolute top-3 right-3 z-10">
+            <Badge className="bg-zinc-950/80 text-zinc-300 border-zinc-500/30 uppercase font-black tracking-widest text-[9px] backdrop-blur-sm">
+              <MapPin className="w-3 h-3 mr-1" />
+              {item.state_uf}
+            </Badge>
+          </div>
+        )}
       </div>
 
       {/* ── Card body ── */}
