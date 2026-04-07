@@ -114,6 +114,17 @@ export function CompanySetup({ ownerId }: { ownerId: string }) {
         throw new Error('Não foi possível salvar seu perfil de usuário. Verifique as permissões de banco de dados.');
       }
 
+      // 1.5 Pre-flight check: CNPJ/CPF duplicado
+      const { data: existingDoc } = await supabase
+        .from('companies')
+        .select('id')
+        .eq('document', values.document)
+        .maybeSingle();
+
+      if (existingDoc) {
+        throw new Error('Fraude evitada: Este CPF/CNPJ já está registrado em outra conta CineHub.');
+      }
+
       // 2. Inserir a empresa
       const { error: companyError } = await supabase
         .from('companies')
