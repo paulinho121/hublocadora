@@ -109,7 +109,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
 
     return (
         <Dialog isOpen={isOpen} onClose={onClose}>
-            <div className="w-full max-w-xl bg-zinc-950 border-zinc-800 p-0 overflow-y-auto rounded-3xl max-h-[90vh] scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
+            <div className="w-full max-w-xl bg-transparent sm:bg-zinc-950 sm:border sm:border-zinc-800 p-0 rounded-3xl">
                 <AnimatePresence mode="wait">
                     {isSuccess ? (
                         <motion.div 
@@ -297,8 +297,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                             <Clock className="w-5 h-5 animate-spin" />
                                         ) : isAvailable ? (
                                             <>
-                                                <span className="hidden sm:inline">Confirmar Reserva para o Futuro</span>
-                                                <span className="sm:hidden">Confirmar Reserva</span>
+                                                <span>Confirmar Essa Reserva</span>
                                                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                                             </>
                                         ) : (
