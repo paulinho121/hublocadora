@@ -608,6 +608,19 @@ export default function Admin() {
                         <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-2 flex justify-between items-center">
                            Parceiros Disponíveis <span className="text-emerald-500 flex items-center gap-1"><Clock className="h-3 w-3"/> LIVE API</span>
                         </p>
+
+                        <div className="p-4 border-2 border-emerald-500/50 bg-emerald-950/20 hover:border-emerald-500 transition-all rounded-2xl cursor-pointer group">
+                           <div className="flex justify-between items-center pb-2">
+                              <h3 className="text-lg font-black tracking-tighter text-emerald-500 flex items-center gap-2">
+                                 FROTA PRÓPRIA <Badge className="bg-emerald-500 text-black text-[9px] uppercase font-black tracking-widest">Recomendado</Badge>
+                              </h3>
+                              <p className="text-xs text-zinc-400 font-bold">~0 min</p>
+                           </div>
+                           <div className="flex justify-between items-end mt-2 pt-2 border-t border-emerald-900/50">
+                              <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest group-hover:text-emerald-500/70">Custo Zero – Veículo Interno</p>
+                              <p className="text-xl font-black text-emerald-500">GRÁTIS</p>
+                           </div>
+                        </div>
                         
                         <div className="p-4 border border-zinc-800 hover:border-orange-500 transition-all rounded-2xl cursor-pointer group hover:bg-orange-500/5">
                            <div className="flex justify-between items-center bg-zinc-950 pb-2">
@@ -646,7 +659,7 @@ export default function Admin() {
 
                   <div className="p-6 border-t border-zinc-900 bg-zinc-900/30 flex justify-end">
                      <Button className="w-full font-black uppercase tracking-widest h-14 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-xl transition-all">
-                        Despachar via Lalamove (Melhor Custo-Benefício)
+                        Despachar Logística
                      </Button>
                   </div>
                </div>
