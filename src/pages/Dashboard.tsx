@@ -182,18 +182,11 @@ export default function Dashboard() {
 
            <div className="flex items-center gap-4">
               <Button 
-                onClick={() => setIsCatalogDialogOpen(true)} 
-                variant="outline"
-                className="h-10 text-[10px] font-black uppercase tracking-widest border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/5 rounded-xl hidden sm:flex"
-              >
-                Importar Catálogo
-              </Button>
-              <Button 
                 onClick={() => setIsHubDialogOpen(true)} 
                 variant="outline"
                 className="h-10 text-[10px] font-black uppercase tracking-widest border-primary/30 text-primary hover:bg-primary/5 rounded-xl hidden sm:flex"
               >
-                Solicitar Suplemento
+                Solicitar Equipamento
               </Button>
               <div className="h-8 w-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center">
                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />

@@ -10,7 +10,8 @@ import {
   Clock,
   ShieldCheck,
   Calendar as CalendarIcon,
-  AlertCircle
+  AlertCircle,
+  FileSignature
 } from 'lucide-react';
 import { 
   Dialog 
@@ -38,6 +39,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
     const [deliveryMethod, setDeliveryMethod] = useState<'pickup' | 'delivery'>('pickup');
     const [quantity, setQuantity] = useState(1);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [acceptContract, setAcceptContract] = useState(false);
 
     const { data: occupiedDates } = useEquipmentOccupiedDates(equipment?.id || '');
 
@@ -204,20 +206,20 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
 
                                 <div>
                                     <h4 className="text-[10px] uppercase font-black text-zinc-500 mb-4 tracking-widest flex items-center gap-2">
-                                        <Truck className="w-3 h-3" /> Logística Flexível
+                                        <Truck className="w-3 h-3" /> Logística Opcional
                                     </h4>
                                     <div className="grid grid-cols-2 gap-4">
                                         <button 
                                             onClick={() => setDeliveryMethod('pickup')}
-                                            className={`group relative p-4 sm:p-6 rounded-2xl border-2 transition-all text-left ${
+                                            className={`group relative p-4 sm:p-5 rounded-2xl border-2 transition-all text-left ${
                                                 deliveryMethod === 'pickup' 
                                                 ? 'bg-emerald-500/10 border-emerald-500' 
                                                 : 'bg-zinc-900/30 border-zinc-800 hover:border-zinc-700'
                                             }`}
                                         >
                                             <Store className={`w-6 h-6 mb-3 ${deliveryMethod === 'pickup' ? 'text-emerald-500' : 'text-zinc-500'}`} />
-                                            <p className="font-bold text-sm mb-1 uppercase tracking-tighter">Retirada HUB</p>
-                                            <p className="text-[10px] text-zinc-500 line-clamp-1">Grátis - Próximo ao set</p>
+                                            <p className="font-bold text-sm mb-1 uppercase tracking-tighter">Retirar no Local</p>
+                                            <p className="text-[10px] text-zinc-500 line-clamp-1">Você ou seu motorista</p>
                                             {deliveryMethod === 'pickup' && (
                                                 <div className="absolute top-2 right-2 bg-emerald-500 rounded-full p-0.5">
                                                     <CheckCircle2 className="w-3 h-3 text-black" />
@@ -227,15 +229,15 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
 
                                         <button 
                                             onClick={() => setDeliveryMethod('delivery')}
-                                            className={`group relative p-4 sm:p-6 rounded-2xl border-2 transition-all text-left ${
+                                            className={`group relative p-4 sm:p-5 rounded-2xl border-2 transition-all text-left ${
                                                 deliveryMethod === 'delivery' 
                                                 ? 'bg-primary/10 border-primary' 
                                                 : 'bg-zinc-900/30 border-zinc-800 hover:border-zinc-700'
                                             }`}
                                         >
                                             <Truck className={`w-6 h-6 mb-3 ${deliveryMethod === 'delivery' ? 'text-primary' : 'text-zinc-500'}`} />
-                                            <p className="font-bold text-sm mb-1 uppercase tracking-tighter">Na Locadora</p>
-                                            <p className="text-[10px] text-zinc-500 line-clamp-1">Frete fixo simplificado</p>
+                                            <p className="font-bold text-sm mb-1 uppercase tracking-tighter">Tele-Entrega</p>
+                                            <p className="text-[10px] text-zinc-500 line-clamp-1">Via Lalamove / Uber</p>
                                             {deliveryMethod === 'delivery' && (
                                                 <div className="absolute top-2 right-2 bg-primary rounded-full p-0.5">
                                                     <CheckCircle2 className="w-3 h-3 text-white" />
@@ -251,8 +253,8 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                             <ShieldCheck className="w-5 h-5 text-emerald-500" />
                                         </div>
                                         <div>
-                                            <p className="text-xs font-bold text-zinc-200 uppercase tracking-tighter">Proteção Cinehub</p>
-                                            <p className="text-[10px] text-zinc-500 uppercase tracking-tighter">Seguro incluso no período</p>
+                                            <p className="text-xs font-bold text-zinc-200 uppercase tracking-tighter">Seguro Co-Participativo</p>
+                                            <p className="text-[10px] text-emerald-500 uppercase font-black tracking-tighter">Ativado no Período</p>
                                         </div>
                                     </div>
                                     <div className="text-right">
@@ -263,15 +265,33 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                     </div>
                                 </div>
 
+                                <div className="p-4 bg-zinc-950 border border-zinc-800 rounded-2xl flex items-start gap-4">
+                                    <input 
+                                        type="checkbox" 
+                                        id="acceptContract"
+                                        checked={acceptContract}
+                                        onChange={(e) => setAcceptContract(e.target.checked)}
+                                        className="w-5 h-5 mt-1 rounded border-zinc-700 bg-zinc-900 text-emerald-500 focus:ring-emerald-500"
+                                    />
+                                    <label htmlFor="acceptContract" className="cursor-pointer">
+                                        <p className="text-xs font-black uppercase text-white tracking-widest flex items-center gap-2">
+                                            <FileSignature className="w-3 h-3" /> Eu concordo com os Termos
+                                        </p>
+                                        <p className="text-[10px] text-zinc-500 leading-relaxed mt-1">
+                                            Li e aceito os termos do contrato de sub-locação, ciente das regras de recolhimento, caução de risco, e das taxas contratuais de intermediamento deste marketplace.
+                                        </p>
+                                    </label>
+                                </div>
+
                                 <div className="flex gap-4">
                                     <Button 
                                         className={`flex-1 h-14 rounded-2xl font-black uppercase tracking-tighter group transition-all ${
-                                            isAvailable 
+                                            isAvailable && acceptContract
                                             ? 'bg-white text-black hover:bg-zinc-200' 
                                             : 'bg-zinc-800 text-zinc-500 cursor-not-allowed border-zinc-700'
                                         }`}
                                         onClick={handleReserve}
-                                        disabled={createBooking.isPending || !isAvailable}
+                                        disabled={createBooking.isPending || !isAvailable || !acceptContract}
                                     >
                                         {createBooking.isPending ? (
                                             <Clock className="w-5 h-5 animate-spin" />
