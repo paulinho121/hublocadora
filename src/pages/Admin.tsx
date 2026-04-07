@@ -569,89 +569,104 @@ export default function Admin() {
 
                   <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
                      {/* Info da Rota */}
-                     <div className="space-y-6 border-r border-zinc-900 pr-0 md:pr-8">
+                     <div className="space-y-6 border-r border-zinc-900 pr-0 md:pr-8 flex flex-col">
                         <div>
                            <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-3">Detalhes do Frete</p>
                            <div className="bg-zinc-900/30 p-4 rounded-2xl border border-zinc-800 space-y-4">
                               <div className="flex items-start gap-3">
                                  <div className="mt-1"><MapPin className="h-4 w-4 text-emerald-500" /></div>
-                                 <div>
+                                 <div className="flex-1">
                                     <p className="text-[9px] text-zinc-500 font-black uppercase tracking-widest">Origem (Locadora)</p>
-                                    <p className="text-xs text-white font-bold">{selectedLogisticsBooking.company?.name}</p>
+                                    <p className="text-xs text-white font-bold truncate">{selectedLogisticsBooking.company?.name}</p>
                                  </div>
                               </div>
                               <div className="border-l-2 border-dashed border-zinc-800 ml-2 h-4 my-1"></div>
                               <div className="flex items-start gap-3">
                                  <div className="mt-1"><MapPin className="h-4 w-4 text-primary" /></div>
-                                 <div>
-                                    <p className="text-[9px] text-zinc-500 font-black uppercase tracking-widest">Destino (Set de Filmagem)</p>
-                                    <p className="text-xs text-white font-bold">Residência Cineasta</p>
+                                 <div className="flex-1">
+                                    <p className="text-[9px] text-zinc-500 font-black uppercase tracking-widest">Destino (Set)</p>
+                                    <p className="text-xs text-white font-bold truncate">Residência Cineasta</p>
                                  </div>
                               </div>
                            </div>
                         </div>
 
                         <div>
-                           <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-3">Carga</p>
+                           <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-3">Especificações de Carga</p>
                            <div className="bg-zinc-900/30 p-4 rounded-2xl border border-zinc-800 flex items-center justify-between">
                                <div>
-                                  <p className="text-xs text-white font-bold">{selectedLogisticsBooking.equipment?.name}</p>
-                                  <p className="text-[10px] text-zinc-500 font-medium">Equipamento Frágil</p>
+                                  <p className="text-xs text-white font-bold truncate max-w-[150px]">{selectedLogisticsBooking.equipment?.name}</p>
+                                  <p className="text-[10px] text-zinc-500 font-medium">Classificação Premium</p>
                                </div>
                                <Badge className="bg-primary/10 text-primary uppercase text-[9px] tracking-widest">Valioso</Badge>
+                           </div>
+                        </div>
+
+                        {/* Radar / Espaço Equilibrador */}
+                        <div className="flex-1 flex flex-col justify-end">
+                           <div className="bg-zinc-950 border border-zinc-900 rounded-2xl h-24 relative overflow-hidden flex items-center justify-center">
+                              <div className="absolute inset-0 opacity-[0.03] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+PHBhdGggZD0iTTIwIDBoLTIwaDIwdjIwSDIwVjB6bS0yIDJINnYxNmgxMlYyeiIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==')]"></div>
+                              <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 to-transparent z-10" />
+                              <div className="relative z-20 flex flex-col items-center">
+                                 <div className="relative flex items-center justify-center">
+                                     <div className="absolute w-12 h-12 border border-emerald-500/20 rounded-full animate-ping"></div>
+                                     <Navigation className="h-5 w-5 text-emerald-500/50 mb-1" />
+                                 </div>
+                                 <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500 mt-2">Traçando Rota em Background</p>
+                              </div>
                            </div>
                         </div>
                      </div>
 
                      {/* API de Cotação */}
-                     <div className="space-y-4">
-                        <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-2 flex justify-between items-center">
-                           Parceiros Disponíveis <span className="text-emerald-500 flex items-center gap-1"><Clock className="h-3 w-3"/> LIVE API</span>
+                     <div className="space-y-3">
+                        <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest flex justify-between items-center bg-emerald-950/20 border border-emerald-900/30 px-3 py-2 rounded-xl mb-4">
+                           Painel de Parceiros <span className="text-emerald-500 flex items-center gap-1"><Clock className="h-3 w-3 animate-pulse"/> CONECTADO</span>
                         </p>
 
-                        <div className="p-4 border-2 border-emerald-500/50 bg-emerald-950/20 hover:border-emerald-500 transition-all rounded-2xl cursor-pointer group">
-                           <div className="flex justify-between items-center pb-2">
-                              <h3 className="text-lg font-black tracking-tighter text-emerald-500 flex items-center gap-2">
-                                 FROTA PRÓPRIA <Badge className="bg-emerald-500 text-black text-[9px] uppercase font-black tracking-widest">Recomendado</Badge>
+                        <div className="p-3 border-2 border-emerald-500/50 bg-emerald-950/20 hover:border-emerald-500 transition-all rounded-xl cursor-pointer group flex flex-col justify-center">
+                           <div className="flex justify-between items-center border-b border-emerald-900/50 pb-2 mb-2">
+                              <h3 className="text-sm font-black tracking-tighter text-emerald-500 flex items-center gap-2">
+                                 FROTA PRÓPRIA <Badge className="bg-emerald-500 text-black text-[8px] uppercase font-black tracking-widest h-4 px-1">Recomendado</Badge>
                               </h3>
-                              <p className="text-xs text-zinc-400 font-bold">~0 min</p>
+                              <p className="text-[10px] text-zinc-400 font-bold">Imediato</p>
                            </div>
-                           <div className="flex justify-between items-end mt-2 pt-2 border-t border-emerald-900/50">
-                              <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest group-hover:text-emerald-500/70">Custo Zero – Veículo Interno</p>
-                              <p className="text-xl font-black text-emerald-500">GRÁTIS</p>
+                           <div className="flex justify-between items-end">
+                              <p className="text-[9px] text-zinc-400 font-bold uppercase tracking-widest leading-[1.2] w-[60%]">Ativo da Locadora</p>
+                              <p className="text-base font-black text-emerald-500">GRÁTIS</p>
                            </div>
                         </div>
                         
-                        <div className="p-4 border border-zinc-800 hover:border-orange-500 transition-all rounded-2xl cursor-pointer group hover:bg-orange-500/5">
-                           <div className="flex justify-between items-center bg-zinc-950 pb-2">
-                              <h3 className="text-lg font-black italic tracking-tighter text-orange-500">LALAMOVE</h3>
-                              <p className="text-xs text-zinc-400 font-bold">~15 min</p>
+                        <div className="p-3 border border-zinc-800 hover:border-orange-500 transition-all rounded-xl cursor-pointer group hover:bg-orange-500/5 flex flex-col justify-center">
+                           <div className="flex justify-between items-center border-b border-zinc-900 pb-2 mb-2">
+                              <h3 className="text-sm font-black italic tracking-tighter text-orange-500">LALAMOVE</h3>
+                              <p className="text-[10px] text-zinc-400 font-bold">~15 min</p>
                            </div>
-                           <div className="flex justify-between items-end mt-2 pt-2 border-t border-zinc-900">
-                              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest group-hover:text-orange-500/70">Carro Grande (Moto-Frete Inviável)</p>
-                              <p className="text-xl font-black text-white group-hover:text-orange-500 transition-colors">R$ 45,90</p>
-                           </div>
-                        </div>
-
-                        <div className="p-4 border border-zinc-800 hover:border-black/50 transition-all rounded-2xl cursor-pointer bg-zinc-900">
-                           <div className="flex justify-between items-center pb-2">
-                              <h3 className="text-lg font-black tracking-tighter text-white">Uber <span className="font-medium">Flash</span></h3>
-                              <p className="text-xs text-zinc-400 font-bold">~5 min</p>
-                           </div>
-                           <div className="flex justify-between items-end mt-2 pt-2 border-t border-zinc-800">
-                              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Veículo Padrão</p>
-                              <p className="text-xl font-black text-white">R$ 52,10</p>
+                           <div className="flex justify-between items-end">
+                              <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest leading-[1.2] w-[60%]">Carreta / Furgao M</p>
+                              <p className="text-base font-black text-white group-hover:text-orange-500 transition-colors">R$ 45,90</p>
                            </div>
                         </div>
 
-                        <div className="p-4 border border-zinc-800 hover:border-yellow-500 transition-all rounded-2xl cursor-pointer group hover:bg-yellow-500/5">
-                           <div className="flex justify-between items-center bg-zinc-950 pb-2">
-                              <h3 className="text-lg font-black tracking-tighter text-yellow-500">99<span className="font-medium text-white">Entrega</span></h3>
-                              <p className="text-xs text-zinc-400 font-bold">~25 min</p>
+                        <div className="p-3 border border-zinc-800 hover:border-black/50 transition-all rounded-xl cursor-pointer bg-zinc-900/50 flex flex-col justify-center">
+                           <div className="flex justify-between items-center border-b border-zinc-800 pb-2 mb-2">
+                              <h3 className="text-sm font-black tracking-tighter text-white">Uber <span className="font-medium">Flash</span></h3>
+                              <p className="text-[10px] text-zinc-400 font-bold">~5 min</p>
                            </div>
-                           <div className="flex justify-between items-end mt-2 pt-2 border-t border-zinc-900">
-                              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest group-hover:text-yellow-500/70">Carro Hatch</p>
-                              <p className="text-xl font-black text-white group-hover:text-yellow-500 transition-colors">R$ 38,50</p>
+                           <div className="flex justify-between items-end">
+                              <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest leading-[1.2] w-[60%]">Premium Rápido</p>
+                              <p className="text-base font-black text-white">R$ 52,10</p>
+                           </div>
+                        </div>
+
+                        <div className="p-3 border border-zinc-800 hover:border-yellow-500 transition-all rounded-xl cursor-pointer group hover:bg-yellow-500/5 flex flex-col justify-center">
+                           <div className="flex justify-between items-center border-b border-zinc-900 pb-2 mb-2">
+                              <h3 className="text-sm font-black tracking-tighter text-yellow-500">99<span className="font-medium text-white">Entrega</span></h3>
+                              <p className="text-[10px] text-zinc-400 font-bold">~25 min</p>
+                           </div>
+                           <div className="flex justify-between items-end">
+                              <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest leading-[1.2] w-[60%]">Carro Passeio Conv.</p>
+                              <p className="text-base font-black text-white group-hover:text-yellow-500 transition-colors">R$ 38,50</p>
                            </div>
                         </div>
                      </div>
