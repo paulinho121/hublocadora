@@ -1,5 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   Loader2, 
   Plus, 
@@ -75,6 +78,44 @@ export default function Dashboard() {
   // Delete Modal State
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+
+  // iFood Real-Time Notification State
+  const queryClient = useQueryClient();
+  const [showLiveNotification, setShowLiveNotification] = useState(false);
+
+  useEffect(() => {
+    if (!tenantId) return;
+
+    const channel = supabase
+      .channel('bookings_channel')
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'bookings', 
+        filter: `company_id=eq.${tenantId}` 
+      }, (payload) => {
+        console.log('Nova Reserva Recebida Real-Time:', payload);
+        
+        // 1. Toca o "Plim" corporativo (iFood Bell)
+        try {
+           const audio = new Audio('https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3?filename=success-1-6297.mp3'); 
+           audio.play().catch(e => console.log('Audio autoplay blocked', e));
+        } catch(e) {}
+        
+        // 2. Avisa React Query para atualizar tela na hora
+        queryClient.invalidateQueries({ queryKey: ['bookings'] });
+        
+        // 3. Pula para a aba de Pedidos e mostra Banner
+        setActiveTab('bookings');
+        setShowLiveNotification(true);
+        setTimeout(() => setShowLiveNotification(false), 8000);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [tenantId, queryClient, setActiveTab]);
 
   if (isLoadingTenant) {
     return (
@@ -159,7 +200,34 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex bg-zinc-950 min-h-screen">
+    <div className="flex bg-zinc-950 min-h-screen relative overflow-hidden">
+      {/* REAL-TIME NOTIFICATION TOAST (iFood Popup) */}
+      <AnimatePresence>
+         {showLiveNotification && (
+            <motion.div 
+              initial={{ y: -150, scale: 0.9, opacity: 0 }}
+              animate={{ y: 20, scale: 1, opacity: 1 }}
+              exit={{ y: -150, scale: 0.9, opacity: 0 }}
+              className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] bg-emerald-500 border border-emerald-400 p-1 rounded-2xl shadow-[0_0_50px_rgba(16,185,129,0.3)] w-[90%] max-w-md flex items-center cursor-pointer"
+              onClick={() => setShowLiveNotification(false)}
+            >
+               <div className="h-14 w-14 bg-black/20 rounded-xl flex items-center justify-center shrink-0">
+                  <div className="relative">
+                    <AlertCircle className="h-8 w-8 text-black" />
+                    <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+                    </span>
+                  </div>
+               </div>
+               <div className="pl-4 py-2">
+                 <h3 className="text-black font-black uppercase tracking-widest text-lg leading-none mb-1">Nova Reserva no Hub!</h3>
+                 <p className="text-emerald-950 text-[11px] font-bold uppercase tracking-tighter">Um produtor acabou de alugar seu equipamento.</p>
+               </div>
+            </motion.div>
+         )}
+      </AnimatePresence>
+
       {/* Desktop Sidebar */}
       <DashboardSidebar 
         activeTab={activeTab} 
