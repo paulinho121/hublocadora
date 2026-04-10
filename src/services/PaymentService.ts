@@ -3,29 +3,15 @@ import { Payment } from '@/types/database';
 
 export class PaymentService {
     static async generatePixPayment(bookingId: string, amount: number) {
-        const { data: booking } = await supabase
-            .from('bookings')
-            .select('company_id')
-            .eq('id', bookingId)
-            .single();
+        const { data, error } = await supabase.functions.invoke('generate-pix', {
+            body: { bookingId, amount },
+        });
 
-        if (!booking) throw new Error("Booking not found");
+        if (error) {
+            console.error("Payment Error:", error);
+            throw new Error(error.message || "Falha ao gerar pagamento");
+        }
 
-        const { data, error } = await supabase
-            .from('payments')
-            .insert([{
-                booking_id: bookingId,
-                tenant_id: booking.company_id,
-                amount: amount,
-                payment_method: 'pix',
-                status: 'pending',
-                qr_code: "00020126580014br.gov.bcb.pix...", 
-                qr_code_base64: "iVBORw0KGgoAAAANSUhEUgA...",
-            }])
-            .select()
-            .single();
-
-        if (error) throw error;
         return data as Payment;
     }
 

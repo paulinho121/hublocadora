@@ -141,11 +141,11 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                     />
                                 )}
                                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
-                                <div className="absolute bottom-6 left-6 right-6">
-                                    <Badge className={`${isAvailable ? 'bg-emerald-500/20 text-emerald-500 border-emerald-500/20' : 'bg-red-500/20 text-red-500 border-red-500/20'} mb-2 uppercase font-black tracking-widest text-[10px]`}>
+                                <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6">
+                                    <Badge className={`${isAvailable ? 'bg-emerald-500/20 text-emerald-500 border-emerald-500/20' : 'bg-red-500/20 text-red-500 border-red-500/20'} mb-2 uppercase font-black tracking-widest text-[9px] sm:text-[10px]`}>
                                         {isAvailable ? `${equipment.stock_quantity || 0} Disponíveis no HUB` : 'Limite de Estoque Atingido'}
                                     </Badge>
-                                    <h2 className="text-3xl font-black tracking-tighter text-white uppercase leading-none">
+                                    <h2 className="text-xl sm:text-3xl font-black tracking-tighter text-white uppercase leading-none truncate">
                                         {equipment.name}
                                     </h2>
                                 </div>
@@ -247,9 +247,9 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                     </div>
                                 </div>
 
-                                <div className="bg-zinc-900/50 p-6 rounded-3xl border border-dashed border-zinc-800 flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-emerald-500/10 rounded-lg">
+                                <div className="bg-zinc-900/50 p-4 sm:p-6 rounded-3xl border border-dashed border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+                                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                                        <div className="p-2 bg-emerald-500/10 rounded-lg shrink-0">
                                             <ShieldCheck className="w-5 h-5 text-emerald-500" />
                                         </div>
                                         <div>
@@ -257,9 +257,9 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                             <p className="text-[10px] text-emerald-500 uppercase font-black tracking-tighter">Ativado no Período</p>
                                         </div>
                                     </div>
-                                    <div className="text-right">
+                                    <div className="text-center sm:text-right w-full sm:w-auto pt-4 sm:pt-0 border-t sm:border-t-0 border-zinc-800/50">
                                         <p className="text-[10px] text-zinc-500 uppercase font-bold">Total do Aluguel</p>
-                                        <p className="text-2xl font-black text-white tracking-tighter">
+                                        <p className="text-xl sm:text-2xl font-black text-white tracking-tighter">
                                             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(equipment.daily_rate * totalDays * quantity)}
                                         </p>
                                     </div>

@@ -143,7 +143,7 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
             tenantId: company?.id || profile?.company_id || null,
             profile, 
             company, 
-            isAdmin: profile?.role === 'admin' || isMasterUser(user?.email),
+            isAdmin: profile?.role === 'admin',
             isLoading: isLoading || authLoading,
             refreshTenant 
         }}>
