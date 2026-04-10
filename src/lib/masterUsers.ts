@@ -1,9 +1,7 @@
-export const MASTER_USERS = [
-  'logistica@mcistore.com.br',
-  'comercial@mcistore.com.br'
-];
-
+/**
+ * ATENÇÃO: Hardcodes de emails foram removidos por segurança.
+ * O controle de acesso agora é feito exclusivamente via campo 'role' no banco de dados.
+ */
 export const isMasterUser = (email?: string | null) => {
-  if (!email) return false;
-  return MASTER_USERS.includes(email.toLowerCase());
+  return false; // A lógica agora deve ser baseada no perfil retornado pelo Supabase
 };

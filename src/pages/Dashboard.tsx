@@ -12,7 +12,8 @@ import {
   AlertCircle, 
   BarChart3, 
   ArrowRight,
-  MapPin
+  MapPin,
+  Truck
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -236,7 +237,7 @@ export default function Dashboard() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0">
+      <main className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0">
         {/* Top Header Section (Mobile Visible) */}
         <header className="h-20 border-b border-zinc-900 flex items-center justify-between px-6 md:px-10 shrink-0">
            <div className="flex items-center gap-3 md:hidden">
@@ -510,6 +511,45 @@ export default function Dashboard() {
         onConfirm={handleConfirmDelete}
         loading={deleteMutation.isPending}
       />
+
+      {/* iFood Style Mobile Bottom Navigation */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-zinc-950 border-t border-zinc-900 flex justify-around items-center h-[72px] pb-safe px-2">
+         <button 
+            onClick={() => setActiveTab('overview')} 
+            className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${activeTab === 'overview' ? 'text-primary' : 'text-zinc-500 hover:text-zinc-400'}`}
+         >
+            <BarChart3 className="h-6 w-6" />
+            <span className="text-[9px] uppercase font-black tracking-widest">Resumo</span>
+         </button>
+         <button 
+            onClick={() => setActiveTab('inventory')} 
+            className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${activeTab === 'inventory' ? 'text-primary' : 'text-zinc-500 hover:text-zinc-400'}`}
+         >
+            <Package className="h-6 w-6" />
+            <span className="text-[9px] uppercase font-black tracking-widest">Frota</span>
+         </button>
+         <button 
+            onClick={() => setActiveTab('bookings')} 
+            className={`relative flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${activeTab === 'bookings' ? 'text-primary' : 'text-zinc-500 hover:text-zinc-400'}`}
+         >
+            <div className="relative">
+               <CalendarDays className="h-6 w-6" />
+               {pendingBookingsCount > 0 && (
+                  <span className="absolute -top-1 -right-2 h-4 w-4 bg-emerald-500 rounded-full flex items-center justify-center text-[9px] text-black font-black">
+                     {pendingBookingsCount}
+                  </span>
+               )}
+            </div>
+            <span className="text-[9px] uppercase font-black tracking-widest">Pedidos</span>
+         </button>
+         <button 
+            onClick={() => setActiveTab('logistics')} 
+            className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${activeTab === 'logistics' ? 'text-primary' : 'text-zinc-500 hover:text-zinc-400'}`}
+         >
+            <Truck className="h-6 w-6" />
+            <span className="text-[9px] uppercase font-black tracking-widest">Logística</span>
+         </button>
+      </div>
     </div>
   );
 }
