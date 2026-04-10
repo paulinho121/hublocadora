@@ -39,6 +39,8 @@ import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar';
 import { InventoryTab } from '@/components/dashboard/InventoryTab';
 import { ConfirmDeleteModal } from '@/components/dashboard/ConfirmDeleteModal';
 import { LogisticsTab } from '@/components/dashboard/LogisticsTab';
+import { FinancialSettings } from '@/components/dashboard/FinancialSettings';
+
 
 type TabType = 'overview' | 'inventory' | 'bookings' | 'logistics' | 'settings';
 const VALID_TABS: TabType[] = ['overview', 'inventory', 'bookings', 'logistics', 'settings'];
@@ -451,10 +453,13 @@ export default function Dashboard() {
                    <h2 className="text-4xl font-black italic tracking-tighter uppercase mb-2">Ajustes</h2>
                    <p className="text-zinc-500 font-medium">Configurações da sua locadora e conta.</p>
                 </header>
-                <Card className="bg-zinc-900/20 border-zinc-900 border-dashed rounded-3xl p-20 text-center">
-                   <AlertCircle className="h-10 w-10 text-zinc-800 mx-auto mb-4" />
-                   <p className="text-zinc-600 font-medium">Configurações financeiras e dados fiscais em breve.</p>
-                </Card>
+                
+                {company && (
+                  <FinancialSettings 
+                    companyId={company.id} 
+                    initialConfig={(company as any).financial_config} 
+                  />
+                )}
              </div>
            )}
 
