@@ -19,6 +19,7 @@ import Docs from '@/pages/Docs';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import EquipmentDetails from '@/pages/EquipmentDetails';
+import { AIToolsPage } from '@/pages/AITools';
 import { AIAssistant } from '@/components/ai/AIAssistant';
 
 function Navbar() {
@@ -42,6 +43,7 @@ function Navbar() {
           </Link>
           <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-muted-foreground uppercase tracking-widest">
             <NavLink to="/dashboard" className={({isActive}) => isActive ? "text-foreground" : "hover:text-foreground transition-colors"}>Locadora</NavLink>
+            <NavLink to="/ai-tools" className={({isActive}) => isActive ? "text-foreground" : "hover:text-foreground transition-colors"}>IA Tools</NavLink>
             {profile?.role === 'admin' && (
               <NavLink to="/admin" className={({isActive}) => isActive ? "text-foreground" : "hover:text-foreground transition-colors"}>Gestão HUB</NavLink>
             )}
@@ -165,6 +167,7 @@ function MainLayout() {
           <Route path="/" element={<Marketplace />} />
           <Route path="/equipment/:id" element={<EquipmentDetails />} />
           <Route path="/docs" element={<Docs />} />
+          <Route path="/ai-tools" element={<AIToolsPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route
