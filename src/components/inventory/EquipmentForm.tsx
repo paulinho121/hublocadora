@@ -11,6 +11,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Equipment } from '@/types/database';
 import { useCreateEquipment, useUpdateEquipment, uploadEquipmentImage } from '@/hooks/useEquipments';
 import { useCategories } from '@/hooks/useCategories';
+import { AIService } from '@/services/AIService';
+import { Sparkles, Wand2 } from 'lucide-react';
 
 const equipmentSchema = z.object({
   name: z.string().min(3, 'Nome deve ter pelo menos 3 caracteres'),
@@ -53,6 +55,7 @@ interface EquipmentFormProps {
 export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentFormProps) {
   const [images, setImages] = useState<string[]>(equipment?.images || []);
   const [uploading, setUploading] = useState(false);
+  const [isAiGenerating, setIsAiGenerating] = useState(false);
 
   const createMutation = useCreateEquipment(companyId);
   const updateMutation = useUpdateEquipment();
@@ -106,6 +109,27 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
     }
   };
 
+  const handleAiDescription = async () => {
+    const name = watch('name');
+    if (!name || name.length < 3) {
+      alert('Digite o nome do modelo para usar a IA');
+      return;
+    }
+
+    try {
+      setIsAiGenerating(true);
+      const data = await AIService.generateCatalog(name);
+      if (data.description) {
+        setValue('description', data.description);
+      }
+    } catch (error) {
+      console.error('AI Error:', error);
+      alert('Erro ao gerar descrição com IA. O servidor do Genkit está rodando?');
+    } finally {
+      setIsAiGenerating(false);
+    }
+  };
+
   const onSubmit = async (values: EquipmentFormValues) => {
     try {
       const { location_base, state_uf, ...dbValues } = values;
@@ -136,7 +160,25 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="name">Nome do Equipamento {equipment?.master_item_id && <span className="text-[10px] text-primary italic">(Catálogo Oficial)</span>}</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="name">Nome do Equipamento {equipment?.master_item_id && <span className="text-[10px] text-primary italic">(Catálogo Oficial)</span>}</Label>
+            <button
+              type="button"
+              onClick={handleAiDescription}
+              disabled={isAiGenerating || !!equipment?.master_item_id}
+              className="flex items-center gap-1 text-[10px] text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
+              title="Gerar descrição com IA"
+            >
+              {isAiGenerating ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <>
+                  <Sparkles className="h-3 w-3" />
+                  Gerar Descrição IA
+                </>
+              )}
+            </button>
+          </div>
           <Input 
             id="name" 
             {...register('name')} 
