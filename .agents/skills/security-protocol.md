@@ -20,3 +20,9 @@
 - [ ] Does the UI handle error states for unauthorized users?
 - [ ] Is sensitive data handled securely?
 - [ ] Does the `tenant_id` match the active session?
+
+## 5. Automated Scanners (CI/CD)
+- **Gitleaks**: Scans for secrets in the commit history.
+- **Semgrep**: Scans for code vulnerabilities (SAST).
+- **NPM Audit**: Scans for vulnerabilities in third-party libraries.
+- *Check the "Actions" tab in GitHub for results after every push.*

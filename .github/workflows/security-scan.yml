@@ -1,0 +1,47 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+  schedule:
+    - cron: '0 0 * * *' # Executa todo dia à meia-noite
+
+jobs:
+  secrets-scan:
+    name: Gitleaks (Secret Scanning)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Gitleaks Action
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  static-analysis:
+    name: Semgrep (Static Analysis)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Semgrep Scan
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/javascript
+            p/react
+            p/typescript
+            p/security-audit
+            p/secrets
+
+  dependency-audit:
+    name: NPM Audit (Dependency Check)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Dependencies
+        run: npm install --package-lock-only
+      - name: Run Audit
+        run: npm audit --audit-level=high
