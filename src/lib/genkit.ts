@@ -12,7 +12,7 @@ export const ai = genkit({
       apiKey: import.meta.env?.GOOGLE_GENAI_API_KEY || process.env.GOOGLE_GENAI_API_KEY,
     }),
   ],
-  model: 'googleai/gemini-2.5-flash', // Atualizado para a versão 2.5
+  model: 'googleai/gemini-1.5-flash', // Atualizado para a versão estável 1.5
 });
 
 /**

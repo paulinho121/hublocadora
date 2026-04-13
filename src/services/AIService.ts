@@ -3,7 +3,8 @@
  * Camada de integração entre o Frontend e o Servidor Genkit Backend.
  */
 
-const API_BASE_URL = 'http://localhost:3001/api/ai';
+// Busca a URL do backend via variável de ambiente ou usa o default de desenvolvimento
+const API_BASE_URL = import.meta.env.VITE_AI_SERVER_URL || 'http://localhost:3001/api/ai';
 
 export const AIService = {
   /**
