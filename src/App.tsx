@@ -19,6 +19,7 @@ import Docs from '@/pages/Docs';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import EquipmentDetails from '@/pages/EquipmentDetails';
+import { AIAssistant } from '@/components/ai/AIAssistant';
 
 function Navbar() {
   const { user, profile, signOut } = useAuth();
@@ -185,6 +186,7 @@ function MainLayout() {
         </Routes>
       </main>
       {!isAuthPage && <BottomNav />}
+      <AIAssistant />
     </div>
   );
 }
