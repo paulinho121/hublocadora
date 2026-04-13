@@ -33,6 +33,46 @@ export const AIService = {
     return response.json();
   },
 
+  async planProject(projectDescription: string, productionType: string, budget: string, shootingDays: number, locationCity?: string) {
+    const response = await fetch(`${API_BASE_URL}/project-planner`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ projectDescription, productionType, budget, shootingDays, locationCity }),
+    });
+    if (!response.ok) throw new Error('Falha ao planejar o projeto.');
+    return response.json();
+  },
+
+  async rentalQuote(equipmentItems: string[], rentalDays: number, location: string, includeInsurance = false, extras: string[] = []) {
+    const response = await fetch(`${API_BASE_URL}/rental-quote`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ equipmentItems, rentalDays, location, includeInsurance, extras }),
+    });
+    if (!response.ok) throw new Error('Falha ao gerar a cotação de aluguel.');
+    return response.json();
+  },
+
+  async checkAvailability(startDate: string, endDate: string, projectType: string, priority: 'custo' | 'qualidade' | 'tempo') {
+    const response = await fetch(`${API_BASE_URL}/availability`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ startDate, endDate, projectType, priority }),
+    });
+    if (!response.ok) throw new Error('Falha ao verificar disponibilidade.');
+    return response.json();
+  },
+
+  async generateFollowUp(customerName: string, bookingSummary: string, status: 'confirmed' | 'picked_up' | 'returned' | 'late') {
+    const response = await fetch(`${API_BASE_URL}/followup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ customerName, bookingSummary, status }),
+    });
+    if (!response.ok) throw new Error('Falha ao gerar follow-up.');
+    return response.json();
+  },
+
   /**
    * Analisa a logística de transporte para uma lista de itens.
    */

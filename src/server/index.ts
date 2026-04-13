@@ -9,7 +9,11 @@ import {
   bookingMatchFlow, 
   maintenanceAnalysisFlow, 
   logisticsOptimizerFlow, 
-  catalogGeneratorFlow 
+  catalogGeneratorFlow,
+  projectGearPlannerFlow,
+  rentalQuoteFlow,
+  availabilityAdvisorFlow,
+  customerFollowUpFlow
 } from '../lib/ai/flows.js';
 
 // Carrega as variáveis do .env
@@ -67,6 +71,46 @@ app.post('/api/ai/logistics', handleAsync(async (req: any, res: any) => {
 app.post('/api/ai/catalog', handleAsync(async (req: any, res: any) => {
   if (!req.body.model) return res.status(400).json({ error: 'Modelo é obrigatório' });
   const result = await catalogGeneratorFlow(req.body.model);
+  res.json(result);
+}));
+
+// 5. Endpoint: Planejamento de Projeto
+app.post('/api/ai/project-planner', handleAsync(async (req: any, res: any) => {
+  const { projectDescription, productionType, budget, shootingDays, locationCity } = req.body;
+  if (!projectDescription || !productionType || !budget || !shootingDays) {
+    return res.status(400).json({ error: 'Todos os campos principais são obrigatórios' });
+  }
+  const result = await projectGearPlannerFlow({ projectDescription, productionType, budget, shootingDays, locationCity });
+  res.json(result);
+}));
+
+// 6. Endpoint: Cotação de Aluguel
+app.post('/api/ai/rental-quote', handleAsync(async (req: any, res: any) => {
+  const { equipmentItems, rentalDays, location, includeInsurance, extras } = req.body;
+  if (!equipmentItems || !rentalDays || !location) {
+    return res.status(400).json({ error: 'Itens, dias e local são obrigatórios' });
+  }
+  const result = await rentalQuoteFlow({ equipmentItems, rentalDays, location, includeInsurance: Boolean(includeInsurance), extras: extras || [] });
+  res.json(result);
+}));
+
+// 7. Endpoint: Disponibilidade de Equipamentos
+app.post('/api/ai/availability', handleAsync(async (req: any, res: any) => {
+  const { startDate, endDate, projectType, priority } = req.body;
+  if (!startDate || !endDate || !projectType || !priority) {
+    return res.status(400).json({ error: 'Data de início, fim, tipo de projeto e prioridade são obrigatórios' });
+  }
+  const result = await availabilityAdvisorFlow({ startDate, endDate, projectType, priority });
+  res.json(result);
+}));
+
+// 8. Endpoint: Follow-up de Cliente
+app.post('/api/ai/followup', handleAsync(async (req: any, res: any) => {
+  const { customerName, bookingSummary, status } = req.body;
+  if (!customerName || !bookingSummary || !status) {
+    return res.status(400).json({ error: 'Nome do cliente, resumo do booking e status são obrigatórios' });
+  }
+  const result = await customerFollowUpFlow({ customerName, bookingSummary, status });
   res.json(result);
 }));
 
