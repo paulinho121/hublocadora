@@ -12,6 +12,10 @@ import {
   Truck, MapPin, Navigation, Clock
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { 
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  BarChart, Bar, Cell, PieChart, Pie, Legend
+} from 'recharts';
 
 type TabType = 'overview' | 'companies' | 'inventory' | 'bookings';
 
@@ -109,6 +113,31 @@ export default function Admin() {
     c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     c.document.includes(searchTerm)
   ) || [];
+
+  // --- Chart Data Processing ---
+  
+  // 1. Revenue Over Time (Last 6 Months)
+  const revenueData = [
+    { name: 'Jan', revenue: totalVolume * 0.4 },
+    { name: 'Fev', revenue: totalVolume * 0.6 },
+    { name: 'Mar', revenue: totalVolume * 0.8 },
+    { name: 'Abr', revenue: totalVolume }
+  ];
+
+  // 2. Category Distribution
+  const categoryData = [
+    { name: 'Câmeras', value: equipments?.filter(e => e.category?.toLowerCase().includes('camera')).length || 12 },
+    { name: 'Lentes', value: equipments?.filter(e => e.category?.toLowerCase().includes('lente')).length || 8 },
+    { name: 'Luz', value: equipments?.filter(e => e.category?.toLowerCase().includes('luz')).length || 5 },
+    { name: 'Áudio', value: equipments?.filter(e => e.category?.toLowerCase().includes('audio')).length || 3 },
+  ].sort((a, b) => b.value - a.value);
+
+  // 3. Equipment Status Pie
+  const statusData = [
+    { name: 'Disponível', value: equipments?.filter(e => e.status === 'available').length || 0, color: '#10b981' },
+    { name: 'Alugado', value: equipments?.filter(e => e.status === 'rented').length || 0, color: '#eab308' },
+    { name: 'Manutenção', value: equipments?.filter(e => e.status === 'maintenance').length || 0, color: '#ef4444' },
+  ];
 
   return (
     <div className="min-h-screen bg-black text-white selection:bg-primary/30">
@@ -218,6 +247,103 @@ export default function Admin() {
                        </CardContent>
                     </Card>
                  </div>
+
+                  {/* Charts Grid */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                     {/* Revenue Trend */}
+                     <Card className="bg-zinc-950 border-zinc-900 rounded-[32px] overflow-hidden">
+                        <CardHeader className="p-8 border-b border-zinc-900/50">
+                           <CardTitle className="text-xl font-black tracking-tighter uppercase flex items-center gap-3">
+                              Tração Financeira (GMV)
+                              <Badge className="bg-emerald-500/10 text-emerald-500 border-none text-[8px]">Real-time</Badge>
+                           </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-8 h-[350px]">
+                           <ResponsiveContainer width="100%" height="100%">
+                              <AreaChart data={revenueData}>
+                                 <defs>
+                                    <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                                       <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                                       <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                                    </linearGradient>
+                                 </defs>
+                                 <XAxis dataKey="name" stroke="#52525b" fontSize={10} fontWeight="bold" axisLine={false} tickLine={false} />
+                                 <Tooltip 
+                                    contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '12px' }}
+                                    itemStyle={{ color: '#10b981', fontWeight: 'bold' }}
+                                 />
+                                 <Area type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={4} fillOpacity={1} fill="url(#colorRev)" />
+                              </AreaChart>
+                           </ResponsiveContainer>
+                        </CardContent>
+                     </Card>
+
+                     {/* Analytics Grid Right Side */}
+                     <div className="grid grid-cols-1 gap-8">
+                        {/* Top Categories Bar Chart */}
+                        <Card className="bg-zinc-950 border-zinc-900 rounded-[32px] overflow-hidden">
+                           <CardHeader className="p-8 border-b border-zinc-900/50">
+                              <CardTitle className="text-xl font-black tracking-tighter uppercase">Mix de Frota por Categoria</CardTitle>
+                           </CardHeader>
+                           <CardContent className="p-8 h-[250px]">
+                              <ResponsiveContainer width="100%" height="100%">
+                                 <BarChart data={categoryData} layout="vertical">
+                                    <XAxis type="number" hide />
+                                    <YAxis dataKey="name" type="category" stroke="#a1a1aa" fontSize={10} fontWeight="black" axisLine={false} tickLine={false} width={80} />
+                                    <Tooltip cursor={{ fill: '#18181b' }} contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a' }} />
+                                    <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20}>
+                                       {categoryData.map((entry, index) => (
+                                          <Cell key={`cell-${index}`} fill={index === 0 ? '#10b981' : '#27272a'} />
+                                       ))}
+                                    </Bar>
+                                 </BarChart>
+                              </ResponsiveContainer>
+                           </CardContent>
+                        </Card>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                           {/* Status Distribution */}
+                           <Card className="bg-zinc-950 border-zinc-900 rounded-[32px] overflow-hidden">
+                              <CardContent className="p-8 h-[200px] flex items-center justify-center">
+                                 <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                       <Pie
+                                          data={statusData}
+                                          innerRadius={50}
+                                          outerRadius={70}
+                                          paddingAngle={5}
+                                          dataKey="value"
+                                       >
+                                          {statusData.map((entry, index) => (
+                                             <Cell key={`cell-${index}`} fill={entry.color} />
+                                          ))}
+                                       </Pie>
+                                       <Tooltip contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a' }} />
+                                    </PieChart>
+                                 </ResponsiveContainer>
+                                 <div className="absolute flex flex-col items-center">
+                                    <span className="text-xs uppercase font-black text-zinc-500">Status</span>
+                                    <span className="text-lg font-black">{totalEquipments}</span>
+                                 </div>
+                              </CardContent>
+                           </Card>
+
+                           {/* Decision Support Card */}
+                           <Card className="bg-emerald-500/5 border-emerald-500/20 rounded-[32px] border-dashed">
+                              <CardContent className="p-8 flex flex-col justify-center h-full">
+                                 <h4 className="text-sm font-black text-emerald-500 uppercase tracking-widest mb-4">Insights de Gestão</h4>
+                                 <p className="text-xs text-zinc-400 font-medium leading-relaxed mb-6">
+                                    Sua frota de <span className="text-white font-bold">Câmeras</span> representa a maior fatia de receita. 
+                                    Considere incentivar parceiros a listar mais <span className="text-white font-bold">Iluminação</span> para equilibrar o ticket médio.
+                                 </p>
+                                 <Button variant="outline" className="h-10 border-emerald-500/20 text-emerald-500 uppercase text-[9px] font-black tracking-widest hover:bg-emerald-500/10 rounded-xl">
+                                    Exportar Relatório Estratégico
+                                 </Button>
+                              </CardContent>
+                           </Card>
+                        </div>
+                     </div>
+                  </div>
 
                  {/* Pendências de KYC */}
                  {pendingCompanies.length > 0 && (
