@@ -101,6 +101,7 @@ export default function Admin() {
 
   // Bookings calculations
   const totalVolume = bookings?.reduce((acc, b) => acc + (b.total_amount || 0), 0) || 0;
+  const avgTicket = bookings?.length ? totalVolume / bookings.length : 0;
   const hubRevenue = totalVolume * 0.15; // 15% taxa da plataforma
   const partnerRevenue = totalVolume * 0.85; 
 
@@ -166,7 +167,7 @@ export default function Admin() {
            {activeTab === 'overview' && (
               <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4">
                  
-                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     <Card className="bg-zinc-950 border-zinc-900 rounded-[32px] hover:border-zinc-800 transition-all">
                        <CardHeader className="p-8 pb-2 flex flex-row items-center justify-between">
                           <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-[0.2em]">Malha de Parceiros</CardTitle>
@@ -200,7 +201,20 @@ export default function Admin() {
                           <div className="text-5xl font-black tracking-tighter text-zinc-100 mb-2">
                              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(potentialGmv)}
                           </div>
-                          <p className="text-xs text-emerald-500/70 font-bold uppercase tracking-widest">Gross Merchandise Volume</p>
+                          <p className="text-xs text-emerald-500/70 font-bold uppercase tracking-widest">Billing Estimado</p>
+                       </CardContent>
+                    </Card>
+
+                    <Card className="bg-zinc-950 border-zinc-900 rounded-[32px] hover:border-zinc-800 transition-all">
+                       <CardHeader className="p-8 pb-2 flex flex-row items-center justify-between">
+                          <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-[0.2em]">Ticket Médio</CardTitle>
+                          <ArrowUpRight className="h-5 w-5 text-primary" />
+                       </CardHeader>
+                       <CardContent className="p-8 pt-0">
+                          <div className="text-5xl font-black tracking-tighter text-zinc-100 mb-2">
+                             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(avgTicket)}
+                          </div>
+                          <p className="text-xs text-primary font-bold uppercase tracking-widest">Valor/Reserva</p>
                        </CardContent>
                     </Card>
                  </div>
@@ -277,19 +291,34 @@ export default function Admin() {
                                     {company.name.charAt(0)}
                                  </div>
                                  <div>
-                                    <div className="flex items-center gap-3 mb-1">
-                                       <h3 className="text-xl font-black uppercase tracking-tight">{company.name}</h3>
-                                       {company.status === 'approved' && <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[9px] uppercase tracking-widest font-black shrink-0">Operando</Badge>}
-                                       {company.status === 'pending' && <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20 text-[9px] uppercase tracking-widest font-black shrink-0">Aguardando Aval</Badge>}
-                                       {company.status === 'rejected' && <Badge className="bg-destructive/10 text-destructive border-destructive/20 text-[9px] uppercase tracking-widest font-black shrink-0">Censurada</Badge>}
-                                    </div>
-                                    <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest mb-2">{company.document}</p>
-                                    <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest flex gap-2">
-                                       <span>Endereço: {company.address_city}-{company.address_state}</span>
-                                       <span>|</span>
-                                       <span>Proprietário: {company.owner?.full_name || company.owner?.email || 'Admin'}</span>
-                                    </p>
-                                 </div>
+                                     <div className="flex flex-wrap items-center gap-3 mb-1">
+                                        <h3 className="text-xl font-black uppercase tracking-tight">{company.name}</h3>
+                                        <div className="flex items-center gap-2">
+                                           {company.status === 'approved' && <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[9px] uppercase tracking-widest font-black shrink-0">Operando</Badge>}
+                                           {company.status === 'pending' && <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20 text-[9px] uppercase tracking-widest font-black shrink-0">Aguardando Aval</Badge>}
+                                           {company.status === 'rejected' && <Badge className="bg-destructive/10 text-destructive border-destructive/20 text-[9px] uppercase tracking-widest font-black shrink-0">Censurada</Badge>}
+                                           
+                                           {/* Online Status Proxy (se atualizado nos últimos 30 min) */}
+                                           {new Date().getTime() - new Date(company.owner?.updated_at || company.created_at).getTime() < 1800000 ? (
+                                              <Badge className="bg-primary/20 text-primary border-primary/30 text-[8px] uppercase tracking-widest font-black h-4 px-1.5 flex items-center gap-1">
+                                                 <div className="w-1 h-1 rounded-full bg-primary animate-pulse" /> ONLINE
+                                              </Badge>
+                                           ) : (
+                                              <Badge className="bg-zinc-900 text-zinc-600 border-zinc-800 text-[8px] uppercase tracking-widest font-black h-4 px-1.5">OFFLINE</Badge>
+                                           )}
+                                        </div>
+                                     </div>
+                                     <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest mb-2">{company.document}</p>
+                                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                                        <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest shrink-0">
+                                           Proprietário: <span className="text-zinc-400">{company.owner?.full_name || 'Admin'}</span>
+                                        </p>
+                                        <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest flex items-center gap-1">
+                                           <Clock className="h-3 w-3" /> 
+                                           Último Login: <span className="text-zinc-400">{new Date(company.owner?.updated_at || company.created_at).toLocaleString('pt-BR')}</span>
+                                        </p>
+                                     </div>
+                                  </div>
                               </div>
                               
                               <div className="flex flex-wrap md:flex-nowrap gap-3 w-full md:w-auto shrink-0">

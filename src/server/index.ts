@@ -1,7 +1,27 @@
+import * as Sentry from "@sentry/node";
+import { nodeProfilingIntegration } from "@sentry/profiling-node";
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import * as dotenv from 'dotenv';
+
+// Carrega as variáveis do .env
+dotenv.config();
+
+const app = express();
+const port = process.env.PORT || 3001;
+
+Sentry.init({
+  dsn: process.env.SENTRY_SERVER_DSN,
+  integrations: [
+    nodeProfilingIntegration(),
+  ],
+  // Performance Monitoring
+  tracesSampleRate: 1.0,
+  // Set sampling rate for profiling - this is relative to tracesSampleRate
+  profilesSampleRate: 1.0,
+});
+
 import { 
   helloFlow, 
 } from '../lib/genkit.js';
@@ -16,14 +36,9 @@ import {
   customerFollowUpFlow
 } from '../lib/ai/flows.js';
 
-// Carrega as variáveis do .env
-dotenv.config();
-
-const app = express();
-const port = process.env.PORT || 3001;
-
 // Configurações de Segurança
-app.use(helmet()); // Adiciona headers de segurança (HSTS, CSP, etc)
+app.use(helmet()); 
+Sentry.setupExpressErrorHandler(app);
 app.use(cors({
   origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : '*',
   methods: ['GET', 'POST'],
@@ -123,6 +138,7 @@ app.get('/api/genkit/hello', handleAsync(async (req: any, res: any) => {
 
 // Error Handler Centralizado
 app.use((err: any, req: any, res: any, next: any) => {
+  Sentry.captureException(err);
   console.error('❌ Server Error:', err.stack);
   res.status(500).json({ 
     error: 'Erro interno do servidor',
