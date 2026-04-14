@@ -1,38 +1,37 @@
 import { ai } from '../genkit.js';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '../supabase.js';
 import { z } from 'zod';
-import * as dotenv from 'dotenv';
-
-dotenv.config();
-
-const supabase = createClient(
-  process.env.VITE_SUPABASE_URL || '',
-  process.env.VITE_SUPABASE_ANON_KEY || ''
-);
 
 const aiAny = ai as any;
 
 /**
- * Tool: Busca equipamentos no banco com base em uma query semântica
+ * Tool: Busca equipamentos no banco com base em uma query semântica.
+ * Agora utiliza o cliente centralizado e robusto.
  */
 export const searchEquipmentsTool = aiAny.defineTool(
   {
     name: 'searchEquipments',
     description: 'Busca equipamentos disponíveis no catálogo do CineHub por categoria ou nome.',
     inputSchema: z.object({
-      query: z.string().describe('Termo de busca ou categoria (ex: camera, lente, iluminacao)'),
+      query: z.string().describe('Termo de busca SIMPLES (ex: camera, lente, iluminacao)'),
     }),
     outputSchema: z.array(z.any()),
   },
   async ({ query }) => {
+    console.log(`--- Tool: Searching for "${query}"...`);
     const { data, error } = await supabase
       .from('equipments')
-      .select('*')
+      .select('name, category, daily_price, status')
       .or(`name.ilike.%${query}%,category.ilike.%${query}%`)
       .eq('status', 'available')
-      .limit(5);
+      .limit(10);
 
-    if (error) throw error;
+    if (error) {
+      console.error('--- Tool Error:', error);
+      return [];
+    }
+    
+    console.log(`--- Tool Result: Found ${data?.length || 0} items.`);
     return data || [];
   }
 );

@@ -5,12 +5,12 @@ import { searchEquipmentsTool } from './tools.js';
 const aiAny = ai as any;
 
 /**
- * 1. Flow de Match de Equipamento: Sugere itens com base na necessidade do projeto
+ * 1. Flow de Match de Equipamento
  */
 export const bookingMatchFlow = aiAny.defineFlow(
   {
     name: 'bookingMatchFlow',
-    inputSchema: z.string().describe('Descrição do projeto de filmagem'),
+    inputSchema: z.string(),
     outputSchema: z.object({
       suggestion: z.string(),
       recommendedItems: z.array(z.string()),
@@ -18,33 +18,28 @@ export const bookingMatchFlow = aiAny.defineFlow(
     }),
   },
   async (projectDesc) => {
-    const { text } = await aiAny.generate({
-      prompt: `Aja como um consultor técnico de locadora de câmeras profissional. 
-      Analise o projeto: "${projectDesc}" e sugira os equipamentos ideais.
-      Use a ferramenta searchEquipments para encontrar o que temos disponível.`,
+    const { output } = await aiAny.generate({
+      prompt: `Aja como consultor técnico da CineHub: "${projectDesc}". Use searchEquipmentsTool.`,
       tools: [searchEquipmentsTool],
+      output: {
+        schema: z.object({
+          suggestion: z.string(),
+          recommendedItems: z.array(z.string()),
+          justification: z.string()
+        })
+      }
     });
-
-    // Como o output é estruturado via Zod, o Genkit tenta parsear ou você pode usar force json
-    // Aqui usaremos um prompt simples para facilitar a demonstração
-    return {
-      suggestion: text,
-      recommendedItems: [], // A IA preencheria isso se usássemos structured outputs
-      justification: "Baseado na complexidade de iluminação e profundidade de campo solicitada."
-    };
+    return output!;
   }
 );
 
 /**
- * 2. Flow de Manutenção: Analisa estado de retorno do equipamento
+ * 2. Flow de Manutenção
  */
 export const maintenanceAnalysisFlow = aiAny.defineFlow(
   {
     name: 'maintenanceAnalysisFlow',
-    inputSchema: z.object({
-      equipmentName: z.string(),
-      reportText: z.string(),
-    }),
+    inputSchema: z.object({ equipmentName: z.string(), reportText: z.string() }),
     outputSchema: z.object({
       status: z.enum(['ok', 'attention', 'urgent_maintenance']),
       recommendation: z.string()
@@ -52,8 +47,7 @@ export const maintenanceAnalysisFlow = aiAny.defineFlow(
   },
   async ({ equipmentName, reportText }) => {
     const { output } = await aiAny.generate({
-      prompt: `Analise o seguinte relatório de devolução do equipamento ${equipmentName}: "${reportText}".
-      Determine se ele precisa de manutenção e qual a gravidade.`,
+      prompt: `Analise o retorno de ${equipmentName}: "${reportText}"`,
       output: {
         schema: z.object({
           status: z.enum(['ok', 'attention', 'urgent_maintenance']),
@@ -66,12 +60,12 @@ export const maintenanceAnalysisFlow = aiAny.defineFlow(
 );
 
 /**
- * 3. Flow de Logística: Otimiza tipo de transporte
+ * 3. Flow de Logística
  */
 export const logisticsOptimizerFlow = aiAny.defineFlow(
   {
     name: 'logisticsOptimizerFlow',
-    inputSchema: z.array(z.string()).describe('Lista de nomes de equipamentos'),
+    inputSchema: z.array(z.string()),
     outputSchema: z.object({
       vehicleType: z.enum(['moto', 'carro_passeio', 'utilitario_van']),
       packingAdvice: z.string()
@@ -79,8 +73,7 @@ export const logisticsOptimizerFlow = aiAny.defineFlow(
   },
   async (items) => {
     const { output } = await aiAny.generate({
-      prompt: `Com base nessa lista de equipamentos: ${items.join(', ')}. 
-      Escolha o melhor veículo para transporte considerando fragilidade e tamanho médio desses itens de cinema.`,
+      prompt: `Veículo para: ${items.join(', ')}`,
       output: {
         schema: z.object({
           vehicleType: z.enum(['moto', 'carro_passeio', 'utilitario_van']),
@@ -93,12 +86,12 @@ export const logisticsOptimizerFlow = aiAny.defineFlow(
 );
 
 /**
- * 4. Flow de Catálogo: Gera decrição vendedora para novos itens
+ * 4. Flow de Catálogo
  */
 export const catalogGeneratorFlow = aiAny.defineFlow(
   {
     name: 'catalogGeneratorFlow',
-    inputSchema: z.string().describe('Nome/Modelo do equipamento'),
+    inputSchema: z.string(),
     outputSchema: z.object({
       title: z.string(),
       description: z.string(),
@@ -107,8 +100,7 @@ export const catalogGeneratorFlow = aiAny.defineFlow(
   },
   async (modelName) => {
     const { output } = await aiAny.generate({
-      prompt: `Gere um título e uma descrição técnica vendedora para o equipamento: ${modelName}. 
-      Foque em diretores de fotografia e produtores.`,
+      prompt: `Copywriting para: ${modelName}`,
       output: {
         schema: z.object({
           title: z.string(),
@@ -122,17 +114,16 @@ export const catalogGeneratorFlow = aiAny.defineFlow(
 );
 
 /**
- * 5. Flow de Planejamento de Projeto: monta pacote de equipamentos para o briefing.
+ * 5. Flow de Planejamento de Projeto
  */
 export const projectGearPlannerFlow = aiAny.defineFlow(
   {
     name: 'projectGearPlannerFlow',
     inputSchema: z.object({
-      projectDescription: z.string().describe('Descrição do projeto de filmagem'),
-      productionType: z.string().describe('Ex: comercial, curta-metragem, documentário'),
-      budget: z.string().describe('Orçamento aproximado do cliente'),
-      shootingDays: z.number().min(1).describe('Número de dias de aluguel'),
-      locationCity: z.string().optional().describe('Cidade de produção')
+      projectDescription: z.string(),
+      productionType: z.string(),
+      budget: z.string(),
+      shootingDays: z.number().min(1)
     }),
     outputSchema: z.object({
       packageName: z.string(),
@@ -143,15 +134,9 @@ export const projectGearPlannerFlow = aiAny.defineFlow(
       rationale: z.string()
     }),
   },
-  async ({ projectDescription, productionType, budget, shootingDays, locationCity }) => {
+  async (input) => {
     const { output } = await aiAny.generate({
-      prompt: `Você é um consultor de equipamento para produção audiovisual. Com base no briefing abaixo, monte um pacote ideal para locação e explique a escolha:
-
-Projeto: ${projectDescription}
-Tipo de produção: ${productionType}
-Orçamento estimado: ${budget}
-Dias de filmagem: ${shootingDays}
-Local: ${locationCity || 'não especificado'}`,
+      prompt: `Planejamento cirúrgico: ${JSON.stringify(input)}. Use searchEquipmentsTool.`,
       tools: [searchEquipmentsTool],
       output: {
         schema: z.object({
@@ -169,17 +154,17 @@ Local: ${locationCity || 'não especificado'}`,
 );
 
 /**
- * 6. Flow de Cotação de Aluguel: gera preço e opções de upgrade.
+ * 6. Flow de Cotação de Aluguel
  */
 export const rentalQuoteFlow = aiAny.defineFlow(
   {
     name: 'rentalQuoteFlow',
     inputSchema: z.object({
-      equipmentItems: z.array(z.string()).describe('Lista de equipamentos selecionados'),
-      rentalDays: z.number().min(1).describe('Quantidade de dias de aluguel'),
-      location: z.string().describe('Local de retirada/entrega'),
-      includeInsurance: z.boolean().describe('Se o cliente deseja seguro adicional'),
-      extras: z.array(z.string()).optional().describe('Serviços adicionais desejados')
+      equipmentItems: z.array(z.string()),
+      rentalDays: z.number().min(1),
+      location: z.string(),
+      includeInsurance: z.boolean(),
+      extras: z.array(z.string()).optional()
     }),
     outputSchema: z.object({
       totalCost: z.string(),
@@ -188,17 +173,9 @@ export const rentalQuoteFlow = aiAny.defineFlow(
       notes: z.string()
     })
   },
-  async ({ equipmentItems, rentalDays, location, includeInsurance, extras }) => {
+  async (input) => {
     const { output } = await aiAny.generate({
-      prompt: `Monte uma cotação profissional de aluguel para o seguinte pedido:
-
-Equipamentos: ${equipmentItems.join(', ')}
-Dias de aluguel: ${rentalDays}
-Local: ${location}
-Seguro adicional: ${includeInsurance ? 'Sim' : 'Não'}
-Serviços extras: ${extras?.length ? extras.join(', ') : 'Nenhum'}
-
-Inclua um breakdown de custos, upgrades recomendados e observações comerciais.`,
+      prompt: `Cotação estratégica: ${JSON.stringify(input)}`,
       output: {
         schema: z.object({
           totalCost: z.string(),
@@ -213,16 +190,16 @@ Inclua um breakdown de custos, upgrades recomendados e observações comerciais.
 );
 
 /**
- * 7. Flow de Disponibilidade: sugere equipamentos disponíveis e substitutos.
+ * 7. Flow de Disponibilidade
  */
 export const availabilityAdvisorFlow = aiAny.defineFlow(
   {
     name: 'availabilityAdvisorFlow',
     inputSchema: z.object({
-      startDate: z.string().describe('Data inicial do projeto'),
-      endDate: z.string().describe('Data final do projeto'),
-      projectType: z.string().describe('Tipo de produção'),
-      priority: z.enum(['custo', 'qualidade', 'tempo']).describe('Prioridade do cliente')
+      startDate: z.string(),
+      endDate: z.string(),
+      projectType: z.string(),
+      priority: z.enum(['custo', 'qualidade', 'tempo'])
     }),
     outputSchema: z.object({
       availableEquipment: z.array(z.string()),
@@ -231,10 +208,9 @@ export const availabilityAdvisorFlow = aiAny.defineFlow(
       recommendation: z.string()
     })
   },
-  async ({ startDate, endDate, projectType, priority }) => {
+  async (input) => {
     const { output } = await aiAny.generate({
-      prompt: `Analise disponibilidade para um projeto entre ${startDate} e ${endDate} com prioridade ${priority} e tipo ${projectType}.
-      Indique quais equipamentos disponíveis do catálogo seriam melhores e sugira substitutos se necessário.`,
+      prompt: `Disponibilidade e substitutos: ${JSON.stringify(input)}. Use searchEquipmentsTool.`,
       tools: [searchEquipmentsTool],
       output: {
         schema: z.object({
@@ -250,7 +226,7 @@ export const availabilityAdvisorFlow = aiAny.defineFlow(
 );
 
 /**
- * 8. Flow de Follow-up de Cliente: cria mensagem automática de acompanhamento.
+ * 8. Flow de Follow-up
  */
 export const customerFollowUpFlow = aiAny.defineFlow(
   {
@@ -266,18 +242,95 @@ export const customerFollowUpFlow = aiAny.defineFlow(
       callToAction: z.string()
     })
   },
-  async ({ customerName, bookingSummary, status }) => {
+  async (input) => {
     const { output } = await aiAny.generate({
-      prompt: `Crie um follow-up profissional para o cliente ${customerName} com base no status '${status}' e o seguinte resumo de booking:
-
-${bookingSummary}
-
-Inclua um assunto atraente, corpo claro e um call-to-action.`,
+      prompt: `Follow-up persuasivo: ${JSON.stringify(input)}`,
       output: {
         schema: z.object({
           subject: z.string(),
           body: z.string(),
           callToAction: z.string()
+        })
+      }
+    });
+    return output!;
+  }
+);
+
+/**
+ * 9. Flow de Análise de Roteiro (Revolutionary Tier)
+ */
+export const script2GearFlow = aiAny.defineFlow(
+  {
+    name: 'script2GearFlow',
+    inputSchema: z.string(),
+    outputSchema: z.object({
+      extractedScenes: z.array(z.object({
+        sceneNumber: z.string(),
+        setting: z.string(),
+        lightingMood: z.string()
+      })),
+      suggestedKit: z.object({
+        cameraPackage: z.array(z.string()),
+        lensesPackage: z.array(z.string()),
+        lightingPackage: z.array(z.string()),
+        gripPackage: z.array(z.string())
+      }),
+      rationale: z.string()
+    })
+  },
+  async (scriptText) => {
+    const { output } = await aiAny.generate({
+      prompt: `Você é o Diretor Técnico da CineHub. Analise rigorosamente este roteiro: "${scriptText}"
+      REGRAS:
+      1. Idioma: Português.
+      2. Schema: Sugira pacotes reais usando searchEquipmentsTool. 
+      3. Divida o suggestedKit em: cameraPackage, lensesPackage, lightingPackage, gripPackage.`,
+      tools: [searchEquipmentsTool],
+      output: {
+        schema: z.object({
+          extractedScenes: z.array(z.object({
+            sceneNumber: z.string(),
+            setting: z.string(),
+            lightingMood: z.string()
+          })),
+          suggestedKit: z.object({
+            cameraPackage: z.array(z.string()),
+            lensesPackage: z.array(z.string()),
+            lightingPackage: z.array(z.string()),
+            gripPackage: z.array(z.string())
+          }),
+          rationale: z.string()
+        })
+      }
+    });
+    return output!;
+  }
+);
+
+/**
+ * 10. Flow de Engenharia de Compatibilidade
+ */
+export const techCompatibilityFlow = aiAny.defineFlow(
+  {
+    name: 'techCompatibilityFlow',
+    inputSchema: z.object({ mainItem: z.string(), accessories: z.array(z.string()) }),
+    outputSchema: z.object({
+      isCompatible: z.boolean(),
+      conflicts: z.array(z.string()),
+      missingParts: z.array(z.string()),
+      techNote: z.string()
+    })
+  },
+  async (input) => {
+    const { output } = await aiAny.generate({
+      prompt: `Compatibilidade: ${JSON.stringify(input)}.`,
+      output: {
+        schema: z.object({
+          isCompatible: z.boolean(),
+          conflicts: z.array(z.string()),
+          missingParts: z.array(z.string()),
+          techNote: z.string()
         })
       }
     });

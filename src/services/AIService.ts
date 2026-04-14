@@ -97,5 +97,18 @@ export const AIService = {
     });
     if (!response.ok) throw new Error('Falha ao analisar manutenção.');
     return response.json();
+  },
+
+  /**
+   * Chat unificado com o Assistente Mestre (Orquestrador)
+   */
+  async chat(message: string) {
+    const response = await fetch(`${API_BASE_URL}/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message }),
+    });
+    if (!response.ok) throw new Error('Falha ao se comunicar com o assistente.');
+    return response.json();
   }
 };

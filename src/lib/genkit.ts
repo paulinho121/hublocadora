@@ -8,11 +8,10 @@ import { genkit } from 'genkit';
 export const ai = genkit({
   plugins: [
     googleAI({
-      // Tenta ler do Vite (import.meta) ou do Node (process.env)
-      apiKey: import.meta.env?.GOOGLE_GENAI_API_KEY || process.env.GOOGLE_GENAI_API_KEY,
+      apiKey: process.env.GOOGLE_GENAI_API_KEY,
     }),
   ],
-  model: 'googleai/gemini-1.5-flash', // Atualizado para a versão estável 1.5
+  model: 'googleai/gemini-2.5-flash', 
 });
 
 /**
