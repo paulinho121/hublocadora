@@ -35,6 +35,7 @@ import {
   availabilityAdvisorFlow,
   customerFollowUpFlow
 } from '../lib/ai/flows.js';
+import { masterAssistantFlow } from '../lib/ai/masterFlow.js';
 
 // Configurações de Segurança
 app.use(helmet()); 
@@ -126,6 +127,13 @@ app.post('/api/ai/followup', handleAsync(async (req: any, res: any) => {
     return res.status(400).json({ error: 'Nome do cliente, resumo do booking e status são obrigatórios' });
   }
   const result = await customerFollowUpFlow({ customerName, bookingSummary, status });
+  res.json(result);
+}));
+
+// 9. Endpoint: Assistente Mestre (Orquestrador)
+app.post('/api/ai/chat', handleAsync(async (req: any, res: any) => {
+  if (!req.body.message) return res.status(400).json({ error: 'Mensagem é obrigatória' });
+  const result = await masterAssistantFlow(req.body.message);
   res.json(result);
 }));
 
