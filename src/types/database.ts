@@ -26,6 +26,14 @@ export interface Company {
     created_at: string;
 }
 
+export interface Category {
+    id: string;
+    name: string;
+    slug: string;
+    description: string | null;
+    created_at: string;
+}
+
 export interface MasterCatalog {
     id: string;
     name: string;

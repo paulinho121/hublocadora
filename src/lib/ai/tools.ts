@@ -10,10 +10,12 @@ const supabase = createClient(
   process.env.VITE_SUPABASE_ANON_KEY || ''
 );
 
+const aiAny = ai as any;
+
 /**
  * Tool: Busca equipamentos no banco com base em uma query semântica
  */
-export const searchEquipmentsTool = ai.defineTool(
+export const searchEquipmentsTool = aiAny.defineTool(
   {
     name: 'searchEquipments',
     description: 'Busca equipamentos disponíveis no catálogo do CineHub por categoria ou nome.',
