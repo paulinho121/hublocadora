@@ -122,6 +122,7 @@ export type DeliveryStatus = 'pending' | 'picking' | 'ready' | 'shipped' | 'deli
 export interface Delivery {
     id: string;
     booking_id: string;
+    serial_number: string | null;
     driver_name: string | null;
     driver_phone: string | null;
     status: DeliveryStatus;

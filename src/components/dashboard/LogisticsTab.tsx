@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Package, Truck, Clock, MapPin, CheckCircle2, ShoppingBag, ArrowRight, Loader2, Phone, User } from 'lucide-react';
+import { Package, Truck, Clock, MapPin, CheckCircle2, ShoppingBag, ArrowRight, Loader2, Phone, User, Hash } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { OrderStatusTracker } from './OrderStatusTracker';
 import { useDeliveries, useUpdateDeliveryStatus } from '@/hooks/useDeliveries';
 import { motion, AnimatePresence } from 'motion/react';
@@ -12,6 +13,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
     const { data: deliveries, isLoading } = useDeliveries();
     const updateMutation = useUpdateDeliveryStatus();
     const [updatingId, setUpdatingId] = useState<string | null>(null);
+    const [serialNumbers, setSerialNumbers] = useState<Record<string, string>>({});
 
     const handleNextStatus = async (delivery: any) => {
         const statusFlow: any = {
@@ -26,7 +28,11 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
 
         setUpdatingId(delivery.id);
         try {
-            await updateMutation.mutateAsync({ id: delivery.id, status: nextStatus });
+            await updateMutation.mutateAsync({ 
+                id: delivery.id, 
+                status: nextStatus,
+                serial_number: serialNumbers[delivery.id] 
+            });
         } finally {
             setUpdatingId(null);
         }
@@ -112,6 +118,11 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                 <Badge variant="outline" className="text-[9px] uppercase font-black bg-primary/10 text-primary border-primary/20">
                                                                     ID #{delivery.booking_id.slice(0, 8)}
                                                                 </Badge>
+                                                                {delivery.serial_number && (
+                                                                    <Badge variant="outline" className="text-[9px] uppercase font-black bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
+                                                                        SN: {delivery.serial_number}
+                                                                    </Badge>
+                                                                )}
                                                                 <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest flex items-center gap-1">
                                                                     <Clock className="h-3 w-3" /> {format(new Date(delivery.created_at), "dd/MM 'às' HH:mm")}
                                                                 </span>
@@ -140,21 +151,45 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
 
                                             {/* Action Sidebar */}
                                             <div className="w-full lg:w-72 flex flex-col justify-center gap-4 bg-zinc-950/50 p-6 md:p-8 rounded-[2rem] border border-zinc-800/50">
+                                                {delivery.status === 'picking' && delivery.booking?.company_id === tenantId && (
+                                                    <div className="space-y-2 mb-2 animate-in fade-in slide-in-from-top-2">
+                                                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                                                            <Hash className="h-3 w-3" />
+                                                            <span>Número de Série (Opcional)</span>
+                                                        </div>
+                                                        <Input 
+                                                            placeholder="Ex: SN-123456"
+                                                            className="bg-zinc-900 border-zinc-800 rounded-xl text-xs h-10 italic"
+                                                            value={serialNumbers[delivery.id] || delivery.serial_number || ''}
+                                                            onChange={(e) => setSerialNumbers(prev => ({ ...prev, [delivery.id]: e.target.value }))}
+                                                        />
+                                                    </div>
+                                                )}
+
                                                 {delivery.status !== 'delivered' && delivery.status !== 'cancelled' ? (
-                                                    <Button 
-                                                        onClick={() => handleNextStatus(delivery)}
-                                                        disabled={updatingId === delivery.id}
-                                                        className="w-full h-16 rounded-2xl bg-primary hover:bg-primary/90 text-black font-black uppercase tracking-widest px-6 shadow-[0_0_30px_rgba(var(--primary-rgb),0.2)] group"
-                                                    >
-                                                        {updatingId === delivery.id ? (
-                                                            <Loader2 className="h-5 w-5 animate-spin" />
-                                                        ) : (
-                                                            <>
-                                                                <span className="flex-1">{getNextActionLabel(delivery.status)}</span>
-                                                                <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                                                            </>
-                                                        )}
-                                                    </Button>
+                                                    delivery.booking?.company_id === tenantId ? (
+                                                        <Button 
+                                                            onClick={() => handleNextStatus(delivery)}
+                                                            disabled={updatingId === delivery.id}
+                                                            className="w-full h-16 rounded-2xl bg-primary hover:bg-primary/90 text-black font-black uppercase tracking-widest px-6 shadow-[0_0_30_rgba(var(--primary-rgb),0.2)] group"
+                                                        >
+                                                            {updatingId === delivery.id ? (
+                                                                <Loader2 className="h-5 w-5 animate-spin" />
+                                                            ) : (
+                                                                <>
+                                                                    <span className="flex-1">{getNextActionLabel(delivery.status)}</span>
+                                                                    <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                                                                </>
+                                                            )}
+                                                        </Button>
+                                                    ) : (
+                                                        <div className="text-center py-4 bg-zinc-900/50 rounded-2xl border border-zinc-800/50">
+                                                            <Clock className="h-10 w-10 text-primary/40 mx-auto mb-2 animate-pulse" />
+                                                            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 italic px-4">
+                                                                Aguardando ação da locadora
+                                                            </p>
+                                                        </div>
+                                                    )
                                                 ) : (
                                                     <div className="text-center py-4">
                                                         <CheckCircle2 className="h-10 w-10 text-emerald-500 mx-auto mb-2" />

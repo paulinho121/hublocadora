@@ -42,18 +42,20 @@ export function useUpdateDeliveryStatus() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async ({ id, status, driver_name, driver_phone }: { 
+        mutationFn: async ({ id, status, driver_name, driver_phone, serial_number }: { 
             id: string; 
             status: DeliveryStatus; 
             driver_name?: string; 
             driver_phone?: string; 
+            serial_number?: string;
         }) => {
             const { error } = await supabase
                 .from('deliveries')
                 .update({ 
                     status, 
                     ...(driver_name && { driver_name }),
-                    ...(driver_phone && { driver_phone })
+                    ...(driver_phone && { driver_phone }),
+                    ...(serial_number && { serial_number })
                 })
                 .eq('id', id);
 
