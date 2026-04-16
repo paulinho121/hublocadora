@@ -82,6 +82,7 @@ export default function Dashboard() {
   // Delete Modal State
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   // iFood Real-Time Notification State
   const queryClient = useQueryClient();
@@ -200,7 +201,15 @@ export default function Dashboard() {
   };
 
   const handleUpdateStatus = async (id: string, status: any) => {
-    await updateStatusMutation.mutateAsync({ id, status });
+    try {
+      setUpdatingId(id);
+      await updateStatusMutation.mutateAsync({ id, status });
+    } catch (error) {
+      console.error('Erro ao atualizar status:', error);
+      alert('Não foi possível atualizar o pedido. Tente novamente.');
+    } finally {
+      setUpdatingId(null);
+    }
   };
 
   return (
