@@ -19,7 +19,7 @@ export function useBookings(options?: {
           renter:profiles(
             full_name, 
             email,
-            company:companies(name)
+            company:companies!company_id(name)
           )
         `);
 
