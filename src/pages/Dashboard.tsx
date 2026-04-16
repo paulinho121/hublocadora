@@ -348,7 +348,9 @@ export default function Dashboard() {
                                       </div>
                                       <div className="min-w-0">
                                          <p className="text-sm font-black text-zinc-100 italic uppercase truncate">{(booking as any).equipment?.name}</p>
-                                         <p className="text-[10px] uppercase text-zinc-500 font-bold tracking-widest truncate">Cliente: {booking.renter?.full_name || 'Usuário'}</p>
+                                         <p className="text-[10px] uppercase text-zinc-500 font-bold tracking-widest truncate">
+                                            Solicitante: {booking.renter?.company?.name || booking.renter?.full_name || 'Usuário'}
+                                         </p>
                                       </div>
                                    </div>
                                    <div className="text-right shrink-0">
@@ -410,11 +412,13 @@ export default function Dashboard() {
                     <Card key={booking.id} className="bg-zinc-900/30 border-zinc-900 rounded-2xl overflow-hidden hover:border-zinc-800 transition-colors">
                        <div className="p-6 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                           <div className="flex gap-4 items-center">
-                             <div className="h-12 w-12 rounded-2xl bg-zinc-800 flex items-center justify-center font-black text-zinc-500 border border-zinc-700">
-                                {booking.renter?.full_name?.charAt(0) || 'U'}
+                             <div className="h-12 w-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-black text-primary overflow-hidden">
+                                {booking.renter?.company?.name?.charAt(0) || booking.renter?.full_name?.charAt(0) || 'U'}
                              </div>
                              <div>
-                                <p className="font-black text-zinc-100 tracking-tight">{booking.renter?.full_name || 'Minha Empresa'}</p>
+                                <p className="font-black text-zinc-100 tracking-tight italic uppercase">
+                                   {booking.renter?.company?.name || booking.renter?.full_name || 'Solicitante Desconhecido'}
+                                </p>
                                 <p className="text-[10px] uppercase font-bold text-zinc-500 tracking-widest">{booking.equipment?.name}</p>
                              </div>
                           </div>

@@ -16,7 +16,11 @@ export function useBookings(options?: {
                 .select(`
           *,
           equipment:equipments(name, category, daily_rate, images),
-          renter:profiles(full_name, email)
+          renter:profiles(
+            full_name, 
+            email,
+            company:companies(name)
+          )
         `);
 
             if (options?.companyId) {
