@@ -116,3 +116,18 @@ export interface Notification {
     read: boolean;
     created_at: string;
 }
+
+export type DeliveryStatus = 'pending' | 'picking' | 'ready' | 'shipped' | 'delivered' | 'cancelled';
+
+export interface Delivery {
+    id: string;
+    booking_id: string;
+    driver_name: string | null;
+    driver_phone: string | null;
+    status: DeliveryStatus;
+    current_lat: number | null;
+    current_lng: number | null;
+    estimated_arrival: string | null;
+    created_at: string;
+    updated_at: string;
+}
