@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Package, Truck, Clock, MapPin, CheckCircle2, ShoppingBag, ArrowRight, Loader2, Phone, User, Hash } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,12 +8,32 @@ import { OrderStatusTracker } from './OrderStatusTracker';
 import { useDeliveries, useUpdateDeliveryStatus } from '@/hooks/useDeliveries';
 import { motion, AnimatePresence } from 'motion/react';
 import { format } from 'date-fns';
+import { useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
 
 export function LogisticsTab({ tenantId }: { tenantId: string }) {
+    const queryClient = useQueryClient();
     const { data: deliveries, isLoading } = useDeliveries();
     const updateMutation = useUpdateDeliveryStatus();
     const [updatingId, setUpdatingId] = useState<string | null>(null);
     const [serialNumbers, setSerialNumbers] = useState<Record<string, string>>({});
+
+    // Real-Time Update Implementation
+    useEffect(() => {
+        const channel = supabase
+            .channel('logistics_realtime')
+            .on('postgres_changes', 
+                { event: '*', schema: 'public', table: 'deliveries' }, 
+                () => {
+                    queryClient.invalidateQueries({ queryKey: ['deliveries'] });
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [queryClient]);
 
     const handleNextStatus = async (delivery: any) => {
         const statusFlow: any = {
