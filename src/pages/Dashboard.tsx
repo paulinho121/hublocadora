@@ -40,6 +40,7 @@ import { InventoryTab } from '@/components/dashboard/InventoryTab';
 import { ConfirmDeleteModal } from '@/components/dashboard/ConfirmDeleteModal';
 import { LogisticsTab } from '@/components/dashboard/LogisticsTab';
 import { FinancialSettings } from '@/components/dashboard/FinancialSettings';
+import { BookingTrackingModal } from '@/components/dashboard/BookingTrackingModal';
 
 
 type TabType = 'overview' | 'inventory' | 'bookings' | 'logistics' | 'settings';
@@ -430,11 +431,27 @@ export default function Dashboard() {
                              </div>
                              <div className="text-right">
                                 <div className="text-lg font-black italic text-zinc-100">{formatCurrency(booking.total_amount)}</div>
-                                <Badge className="text-[8px] uppercase font-black uppercase tracking-tighter h-4">{booking.status}</Badge>
+                                <Badge className={`text-[8px] uppercase font-black tracking-tighter h-4 ${
+                                   booking.status === 'approved' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 
+                                   booking.status === 'pending' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : ''
+                                }`}>{booking.status}</Badge>
                              </div>
                           </div>
                        </div>
                        
+                       {bookingFilter === 'requested' && (booking.status === 'approved' || booking.status === 'active') && (
+                          <div className="px-6 py-4 bg-zinc-900/50 flex justify-end gap-3 border-t border-zinc-800">
+                             <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => setTrackingBookingId(booking.id)} 
+                                className="border-zinc-700 text-zinc-300 font-black uppercase text-[10px] tracking-widest rounded-lg px-6 flex items-center gap-2"
+                             >
+                                <Truck className="h-3 w-3" /> Acompanhar Pedido
+                             </Button>
+                          </div>
+                       )}
+
                        {bookingFilter === 'received' && booking.status === 'pending' && (
                          <div className="px-6 py-4 bg-zinc-900/50 flex justify-end gap-3 border-t border-zinc-800">
                             <Button variant="ghost" size="sm" onClick={() => handleUpdateStatus(booking.id, 'rejected')} className="text-destructive font-black uppercase text-[10px] hover:bg-destructive/5 tracking-widest">Recusar</Button>
@@ -509,9 +526,9 @@ export default function Dashboard() {
       <Dialog 
         isOpen={!!trackingBookingId} 
         onClose={() => setTrackingBookingId(null)}
-        title="Rastreio da Entrega"
+        title="Status do Pedido Hub"
       >
-        {trackingBookingId && <DeliveryMap bookingId={trackingBookingId} />}
+        {trackingBookingId && <BookingTrackingModal bookingId={trackingBookingId} />}
       </Dialog>
       
       <ConfirmDeleteModal 

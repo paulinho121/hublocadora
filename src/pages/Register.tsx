@@ -10,13 +10,22 @@ export default function Register() {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
+        setSuccessMessage(null);
+
+        if (password !== confirmPassword) {
+            setError('As senhas não coincidem');
+            setLoading(false);
+            return;
+        }
 
         const { error } = await supabase.auth.signUp({
             email,
@@ -24,12 +33,36 @@ export default function Register() {
         });
 
         if (error) {
-            setError(error.message);
+            if (error.message.includes('already registered') || error.message.includes('already exists')) {
+                setError('Este e-mail já está cadastrado em nossa base.');
+            } else {
+                setError(error.message);
+            }
             setLoading(false);
         } else {
-            // In a real app we might redirect to a 'verify email' page. For now, go to login.
-            navigate('/login', { replace: true });
+            setSuccessMessage('Conta criada com sucesso! Por favor, confirme seu e-mail para ativar sua conta.');
+            setLoading(false);
         }
+    };
+
+    const handleResetPassword = async () => {
+        if (!email) {
+            setError("Digite seu e-mail para recuperar a senha");
+            return;
+        }
+        setLoading(true);
+        setError(null);
+        
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin + '/reset-password',
+        });
+        
+        if (error) {
+            setError(error.message);
+        } else {
+            setSuccessMessage("As instruções de recuperação foram enviadas para seu e-mail!");
+        }
+        setLoading(false);
     };
 
     const handleGoogleLogin = async () => {
@@ -90,7 +123,38 @@ export default function Register() {
                                 required
                             />
                         </div>
-                        {error && <p className="text-xs text-red-400 font-bold uppercase tracking-widest text-center mt-2">{error}</p>}
+                        <div className="space-y-1.5">
+                            <Input
+                                type="password"
+                                placeholder="Confirme sua senha"
+                                className="h-12 bg-zinc-900/50 border-zinc-800 focus:border-primary/50 transition-all font-medium"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                required
+                            />
+                        </div>
+                        {error && (
+                            <div className="space-y-2 mt-2">
+                                <p className="text-xs text-red-400 font-bold uppercase tracking-widest text-center">{error}</p>
+                                {error.includes('já está cadastrado') && (
+                                    <Button 
+                                        type="button"
+                                        variant="link" 
+                                        className="w-full text-[10px] text-primary hover:text-primary/80 font-black uppercase underline underline-offset-4"
+                                        onClick={handleResetPassword}
+                                    >
+                                        Esqueci minha senha / Recuperar Acesso
+                                    </Button>
+                                )}
+                            </div>
+                        )}
+                        {successMessage && (
+                            <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl text-center">
+                                <p className="text-xs text-emerald-400 font-black uppercase tracking-widest leading-relaxed">
+                                    {successMessage}
+                                </p>
+                            </div>
+                        )}
                         <Button className="w-full h-12 bg-primary hover:bg-primary/90 font-black uppercase tracking-tighter text-lg mt-4 shadow-lg shadow-primary/20" type="submit" disabled={loading}>
                             {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
                             {loading ? 'Preparando Setup...' : 'Cadastrar agora'}

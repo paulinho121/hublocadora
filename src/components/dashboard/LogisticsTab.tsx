@@ -1,15 +1,67 @@
 import { useState } from 'react';
-import { Package, Truck, ArrowUpRight, ArrowDownLeft, Clock, MapPin, Search } from 'lucide-react';
+import { Package, Truck, Clock, MapPin, CheckCircle2, ShoppingBag, ArrowRight, Loader2, Phone, User } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { useBookings } from '@/hooks/useBookings';
+import { OrderStatusTracker } from './OrderStatusTracker';
+import { useDeliveries, useUpdateDeliveryStatus } from '@/hooks/useDeliveries';
+import { motion, AnimatePresence } from 'motion/react';
+import { format } from 'date-fns';
 
 export function LogisticsTab({ tenantId }: { tenantId: string }) {
-    const { data: bookings } = useBookings({ companyId: tenantId });
-    const [search, setSearch] = useState("");
-    const todayLogistics = bookings?.filter(b => (b.status === 'approved' || b.status === 'active'));
+    const { data: deliveries, isLoading } = useDeliveries();
+    const updateMutation = useUpdateDeliveryStatus();
+    const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+    const handleNextStatus = async (delivery: any) => {
+        const statusFlow: any = {
+            'pending': 'picking',
+            'picking': 'ready',
+            'ready': 'shipped',
+            'shipped': 'delivered'
+        };
+
+        const nextStatus = statusFlow[delivery.status];
+        if (!nextStatus) return;
+
+        setUpdatingId(delivery.id);
+        try {
+            await updateMutation.mutateAsync({ id: delivery.id, status: nextStatus });
+        } finally {
+            setUpdatingId(null);
+        }
+    };
+
+    const getStatusLabel = (status: string) => {
+        const labels: any = {
+            'pending': 'Pedido Recebido',
+            'picking': 'Em Separação',
+            'ready': 'Pronto para Enviar',
+            'shipped': 'Em Trânsito',
+            'delivered': 'Entregue',
+            'cancelled': 'Cancelado'
+        };
+        return labels[status] || status;
+    };
+
+    const getNextActionLabel = (status: string) => {
+        const actions: any = {
+            'pending': 'Iniciar Separação',
+            'picking': 'Finalizar Separação',
+            'ready': 'Despachar Equipamento',
+            'shipped': 'Confirmar Entrega'
+        };
+        return actions[status];
+    };
+
+    if (isLoading) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20">
+                <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+                <p className="text-zinc-500 font-medium italic tracking-widest uppercase text-xs">Carregando Fluxo Logístico...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -19,15 +71,115 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                     <p className="text-zinc-500 font-medium">Controle de fluxo de equipamentos em tempo real.</p>
                 </div>
             </header>
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                <Card className="bg-zinc-900 border-zinc-800 rounded-3xl p-8">
-                   <h3 className="text-xl font-black italic uppercase tracking-tighter mb-4">Saídas Hoje</h3>
-                   <p className="text-zinc-600 text-sm italic">Otimize as entregas do dia aqui.</p>
-                </Card>
-                <Card className="bg-zinc-900 border-zinc-800 rounded-3xl p-8">
-                   <h3 className="text-xl font-black italic uppercase tracking-tighter mb-4">Retornos Hoje</h3>
-                   <p className="text-zinc-600 text-sm italic">Conferência de entrada rápida.</p>
-                </Card>
+
+            <div className="grid grid-cols-1 gap-6">
+                <AnimatePresence mode="popLayout">
+                    {deliveries?.length === 0 ? (
+                        <motion.div 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-zinc-900/30 border border-dashed border-zinc-800 rounded-3xl p-20 text-center"
+                        >
+                            <Truck className="h-12 w-12 text-zinc-700 mx-auto mb-4" />
+                            <h3 className="text-xl font-black italic uppercase text-zinc-500">Nenhuma entrega ativa</h3>
+                            <p className="text-zinc-600 text-sm mt-2 font-medium">Novos pedidos aparecerão aqui automaticamente.</p>
+                        </motion.div>
+                    ) : (
+                        deliveries?.map((delivery: any) => (
+                            <motion.div
+                                key={delivery.id}
+                                layout
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                            >
+                                <Card className="bg-zinc-900/40 border-zinc-800 rounded-[2.5rem] overflow-hidden hover:border-zinc-700 transition-all shadow-2xl">
+                                    <div className="p-8 md:p-10">
+                                        <div className="flex flex-col lg:flex-row gap-10">
+                                            {/* Order Info */}
+                                            <div className="flex-1 space-y-6">
+                                                <div className="flex items-start justify-between">
+                                                    <div className="flex gap-4">
+                                                        <div className="h-16 w-16 rounded-2xl bg-zinc-950 border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
+                                                            {delivery.booking?.equipment?.images?.[0] ? (
+                                                                <img src={delivery.booking.equipment.images[0]} alt="" className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <Package className="h-8 w-8 text-zinc-700" />
+                                                            )}
+                                                        </div>
+                                                        <div>
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <Badge variant="outline" className="text-[9px] uppercase font-black bg-primary/10 text-primary border-primary/20">
+                                                                    ID #{delivery.booking_id.slice(0, 8)}
+                                                                </Badge>
+                                                                <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest flex items-center gap-1">
+                                                                    <Clock className="h-3 w-3" /> {format(new Date(delivery.created_at), "dd/MM 'às' HH:mm")}
+                                                                </span>
+                                                            </div>
+                                                            <h3 className="text-2xl font-black italic uppercase tracking-tighter text-zinc-100 italic">
+                                                                {delivery.booking?.equipment?.name || 'Equipamento'}
+                                                            </h3>
+                                                            <p className="text-zinc-500 text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 mt-1">
+                                                                <User className="h-3 w-3" /> {delivery.booking?.renter?.company?.name || delivery.booking?.renter?.full_name}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div className="text-right hidden sm:block">
+                                                        <p className="text-[10px] font-black uppercase text-zinc-600 tracking-widest mb-1">Status Atual</p>
+                                                        <Badge className="bg-zinc-800 text-zinc-300 font-black uppercase italic text-xs py-1.5 px-4 rounded-full border-zinc-700">
+                                                            {getStatusLabel(delivery.status)}
+                                                        </Badge>
+                                                    </div>
+                                                </div>
+
+                                                <div className="pt-4 border-t border-zinc-800/50">
+                                                    <OrderStatusTracker status={delivery.status} />
+                                                </div>
+                                            </div>
+
+                                            {/* Action Sidebar */}
+                                            <div className="w-full lg:w-72 flex flex-col justify-center gap-4 bg-zinc-950/50 p-6 md:p-8 rounded-[2rem] border border-zinc-800/50">
+                                                {delivery.status !== 'delivered' && delivery.status !== 'cancelled' ? (
+                                                    <Button 
+                                                        onClick={() => handleNextStatus(delivery)}
+                                                        disabled={updatingId === delivery.id}
+                                                        className="w-full h-16 rounded-2xl bg-primary hover:bg-primary/90 text-black font-black uppercase tracking-widest px-6 shadow-[0_0_30px_rgba(var(--primary-rgb),0.2)] group"
+                                                    >
+                                                        {updatingId === delivery.id ? (
+                                                            <Loader2 className="h-5 w-5 animate-spin" />
+                                                        ) : (
+                                                            <>
+                                                                <span className="flex-1">{getNextActionLabel(delivery.status)}</span>
+                                                                <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                                                            </>
+                                                        )}
+                                                    </Button>
+                                                ) : (
+                                                    <div className="text-center py-4">
+                                                        <CheckCircle2 className="h-10 w-10 text-emerald-500 mx-auto mb-2" />
+                                                        <p className="text-[10px] font-black uppercase tracking-widest text-emerald-500 italic">Operação Concluída</p>
+                                                    </div>
+                                                )}
+
+                                                <div className="space-y-3 pt-2">
+                                                    <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-300 cursor-pointer transition-colors">
+                                                        <MapPin className="h-4 w-4" />
+                                                        <span>Ver Local de Entrega</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-300 cursor-pointer transition-colors">
+                                                        <Phone className="h-4 w-4" />
+                                                        <span>Contatar Cliente</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Card>
+                            </motion.div>
+                        ))
+                    )}
+                </AnimatePresence>
             </div>
         </div>
     );
