@@ -71,8 +71,8 @@ as $$
 declare
     user_email text;
 begin
-    -- Resgata o e-mail do dono da reserva usando o user_id que está na bookings
-    select email into user_email from auth.users where id = new.user_id;
+    -- Resgata o e-mail do dono da reserva usando o renter_id que está na bookings (CORRIGIDO: era user_id)
+    select email into user_email from auth.users where id = new.renter_id;
 
     if user_email is not null then
         perform public.send_resend_email(
@@ -90,3 +90,20 @@ $$;
 create or replace trigger on_booking_created
 after insert on public.bookings
 for each row execute function public.trigger_send_booking_confirmation();
+
+-- ==========================================
+-- 3. SEGURANÇA: POLÍTICAS DE NOTIFICAÇÕES
+-- ==========================================
+-- Garante que o usuário só veja suas próprias notificações
+
+alter table public.notifications enable row level security;
+
+drop policy if exists "Users can view own notifications" on public.notifications;
+create policy "Users can view own notifications" 
+on public.notifications for select 
+using (auth.uid() = user_id);
+
+drop policy if exists "Users can update own notifications" on public.notifications;
+create policy "Users can update own notifications" 
+on public.notifications for update 
+using (auth.uid() = user_id);
