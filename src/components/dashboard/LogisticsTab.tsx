@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Package, Truck, Clock, MapPin, CheckCircle2, ShoppingBag, ArrowRight, Loader2, Phone, User, Hash } from 'lucide-react';
+import { Package, Truck, Clock, MapPin, CheckCircle2, ShoppingBag, ArrowRight, Loader2, Phone, User, Hash, ShieldAlert } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +17,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
     const updateMutation = useUpdateDeliveryStatus();
     const [updatingId, setUpdatingId] = useState<string | null>(null);
     const [serialNumbers, setSerialNumbers] = useState<Record<string, string>>({});
+    const [tokenInputs, setTokenInputs] = useState<Record<string, string>>({});
 
     // Real-Time Update Implementation
     useEffect(() => {
@@ -45,6 +46,15 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
 
         const nextStatus = statusFlow[delivery.status];
         if (!nextStatus) return;
+
+        // Safety check for delivery token if moving to 'delivered'
+        if (delivery.status === 'shipped' && nextStatus === 'delivered') {
+            const enteredToken = tokenInputs[delivery.id] || '';
+            if (enteredToken !== delivery.delivery_token) {
+                alert('Token de segurança inválido! Solicite o código de 4 dígitos ao cliente.');
+                return;
+            }
+        }
 
         setUpdatingId(delivery.id);
         try {
@@ -171,6 +181,35 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
 
                                             {/* Action Sidebar */}
                                             <div className="w-full lg:w-72 flex flex-col justify-center gap-4 bg-zinc-950/50 p-6 md:p-8 rounded-[2rem] border border-zinc-800/50">
+                                                {/* Provider Info (Token needed for shipping) */}
+                                                {delivery.status === 'shipped' && delivery.booking?.company_id === tenantId && (
+                                                    <div className="space-y-2 mb-2 animate-in fade-in slide-in-from-top-2">
+                                                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary">
+                                                            <ShieldAlert className="h-3 w-3" />
+                                                            <span>Token de Confirmação</span>
+                                                        </div>
+                                                        <Input 
+                                                            placeholder="0 0 0 0"
+                                                            maxLength={4}
+                                                            className="bg-zinc-900 border-primary/50 rounded-xl text-center text-xl font-black tracking-[0.5em] h-12"
+                                                            value={tokenInputs[delivery.id] || ''}
+                                                            onChange={(e) => setTokenInputs(prev => ({ ...prev, [delivery.id]: e.target.value.replace(/\D/g, '') }))}
+                                                        />
+                                                        <p className="text-[8px] text-zinc-500 font-bold text-center uppercase">Solicite ao cliente no ato da entrega</p>
+                                                    </div>
+                                                )}
+
+                                                {/* Renter Info (Show code to them) */}
+                                                {delivery.booking?.renter_id === user?.id && delivery.status !== 'delivered' && delivery.status !== 'cancelled' && (
+                                                    <div className="bg-primary/5 border border-primary/20 p-4 rounded-2xl text-center mb-2 animate-pulse">
+                                                        <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-1">Seu Código de Entrega</p>
+                                                        <div className="text-3xl font-black tracking-[0.3em] text-white">
+                                                            {delivery.delivery_token || '----'}
+                                                        </div>
+                                                        <p className="text-[8px] text-zinc-500 font-bold uppercase mt-2">Informe ao entregador para confirmar</p>
+                                                    </div>
+                                                )}
+
                                                 {delivery.status === 'picking' && delivery.booking?.company_id === tenantId && (
                                                     <div className="space-y-2 mb-2 animate-in fade-in slide-in-from-top-2">
                                                         <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-500">

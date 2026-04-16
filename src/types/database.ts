@@ -123,6 +123,7 @@ export interface Delivery {
     id: string;
     booking_id: string;
     serial_number: string | null;
+    delivery_token: string | null;
     driver_name: string | null;
     driver_phone: string | null;
     status: DeliveryStatus;
