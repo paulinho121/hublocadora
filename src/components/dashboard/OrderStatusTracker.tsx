@@ -55,15 +55,15 @@ export function OrderStatusTracker({ status, updatedAt }: OrderStatusTrackerProp
         }
       `}</style>
 
-      <div className="relative flex justify-between px-4 sm:px-8">
+      <div className="relative flex justify-between px-2 sm:px-8">
         {/* Main Progress Line (Gray Background) */}
-        <div className="absolute top-1/2 left-0 w-full h-[3px] bg-zinc-800 -translate-y-1/2 z-0 rounded-full" />
+        <div className="absolute top-1/2 left-0 w-full h-[2px] sm:h-[3px] bg-zinc-800 -translate-y-1/2 z-0 rounded-full" />
         
         {/* Animated Progress Line (Filled) */}
         <motion.div 
           initial={{ width: 0 }}
           animate={{ width: `${(currentStepIndex / (STEPS.length - 1)) * 100}%` }}
-          className="absolute top-1/2 left-0 h-[3px] bg-emerald-500 -translate-y-1/2 z-0 transition-all duration-1000 ease-in-out shadow-[0_0_20px_rgba(16,185,129,0.4)] rounded-full"
+          className="absolute top-1/2 left-0 h-[2px] sm:h-[3px] bg-emerald-500 -translate-y-1/2 z-0 transition-all duration-1000 ease-in-out shadow-[0_0_20px_rgba(16,185,129,0.4)] rounded-full"
         />
 
         {STEPS.map((step, index) => {
@@ -81,11 +81,11 @@ export function OrderStatusTracker({ status, updatedAt }: OrderStatusTrackerProp
               <motion.div
                 initial={false}
                 animate={{
-                  scale: isCurrent ? 1.4 : 1,
+                  scale: isCurrent ? 1.2 : 1,
                   borderColor: isCompleted || isCurrent ? '#10b981' : '#27272a',
                 }}
-                className={`group relative w-12 h-12 rounded-full border-2 bg-zinc-950 flex items-center justify-center transition-all duration-700 overflow-hidden ${
-                  isCurrent ? 'ring-4 ring-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.2)]' : ''
+                className={`group relative w-9 h-9 sm:w-12 sm:h-12 rounded-full border-2 bg-zinc-950 flex items-center justify-center transition-all duration-700 overflow-hidden ${
+                  isCurrent ? 'ring-2 sm:ring-4 ring-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.2)]' : ''
                 }`}
               >
                 {/* Liquid Background */}
@@ -106,15 +106,15 @@ export function OrderStatusTracker({ status, updatedAt }: OrderStatusTrackerProp
 
                 {/* Icon */}
                 <Icon 
-                  className={`h-5 w-5 relative z-10 transition-colors duration-500 ${
+                  className={`h-3.5 w-3.5 sm:h-5 sm:w-5 relative z-10 transition-colors duration-500 ${
                     isCompleted || isCurrent ? 'text-white' : 'text-zinc-700'
                   }`} 
                 />
               </motion.div>
 
               {/* Label */}
-              <div className="absolute -bottom-10 whitespace-nowrap text-center">
-                <p className={`text-[10px] font-black uppercase tracking-tighter italic transition-colors duration-500 ${
+              <div className="absolute -bottom-8 sm:-bottom-10 whitespace-nowrap text-center">
+                <p className={`text-[7px] sm:text-[10px] font-black uppercase tracking-tighter italic transition-colors duration-500 ${
                   isCurrent ? 'text-emerald-500' : isCompleted ? 'text-zinc-300' : 'text-zinc-700'
                 }`}>
                   {step.label}
@@ -123,7 +123,7 @@ export function OrderStatusTracker({ status, updatedAt }: OrderStatusTrackerProp
                    <motion.div 
                      animate={{ opacity: [0.3, 1, 0.3] }}
                      transition={{ repeat: Infinity, duration: 1.5 }}
-                     className="h-1 w-full bg-emerald-500/30 blur-sm rounded-full mt-1"
+                     className="h-0.5 sm:h-1 w-full bg-emerald-500/30 blur-[2px] rounded-full mt-0.5 sm:mt-1"
                    />
                 )}
               </div>

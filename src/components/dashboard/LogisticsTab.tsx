@@ -104,9 +104,9 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <header className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-4xl font-black italic tracking-tighter uppercase mb-2">Painel de Logística</h2>
-                    <p className="text-zinc-500 font-medium">Controle de fluxo de equipamentos em tempo real.</p>
+                <div className="px-1 sm:px-0">
+                    <h2 className="text-2xl sm:text-4xl font-black italic tracking-tighter uppercase mb-1 sm:mb-2">Painel de Logística</h2>
+                    <p className="text-zinc-500 text-[10px] sm:text-base font-medium">Controle de fluxo em tempo real.</p>
                 </div>
             </header>
 
@@ -131,18 +131,18 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.95 }}
                             >
-                                <Card className="bg-zinc-900/40 border-zinc-800 rounded-[2.5rem] overflow-hidden hover:border-zinc-700 transition-all shadow-2xl">
-                                    <div className="p-8 md:p-10">
-                                        <div className="flex flex-col lg:flex-row gap-10">
+                                <Card className="bg-zinc-900/40 border-zinc-800 rounded-[1.5rem] sm:rounded-[2.5rem] overflow-hidden hover:border-zinc-700 transition-all shadow-2xl">
+                                    <div className="p-4 sm:p-8 md:p-10">
+                                        <div className="flex flex-col lg:flex-row gap-6 sm:gap-10">
                                             {/* Order Info */}
                                             <div className="flex-1 space-y-6">
                                                 <div className="flex items-start justify-between">
                                                     <div className="flex gap-4">
-                                                        <div className="h-16 w-16 rounded-2xl bg-zinc-950 border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
+                                                        <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-xl sm:rounded-2xl bg-zinc-950 border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
                                                             {delivery.booking?.equipment?.images?.[0] ? (
                                                                 <img src={delivery.booking.equipment.images[0]} alt="" className="w-full h-full object-cover" />
                                                             ) : (
-                                                                <Package className="h-8 w-8 text-zinc-700" />
+                                                                <Package className="h-6 w-6 sm:h-8 sm:w-8 text-zinc-700" />
                                                             )}
                                                         </div>
                                                         <div>
@@ -182,7 +182,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                             </div>
 
                                             {/* Action Sidebar */}
-                                            <div className="w-full lg:w-72 flex flex-col justify-center gap-4 bg-zinc-950/50 p-6 md:p-8 rounded-[2rem] border border-zinc-800/50">
+                                            <div className="w-full lg:w-72 flex flex-col justify-center gap-4 bg-zinc-950/20 sm:bg-zinc-950/50 p-4 sm:p-8 rounded-[1.2rem] sm:rounded-[2rem] border border-zinc-800/50">
                                                 {/* Provider Info (Token needed for shipping) */}
                                                 {delivery.status === 'shipped' && delivery.booking?.company_id === tenantId && (
                                                     <div className="space-y-2 mb-2 animate-in fade-in slide-in-from-top-2">
