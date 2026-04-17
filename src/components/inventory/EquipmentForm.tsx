@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -8,10 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import { Equipment } from '@/types/database';
 import { useCreateEquipment, useUpdateEquipment, uploadEquipmentImage } from '@/hooks/useEquipments';
 import { useCategories } from '@/hooks/useCategories';
+import { useBranches } from '@/hooks/useBranches';
 import { AIService } from '@/services/AIService';
+import { EquipmentService } from '@/services/EquipmentService';
 import { Sparkles, Wand2 } from 'lucide-react';
 
 const equipmentSchema = z.object({
@@ -60,6 +63,9 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
   const createMutation = useCreateEquipment(companyId);
   const updateMutation = useUpdateEquipment();
   const { data: categories, isLoading: isLoadingCategories } = useCategories();
+  const { branches } = useBranches();
+  
+  const [branchStock, setBranchStock] = useState<Record<string, number>>({});
 
   const {
     register,
@@ -81,6 +87,19 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
       state_uf: equipment?.state_uf || (equipment?.features as any)?.state || '',
     },
   });
+  
+  // Carrega estoque por filial se for edição
+  useEffect(() => {
+    if (equipment?.id) {
+      EquipmentService.getStockByEquipment(equipment.id).then(stocks => {
+        const stockMap: Record<string, number> = {};
+        stocks.forEach(s => {
+          stockMap[s.branch_id] = s.quantity;
+        });
+        setBranchStock(stockMap);
+      });
+    }
+  }, [equipment?.id]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -145,9 +164,11 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
       };
 
       if (equipment) {
-        await updateMutation.mutateAsync({ id: equipment.id, ...payload });
+        const updated = await updateMutation.mutateAsync({ id: equipment.id, ...payload });
+        if (updated?.id) await EquipmentService.updateBranchStock(updated.id, branchStock);
       } else {
-        await createMutation.mutateAsync(payload);
+        const created = await createMutation.mutateAsync(payload);
+        if (created?.id) await EquipmentService.updateBranchStock(created.id, branchStock);
       }
       onSuccess();
     } catch (error) {
@@ -259,12 +280,40 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4">
+        <div className="space-y-4 p-4 bg-zinc-900/50 border border-zinc-800 rounded-2xl">
+          <div className="flex items-center justify-between">
+            <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Distribuição por Unidade (Brasil)</Label>
+            <Badge variant="outline" className="text-[9px] border-primary/20 text-primary">Multi-Branch Ativo</Badge>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+             {branches?.map((branch) => (
+               <div key={branch.id} className="flex items-center justify-between gap-4 bg-zinc-950 p-3 rounded-xl border border-zinc-800/50">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-bold uppercase truncate">{branch.name}</p>
+                    <p className="text-[8px] text-zinc-500 uppercase">{branch.city}</p>
+                  </div>
+                  <Input 
+                    type="number" 
+                     placeholder="0"
+                    className="w-20 h-8 text-center bg-zinc-900 border-zinc-700 text-xs font-black" 
+                    value={branchStock[branch.id] || ''}
+                    onChange={(e) => setBranchStock(prev => ({ ...prev, [branch.id]: parseInt(e.target.value) || 0 }))}
+                  />
+               </div>
+             ))}
+             {(!branches || branches.length === 0) && (
+               <p className="text-[10px] text-zinc-600 italic col-span-2">Nenhuma sub-locadora cadastrada na sua rede.</p>
+             )}
+          </div>
+        </div>
+
         <div className="space-y-2">
           <Label htmlFor="stock_quantity">Quantidade Total em Estoque</Label>
           <Input id="stock_quantity" type="number" {...register('stock_quantity')} placeholder="Ex: 5" />
           {errors.stock_quantity && <p className="text-xs text-red-500">{errors.stock_quantity.message}</p>}
-          <p className="text-[10px] text-muted-foreground italic">Quantos itens desse modelo você possui para alugar.</p>
+          <p className="text-[10px] text-muted-foreground italic">Quantos itens desse modelo você possui no total.</p>
         </div>
       </div>
 

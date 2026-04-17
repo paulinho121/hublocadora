@@ -7,7 +7,8 @@ import {
   Settings, 
   LogOut, 
   ChevronRight, 
-  User 
+  User,
+  Globe
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -27,6 +28,7 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
     { id: 'inventory', label: 'Inventário', icon: Package },
     { id: 'bookings', label: 'Reservas', icon: CalendarDays },
     { id: 'logistics', label: 'Logística', icon: Truck },
+    { id: 'network', label: 'Minha Rede', icon: Globe },
     { id: 'settings', label: 'Configurações', icon: Settings },
   ];
 

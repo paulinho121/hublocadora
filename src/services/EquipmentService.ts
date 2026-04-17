@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { Equipment } from '@/types/database';
+import { Equipment, EquipmentStock } from '@/types/database';
 
 export class EquipmentService {
     /**
@@ -97,5 +97,35 @@ export class EquipmentService {
             .getPublicUrl(filePath);
 
         return publicUrl;
+    }
+
+    /**
+     * Gerencia estoque distribuído por unidades
+     */
+    static async updateBranchStock(equipmentId: string, stocks: Record<string, number>) {
+        const insertData = Object.entries(stocks).map(([branchId, quantity]) => ({
+            equipment_id: equipmentId,
+            branch_id: branchId,
+            quantity: quantity,
+            updated_at: new Date().toISOString()
+        }));
+
+        if (insertData.length === 0) return;
+
+        const { error } = await supabase
+            .from('equipment_stock')
+            .upsert(insertData, { onConflict: 'equipment_id,branch_id' });
+
+        if (error) throw error;
+    }
+
+    static async getStockByEquipment(equipmentId: string) {
+        const { data, error } = await supabase
+            .from('equipment_stock')
+            .select('*')
+            .eq('equipment_id', equipmentId);
+
+        if (error) throw error;
+        return data as EquipmentStock[];
     }
 }

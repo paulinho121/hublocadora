@@ -11,9 +11,15 @@ import { format } from 'date-fns';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBranches } from '@/hooks/useBranches';
+import { Dialog } from '@/components/ui/dialog';
 
 export function LogisticsTab({ tenantId }: { tenantId: string }) {
     const { user } = useAuth();
+    const { branches } = useBranches();
+    const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
+    const [branchModalOpen, setBranchModalOpen] = useState(false);
+    const [pendingDelivery, setPendingDelivery] = useState<any>(null);
     const queryClient = useQueryClient();
     const { data: deliveries, isLoading } = useDeliveries();
     const updateMutation = useUpdateDeliveryStatus();
@@ -49,6 +55,13 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
         const nextStatus = statusFlow[delivery.status];
         if (!nextStatus) return;
 
+        // SE for a primeira movimentação (pending -> picking), abre modal de escolha de filial
+        if (delivery.status === 'pending' && nextStatus === 'picking' && branches && branches.length > 0) {
+            setPendingDelivery(delivery);
+            setBranchModalOpen(true);
+            return;
+        }
+
         // Safety check for delivery token if moving to 'delivered'
         if (delivery.status === 'shipped' && nextStatus === 'delivered') {
             const enteredToken = tokenInputs[delivery.id] || '';
@@ -63,11 +76,23 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
             await updateMutation.mutateAsync({ 
                 id: delivery.id, 
                 status: nextStatus,
-                serial_number: serialNumbers[delivery.id] 
+                serial_number: serialNumbers[delivery.id],
+                origin_branch_id: selectedBranchId || delivery.origin_branch_id
             });
         } finally {
             setUpdatingId(null);
+            setSelectedBranchId(null);
+            setPendingDelivery(null);
         }
+    };
+
+    const confirmBranchSelection = () => {
+        if (!selectedBranchId) {
+            alert('Por favor, selecione uma unidade de origem.');
+            return;
+        }
+        setBranchModalOpen(false);
+        handleNextStatus(pendingDelivery);
     };
 
     const getStatusLabel = (status: string) => {
@@ -277,6 +302,53 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                     )}
                 </AnimatePresence>
             </div>
+
+            {/* Modal de Escolha de Filial */}
+            <Dialog 
+                isOpen={branchModalOpen} 
+                onClose={() => setBranchModalOpen(false)}
+                title="Unidade de Origem"
+            >
+                <div className="space-y-6">
+                    <p className="text-zinc-500 text-sm font-medium">De qual unidade do CineHub este equipamento será enviado?</p>
+                    
+                    <div className="grid grid-cols-1 gap-3">
+                        {branches?.map(branch => (
+                            <button
+                                key={branch.id}
+                                onClick={() => setSelectedBranchId(branch.id)}
+                                className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all text-left ${
+                                    selectedBranchId === branch.id 
+                                    ? 'border-primary bg-primary/10' 
+                                    : 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700'
+                                }`}
+                            >
+                                <div>
+                                    <p className="font-black uppercase italic tracking-tighter">{branch.name}</p>
+                                    <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">{branch.city} - {branch.state}</p>
+                                </div>
+                                {selectedBranchId === branch.id && <CheckCircle2 className="h-5 w-5 text-primary" />}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="flex gap-3 pt-4">
+                        <Button 
+                            variant="ghost" 
+                            onClick={() => setBranchModalOpen(false)}
+                            className="flex-1 text-zinc-500 font-black uppercase tracking-widest"
+                        >
+                            Cancelar
+                        </Button>
+                        <Button 
+                            onClick={confirmBranchSelection}
+                            className="flex-2 bg-primary hover:bg-primary/90 text-black font-black uppercase tracking-widest px-8 rounded-xl"
+                        >
+                            Confirmar Unidade
+                        </Button>
+                    </div>
+                </div>
+            </Dialog>
         </div>
     );
 }

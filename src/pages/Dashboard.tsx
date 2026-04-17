@@ -41,10 +41,11 @@ import { ConfirmDeleteModal } from '@/components/dashboard/ConfirmDeleteModal';
 import { LogisticsTab } from '@/components/dashboard/LogisticsTab';
 import { FinancialSettings } from '@/components/dashboard/FinancialSettings';
 import { BookingTrackingModal } from '@/components/dashboard/BookingTrackingModal';
+import { BranchesTab } from '@/components/dashboard/BranchesTab';
 
 
-type TabType = 'overview' | 'inventory' | 'bookings' | 'logistics' | 'settings';
-const VALID_TABS: TabType[] = ['overview', 'inventory', 'bookings', 'logistics', 'settings'];
+type TabType = 'overview' | 'inventory' | 'bookings' | 'logistics' | 'network' | 'settings';
+const VALID_TABS: TabType[] = ['overview', 'inventory', 'bookings', 'logistics', 'network', 'settings'];
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -477,6 +478,10 @@ export default function Dashboard() {
              <LogisticsTab tenantId={tenantId || ''} />
            )}
 
+           {activeTab === 'network' && (
+             <BranchesTab />
+           )}
+
            {activeTab === 'settings' && (
              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <header className="mb-10">
@@ -588,3 +593,4 @@ export default function Dashboard() {
     </div>
   );
 }
+
