@@ -124,6 +124,7 @@ export interface Delivery {
     booking_id: string;
     serial_number: string | null;
     delivery_token: string | null;
+    origin_branch_id: string | null;
     driver_name: string | null;
     driver_phone: string | null;
     status: DeliveryStatus;
@@ -131,5 +132,27 @@ export interface Delivery {
     current_lng: number | null;
     estimated_arrival: string | null;
     created_at: string;
+    updated_at: string;
+}
+
+export interface Branch {
+    id: string;
+    company_id: string;
+    name: string;
+    address: string | null;
+    city: string | null;
+    state: string | null;
+    manager_email: string | null;
+    invite_token: string;
+    status: 'invited' | 'active' | 'inactive';
+    created_at: string;
+    updated_at: string;
+}
+
+export interface EquipmentStock {
+    id: string;
+    equipment_id: string;
+    branch_id: string;
+    quantity: number;
     updated_at: string;
 }
