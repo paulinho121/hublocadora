@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useEquipments } from '@/hooks/useEquipments';
 import { useBranchStock } from '@/hooks/useBranchStock';
+import { useTransfers } from '@/hooks/useTransfers';
 import { useTenant } from '@/hooks/useTenant';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Package, Loader2, Check, AlertCircle, Settings } from 'lucide-react';
+import { Search, Package, Loader2, Check, AlertCircle, Settings, Truck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
@@ -20,7 +21,9 @@ export function BranchStockModal({ branchId, branchName, isOpen, onClose }: Bran
     const { tenantId } = useTenant();
     const { data: equipments, isLoading: loadingEquipments } = useEquipments({ companyId: tenantId || undefined });
     const { stock, updateStock } = useBranchStock(branchId);
+    const { createTransfer } = useTransfers();
     const [search, setSearch] = useState('');
+    const [requestingId, setRequestingId] = useState<string | null>(null);
 
     const filteredEquipments = equipments?.filter(e => 
         e.name?.toLowerCase().includes(search.toLowerCase())
@@ -38,6 +41,22 @@ export function BranchStockModal({ branchId, branchName, isOpen, onClose }: Bran
         }
     };
 
+    const handleRequestTransfer = async (equipmentId: string) => {
+        setRequestingId(equipmentId);
+        try {
+            await createTransfer.mutateAsync({
+                requesterBranchId: branchId,
+                equipmentId,
+                quantity: 1 // Default to 1, could be a prompt
+            });
+            alert('Solicitação enviada ao Master com sucesso!');
+        } catch (error) {
+            alert('Erro ao enviar solicitação');
+        } finally {
+            setRequestingId(null);
+        }
+    };
+
     return (
         <Dialog 
             isOpen={isOpen} 
@@ -48,7 +67,7 @@ export function BranchStockModal({ branchId, branchName, isOpen, onClose }: Bran
                 <div className="bg-zinc-900/50 border border-zinc-800 p-4 rounded-2xl flex gap-3 items-start">
                     <Settings className="h-5 w-5 text-primary shrink-0 mt-1" />
                     <p className="text-zinc-500 font-medium text-[11px] leading-relaxed">
-                        Defina as quantidades de equipamentos para esta filial. Alterações são salvas automaticamente ao sair do campo.
+                        Gerencie o estoque local ou <span className="text-primary font-bold">solicite reposição</span> diretamente do HUB caso o item esteja em falta.
                     </p>
                 </div>
 
@@ -98,9 +117,21 @@ export function BranchStockModal({ branchId, branchName, isOpen, onClose }: Bran
                                             <h4 className="font-bold text-xs uppercase truncate text-zinc-200">
                                                 {equipment.name}
                                             </h4>
-                                            <Badge variant="outline" className="text-[8px] uppercase font-black px-1.5 py-0 border-zinc-800 text-zinc-500 mt-1">
-                                                {equipment.category}
-                                            </Badge>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <Badge variant="outline" className="text-[8px] uppercase font-black px-1.5 py-0 border-zinc-800 text-zinc-500">
+                                                    {equipment.category}
+                                                </Badge>
+                                                {currentStock === 0 && (
+                                                    <button 
+                                                        disabled={requestingId === equipment.id}
+                                                        onClick={() => handleRequestTransfer(equipment.id)}
+                                                        className="flex items-center gap-1 text-[8px] font-black uppercase text-primary hover:text-primary/80 transition-colors"
+                                                    >
+                                                        <Truck className="h-2 w-2" />
+                                                        {requestingId === equipment.id ? 'Solicitando...' : 'Solicitar Reposição'}
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
 
