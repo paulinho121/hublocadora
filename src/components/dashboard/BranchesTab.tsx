@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { Building2, Plus, Copy, Check, Mail, MapPin, Globe, ShieldCheck } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { useBranches } from '@/hooks/useBranches';
 import { motion, AnimatePresence } from 'motion/react';
 import { BranchStockModal } from './BranchStockModal';
+import { BranchCard } from './BranchCard';
 import { Branch } from '@/types/database';
 
 export function BranchesTab() {
@@ -115,37 +114,16 @@ export function BranchesTab() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {branches?.map((branch) => (
-                    <Card key={branch.id} className="bg-zinc-950/50 border-zinc-800 rounded-3xl overflow-hidden hover:border-zinc-700 transition-all">
-                        <CardContent className="p-6">
-                            <div className="flex items-start justify-between mb-6">
-                                <div className="h-10 w-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center">
-                                    <Building2 className="h-5 w-5 text-primary" />
-                                </div>
-                                <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[9px]">{branch.status}</Badge>
-                            </div>
-                            <h3 className="text-xl font-black italic uppercase tracking-tighter">{branch.name}</h3>
-                            <div className="flex items-center gap-2 text-zinc-500 text-[10px] mt-1">
-                                <MapPin className="h-3 w-3" />
-                                <span>{branch.city}</span>
-                            </div>
-                            <div className="grid grid-cols-2 gap-3 mt-6">
-                                <Button variant="outline" onClick={() => copyInviteLink(branch.invite_token, branch.id)} className="h-9 text-[9px] uppercase font-black">
-                                    {copiedId === branch.id ? <Check className="h-3 w-3 mr-1" /> : <Copy className="h-3 w-3 mr-1" />}
-                                    Convite
-                                </Button>
-                                <Button 
-                                    variant="outline" 
-                                    className="h-9 text-[9px] uppercase font-black"
-                                    onClick={() => {
-                                        setSelectedBranch(branch);
-                                        setIsStockModalOpen(true);
-                                    }}
-                                >
-                                    <Globe className="h-3 w-3 mr-1" /> Estoque
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
+                    <BranchCard 
+                        key={branch.id}
+                        branch={branch}
+                        isCopied={copiedId === branch.id}
+                        onCopyInvite={copyInviteLink}
+                        onManageStock={() => {
+                            setSelectedBranch(branch);
+                            setIsStockModalOpen(true);
+                        }}
+                    />
                 ))}
             </div>
 
