@@ -13,6 +13,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBranches } from '@/hooks/useBranches';
 import { Dialog } from '@/components/ui/dialog';
+import { InternalTransfersSection } from './InternalTransfersSection';
 
 export function LogisticsTab({ tenantId }: { tenantId: string }) {
     const { user } = useAuth();
@@ -117,6 +118,8 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
         return actions[status];
     };
 
+    const [activeSubTab, setActiveSubTab] = useState<'deliveries' | 'transfers'>('deliveries');
+
     if (isLoading) {
         return (
             <div className="flex flex-col items-center justify-center py-20">
@@ -128,16 +131,40 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <header className="flex items-center justify-between">
-                <div className="px-1 sm:px-0">
-                    <h2 className="text-2xl sm:text-4xl font-black italic tracking-tighter uppercase mb-1 sm:mb-2">Painel de Logística</h2>
-                    <p className="text-zinc-500 text-[10px] sm:text-base font-medium">Controle de fluxo em tempo real.</p>
+            <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                <div>
+                    <h2 className="text-4xl font-black italic tracking-tighter uppercase mb-2">Painel de Logística</h2>
+                    <p className="text-zinc-500 font-medium">Controle de fluxo em tempo real.</p>
+                </div>
+
+                <div className="flex bg-zinc-900/50 p-1 rounded-2xl border border-zinc-800">
+                    <button 
+                        onClick={() => setActiveSubTab('deliveries')}
+                        className={cn(
+                            "px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                            activeSubTab === 'deliveries' ? "bg-zinc-800 text-white shadow-xl" : "text-zinc-500 hover:text-zinc-300"
+                        )}
+                    >
+                        Entregas Clientes
+                    </button>
+                    <button 
+                        onClick={() => setActiveSubTab('transfers')}
+                        className={cn(
+                            "px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                            activeSubTab === 'transfers' ? "bg-zinc-800 text-white shadow-xl" : "text-zinc-500 hover:text-zinc-300"
+                        )}
+                    >
+                        Transferências Internas
+                    </button>
                 </div>
             </header>
 
-            <div className="grid grid-cols-1 gap-6">
-                <AnimatePresence mode="popLayout">
-                    {deliveries?.length === 0 ? (
+            {activeSubTab === 'transfers' ? (
+                <InternalTransfersSection />
+            ) : (
+                <div className="grid grid-cols-1 gap-6">
+                    <AnimatePresence mode="popLayout">
+                        {deliveries?.length === 0 ? (
                         <motion.div 
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
