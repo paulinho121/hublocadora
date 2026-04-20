@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useBranches } from '@/hooks/useBranches';
 import { motion, AnimatePresence } from 'motion/react';
+import { BranchStockModal } from './BranchStockModal';
+import { Branch } from '@/types/database';
 
 export function BranchesTab() {
     const { branches, isLoading, createBranch } = useBranches();
@@ -14,6 +16,8 @@ export function BranchesTab() {
     const [email, setEmail] = useState('');
     const [city, setCity] = useState('');
     const [copiedId, setCopiedId] = useState<string | null>(null);
+    const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
+    const [isStockModalOpen, setIsStockModalOpen] = useState(false);
 
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -129,7 +133,14 @@ export function BranchesTab() {
                                     {copiedId === branch.id ? <Check className="h-3 w-3 mr-1" /> : <Copy className="h-3 w-3 mr-1" />}
                                     Convite
                                 </Button>
-                                <Button variant="outline" className="h-9 text-[9px] uppercase font-black">
+                                <Button 
+                                    variant="outline" 
+                                    className="h-9 text-[9px] uppercase font-black"
+                                    onClick={() => {
+                                        setSelectedBranch(branch);
+                                        setIsStockModalOpen(true);
+                                    }}
+                                >
                                     <Globe className="h-3 w-3 mr-1" /> Estoque
                                 </Button>
                             </div>
@@ -137,6 +148,18 @@ export function BranchesTab() {
                     </Card>
                 ))}
             </div>
+
+            {selectedBranch && (
+                <BranchStockModal 
+                    branchId={selectedBranch.id}
+                    branchName={selectedBranch.name}
+                    isOpen={isStockModalOpen}
+                    onClose={() => {
+                        setIsStockModalOpen(false);
+                        setSelectedBranch(null);
+                    }}
+                />
+            )}
         </div>
     );
 }
