@@ -82,6 +82,10 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                 serial_number: serialNumbers[delivery.id],
                 origin_branch_id: selectedBranchId || delivery.origin_branch_id
             });
+            console.log("Logística atualizada com sucesso!");
+        } catch (error: any) {
+            console.error('Erro na logística:', error);
+            alert(`Erro ao atualizar logística: ${error.message || 'Erro desconhecido'}`);
         } finally {
             setUpdatingId(null);
             setSelectedBranchId(null);
@@ -89,13 +93,13 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
         }
     };
 
-    const confirmBranchSelection = () => {
+    const confirmBranchSelection = async () => {
         if (!selectedBranchId) {
             alert('Por favor, selecione uma unidade de origem.');
             return;
         }
         setBranchModalOpen(false);
-        handleNextStatus(pendingDelivery);
+        await handleNextStatus(pendingDelivery);
     };
 
     const getStatusLabel = (status: string) => {
