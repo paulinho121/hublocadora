@@ -67,13 +67,13 @@ export default function Admin() {
 
   // Mutations
   const updateCompanyStatus = useMutation({
-    mutationFn: async ({ id, status }: { id: string, status: 'active' | 'suspended' | 'pending' | 'approved' | 'rejected' }) => {
-      // Normalizamos para o padrão do banco (active/suspended) mas aceitamos os antigos para compatibilidade
-      const dbStatus = status === 'approved' ? 'active' : (status === 'rejected' ? 'suspended' : status);
+    mutationFn: async ({ id, status }: { id: string, status: 'approved' | 'rejected' | 'pending' | 'active' | 'suspended' }) => {
+      // Usamos 'approved' como padrão pois é o que observamos no banco
+      const dbStatus = (status === 'active' || status === 'approved') ? 'approved' : 'rejected';
       
       const { error, data } = await supabase.from('companies').update({ status: dbStatus }).eq('id', id).select();
       if (error) throw error;
-      if (!data || data.length === 0) throw new Error("Aprovação bloqueada pelo Banco de Dados. Verifique a política RLS.");
+      if (!data || data.length === 0) throw new Error("Nenhuma linha atualizada. Verifique se o ID existe e se você tem permissão de Admin.");
       return data;
     },
     onSuccess: (_, variables) => {
@@ -383,7 +383,7 @@ export default function Admin() {
                                          Analisar
                                       </Button>
                                       <Button 
-                                         onClick={() => updateCompanyStatus.mutate({ id: company.id, status: 'active' })} 
+                                         onClick={() => updateCompanyStatus.mutate({ id: company.id, status: 'approved' })} 
                                          disabled={updateCompanyStatus.isPending}
                                          className="h-12 bg-emerald-600 hover:bg-emerald-500 text-white uppercase text-[10px] font-black tracking-widest rounded-xl px-6"
                                       >
@@ -463,7 +463,7 @@ export default function Admin() {
                               <div className="flex flex-wrap md:flex-nowrap gap-3 w-full md:w-auto shrink-0">
                                  {company.status === 'pending' && (
                                    <Button 
-                                     onClick={() => updateCompanyStatus.mutate({ id: company.id, status: 'active' })} 
+                                     onClick={() => updateCompanyStatus.mutate({ id: company.id, status: 'approved' })} 
                                      disabled={updateCompanyStatus.isPending}
                                      className="bg-primary hover:bg-primary/90 text-black font-black h-12 px-8 uppercase text-[10px] tracking-widest rounded-xl transition-all w-full md:w-auto"
                                    >
@@ -484,7 +484,7 @@ export default function Admin() {
 
                                  {company.status === 'suspended' && (
                                    <Button 
-                                     onClick={() => updateCompanyStatus.mutate({ id: company.id, status: 'active' })} 
+                                     onClick={() => updateCompanyStatus.mutate({ id: company.id, status: 'approved' })} 
                                      disabled={updateCompanyStatus.isPending}
                                      variant="outline"
                                      className="border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/10 font-black h-12 px-6 uppercase text-[10px] tracking-widest rounded-xl transition-all w-full md:w-auto"
