@@ -9,6 +9,8 @@ interface TenantContextType {
     profile: Profile | null;
     company: Company | null;
     isAdmin: boolean;
+    isBranchManager: boolean;
+    branchId: string | null;
     isLoading: boolean;
     refreshTenant: () => Promise<void>;
 }
@@ -18,6 +20,8 @@ const TenantContext = createContext<TenantContextType>({
     profile: null,
     company: null,
     isAdmin: false,
+    isBranchManager: false,
+    branchId: null,
     isLoading: true,
     refreshTenant: async () => {},
 });
@@ -26,6 +30,7 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
     const { user, loading: authLoading } = useAuth();
     const [profile, setProfile] = useState<Profile | null>(null);
     const [company, setCompany] = useState<Company | null>(null);
+    const [branchId, setBranchId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchData = async () => {
@@ -119,8 +124,23 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
                 }
             }
 
+            // 5. Verificar se é um Branch Manager
+            let currentBranchId: string | null = null;
+            if (user.email) {
+                const { data: branchData } = await supabase
+                    .from('branches')
+                    .select('id')
+                    .eq('manager_email', user.email)
+                    .maybeSingle();
+                
+                if (branchData) {
+                    currentBranchId = branchData.id;
+                }
+            }
+
             setProfile(currentProfile);
             setCompany(currentCompany);
+            setBranchId(currentBranchId);
         } catch (error) {
             console.error('[TenantContext] Error fetching tenant data:', error);
         } finally {
@@ -144,6 +164,8 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
             profile, 
             company, 
             isAdmin: profile?.role === 'admin',
+            isBranchManager: !!branchId,
+            branchId,
             isLoading: isLoading || authLoading,
             refreshTenant 
         }}>

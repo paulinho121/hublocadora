@@ -22,6 +22,9 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useEquipments } from '@/hooks/useEquipments';
 import { useCreateBooking } from '@/hooks/useBookings';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTransfers } from '@/hooks/useTransfers';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
 
 const supplementSchema = z.object({
   equipmentId: z.string().min(1, 'Selecione o equipamento'),
@@ -49,6 +52,18 @@ export function HubSupplementRequest({ onSuccess }: HubSupplementRequestProps) {
   // Idealmente: carregar apenas da conta "HUB MASTER"
   const { data: hubEquipments, isLoading: isLoadingEquipments } = useEquipments();
 
+  const { data: myBranch } = useQuery({
+    queryKey: ['my-branch', user?.email],
+    queryFn: async () => {
+      if (!user?.email) return null;
+      const { data } = await supabase.from('branches').select('id').eq('manager_email', user.email).maybeSingle();
+      return data;
+    },
+    enabled: !!user?.email
+  });
+
+  const { createTransfer } = useTransfers();
+
   const form = useForm<SupplementFormValues>({
     resolver: zodResolver(supplementSchema),
     defaultValues: {
@@ -66,19 +81,29 @@ export function HubSupplementRequest({ onSuccess }: HubSupplementRequestProps) {
       const equipment = hubEquipments?.find(e => e.id === values.equipmentId);
       if (!equipment) return;
 
-      await createBooking.mutateAsync({
-        equipment_id: values.equipmentId,
-        renter_id: user.id,
-        company_id: equipment.company_id, // O dono do item (HUB)
-        start_date: values.startDate,
-        end_date: values.endDate,
-        total_amount: equipment.daily_rate * values.quantity, // Cálculo simplificado
-        status: 'pending',
-        notes: values.notes || null,
-        quantity: values.quantity,
-        delivery_method: values.deliveryMethod,
-        delivery_address: values.deliveryMethod === 'delivery' ? values.deliveryAddress || null : null,
-      });
+      if (myBranch?.id) {
+          // É uma sub-locadora pedindo um item! Gera transferência interna.
+          await createTransfer.mutateAsync({
+              requesterBranchId: myBranch.id,
+              equipmentId: values.equipmentId,
+              quantity: values.quantity
+          });
+      } else {
+          // Conta normal pedindo.
+          await createBooking.mutateAsync({
+            equipment_id: values.equipmentId,
+            renter_id: user.id,
+            company_id: equipment.company_id, // O dono do item (HUB)
+            start_date: values.startDate,
+            end_date: values.endDate,
+            total_amount: equipment.daily_rate * values.quantity, // Cálculo simplificado
+            status: 'pending',
+            notes: values.notes || null,
+            quantity: values.quantity,
+            delivery_method: values.deliveryMethod,
+            delivery_address: values.deliveryMethod === 'delivery' ? values.deliveryAddress || null : null,
+          });
+      }
 
       setIsSuccess(true);
       setTimeout(() => {

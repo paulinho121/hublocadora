@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 import { Select } from '@/components/ui/select';
 
+import { useTenant } from '@/contexts/TenantContext';
+
 interface InventoryTabProps {
   tenantId: string | undefined;
   onAdd: () => void;
@@ -23,9 +25,11 @@ interface InventoryTabProps {
 export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTabProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const { isBranchManager, branchId } = useTenant();
 
   const { data: equipments, isLoading } = useEquipments({
     companyId: tenantId || undefined,
+    branchId: isBranchManager ? branchId : undefined,
     category: categoryFilter === 'all' ? undefined : categoryFilter,
     searchQuery: searchQuery || undefined
   });

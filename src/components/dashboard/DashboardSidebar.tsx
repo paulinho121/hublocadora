@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTenant } from "@/contexts/TenantContext";
 import { NotificationCenter } from "./NotificationCenter";
 
 interface SidebarProps {
@@ -22,13 +23,14 @@ interface SidebarProps {
 
 export function DashboardSidebar({ activeTab, onTabChange, companyName }: SidebarProps) {
   const { user, signOut } = useAuth();
+  const { isBranchManager } = useTenant();
   
   const menuItems = [
     { id: 'overview', label: 'Visão Geral', icon: BarChart3 },
     { id: 'inventory', label: 'Inventário', icon: Package },
     { id: 'bookings', label: 'Reservas', icon: CalendarDays },
     { id: 'logistics', label: 'Logística', icon: Truck },
-    { id: 'network', label: 'Minha Rede', icon: Globe },
+    ...(isBranchManager ? [] : [{ id: 'network', label: 'Minha Rede', icon: Globe }]),
     { id: 'settings', label: 'Configurações', icon: Settings },
   ];
 
