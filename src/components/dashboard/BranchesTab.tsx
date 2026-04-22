@@ -25,7 +25,7 @@ export function BranchesTab() {
                 name,
                 manager_email: email,
                 city,
-                status: 'active'
+                status: 'invited'
             });
             setIsCreating(false);
             setName('');
