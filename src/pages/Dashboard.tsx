@@ -49,7 +49,7 @@ const VALID_TABS: TabType[] = ['overview', 'inventory', 'bookings', 'logistics',
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { company, isLoading: isLoadingTenant, tenantId } = useTenant();
+  const { company, isLoading: isLoadingTenant, tenantId, isBranchManager, branchId } = useTenant();
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Tab is driven by URL ?tab= param — enables mobile BottomNav to switch tabs
@@ -66,7 +66,8 @@ export default function Dashboard() {
   });
 
   const { data: equipments, isLoading: isLoadingEquipments } = useEquipments({
-    companyId: tenantId || undefined
+    companyId: tenantId || undefined,
+    branchId: isBranchManager ? branchId : undefined
   });
   
   const deleteMutation = useDeleteEquipment();

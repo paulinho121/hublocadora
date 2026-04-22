@@ -15,6 +15,7 @@ import { useCategories } from '@/hooks/useCategories';
 import { useBranches } from '@/hooks/useBranches';
 import { AIService } from '@/services/AIService';
 import { EquipmentService } from '@/services/EquipmentService';
+import { useTenant } from '@/contexts/TenantContext';
 import { Sparkles, Wand2 } from 'lucide-react';
 
 const equipmentSchema = z.object({
@@ -64,7 +65,12 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
   const updateMutation = useUpdateEquipment();
   const { data: categories, isLoading: isLoadingCategories } = useCategories();
   const { branches } = useBranches();
+  const { isBranchManager, branchId } = useTenant();
   
+  const displayBranches = isBranchManager && branchId 
+    ? branches?.filter(b => b.id === branchId) 
+    : branches;
+
   const [branchStock, setBranchStock] = useState<Record<string, number>>({});
 
   const {
@@ -288,7 +294,7 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-             {branches?.map((branch) => (
+             {displayBranches?.map((branch) => (
                <div key={branch.id} className="flex items-center justify-between gap-4 bg-zinc-950 p-3 rounded-xl border border-zinc-800/50">
                   <div className="min-w-0">
                     <p className="text-[10px] font-bold uppercase truncate">{branch.name}</p>
@@ -303,7 +309,7 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
                   />
                </div>
              ))}
-             {(!branches || branches.length === 0) && (
+             {(!displayBranches || displayBranches.length === 0) && (
                <p className="text-[10px] text-zinc-600 col-span-2">Nenhuma sub-locadora cadastrada na sua rede.</p>
              )}
           </div>

@@ -13,13 +13,43 @@ export function useEquipment(id: string) {
 
 export function useEquipments(options?: {
     companyId?: string;
+    branchId?: string | null;
     category?: string;
     searchQuery?: string;
 }) {
     return useQuery({
         queryKey: ['equipments', options],
         queryFn: async () => {
-             // Caso base: se temos companyId, usamos o serviço otimizado
+             // Se é um gerente de filial, precisa filtrar pelo estoque da filial dele
+             if (options?.branchId) {
+                 const { data: stockData, error: stockError } = await supabase
+                    .from('equipment_stock')
+                    .select('equipment_id, quantity')
+                    .eq('branch_id', options.branchId)
+                    .gt('quantity', 0);
+                 
+                 if (stockError) throw stockError;
+                 
+                 if (!stockData || stockData.length === 0) return [];
+                 
+                 const equipmentIds = stockData.map(s => s.equipment_id);
+                 
+                 let query = supabase
+                    .from('equipments')
+                    .select('*')
+                    .in('id', equipmentIds);
+                    
+                 if (options?.category) query = query.eq('category', options.category);
+                 if (options?.searchQuery) query = query.ilike('name', `%${options.searchQuery}%`);
+                 
+                 const { data, error } = await query.order('created_at', { ascending: false });
+                 if (error) throw error;
+                 
+                 // Pode injetar a quantidade em estoque real se quiser (opcional)
+                 return data as Equipment[];
+             }
+
+             // Caso base (Master): se temos companyId sem outros filtros
              if (options?.companyId && !options.category && !options.searchQuery) {
                  return EquipmentService.getAllByTenant(options.companyId);
              }
