@@ -44,7 +44,7 @@ export default function Admin() {
   const { data: equipments, isLoading: equipmentsLoading } = useQuery({
     queryKey: ['admin-equipments'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('equipments').select('id, name, status, daily_rate');
+      const { data, error } = await supabase.from('equipments').select('id, name, status, daily_rate, category');
       if (error) throw error;
       return data;
     },
