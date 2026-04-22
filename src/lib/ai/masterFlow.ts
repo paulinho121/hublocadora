@@ -12,10 +12,11 @@ import {
 
 const aiAny = ai as any;
 
-const safeJoin = (data: any, separator: string = '\n• ') => {
-  if (Array.isArray(data)) return '• ' + data.join(separator);
+const safeJoin = (data: any, separator: string = '\n• ', fallback: string = 'Nenhum item sugerido') => {
+  if (Array.isArray(data) && data.length > 0) return '• ' + data.join(separator);
+  if (Array.isArray(data) && data.length === 0) return fallback;
   if (typeof data === 'object' && data !== null) return '• ' + Object.values(data).join(separator);
-  return String(data || 'Nenhum item sugerido');
+  return String(data || fallback);
 };
 
 export const masterAssistantFlow = aiAny.defineFlow(
