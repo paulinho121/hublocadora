@@ -67,15 +67,20 @@ export default function Admin() {
 
   // Mutations
   const updateCompanyStatus = useMutation({
-    mutationFn: async ({ id, status }: { id: string, status: 'approved' | 'rejected' | 'pending' }) => {
-      const { error, data } = await supabase.from('companies').update({ status }).eq('id', id).select();
+    mutationFn: async ({ id, status }: { id: string, status: 'active' | 'suspended' | 'pending' | 'approved' | 'rejected' }) => {
+      // Normalizamos para o padrão do banco (active/suspended) mas aceitamos os antigos para compatibilidade
+      const dbStatus = status === 'approved' ? 'active' : (status === 'rejected' ? 'suspended' : status);
+      
+      const { error, data } = await supabase.from('companies').update({ status: dbStatus }).eq('id', id).select();
       if (error) throw error;
       if (!data || data.length === 0) throw new Error("Aprovação bloqueada pelo Banco de Dados. Verifique a política RLS.");
       return data;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['admin-companies'] });
-      alert(`Status atualizado para: ${variables.status.toUpperCase()}`);
+      // Toast amigável em vez de alert bloqueante se possível, mas mantendo a lógica atual corrigida
+      const statusMsg = variables.status === 'active' || variables.status === 'approved' ? 'APROVADA' : 'SUSPENSA';
+      console.log(`Empresa atualizada para: ${statusMsg}`);
     },
     onError: (err: any) => {
       alert("Erro ao atualizar: " + err.message);
@@ -420,9 +425,9 @@ export default function Admin() {
                                      <div className="flex flex-wrap items-center gap-3 mb-1">
                                         <h3 className="text-xl font-black uppercase tracking-tight">{company.name}</h3>
                                         <div className="flex items-center gap-2">
-                                           {company.status === 'approved' && <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[9px] uppercase tracking-widest font-black shrink-0">Operando</Badge>}
+                                           {(company.status === 'approved' || company.status === 'active') && <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[9px] uppercase tracking-widest font-black shrink-0">Operando</Badge>}
                                            {company.status === 'pending' && <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20 text-[9px] uppercase tracking-widest font-black shrink-0">Aguardando Aval</Badge>}
-                                           {company.status === 'rejected' && <Badge className="bg-destructive/10 text-destructive border-destructive/20 text-[9px] uppercase tracking-widest font-black shrink-0">Censurada</Badge>}
+                                           {(company.status === 'rejected' || company.status === 'suspended') && <Badge className="bg-destructive/10 text-destructive border-destructive/20 text-[9px] uppercase tracking-widest font-black shrink-0">Censurada</Badge>}
                                            
                                            {/* Online Status Proxy (se atualizado nos últimos 30 min) */}
                                            {new Date().getTime() - new Date(company.owner?.updated_at || company.created_at).getTime() < 1800000 ? (
@@ -450,17 +455,17 @@ export default function Admin() {
                               <div className="flex flex-wrap md:flex-nowrap gap-3 w-full md:w-auto shrink-0">
                                  {company.status === 'pending' && (
                                    <Button 
-                                     onClick={() => updateCompanyStatus.mutate({ id: company.id, status: 'approved' })} 
+                                     onClick={() => updateCompanyStatus.mutate({ id: company.id, status: 'active' })} 
                                      disabled={updateCompanyStatus.isPending}
                                      className="bg-primary hover:bg-primary/90 text-black font-black h-12 px-8 uppercase text-[10px] tracking-widest rounded-xl transition-all w-full md:w-auto"
                                    >
-                                      Aprovar KYC
+                                      {updateCompanyStatus.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Aprovar KYC'}
                                    </Button>
                                  )}
                                  
-                                 {company.status === 'approved' && (
+                                 {company.status === 'active' && (
                                    <Button 
-                                     onClick={() => updateCompanyStatus.mutate({ id: company.id, status: 'rejected' })} 
+                                     onClick={() => updateCompanyStatus.mutate({ id: company.id, status: 'suspended' })} 
                                      disabled={updateCompanyStatus.isPending}
                                      variant="outline"
                                      className="border-destructive/20 text-destructive hover:bg-destructive/10 font-black h-12 px-6 uppercase text-[10px] tracking-widest rounded-xl transition-all w-full md:w-auto"
@@ -469,9 +474,9 @@ export default function Admin() {
                                    </Button>
                                  )}
 
-                                 {company.status === 'rejected' && (
+                                 {company.status === 'suspended' && (
                                    <Button 
-                                     onClick={() => updateCompanyStatus.mutate({ id: company.id, status: 'approved' })} 
+                                     onClick={() => updateCompanyStatus.mutate({ id: company.id, status: 'active' })} 
                                      disabled={updateCompanyStatus.isPending}
                                      variant="outline"
                                      className="border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/10 font-black h-12 px-6 uppercase text-[10px] tracking-widest rounded-xl transition-all w-full md:w-auto"
