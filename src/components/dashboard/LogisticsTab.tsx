@@ -58,7 +58,8 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
         if (!nextStatus) return;
 
         // SE for a primeira movimentação (pending -> picking), abre modal de escolha de filial
-        if (delivery.status === 'pending' && nextStatus === 'picking' && branches && branches.length > 0) {
+        // Apenas abre se ainda não tivermos uma filial selecionada (selectedBranchId)
+        if (delivery.status === 'pending' && nextStatus === 'picking' && branches && branches.length > 0 && !selectedBranchId) {
             setPendingDelivery(delivery);
             setBranchModalOpen(true);
             return;
