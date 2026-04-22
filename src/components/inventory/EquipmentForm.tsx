@@ -182,7 +182,7 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label htmlFor="name">Nome do Equipamento {equipment?.master_item_id && <span className="text-[10px] text-primary italic">(Catálogo Oficial)</span>}</Label>
+            <Label htmlFor="name">Nome do Equipamento {equipment?.master_item_id && <span className="text-[10px] text-primary">(Catálogo Oficial)</span>}</Label>
             <button
               type="button"
               onClick={handleAiDescription}
@@ -304,7 +304,7 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
                </div>
              ))}
              {(!branches || branches.length === 0) && (
-               <p className="text-[10px] text-zinc-600 italic col-span-2">Nenhuma sub-locadora cadastrada na sua rede.</p>
+               <p className="text-[10px] text-zinc-600 col-span-2">Nenhuma sub-locadora cadastrada na sua rede.</p>
              )}
           </div>
         </div>
@@ -313,7 +313,7 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
           <Label htmlFor="stock_quantity">Quantidade Total em Estoque</Label>
           <Input id="stock_quantity" type="number" {...register('stock_quantity')} placeholder="Ex: 5" />
           {errors.stock_quantity && <p className="text-xs text-red-500">{errors.stock_quantity.message}</p>}
-          <p className="text-[10px] text-muted-foreground italic">Quantos itens desse modelo você possui no total.</p>
+          <p className="text-[10px] text-muted-foreground">Quantos itens desse modelo você possui no total.</p>
         </div>
       </div>
 

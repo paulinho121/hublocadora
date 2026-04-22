@@ -54,12 +54,12 @@ export function InternalTransfersSection() {
                     <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
                         <AlertCircle className="h-5 w-5 text-primary" />
                     </div>
-                    <h3 className="text-xl font-black italic uppercase tracking-tighter">Aprovações Pendentes</h3>
+                    <h3 className="text-xl font-black uppercase tracking-tighter">Aprovações Pendentes</h3>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4">
                     {pendingTransfers.length === 0 ? (
-                        <p className="text-zinc-600 text-xs font-bold uppercase tracking-widest italic py-8 border border-dashed border-zinc-800 rounded-3xl text-center">
+                        <p className="text-zinc-600 text-xs font-bold uppercase tracking-widest py-8 border border-dashed border-zinc-800 rounded-3xl text-center">
                             Nenhuma solicitação aguardando aprovação master.
                         </p>
                     ) : pendingTransfers.map(transfer => (
@@ -78,7 +78,7 @@ export function InternalTransfersSection() {
                                             <Badge className="bg-primary/10 text-primary border-primary/20 text-[8px] uppercase font-black">SOLICITAÇÃO DE REPOSIÇÃO</Badge>
                                             <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{format(new Date(transfer.created_at), "dd/MM 'às' HH:mm")}</span>
                                         </div>
-                                        <h4 className="text-lg font-black italic uppercase text-zinc-100">{transfer.equipment?.name}</h4>
+                                        <h4 className="text-lg font-black uppercase text-zinc-100">{transfer.equipment?.name}</h4>
                                         <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
                                             <Building2 className="h-3 w-3" /> Unidade Solicitante: <span className="text-zinc-300">{transfer.requester_branch?.name}</span>
                                         </p>
@@ -87,7 +87,7 @@ export function InternalTransfersSection() {
                                 <div className="flex items-center gap-6">
                                     <div className="text-right">
                                         <span className="text-[10px] font-black uppercase text-zinc-600 block mb-1">Quantidade</span>
-                                        <span className="text-2xl font-black italic text-white">{transfer.quantity}</span>
+                                        <span className="text-2xl font-black text-white">{transfer.quantity}</span>
                                     </div>
                                     <Button 
                                         onClick={() => {
@@ -111,7 +111,7 @@ export function InternalTransfersSection() {
                     <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
                         <Truck className="h-5 w-5 text-emerald-500" />
                     </div>
-                    <h3 className="text-xl font-black italic uppercase tracking-tighter">Em Trânsito / Processamento</h3>
+                    <h3 className="text-xl font-black uppercase tracking-tighter">Em Trânsito / Processamento</h3>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4">

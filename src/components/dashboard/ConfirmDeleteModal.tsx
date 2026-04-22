@@ -27,7 +27,7 @@ export function ConfirmDeleteModal({
         </div>
         
         <div className="space-y-2">
-          <h2 className="text-2xl font-black uppercase italic tracking-tighter text-zinc-100">{title}</h2>
+          <h2 className="text-2xl font-black uppercase tracking-tighter text-zinc-100">{title}</h2>
           <p className="text-zinc-500 text-sm leading-relaxed max-w-xs mx-auto">
             {description}
           </p>

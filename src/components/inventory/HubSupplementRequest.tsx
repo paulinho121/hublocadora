@@ -95,7 +95,7 @@ export function HubSupplementRequest({ onSuccess }: HubSupplementRequestProps) {
         <div className="bg-emerald-500/10 p-4 rounded-full mb-4">
           <CheckCircle2 className="w-12 h-12 text-emerald-500" />
         </div>
-        <h3 className="text-xl font-bold italic uppercase tracking-tighter mb-2">Solicitação Enviada</h3>
+        <h3 className="text-xl font-bold uppercase tracking-tighter mb-2">Solicitação Enviada</h3>
         <p className="text-muted-foreground max-w-xs mx-auto">
           Sua requisição de suplemento de estoque foi enviada ao HUB. Você receberá um alerta assim que for aprovada.
         </p>
@@ -184,7 +184,7 @@ export function HubSupplementRequest({ onSuccess }: HubSupplementRequestProps) {
                 className="flex flex-col items-center justify-between rounded-xl border-2 border-zinc-900 bg-zinc-950 p-4 hover:bg-zinc-900 peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-all"
               >
                 <Store className="mb-2 h-6 w-6 text-zinc-500" />
-                <span className="text-xs font-bold uppercase italic">Retirar no HUB</span>
+                <span className="text-xs font-bold uppercase">Retirar no HUB</span>
               </Label>
             </div>
             <div>
@@ -194,7 +194,7 @@ export function HubSupplementRequest({ onSuccess }: HubSupplementRequestProps) {
                 className="flex flex-col items-center justify-between rounded-xl border-2 border-zinc-900 bg-zinc-950 p-4 hover:bg-zinc-900 peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-all"
               >
                 <Truck className="mb-2 h-6 w-6 text-zinc-500" />
-                <span className="text-xs font-bold uppercase italic">Receber no Local</span>
+                <span className="text-xs font-bold uppercase">Receber no Local</span>
               </Label>
             </div>
           </RadioGroup>
@@ -226,7 +226,7 @@ export function HubSupplementRequest({ onSuccess }: HubSupplementRequestProps) {
 
       <Button 
         type="submit" 
-        className="w-full h-12 font-black italic uppercase tracking-tighter text-lg"
+        className="w-full h-12 font-black uppercase tracking-tighter text-lg"
         disabled={createBooking.isPending}
       >
         {createBooking.isPending ? (

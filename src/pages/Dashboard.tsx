@@ -149,7 +149,7 @@ export default function Dashboard() {
                 <Loader2 className="h-10 w-10 animate-spin text-primary" />
               </div>
            </div>
-          <h2 className="text-4xl font-black tracking-tighter italic uppercase">Análise em Curso</h2>
+          <h2 className="text-4xl font-black tracking-tighter uppercase">Análise em Curso</h2>
           <p className="text-zinc-400 text-lg leading-relaxed">
             Estamos revisando os dados da <span className="text-zinc-100 font-bold">{company.name}</span>. 
             Você terá acesso total em breve.
@@ -255,11 +255,11 @@ export default function Dashboard() {
         <header className="h-20 border-b border-zinc-900 flex items-center justify-between px-6 md:px-10 shrink-0">
            <div className="flex items-center gap-3 md:hidden">
               <Package className="h-6 w-6 text-primary" />
-              <span className="font-black italic uppercase tracking-tighter text-lg">{company?.name}</span>
+              <span className="font-black uppercase tracking-tighter text-lg">{company?.name}</span>
            </div>
            
            <div className="hidden md:block">
-              <h1 className="text-sm font-black uppercase tracking-[0.3em] text-zinc-500 italic">Área de Gestão</h1>
+              <h1 className="text-sm font-black uppercase tracking-[0.3em] text-zinc-500">Área de Gestão</h1>
            </div>
 
            <div className="flex items-center gap-4">
@@ -283,7 +283,7 @@ export default function Dashboard() {
            {activeTab === 'overview' && (
              <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <header>
-                   <h2 className="text-4xl font-black italic tracking-tighter uppercase mb-2">Visão Geral</h2>
+                   <h2 className="text-4xl font-black tracking-tighter uppercase mb-2">Visão Geral</h2>
                    <p className="text-zinc-500 font-medium">O pulso financeiro e operacional da sua locadora hoje.</p>
                 </header>
 
@@ -295,7 +295,7 @@ export default function Dashboard() {
                          <TrendingUp className="h-4 w-4 text-emerald-500" />
                       </CardHeader>
                       <CardContent className="p-6 pt-0">
-                         <div className="text-3xl font-black italic tracking-tighter text-zinc-100 mb-1">
+                         <div className="text-3xl font-black tracking-tighter text-zinc-100 mb-1">
                             {formatCurrency(totalRevenue)}
                          </div>
                          <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Baseado em itens entregues</p>
@@ -308,7 +308,7 @@ export default function Dashboard() {
                          <CalendarDays className="h-4 w-4 text-zinc-600" />
                       </CardHeader>
                       <CardContent className="p-6 pt-0">
-                         <div className="text-3xl font-black italic tracking-tighter text-zinc-100 mb-1">{activeBookings}</div>
+                         <div className="text-3xl font-black tracking-tighter text-zinc-100 mb-1">{activeBookings}</div>
                          <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">{pendingBookingsCount} Pendentes</p>
                       </CardContent>
                    </Card>
@@ -319,7 +319,7 @@ export default function Dashboard() {
                          <Package className="h-4 w-4 text-zinc-600" />
                       </CardHeader>
                       <CardContent className="p-6 pt-0">
-                         <div className="text-3xl font-black italic tracking-tighter text-zinc-100 mb-1">{equipments?.length || 0}</div>
+                         <div className="text-3xl font-black tracking-tighter text-zinc-100 mb-1">{equipments?.length || 0}</div>
                          <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Itens cadastrados</p>
                       </CardContent>
                    </Card>
@@ -330,7 +330,7 @@ export default function Dashboard() {
                          <AlertCircle className="h-4 w-4 text-destructive" />
                       </CardHeader>
                       <CardContent className="p-6 pt-0">
-                         <div className="text-3xl font-black italic tracking-tighter text-destructive mb-1">{maintenanceCount}</div>
+                         <div className="text-3xl font-black tracking-tighter text-destructive mb-1">{maintenanceCount}</div>
                          <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Atenção requerida</p>
                       </CardContent>
                    </Card>
@@ -339,7 +339,7 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
                    <Card className="xl:col-span-2 bg-zinc-950 border-zinc-900 rounded-3xl">
                       <CardHeader className="p-8 border-b border-zinc-900 flex flex-row items-center justify-between">
-                         <CardTitle className="text-xl font-black italic tracking-tighter uppercase">Pedidos Recentes</CardTitle>
+                         <CardTitle className="text-xl font-black tracking-tighter uppercase">Pedidos Recentes</CardTitle>
                          <Button variant="ghost" className="text-[10px] uppercase font-black tracking-widest text-zinc-500">Ver Todos</Button>
                       </CardHeader>
                       <CardContent className="p-0">
@@ -358,14 +358,14 @@ export default function Dashboard() {
                                          )}
                                       </div>
                                       <div className="min-w-0">
-                                         <p className="text-sm font-black text-zinc-100 italic uppercase truncate">{(booking as any).equipment?.name}</p>
+                                         <p className="text-sm font-black text-zinc-100 uppercase truncate">{(booking as any).equipment?.name}</p>
                                          <p className="text-[10px] uppercase text-zinc-500 font-bold tracking-widest truncate">
                                             Solicitante: {booking.renter?.company?.name || booking.renter?.full_name || 'Usuário'}
                                          </p>
                                       </div>
                                    </div>
                                    <div className="text-right shrink-0">
-                                      <div className="text-sm font-black text-zinc-100 italic">{formatCurrency(booking.total_amount)}</div>
+                                      <div className="text-sm font-black text-zinc-100">{formatCurrency(booking.total_amount)}</div>
                                       <Badge variant="outline" className="text-[8px] uppercase font-black h-4 px-1 border-zinc-800 text-zinc-500">{booking.status}</Badge>
                                    </div>
                                 </div>
@@ -377,7 +377,7 @@ export default function Dashboard() {
 
                    <Card className="bg-zinc-950 border-zinc-900 rounded-3xl">
                       <CardHeader className="p-8 border-b border-zinc-900">
-                         <CardTitle className="text-xl font-black italic tracking-tighter uppercase">Destaques</CardTitle>
+                         <CardTitle className="text-xl font-black tracking-tighter uppercase">Destaques</CardTitle>
                       </CardHeader>
                       <CardContent className="p-8 space-y-6 text-center">
                          <div className="p-6 bg-zinc-900/50 rounded-2xl border border-dashed border-zinc-800">
@@ -409,7 +409,7 @@ export default function Dashboard() {
              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <header className="mb-10 flex items-center justify-between">
                    <div>
-                      <h2 className="text-4xl font-black italic tracking-tighter uppercase mb-2">Pedidos</h2>
+                      <h2 className="text-4xl font-black tracking-tighter uppercase mb-2">Pedidos</h2>
                       <p className="text-zinc-500 font-medium">Gerencie entradas e solicitações do HUB.</p>
                    </div>
                    <div className="flex bg-zinc-900 p-1 rounded-xl border border-zinc-800">
@@ -427,7 +427,7 @@ export default function Dashboard() {
                                 {booking.renter?.company?.name?.charAt(0) || booking.renter?.full_name?.charAt(0) || 'U'}
                              </div>
                              <div>
-                                <p className="font-black text-zinc-100 tracking-tight italic uppercase">
+                                <p className="font-black text-zinc-100 tracking-tight uppercase">
                                    {booking.renter?.company?.name || booking.renter?.full_name || 'Solicitante Desconhecido'}
                                 </p>
                                 <p className="text-[10px] uppercase font-bold text-zinc-500 tracking-widest">{booking.equipment?.name}</p>
@@ -440,7 +440,7 @@ export default function Dashboard() {
                                 <p className="text-xs font-bold text-zinc-400">{format(new Date(booking.start_date), "dd/MM")} - {format(new Date(booking.end_date), "dd/MM")}</p>
                              </div>
                              <div className="text-right">
-                                <div className="text-lg font-black italic text-zinc-100">{formatCurrency(booking.total_amount)}</div>
+                                <div className="text-lg font-black text-zinc-100">{formatCurrency(booking.total_amount)}</div>
                                 <Badge className={`text-[8px] uppercase font-black tracking-tighter h-4 ${
                                    booking.status === 'approved' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 
                                    booking.status === 'pending' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : ''
@@ -485,7 +485,7 @@ export default function Dashboard() {
            {activeTab === 'settings' && (
              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <header className="mb-10">
-                   <h2 className="text-4xl font-black italic tracking-tighter uppercase mb-2">Ajustes</h2>
+                   <h2 className="text-4xl font-black tracking-tighter uppercase mb-2">Ajustes</h2>
                    <p className="text-zinc-500 font-medium">Configurações da sua locadora e conta.</p>
                 </header>
                 

@@ -131,7 +131,7 @@ export default function EquipmentDetails() {
              <Badge variant="outline" className="border-zinc-800 text-zinc-500 hidden sm:flex">ID: {id?.slice(0, 8)}</Badge>
              <Button size="sm" variant="ghost" className="text-zinc-400">
                <ShieldCheck className="w-4 h-4 mr-2" />
-               <span className="text-xs font-bold uppercase italic">Seguro Ativo</span>
+               <span className="text-xs font-bold uppercase">Seguro Ativo</span>
              </Button>
           </div>
         </div>
@@ -155,7 +155,7 @@ export default function EquipmentDetails() {
                 </div>
               )}
               <div className="absolute top-4 left-4">
-                <Badge className="bg-primary/90 backdrop-blur-md text-white border-none font-black italic uppercase tracking-tighter px-3 py-1">
+                <Badge className="bg-primary/90 backdrop-blur-md text-white border-none font-black uppercase tracking-tighter px-3 py-1">
                   {equipment.category}
                 </Badge>
               </div>
@@ -197,7 +197,7 @@ export default function EquipmentDetails() {
           <div className="flex flex-col">
             <div className="mb-8">
               <div className="flex items-center gap-2 mb-4">
-                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest italic ${conditionColors[equipment.condition]}`}>
+                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${conditionColors[equipment.condition]}`}>
                   {conditionLabels[equipment.condition]}
                 </span>
                 <span className="text-zinc-500">•</span>
@@ -206,7 +206,7 @@ export default function EquipmentDetails() {
                   <span>{equipment.company?.address_city || 'Fortaleza'} - {equipment.company?.address_state || 'CE'}</span>
                 </div>
               </div>
-              <h1 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter leading-none mb-4">
+              <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none mb-4">
                 {equipment.name}
               </h1>
               <p className="text-zinc-400 text-lg leading-relaxed font-medium">
@@ -219,7 +219,7 @@ export default function EquipmentDetails() {
               <CardContent className="p-8">
                 <div className="flex items-end justify-between mb-8 pb-8 border-b border-zinc-900">
                   <div>
-                    <p className="text-zinc-500 uppercase font-black italic tracking-widest text-xs mb-1">Preço da Diária</p>
+                    <p className="text-zinc-500 uppercase font-black tracking-widest text-xs mb-1">Preço da Diária</p>
                     <div className="flex items-baseline gap-2">
                        <span className="text-4xl font-black text-zinc-100 tracking-tighter leading-none">
                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(equipment.daily_rate)}
@@ -230,7 +230,7 @@ export default function EquipmentDetails() {
                     <p className="text-xs font-bold text-zinc-500 mb-1">Avaliação</p>
                     <div className="flex items-center gap-1 bg-zinc-900 px-2 py-1 rounded-lg">
                       <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-                      <span className="text-sm font-black italic">4.9</span>
+                      <span className="text-sm font-black">4.9</span>
                     </div>
                   </div>
                 </div>
@@ -247,7 +247,7 @@ export default function EquipmentDetails() {
                 </div>
 
                 <div className="mt-8 p-4 bg-zinc-900/50 rounded-2xl border border-zinc-800 space-y-4">
-                   <p className="text-[10px] uppercase font-black italic text-zinc-500 tracking-widest text-center">Consultar Calendário</p>
+                   <p className="text-[10px] uppercase font-black text-zinc-500 tracking-widest text-center">Consultar Calendário</p>
                    <div className="grid grid-cols-2 gap-2">
                       <div className="space-y-1">
                          <label className="text-[9px] uppercase font-bold text-zinc-500 ml-1">Retirada</label>
@@ -275,7 +275,7 @@ export default function EquipmentDetails() {
                      <div className="flex items-center justify-between px-2 pt-2 border-t border-zinc-800/50">
                         <div className="flex items-center gap-2">
                            <div className={`w-2 h-2 rounded-full ${availability.isAvailable ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
-                           <span className={`text-[11px] font-black uppercase italic ${availability.isAvailable ? 'text-emerald-500' : 'text-red-500'}`}>
+                           <span className={`text-[11px] font-black uppercase ${availability.isAvailable ? 'text-emerald-500' : 'text-red-500'}`}>
                               {availability.isAvailable ? 'Equipamento Disponível' : 'Indisponível no Período'}
                            </span>
                         </div>
@@ -291,7 +291,7 @@ export default function EquipmentDetails() {
                    <Button 
                      onClick={handleStartBooking}
                      disabled={!availability?.isAvailable || isSubmitting}
-                     className={`h-14 rounded-2xl font-black italic uppercase tracking-tighter text-lg group shadow-2xl transition-all
+                     className={`h-14 rounded-2xl font-black uppercase tracking-tighter text-lg group shadow-2xl transition-all
                        ${availability?.isAvailable 
                          ? 'bg-primary hover:bg-primary/90 text-white shadow-[0_10px_30px_rgba(234,88,12,0.3)]' 
                          : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'}`}
@@ -308,18 +308,18 @@ export default function EquipmentDetails() {
 
             {/* Especificações Adicionais */}
             <div className="mt-12 space-y-6">
-               <h3 className="text-xl font-black italic uppercase tracking-tighter flex items-center gap-2">
+               <h3 className="text-xl font-black uppercase tracking-tighter flex items-center gap-2">
                   <Info className="w-5 h-5 text-primary" /> Detalhes Técnicos
                </h3>
                <div className="grid grid-cols-2 gap-4">
                   {equipment.features && Object.entries(equipment.features).map(([key, value]) => (
                     <div key={key} className="bg-zinc-900/30 p-4 rounded-2xl border border-zinc-800/50">
-                       <p className="text-[10px] uppercase font-black text-zinc-500 tracking-widest mb-1 italic">{key}</p>
+                       <p className="text-[10px] uppercase font-black text-zinc-500 tracking-widest mb-1">{key}</p>
                        <p className="font-bold text-zinc-300">{String(value)}</p>
                     </div>
                   ))}
                   {!equipment.features || Object.keys(equipment.features).length === 0 && (
-                     <p className="text-zinc-500 italic text-sm col-span-2">Consulte a locadora para especificações completas de montagem e acessórios.</p>
+                     <p className="text-zinc-500 text-sm col-span-2">Consulte a locadora para especificações completas de montagem e acessórios.</p>
                   )}
                </div>
             </div>

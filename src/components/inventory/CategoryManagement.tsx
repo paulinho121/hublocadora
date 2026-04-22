@@ -56,7 +56,7 @@ export function CategoryManagement() {
           <Button 
             onClick={handleAdd}
             disabled={createCategory.isPending || !newName.trim()}
-            className="h-12 px-6 rounded-xl font-black uppercase italic"
+            className="h-12 px-6 rounded-xl font-black uppercase"
           >
             {createCategory.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Criar'}
           </Button>
@@ -80,7 +80,7 @@ export function CategoryManagement() {
                 className="h-10 px-4 rounded-xl border-zinc-900 bg-zinc-950 text-zinc-100 flex items-center gap-2 hover:bg-zinc-900 transition-colors"
               >
                 <div className="w-2 h-2 rounded-full bg-primary/40" />
-                <span className="font-bold uppercase italic tracking-tight text-xs">{cat.name}</span>
+                <span className="font-bold uppercase tracking-tight text-xs">{cat.name}</span>
               </Badge>
             ))
           )}

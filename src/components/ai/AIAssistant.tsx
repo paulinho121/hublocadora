@@ -179,7 +179,7 @@ export function AIAssistant() {
                           p: ({node, ...props}) => <p className="mb-2 last:mb-0 leading-relaxed" {...props} />,
                           ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2" {...props} />,
                           li: ({node, ...props}) => <li className="mb-1" {...props} />,
-                          blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-primary/50 pl-4 py-1 italic bg-white/5 rounded-r-md my-2" {...props} />
+                          blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-primary/50 pl-4 py-1 bg-white/5 rounded-r-md my-2" {...props} />
                         }}
                       >
                         {chat.content}

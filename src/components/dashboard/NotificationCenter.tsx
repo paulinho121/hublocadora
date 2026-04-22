@@ -24,13 +24,13 @@ export function NotificationCenter() {
             {isOpen && (
                 <div className="absolute right-0 mt-4 w-80 bg-zinc-950 border border-zinc-800 rounded-3xl shadow-3xl overflow-hidden z-50">
                     <header className="p-4 border-b border-zinc-900 flex justify-between items-center">
-                         <h4 className="text-xs font-black uppercase italic tracking-widest text-zinc-100">Notificações</h4>
+                         <h4 className="text-xs font-black uppercase tracking-widest text-zinc-100">Notificações</h4>
                          <button onClick={() => setIsOpen(false)}><X className="h-4 w-4"/></button>
                     </header>
                     <div className="max-h-80 overflow-y-auto">
                        {notifications.map((n) => (
                           <div key={n.id} className="p-4 border-b border-zinc-900">
-                             <p className="text-[10px] font-black uppercase text-zinc-100 italic">{n.title}</p>
+                             <p className="text-[10px] font-black uppercase text-zinc-100">{n.title}</p>
                              <p className="text-[10px] text-zinc-500 font-medium">{n.message}</p>
                           </div>
                        ))}

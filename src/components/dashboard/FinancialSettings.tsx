@@ -72,7 +72,7 @@ export function FinancialSettings({ companyId, initialConfig }: { companyId: str
         {/* REPASSE & PAGAMENTOS */}
         <Card className="bg-zinc-950 border-zinc-900 rounded-3xl overflow-hidden shadow-2xl">
           <CardHeader className="p-8 border-b border-zinc-900 bg-zinc-900/40">
-            <CardTitle className="text-xl font-black italic uppercase flex items-center gap-3">
+            <CardTitle className="text-xl font-black uppercase flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center">
                 <Wallet className="h-5 w-5 text-primary" />
               </div>
@@ -87,7 +87,7 @@ export function FinancialSettings({ companyId, initialConfig }: { companyId: str
                 placeholder="CNPJ, E-mail ou Celular" 
                 className="h-14 bg-zinc-900 border-zinc-800 rounded-xl focus:ring-primary/20 text-lg font-mono" 
               />
-              {errors.pix_key && <p className="text-xs text-red-500 font-bold italic">{errors.pix_key.message}</p>}
+              {errors.pix_key && <p className="text-xs text-red-500 font-bold">{errors.pix_key.message}</p>}
             </div>
 
             <div className="grid grid-cols-2 gap-4 pt-4 border-t border-zinc-900/50">
@@ -117,7 +117,7 @@ export function FinancialSettings({ companyId, initialConfig }: { companyId: str
         {/* DADOS FISCAIS */}
         <Card className="bg-zinc-950 border-zinc-900 rounded-3xl overflow-hidden shadow-2xl">
           <CardHeader className="p-8 border-b border-zinc-900 bg-zinc-900/40">
-            <CardTitle className="text-xl font-black italic uppercase flex items-center gap-3">
+            <CardTitle className="text-xl font-black uppercase flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-zinc-800 flex items-center justify-center">
                 <Receipt className="h-5 w-5 text-zinc-400" />
               </div>
@@ -129,7 +129,7 @@ export function FinancialSettings({ companyId, initialConfig }: { companyId: str
               <Label className="text-[10px] uppercase font-black tracking-widest text-zinc-500">Regime Tributário</Label>
               <select 
                 {...register('fiscal_data.tax_regime')}
-                className="w-full h-12 bg-zinc-900 border-zinc-800 rounded-xl px-4 text-sm focus:ring-primary/20 appearance-none font-bold italic"
+                className="w-full h-12 bg-zinc-900 border-zinc-800 rounded-xl px-4 text-sm focus:ring-primary/20 appearance-none font-bold"
               >
                 <option value="simples_nacional">SIMPLES NACIONAL</option>
                 <option value="lucro_presumido">LUCRO PRESUMIDO</option>
@@ -177,7 +177,7 @@ export function FinancialSettings({ companyId, initialConfig }: { companyId: str
             </div>
             <div>
                <p className="text-sm font-bold text-zinc-200">Segurança de Dados</p>
-               <p className="text-[10px] text-zinc-500 font-medium italic">Seus dados são criptografados e protegidos por políticas RLS rigorosas.</p>
+               <p className="text-[10px] text-zinc-500 font-medium">Seus dados são criptografados e protegidos por políticas RLS rigorosas.</p>
             </div>
          </div>
          <Button 

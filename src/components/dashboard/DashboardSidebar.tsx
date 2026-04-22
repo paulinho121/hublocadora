@@ -41,7 +41,7 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
              <Package className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h2 className="text-xl font-black italic tracking-tighter uppercase truncate leading-none mb-1">
+            <h2 className="text-xl font-black tracking-tighter uppercase truncate leading-none mb-1">
               {companyName || 'Cinehub'}
             </h2>
             <div className="flex items-center gap-1.5 shrink-0">

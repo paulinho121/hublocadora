@@ -113,7 +113,7 @@ export default function Login() {
                             cinehub
                         </span>
                     </div>
-                    <CardTitle className="text-xl md:text-2xl font-black uppercase italic tracking-tight">Login de Acesso</CardTitle>
+                    <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tight">Login de Acesso</CardTitle>
                     <CardDescription className="text-xs md:text-sm font-medium">
                         O maior HUB da sua produção começa aqui.
                     </CardDescription>
@@ -155,7 +155,7 @@ export default function Login() {
                         {error && <p className="text-xs text-red-400 font-bold uppercase tracking-widest text-center mt-2">{error}</p>}
                         
                         <div className="flex flex-col gap-2 mt-6">
-                            <Button className="w-full h-12 bg-primary hover:bg-primary/90 font-black uppercase italic tracking-tighter text-lg shadow-lg shadow-primary/20" type="submit" disabled={loading}>
+                            <Button className="w-full h-12 bg-primary hover:bg-primary/90 font-black uppercase tracking-tighter text-lg shadow-lg shadow-primary/20" type="submit" disabled={loading}>
                                 {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
                                 {loading ? 'Sincronizando...' : 'Entrar no Hub'}
                             </Button>

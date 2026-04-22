@@ -38,7 +38,7 @@ export function PixPaymentModal({ isOpen, onClose, bookingId, amount, onSuccess 
   return (
     <Dialog isOpen={isOpen} onClose={onClose} title="Pagamento via PIX">
       <div className="text-center space-y-6">
-        <h3 className="text-4xl font-black italic uppercase tracking-tighter text-zinc-100">
+        <h3 className="text-4xl font-black uppercase tracking-tighter text-zinc-100">
           {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(amount)}
         </h3>
         <div className="bg-white rounded-3xl p-6 shadow-2xl flex items-center justify-center aspect-square">
