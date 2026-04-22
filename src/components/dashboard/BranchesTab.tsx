@@ -51,7 +51,7 @@ export function BranchesTab() {
         <div className="space-y-8 animate-in fade-in duration-700">
             <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-3xl font-black italic tracking-tighter uppercase mb-1">Minha Rede</h2>
+                    <h2 className="text-3xl font-black tracking-tighter uppercase mb-1">Minha Rede</h2>
                     <p className="text-zinc-500 font-medium text-sm">Gerencie suas sub-locadoras e estoque pelo Brasil.</p>
                 </div>
                 <Button 

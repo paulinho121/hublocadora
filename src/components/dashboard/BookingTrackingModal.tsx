@@ -28,7 +28,7 @@ export function BookingTrackingModal({ bookingId }: BookingTrackingModalProps) {
         <div className="w-16 h-16 bg-zinc-900 rounded-3xl flex items-center justify-center mx-auto mb-4 border border-zinc-800">
            <Info className="h-8 w-8 text-zinc-700" />
         </div>
-        <h3 className="text-xl font-black italic uppercase text-zinc-200">Aguardando Processamento</h3>
+        <h3 className="text-xl font-black uppercase text-zinc-200">Aguardando Processamento</h3>
         <p className="text-zinc-500 text-sm mt-2 font-medium">A locadora está revisando seu pedido. Assim que aprovarem, o rastreio em tempo real será ativado.</p>
       </div>
     );
@@ -48,14 +48,14 @@ export function BookingTrackingModal({ bookingId }: BookingTrackingModalProps) {
             </div>
             <div>
                 <p className="text-[10px] font-black uppercase text-primary tracking-widest mb-0.5">Equipamento</p>
-                <h4 className="text-lg font-black italic uppercase text-zinc-100 leading-none">
+                <h4 className="text-lg font-black uppercase text-zinc-100 leading-none">
                     {delivery.booking?.equipment?.name}
                 </h4>
             </div>
         </div>
         <div className="text-right">
             <p className="text-[10px] font-black uppercase text-zinc-600 tracking-widest mb-1">Status iFood Hub</p>
-            <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 font-black uppercase italic text-[10px] px-3">
+            <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 font-black uppercase text-[10px] px-3">
                 Ao Vivo
             </Badge>
         </div>

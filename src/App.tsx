@@ -21,6 +21,7 @@ import Register from '@/pages/Register';
 import EquipmentDetails from '@/pages/EquipmentDetails';
 import { AIToolsPage } from '@/pages/AITools';
 import { AIAssistant } from '@/components/ai/AIAssistant';
+import AcceptInvite from '@/pages/AcceptInvite';
 
 function Navbar() {
   const { user, profile, signOut } = useAuth();
@@ -157,7 +158,7 @@ function BottomNav() {
 
 function MainLayout() {
   const location = useLocation();
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname.startsWith('/invite/');
 
   return (
     <div className="min-h-screen bg-background font-sans antialiased flex flex-col">
@@ -170,6 +171,7 @@ function MainLayout() {
           <Route path="/ai-tools" element={<AIToolsPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/invite/:token" element={<AcceptInvite />} />
           <Route
             path="/dashboard"
             element={

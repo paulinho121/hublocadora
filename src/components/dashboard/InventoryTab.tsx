@@ -41,7 +41,7 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
       <div className="flex flex-col md:flex-row items-end justify-between gap-4 bg-zinc-950/20 p-6 rounded-2xl border border-zinc-900/50 backdrop-blur-sm">
         <div className="flex-1 w-full space-y-4">
           <div className="flex items-center gap-2 mb-2">
-            <h2 className="text-xl font-black uppercase italic tracking-tighter">Seu Inventário</h2>
+            <h2 className="text-xl font-black uppercase tracking-tighter">Seu Inventário</h2>
             <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
           </div>
           

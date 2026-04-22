@@ -14,7 +14,7 @@ const BrandItem = ({ brand }: { brand: typeof brands[0] }) => {
   const [error, setError] = useState(false);
   
   if (error) {
-    return <span className="text-3xl md:text-5xl font-black tracking-tighter text-zinc-800 uppercase italic">{brand.name}</span>;
+    return <span className="text-3xl md:text-5xl font-black tracking-tighter text-zinc-800 uppercase">{brand.name}</span>;
   }
 
   return (

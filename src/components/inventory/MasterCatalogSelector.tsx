@@ -147,7 +147,7 @@ export function MasterCatalogSelector({ companyId, onSuccess }: MasterCatalogSel
                   {item.category}
                 </span>
               </div>
-              <h4 className="font-bold text-zinc-100 truncate italic tracking-tight">{item.name}</h4>
+              <h4 className="font-bold text-zinc-100 truncate tracking-tight">{item.name}</h4>
               <p className="text-xs text-zinc-500 line-clamp-1">{item.description}</p>
             </div>
             <ChevronRight className={`w-5 h-5 ${selectedItem?.id === item.id ? 'text-primary' : 'text-zinc-700'}`} />
@@ -165,7 +165,7 @@ export function MasterCatalogSelector({ companyId, onSuccess }: MasterCatalogSel
             className="fixed bottom-6 left-6 right-6 md:left-auto md:right-10 md:w-96 z-50 bg-zinc-950/90 backdrop-blur-xl border border-primary/20 p-6 rounded-3xl shadow-2xl space-y-6"
           >
             <div className="flex items-start justify-between">
-                <h3 className="text-xl font-black italic uppercase tracking-tighter text-primary">
+                <h3 className="text-xl font-black uppercase tracking-tighter text-primary">
                   {existingItem ? 'Atualizar Estoque' : selectedItem.name}
                 </h3>
                 <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest mt-1">
@@ -251,7 +251,7 @@ export function MasterCatalogSelector({ companyId, onSuccess }: MasterCatalogSel
             </div>
 
             <Button 
-              className={`w-full h-14 rounded-2xl font-black italic uppercase tracking-tighter text-lg shadow-2xl hover:scale-[1.02] active:scale-95 transition-all ${
+              className={`w-full h-14 rounded-2xl font-black uppercase tracking-tighter text-lg shadow-2xl hover:scale-[1.02] active:scale-95 transition-all ${
                 existingItem ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/20' : 'shadow-primary/30'
               }`}
               onClick={handleAdd}

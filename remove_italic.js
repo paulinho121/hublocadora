@@ -14,8 +14,9 @@ function processDir(dir) {
     } else if (fullPath.endsWith('.tsx') || fullPath.endsWith('.ts')) {
       let content = fs.readFileSync(fullPath, 'utf8');
       if (content.match(/\bitalic\b/)) {
-        let newContent = content.replace(/\bitalic\b/g, '');
-        newContent = newContent.replace(/  +/g, ' ');
+        let newContent = content.replace(/(?:\s+italic\b)|(?:\bitalic\s+)/g, '');
+        // Fallback for just 'italic'
+        newContent = newContent.replace(/\bitalic\b/g, '');
         fs.writeFileSync(fullPath, newContent);
         console.log(`Updated: ${fullPath}`);
       }

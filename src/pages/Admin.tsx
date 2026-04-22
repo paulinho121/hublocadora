@@ -794,7 +794,7 @@ export default function Admin() {
                         
                         <div className="p-3 border border-zinc-800 hover:border-orange-500 transition-all rounded-xl cursor-pointer group hover:bg-orange-500/5 flex flex-col justify-center">
                            <div className="flex justify-between items-center border-b border-zinc-900 pb-2 mb-2">
-                              <h3 className="text-sm font-black italic tracking-tighter text-orange-500">LALAMOVE</h3>
+                              <h3 className="text-sm font-black tracking-tighter text-orange-500">LALAMOVE</h3>
                               <p className="text-[10px] text-zinc-400 font-bold">~15 min</p>
                            </div>
                            <div className="flex justify-between items-end">

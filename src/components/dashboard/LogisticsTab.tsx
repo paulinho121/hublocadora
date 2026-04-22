@@ -14,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useBranches } from '@/hooks/useBranches';
 import { Dialog } from '@/components/ui/dialog';
 import { InternalTransfersSection } from './InternalTransfersSection';
+import { cn } from '@/lib/utils';
 
 export function LogisticsTab({ tenantId }: { tenantId: string }) {
     const { user } = useAuth();
@@ -124,7 +125,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
         return (
             <div className="flex flex-col items-center justify-center py-20">
                 <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-                <p className="text-zinc-500 font-medium italic tracking-widest uppercase text-xs">Carregando Fluxo Logístico...</p>
+                <p className="text-zinc-500 font-medium tracking-widest uppercase text-xs">Carregando Fluxo Logístico...</p>
             </div>
         );
     }
@@ -133,7 +134,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                 <div>
-                    <h2 className="text-4xl font-black italic tracking-tighter uppercase mb-2">Painel de Logística</h2>
+                    <h2 className="text-4xl font-black tracking-tighter uppercase mb-2">Painel de Logística</h2>
                     <p className="text-zinc-500 font-medium">Controle de fluxo em tempo real.</p>
                 </div>
 
@@ -171,7 +172,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                             className="bg-zinc-900/30 border border-dashed border-zinc-800 rounded-3xl p-20 text-center"
                         >
                             <Truck className="h-12 w-12 text-zinc-700 mx-auto mb-4" />
-                            <h3 className="text-xl font-black italic uppercase text-zinc-500">Nenhuma entrega ativa</h3>
+                            <h3 className="text-xl font-black uppercase text-zinc-500">Nenhuma entrega ativa</h3>
                             <p className="text-zinc-600 text-sm mt-2 font-medium">Novos pedidos aparecerão aqui automaticamente.</p>
                         </motion.div>
                     ) : (
@@ -211,7 +212,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                     <Clock className="h-3 w-3" /> {format(new Date(delivery.created_at), "dd/MM 'às' HH:mm")}
                                                                 </span>
                                                             </div>
-                                                            <h3 className="text-2xl font-black italic uppercase tracking-tighter text-zinc-100 italic">
+                                                            <h3 className="text-2xl font-black uppercase tracking-tighter text-zinc-100">
                                                                 {delivery.booking?.equipment?.name || 'Equipamento'}
                                                             </h3>
                                                             <p className="text-zinc-500 text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 mt-1">
@@ -222,7 +223,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                     
                                                     <div className="text-right hidden sm:block">
                                                         <p className="text-[10px] font-black uppercase text-zinc-600 tracking-widest mb-1">Status Atual</p>
-                                                        <Badge className="bg-zinc-800 text-zinc-300 font-black uppercase italic text-xs py-1.5 px-4 rounded-full border-zinc-700">
+                                                        <Badge className="bg-zinc-800 text-zinc-300 font-black uppercase text-xs py-1.5 px-4 rounded-full border-zinc-700">
                                                             {getStatusLabel(delivery.status)}
                                                         </Badge>
                                                     </div>
@@ -272,7 +273,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                         </div>
                                                         <Input 
                                                             placeholder="Ex: SN-123456"
-                                                            className="bg-zinc-900 border-zinc-800 rounded-xl text-xs h-10 italic"
+                                                            className="bg-zinc-900 border-zinc-800 rounded-xl text-xs h-10"
                                                             value={serialNumbers[delivery.id] || delivery.serial_number || ''}
                                                             onChange={(e) => setSerialNumbers(prev => ({ ...prev, [delivery.id]: e.target.value }))}
                                                         />
@@ -298,7 +299,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                     ) : (
                                                         <div className="text-center py-4 bg-zinc-900/50 rounded-2xl border border-zinc-800/50">
                                                             <Clock className="h-10 w-10 text-primary/40 mx-auto mb-2 animate-pulse" />
-                                                            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 italic px-4">
+                                                            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 px-4">
                                                                 Aguardando ação da locadora
                                                             </p>
                                                         </div>
@@ -306,7 +307,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                 ) : (
                                                     <div className="text-center py-4">
                                                         <CheckCircle2 className="h-10 w-10 text-emerald-500 mx-auto mb-2" />
-                                                        <p className="text-[10px] font-black uppercase tracking-widest text-emerald-500 italic">Operação Concluída</p>
+                                                        <p className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Operação Concluída</p>
                                                     </div>
                                                 )}
 
@@ -329,6 +330,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                     )}
                 </AnimatePresence>
             </div>
+            )}
 
             {/* Modal de Escolha de Filial */}
             <Dialog 
@@ -351,7 +353,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                 }`}
                             >
                                 <div>
-                                    <p className="font-black uppercase italic tracking-tighter">{branch.name}</p>
+                                    <p className="font-black uppercase tracking-tighter">{branch.name}</p>
                                     <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">{branch.city} - {branch.state}</p>
                                 </div>
                                 {selectedBranchId === branch.id && <CheckCircle2 className="h-5 w-5 text-primary" />}

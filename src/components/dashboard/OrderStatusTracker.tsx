@@ -22,7 +22,7 @@ export function OrderStatusTracker({ status, updatedAt }: OrderStatusTrackerProp
   if (status === 'cancelled') {
     return (
       <div className="bg-destructive/10 border border-destructive/20 rounded-2xl p-6 text-center">
-        <p className="text-destructive font-black uppercase italic tracking-tighter">Pedido Cancelado</p>
+        <p className="text-destructive font-black uppercase tracking-tighter">Pedido Cancelado</p>
       </div>
     );
   }
@@ -114,7 +114,7 @@ export function OrderStatusTracker({ status, updatedAt }: OrderStatusTrackerProp
 
               {/* Label */}
               <div className="absolute -bottom-8 sm:-bottom-10 whitespace-nowrap text-center">
-                <p className={`text-[7px] sm:text-[10px] font-black uppercase tracking-tighter italic transition-colors duration-500 ${
+                <p className={`text-[7px] sm:text-[10px] font-black uppercase tracking-tighter transition-colors duration-500 ${
                   isCurrent ? 'text-emerald-500' : isCompleted ? 'text-zinc-300' : 'text-zinc-700'
                 }`}>
                   {step.label}

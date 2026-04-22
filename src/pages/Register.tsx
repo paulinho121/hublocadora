@@ -96,7 +96,7 @@ export default function Register() {
                             cinehub
                         </span>
                     </div>
-                    <CardTitle className="text-xl md:text-2xl font-black uppercase italic tracking-tight">Novo no Hub</CardTitle>
+                    <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tight">Novo no Hub</CardTitle>
                     <CardDescription className="text-xs md:text-sm font-medium">
                         Junte-se ao maior ecossistema audiovisual.
                     </CardDescription>

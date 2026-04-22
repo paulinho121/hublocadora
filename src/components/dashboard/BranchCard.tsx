@@ -40,7 +40,7 @@ export function BranchCard({ branch, onManageStock, onCopyInvite, isCopied }: Br
                         </div>
                         <div>
                             <div className="flex items-center gap-2 mb-0.5">
-                                <h3 className="text-xl font-black italic uppercase tracking-tighter text-white">
+                                <h3 className="text-xl font-black uppercase tracking-tighter text-white">
                                     {branch.name}
                                 </h3>
                                 <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[8px] px-1.5 h-4 uppercase font-black">
@@ -98,14 +98,14 @@ export function BranchCard({ branch, onManageStock, onCopyInvite, isCopied }: Br
                                                         <p className="text-[8px] text-zinc-500 uppercase font-bold">{item.equipment?.category}</p>
                                                     </div>
                                                 </div>
-                                                <Badge className="bg-zinc-800 text-zinc-400 border-zinc-700 text-[10px] italic font-black">
+                                                <Badge className="bg-zinc-800 text-zinc-400 border-zinc-700 text-[10px] font-black">
                                                     {item.quantity}
                                                 </Badge>
                                             </div>
                                         ))}
                                     </div>
                                 ) : (
-                                    <p className="text-[9px] text-zinc-600 uppercase font-black text-center py-4 italic">Sem estoque atribuído</p>
+                                    <p className="text-[9px] text-zinc-600 uppercase font-black text-center py-4">Sem estoque atribuído</p>
                                 )}
                             </div>
                         </motion.div>
