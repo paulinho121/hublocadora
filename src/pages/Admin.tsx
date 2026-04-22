@@ -68,19 +68,18 @@ export default function Admin() {
   // Mutations
   const updateCompanyStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string, status: 'approved' | 'rejected' | 'pending' | 'active' | 'suspended' }) => {
-      // Usamos 'approved' como padrão pois é o que observamos no banco
-      const dbStatus = (status === 'active' || status === 'approved') ? 'approved' : 'rejected';
-      
-      const { error, data } = await supabase.from('companies').update({ status: dbStatus }).eq('id', id).select();
-      if (error) throw error;
-      if (!data || data.length === 0) throw new Error("Nenhuma linha atualizada. Verifique se o ID existe e se você tem permissão de Admin.");
-      
-      // Verificação de consistência: O banco realmente salvou o que pedimos?
-      if (data[0].status !== dbStatus) {
-        throw new Error(`O Banco de Dados recusou a alteração. Status atual no banco: ${data[0].status}. Verifique Triggers ou Constraints.`);
+      if (status === 'approved' || status === 'active') {
+        // Usamos a nova RPC para bypassar o RLS
+        const { error } = await supabase.rpc('approve_company', { p_company_id: id });
+        if (error) throw error;
+        return { success: true };
+      } else {
+        // Para rejeição/suspensão, mantemos o update padrão ou criamos outra RPC
+        const dbStatus = (status === 'rejected' || status === 'suspended') ? 'suspended' : status;
+        const { error, data } = await supabase.from('companies').update({ status: dbStatus }).eq('id', id).select();
+        if (error) throw error;
+        return data;
       }
-      
-      return data;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['admin-companies'] });
