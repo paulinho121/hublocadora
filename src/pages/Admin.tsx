@@ -74,6 +74,12 @@ export default function Admin() {
       const { error, data } = await supabase.from('companies').update({ status: dbStatus }).eq('id', id).select();
       if (error) throw error;
       if (!data || data.length === 0) throw new Error("Nenhuma linha atualizada. Verifique se o ID existe e se você tem permissão de Admin.");
+      
+      // Verificação de consistência: O banco realmente salvou o que pedimos?
+      if (data[0].status !== dbStatus) {
+        throw new Error(`O Banco de Dados recusou a alteração. Status atual no banco: ${data[0].status}. Verifique Triggers ou Constraints.`);
+      }
+      
       return data;
     },
     onSuccess: (_, variables) => {
