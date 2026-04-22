@@ -78,9 +78,8 @@ export default function Admin() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['admin-companies'] });
-      // Toast amigável em vez de alert bloqueante se possível, mas mantendo a lógica atual corrigida
       const statusMsg = variables.status === 'active' || variables.status === 'approved' ? 'APROVADA' : 'SUSPENSA';
-      console.log(`Empresa atualizada para: ${statusMsg}`);
+      alert(`Sucesso! Unidade ${statusMsg} com sucesso. A página será atualizada.`);
     },
     onError: (err: any) => {
       alert("Erro ao atualizar: " + err.message);
@@ -375,13 +374,22 @@ export default function Admin() {
                                         </p>
                                      </div>
                                   </div>
-                                  <Button 
-                                     onClick={() => { setActiveTab('companies'); setSearchTerm(company.document); }}
-                                     variant="outline" 
-                                     className="h-12 border-primary/20 text-primary uppercase text-[10px] font-black tracking-widest hover:bg-primary/10 rounded-xl"
-                                  >
-                                     Analisar Cadastro
-                                  </Button>
+                                   <div className="flex gap-2">
+                                      <Button 
+                                         onClick={() => { setActiveTab('companies'); setSearchTerm(company.document); }}
+                                         variant="outline" 
+                                         className="h-12 border-zinc-800 text-zinc-400 uppercase text-[10px] font-black tracking-widest hover:bg-zinc-900 rounded-xl"
+                                      >
+                                         Analisar
+                                      </Button>
+                                      <Button 
+                                         onClick={() => updateCompanyStatus.mutate({ id: company.id, status: 'active' })} 
+                                         disabled={updateCompanyStatus.isPending}
+                                         className="h-12 bg-emerald-600 hover:bg-emerald-500 text-white uppercase text-[10px] font-black tracking-widest rounded-xl px-6"
+                                      >
+                                         {updateCompanyStatus.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Aprovar Agora'}
+                                      </Button>
+                                   </div>
                                </div>
                             ))}
                          </div>
