@@ -180,15 +180,15 @@ export default function EquipmentDetails() {
             <div className="grid grid-cols-3 gap-4 pt-4">
                <div className="bg-zinc-950 border border-zinc-800 p-4 rounded-2xl text-center">
                   <ShieldCheck className="w-6 h-6 mx-auto mb-2 text-emerald-500" />
-                  <p className="text-[10px] font-black uppercase tracking-tighter">Proteção HUB</p>
+                  <p className="text-[11px] font-black uppercase tracking-tighter">Proteção HUB</p>
                </div>
                <div className="bg-zinc-950 border border-zinc-800 p-4 rounded-2xl text-center">
                   <Star className="w-6 h-6 mx-auto mb-2 text-yellow-500 fill-yellow-500" />
-                  <p className="text-[10px] font-black uppercase tracking-tighter">Top Rated</p>
+                  <p className="text-[11px] font-black uppercase tracking-tighter">Top Rated</p>
                </div>
                <div className="bg-zinc-950 border border-zinc-800 p-4 rounded-2xl text-center">
                   <Package className="w-6 h-6 mx-auto mb-2 text-blue-500" />
-                  <p className="text-[10px] font-black uppercase tracking-tighter">Original</p>
+                  <p className="text-[11px] font-black uppercase tracking-tighter">Original</p>
                </div>
             </div>
           </div>
@@ -197,7 +197,7 @@ export default function EquipmentDetails() {
           <div className="flex flex-col">
             <div className="mb-8">
               <div className="flex items-center gap-2 mb-4">
-                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${conditionColors[equipment.condition]}`}>
+                <span className={`px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest ${conditionColors[equipment.condition]}`}>
                   {conditionLabels[equipment.condition]}
                 </span>
                 <span className="text-zinc-500">•</span>
@@ -247,10 +247,10 @@ export default function EquipmentDetails() {
                 </div>
 
                 <div className="mt-8 p-4 bg-zinc-900/50 rounded-2xl border border-zinc-800 space-y-4">
-                   <p className="text-[10px] uppercase font-black text-zinc-500 tracking-widest text-center">Consultar Calendário</p>
+                   <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest text-center">Consultar Calendário</p>
                    <div className="grid grid-cols-2 gap-2">
                       <div className="space-y-1">
-                         <label className="text-[9px] uppercase font-bold text-zinc-500 ml-1">Retirada</label>
+                         <label className="text-[11px] uppercase font-bold text-zinc-500 ml-1">Retirada</label>
                          <input 
                            type="date" 
                            value={startDate} 
@@ -259,7 +259,7 @@ export default function EquipmentDetails() {
                          />
                       </div>
                       <div className="space-y-1">
-                         <label className="text-[9px] uppercase font-bold text-zinc-500 ml-1">Devolução</label>
+                         <label className="text-[11px] uppercase font-bold text-zinc-500 ml-1">Devolução</label>
                          <input 
                            type="date" 
                            value={endDate} 
@@ -314,7 +314,7 @@ export default function EquipmentDetails() {
                <div className="grid grid-cols-2 gap-4">
                   {equipment.features && Object.entries(equipment.features).map(([key, value]) => (
                     <div key={key} className="bg-zinc-900/30 p-4 rounded-2xl border border-zinc-800/50">
-                       <p className="text-[10px] uppercase font-black text-zinc-500 tracking-widest mb-1">{key}</p>
+                       <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest mb-1">{key}</p>
                        <p className="font-bold text-zinc-300">{String(value)}</p>
                     </div>
                   ))}

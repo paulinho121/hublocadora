@@ -15,6 +15,7 @@ import { useBranches } from '@/hooks/useBranches';
 import { Dialog } from '@/components/ui/dialog';
 import { InternalTransfersSection } from './InternalTransfersSection';
 import { cn } from '@/lib/utils';
+import { InventoryStatusReport } from './InventoryStatusReport';
 
 export function LogisticsTab({ tenantId }: { tenantId: string }) {
     const { user } = useAuth();
@@ -124,7 +125,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
         return actions[status];
     };
 
-    const [activeSubTab, setActiveSubTab] = useState<'deliveries' | 'transfers'>('deliveries');
+    const [activeSubTab, setActiveSubTab] = useState<'deliveries' | 'transfers' | 'availability'>('deliveries');
 
     if (isLoading) {
         return (
@@ -162,10 +163,21 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                     >
                         Transferências Internas
                     </button>
+                    <button 
+                        onClick={() => setActiveSubTab('availability')}
+                        className={cn(
+                            "px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                            activeSubTab === 'availability' ? "bg-zinc-800 text-white shadow-xl" : "text-zinc-500 hover:text-zinc-300"
+                        )}
+                    >
+                        Disponibilidade
+                    </button>
                 </div>
             </header>
 
-            {activeSubTab === 'transfers' ? (
+            {activeSubTab === 'availability' ? (
+                <InventoryStatusReport companyId={tenantId} />
+            ) : activeSubTab === 'transfers' ? (
                 <InternalTransfersSection />
             ) : (
                 <div className="grid grid-cols-1 gap-6">

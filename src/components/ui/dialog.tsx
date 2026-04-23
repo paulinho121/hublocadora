@@ -13,12 +13,12 @@ export function Dialog({ isOpen, onClose, title, children }: DialogProps) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-10">
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4 md:p-10">
       <div 
         className="absolute inset-0 bg-background/80 backdrop-blur-sm" 
         onClick={onClose} 
       />
-      <div className="relative w-full max-w-2xl max-h-full bg-background rounded-2xl border border-zinc-900 shadow-2xl flex flex-col animate-in fade-in zoom-in duration-200">
+      <div className="relative w-full h-[95vh] sm:h-auto max-w-2xl max-h-full bg-background rounded-t-3xl sm:rounded-2xl border border-zinc-900 shadow-[0_-20px_50px_rgba(0,0,0,0.5)] sm:shadow-2xl flex flex-col animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-0 sm:fade-in sm:zoom-in duration-300">
         <div className="flex items-center justify-between p-6 border-b border-zinc-900 shrink-0">
           {title && <h2 className="text-xl font-black tracking-tighter uppercase">{title}</h2>}
           <button

@@ -140,7 +140,7 @@ export default function Register() {
                                     <Button 
                                         type="button"
                                         variant="link" 
-                                        className="w-full text-[10px] text-primary hover:text-primary/80 font-black uppercase underline underline-offset-4"
+                                        className="w-full text-xs text-primary hover:text-primary/80 font-black uppercase underline underline-offset-4"
                                         onClick={handleResetPassword}
                                     >
                                         Esqueci minha senha / Recuperar Acesso
