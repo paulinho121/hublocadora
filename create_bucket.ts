@@ -1,8 +1,8 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = 'https://ktcmnjtnpnocitojgrxw.supabase.co';
-const supabaseKey = '[REMOVIDO_POR_SEGURANCA]';
+const supabaseUrl = process.env.SUPABASE_URL || 'https://ktcmnjtnpnocitojgrxw.supabase.co';
+const supabaseKey = process.env.SUPABASE_ANON_KEY || 'your-anon-key-here';
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
