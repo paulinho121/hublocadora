@@ -1,0 +1,8 @@
+title = "gitleaks ignore"
+
+[allowlist]
+description = "Ignore old commits that have the anon key hardcoded in utility scripts"
+commits = [
+  "414e637df4d049453a935ef2d16eab4781849671",
+  "020d4f34eccf44cb8717393da0ed011515a844a9"
+]
