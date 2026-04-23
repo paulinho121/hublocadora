@@ -97,49 +97,22 @@ export function InventoryCard({ item, onEdit, onDelete }: InventoryCardProps) {
           </h3>
         </div>
 
-        <div className="flex items-end justify-between mt-auto">
-          <div>
-            <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-0.5">Taxa Diária</p>
-            <div className="text-xl font-black tracking-tighter text-zinc-100">
-              {formatCurrency(item.daily_rate)}
-              <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest ml-1">/ dia</span>
+        <div className="flex flex-col gap-4 mt-auto">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-0.5">Taxa Diária</p>
+              <div className="text-xl font-black tracking-tighter text-zinc-100">
+                {formatCurrency(item.daily_rate)}
+                <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest ml-1">/ dia</span>
+              </div>
             </div>
-            <div className="flex flex-col gap-1 mt-2 mb-1">
-              {item.location_base && (
-                <div className="flex items-center gap-1.5 text-zinc-400 bg-zinc-900 w-max px-2 py-1 rounded border border-zinc-800">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0 animate-pulse"></span>
-                  <span className="text-[9px] font-bold uppercase tracking-widest leading-none">
-                    {item.location_base} {item.state_uf && `(${item.state_uf})`}
-                  </span>
-                </div>
-              )}
-              <p className="text-[9px] text-emerald-500 font-bold uppercase tracking-widest">
-                 Disponíveis: {item.stock_quantity || 0} unidades
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={toggleExternalRental}
-              disabled={loading}
-              className={`flex items-center gap-2 px-3 h-8 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-                item.status === 'unavailable' 
-                ? 'bg-zinc-800 text-zinc-500 border border-zinc-700' 
-                : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500/20'
-              }`}
-              title={item.status === 'unavailable' ? "Voltar ao HUB" : "Indisponibilizar"}
-            >
-              <div className={`h-1.5 w-1.5 rounded-full ${item.status === 'unavailable' ? 'bg-zinc-600' : 'bg-emerald-500 animate-pulse'}`} />
-              {item.status === 'unavailable' ? 'Invisível no HUB' : 'Ativo no HUB'}
-            </button>
-
+            
             <div className="flex gap-1">
               <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={() => onEdit(item)} 
-                className="h-8 w-8 hover:bg-primary/20 hover:text-primary transition-colors"
+                className="h-9 w-9 bg-zinc-900/50 hover:bg-primary/20 hover:text-primary transition-all rounded-xl border border-zinc-800"
                 title="Editar"
               >
                 <Edit2 className="h-4 w-4" />
@@ -148,12 +121,44 @@ export function InventoryCard({ item, onEdit, onDelete }: InventoryCardProps) {
                 variant="ghost" 
                 size="icon" 
                 onClick={() => onDelete(item.id)}
-                className="h-8 w-8 hover:bg-destructive/10 text-zinc-600 hover:text-destructive transition-colors"
+                className="h-9 w-9 bg-zinc-900/50 hover:bg-destructive/10 text-zinc-600 hover:text-destructive transition-all rounded-xl border border-zinc-800"
                 title="Excluir"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex flex-wrap gap-2">
+              {item.location_base && (
+                <div className="flex items-center gap-1.5 text-zinc-400 bg-zinc-900 px-2 py-1 rounded-lg border border-zinc-800">
+                  <span className="w-1 h-1 rounded-full bg-primary shrink-0 animate-pulse"></span>
+                  <span className="text-[9px] font-bold uppercase tracking-widest">
+                    {item.location_base}
+                  </span>
+                </div>
+              )}
+              <div className="flex items-center gap-1.5 text-emerald-500 bg-emerald-500/5 px-2 py-1 rounded-lg border border-emerald-500/10">
+                <Package className="h-3 w-3" />
+                <span className="text-[9px] font-bold uppercase tracking-widest">
+                  {item.stock_quantity || 0} em estoque
+                </span>
+              </div>
+            </div>
+
+            <button 
+              onClick={toggleExternalRental}
+              disabled={loading}
+              className={`w-full flex items-center justify-center gap-2 h-10 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border ${
+                item.status === 'unavailable' 
+                ? 'bg-zinc-900 text-zinc-500 border-zinc-800 hover:bg-zinc-800' 
+                : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.05)]'
+              }`}
+            >
+              <div className={`h-1.5 w-1.5 rounded-full ${item.status === 'unavailable' ? 'bg-zinc-600' : 'bg-emerald-500 animate-pulse'}`} />
+              {item.status === 'unavailable' ? 'Invisível no HUB' : 'Ativo no HUB'}
+            </button>
           </div>
         </div>
 
