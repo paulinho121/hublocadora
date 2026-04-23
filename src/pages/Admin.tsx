@@ -190,7 +190,7 @@ export default function Admin() {
               >
                  <Building2 className="h-4 w-4" /> Locadoras
                  {pendingCompanies.length > 0 && (
-                    <span className="ml-2 bg-primary text-black px-2 py-0.5 rounded-full text-[10px]">{pendingCompanies.length}</span>
+                    <span className="ml-2 bg-primary text-black px-2 py-0.5 rounded-full text-[11px]"> {pendingCompanies.length}</span>
                  )}
               </button>
               <button 
@@ -345,7 +345,7 @@ export default function Admin() {
                                     Sua frota de <span className="text-white font-bold">Câmeras</span> representa a maior fatia de receita. 
                                     Considere incentivar parceiros a listar mais <span className="text-white font-bold">Iluminação</span> para equilibrar o ticket médio.
                                  </p>
-                                 <Button variant="outline" className="h-10 border-emerald-500/20 text-emerald-500 uppercase text-[9px] font-black tracking-widest hover:bg-emerald-500/10 rounded-xl">
+                                 <Button variant="outline" className="h-10 border-emerald-500/20 text-emerald-500 uppercase text-[11px] font-black tracking-widest hover:bg-emerald-500/10 rounded-xl">
                                     Exportar Relatório Estratégico
                                  </Button>
                               </CardContent>
@@ -360,7 +360,7 @@ export default function Admin() {
                       <CardHeader className="p-8 border-b border-zinc-900">
                          <CardTitle className="text-xl font-black tracking-tighter uppercase flex items-center gap-3">
                             Atenção Requerida (KYC)
-                            <Badge className="bg-primary text-black uppercase tracking-widest text-[9px]">{pendingCompanies.length} Pendentes</Badge>
+                            <Badge className="bg-primary text-black uppercase tracking-widest text-[11px]">{pendingCompanies.length} Pendentes</Badge>
                          </CardTitle>
                       </CardHeader>
                       <CardContent className="p-0">
@@ -374,7 +374,7 @@ export default function Admin() {
                                      <div>
                                         <h3 className="text-xl font-black uppercase tracking-tight">{company.name}</h3>
                                         <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest mb-1">{company.document}</p>
-                                        <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">
+                                        <p className="text-[11px] text-zinc-600 font-bold uppercase tracking-widest">
                                            Proprietário: {company.owner?.full_name || 'Desconhecido'}
                                         </p>
                                      </div>
@@ -383,14 +383,14 @@ export default function Admin() {
                                       <Button 
                                          onClick={() => { setActiveTab('companies'); setSearchTerm(company.document); }}
                                          variant="outline" 
-                                         className="h-12 border-zinc-800 text-zinc-400 uppercase text-[10px] font-black tracking-widest hover:bg-zinc-900 rounded-xl"
+                                         className="h-12 border-zinc-800 text-zinc-400 uppercase text-[11px] font-black tracking-widest hover:bg-zinc-900 rounded-xl"
                                       >
                                          Analisar
                                       </Button>
                                       <Button 
                                          onClick={() => updateCompanyStatus.mutate({ id: company.id, status: 'approved' })} 
                                          disabled={updateCompanyStatus.isPending}
-                                         className="h-12 bg-emerald-600 hover:bg-emerald-500 text-white uppercase text-[10px] font-black tracking-widest rounded-xl px-6"
+                                         className="h-12 bg-emerald-600 hover:bg-emerald-500 text-white uppercase text-[11px] font-black tracking-widest rounded-xl px-6"
                                       >
                                          {updateCompanyStatus.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Aprovar Agora'}
                                       </Button>
@@ -438,9 +438,9 @@ export default function Admin() {
                                      <div className="flex flex-wrap items-center gap-3 mb-1">
                                         <h3 className="text-xl font-black uppercase tracking-tight">{company.name}</h3>
                                         <div className="flex items-center gap-2">
-                                           {(company.status === 'approved' || company.status === 'active') && <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[9px] uppercase tracking-widest font-black shrink-0">Operando</Badge>}
-                                           {company.status === 'pending' && <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20 text-[9px] uppercase tracking-widest font-black shrink-0">Aguardando Aval</Badge>}
-                                           {(company.status === 'rejected' || company.status === 'suspended') && <Badge className="bg-destructive/10 text-destructive border-destructive/20 text-[9px] uppercase tracking-widest font-black shrink-0">Censurada</Badge>}
+                                           {(company.status === 'approved' || company.status === 'active') && <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[11px] uppercase tracking-widest font-black shrink-0">Operando</Badge>}
+                                           {company.status === 'pending' && <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20 text-[11px] uppercase tracking-widest font-black shrink-0">Aguardando Aval</Badge>}
+                                           {(company.status === 'rejected' || company.status === 'suspended') && <Badge className="bg-destructive/10 text-destructive border-destructive/20 text-[11px] uppercase tracking-widest font-black shrink-0">Censurada</Badge>}
                                            
                                            {/* Online Status Proxy (se atualizado nos últimos 30 min) */}
                                            {new Date().getTime() - new Date(company.owner?.updated_at || company.created_at).getTime() < 1800000 ? (
@@ -454,10 +454,10 @@ export default function Admin() {
                                      </div>
                                      <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest mb-2">{company.document}</p>
                                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                                        <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest shrink-0">
+                                        <p className="text-[11px] text-zinc-600 font-bold uppercase tracking-widest shrink-0">
                                            Proprietário: <span className="text-zinc-400">{company.owner?.full_name || 'Admin'}</span>
                                         </p>
-                                        <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest flex items-center gap-1">
+                                        <p className="text-[11px] text-zinc-600 font-bold uppercase tracking-widest flex items-center gap-1">
                                            <Clock className="h-3 w-3" /> 
                                            Último Login: <span className="text-zinc-400">{new Date(company.owner?.updated_at || company.created_at).toLocaleString('pt-BR')}</span>
                                         </p>
@@ -470,7 +470,7 @@ export default function Admin() {
                                    <Button 
                                      onClick={() => updateCompanyStatus.mutate({ id: company.id, status: 'approved' })} 
                                      disabled={updateCompanyStatus.isPending}
-                                     className="bg-primary hover:bg-primary/90 text-black font-black h-12 px-8 uppercase text-[10px] tracking-widest rounded-xl transition-all w-full md:w-auto"
+                                     className="bg-primary hover:bg-primary/90 text-black font-black h-12 px-8 uppercase text-[11px] tracking-widest rounded-xl transition-all w-full md:w-auto"
                                    >
                                       {updateCompanyStatus.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Aprovar KYC'}
                                    </Button>
@@ -481,7 +481,7 @@ export default function Admin() {
                                      onClick={() => updateCompanyStatus.mutate({ id: company.id, status: 'suspended' })} 
                                      disabled={updateCompanyStatus.isPending}
                                      variant="outline"
-                                     className="border-destructive/20 text-destructive hover:bg-destructive/10 font-black h-12 px-6 uppercase text-[10px] tracking-widest rounded-xl transition-all w-full md:w-auto"
+                                     className="border-destructive/20 text-destructive hover:bg-destructive/10 font-black h-12 px-6 uppercase text-[11px] tracking-widest rounded-xl transition-all w-full md:w-auto"
                                    >
                                       <Ban className="h-4 w-4 mr-2" /> Suspender
                                    </Button>
@@ -492,7 +492,7 @@ export default function Admin() {
                                      onClick={() => updateCompanyStatus.mutate({ id: company.id, status: 'approved' })} 
                                      disabled={updateCompanyStatus.isPending}
                                      variant="outline"
-                                     className="border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/10 font-black h-12 px-6 uppercase text-[10px] tracking-widest rounded-xl transition-all w-full md:w-auto"
+                                     className="border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/10 font-black h-12 px-6 uppercase text-[11px] tracking-widest rounded-xl transition-all w-full md:w-auto"
                                    >
                                       <CheckCircle2 className="h-4 w-4 mr-2" /> Reativar
                                    </Button>
@@ -515,13 +515,13 @@ export default function Admin() {
                {/* Financial Mini-Dashboard */}
                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="bg-zinc-950 p-6 rounded-[24px] border border-zinc-900 flex flex-col justify-between">
-                     <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-2">Volume Transacionado (All-Time)</p>
+                     <p className="text-[11px] text-zinc-500 font-black uppercase tracking-widest mb-2">Volume Transacionado (All-Time)</p>
                      <p className="text-3xl font-black text-white tracking-tighter">
                         {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalVolume)}
                      </p>
                   </div>
                   <div className="bg-zinc-950 p-6 rounded-[24px] border border-zinc-900 flex flex-col justify-between">
-                     <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-2 flex items-center justify-between">
+                     <p className="text-[11px] text-zinc-500 font-black uppercase tracking-widest mb-2 flex items-center justify-between">
                          Repasse a Locadoras <Badge className="bg-zinc-900 text-zinc-400 text-[8px]">85%</Badge>
                      </p>
                      <p className="text-3xl font-black text-zinc-300 tracking-tighter">
@@ -529,7 +529,7 @@ export default function Admin() {
                      </p>
                   </div>
                   <div className="bg-emerald-950/20 p-6 rounded-[24px] border border-emerald-900/30 flex flex-col justify-between">
-                     <p className="text-[10px] text-emerald-600 font-black uppercase tracking-widest mb-2 flex items-center justify-between">
+                     <p className="text-[11px] text-emerald-600 font-black uppercase tracking-widest mb-2 flex items-center justify-between">
                          Receita CineHub Master <Badge className="bg-emerald-900/50 text-emerald-400 text-[8px]">15%</Badge>
                      </p>
                      <p className="text-3xl font-black text-emerald-500 tracking-tighter">

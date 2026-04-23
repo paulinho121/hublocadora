@@ -115,7 +115,7 @@ function BottomNav() {
             className={`flex flex-col items-center gap-1 transition-all px-2 ${currentTab === id ? 'text-primary' : 'text-muted-foreground'}`}
           >
             <Icon className="w-5 h-5" />
-            <span className="text-[9px] font-bold uppercase tracking-tighter">{label}</span>
+            <span className="text-[11px] font-bold uppercase tracking-tighter">{label}</span>
           </button>
         ))}
       </nav>
@@ -129,14 +129,14 @@ function BottomNav() {
         className={({isActive}) => `flex flex-col items-center gap-1 transition-all ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
       >
         <ShoppingBag className="w-6 h-6" />
-        <span className="text-[10px] font-bold uppercase tracking-tighter">Market</span>
+        <span className="text-[11px] font-bold uppercase tracking-tighter">Market</span>
       </NavLink>
       <NavLink 
         to="/dashboard" 
         className={({isActive}) => `flex flex-col items-center gap-1 transition-all ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
       >
         <LayoutDashboard className="w-6 h-6" />
-        <span className="text-[10px] font-bold uppercase tracking-tighter">Locadora</span>
+        <span className="text-[11px] font-bold uppercase tracking-tighter">Locadora</span>
       </NavLink>
       {profile?.role === 'admin' && (
         <NavLink 
@@ -144,12 +144,12 @@ function BottomNav() {
           className={({isActive}) => `flex flex-col items-center gap-1 transition-all ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
         >
           <Settings className="w-6 h-6" />
-          <span className="text-[10px] font-bold uppercase tracking-tighter">Admin</span>
+          <span className="text-[11px] font-bold uppercase tracking-tighter">Admin</span>
         </NavLink>
       )}
       <button className="flex flex-col items-center gap-1 text-muted-foreground">
         <User className="w-6 h-6" />
-        <span className="text-[10px] font-bold uppercase tracking-tighter">Perfil</span>
+        <span className="text-[11px] font-bold uppercase tracking-tighter">Perfil</span>
       </button>
     </nav>
   );

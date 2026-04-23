@@ -48,7 +48,7 @@ export function AIToolsPage() {
               <Sparkles className="h-7 w-7 md:h-8 md:w-8 text-primary animate-pulse" />
             </div>
             <div className="flex-1">
-              <span className="text-primary text-[10px] md:text-xs font-black uppercase tracking-[0.3em] mb-2 block">CineHub Intelligence</span>
+              <span className="text-primary text-[11px] md:text-xs font-black uppercase tracking-[0.3em] mb-2 block">CineHub Intelligence</span>
               <h1 className="text-3xl sm:text-4xl md:text-6xl font-black tracking-tighter uppercase leading-[0.9] mb-4">
                 Ferramentas <br className="hidden md:block" />
                 de <span className="text-primary">IA</span>
@@ -98,7 +98,7 @@ export function AIToolsPage() {
                   </p>
 
                   <div className={cn(
-                    "mt-4 pt-4 border-t border-zinc-800/50 w-full flex items-center justify-center md:justify-start gap-2 text-[10px] uppercase font-black tracking-widest transition-all duration-500",
+                    "mt-4 pt-4 border-t border-zinc-800/50 w-full flex items-center justify-center md:justify-start gap-2 text-[11px] uppercase font-black tracking-widest transition-all duration-500",
                     activeTab === tool.id ? "text-primary opacity-100 translate-y-0" : "text-zinc-600 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0"
                   )}>
                     <Zap className="h-3 w-3" /> ATIVO
@@ -122,7 +122,7 @@ export function AIToolsPage() {
                   Olá! Sou sua inteligência dedicada para dúvidas técnicas, verificações de estoque e recomendações de equipamentos.
                 </p>
                 <div className="bg-zinc-950/50 border border-zinc-800 rounded-2xl p-4 md:p-6 text-left w-full max-w-lg mx-auto">
-                  <p className="text-[10px] md:text-xs text-zinc-500 uppercase font-bold tracking-widest mb-4">Exemplos do que perguntar:</p>
+                  <p className="text-[11px] md:text-xs text-zinc-500 uppercase font-bold tracking-widest mb-4">Exemplos do que perguntar:</p>
                   <ul className="space-y-3 text-xs md:text-sm font-medium">
                     <li className="flex items-start gap-3 text-zinc-300">
                       <div className="h-1.5 w-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
@@ -154,7 +154,7 @@ export function AIToolsPage() {
         <div className="mt-16 md:mt-20 grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-12">
           <div className="space-y-6 md:space-y-8">
             <div className="text-center lg:text-left px-4 lg:px-0">
-              <span className="text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-4 block">Engine Details</span>
+              <span className="text-primary text-[11px] font-black uppercase tracking-[0.3em] mb-4 block">Engine Details</span>
               <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tighter flex items-center justify-center lg:justify-start gap-3 mb-4 md:mb-6">
                 <Shield className="h-6 w-6 md:h-8 md:w-8 text-primary" />
                 Tecnologias de Ponta
@@ -174,7 +174,7 @@ export function AIToolsPage() {
                  <div key={i} className="bg-zinc-900/30 border border-zinc-800/50 p-4 md:p-5 rounded-2xl group hover:border-primary/30 transition-colors">
                    <CheckCircle2 className="h-3 w-3 md:h-4 md:w-4 text-primary mb-3" />
                    <h4 className="text-xs md:text-sm font-bold text-white mb-1 tracking-tight">{item.label}</h4>
-                   <p className="text-[10px] md:text-[11px] text-zinc-500 font-medium">{item.desc}</p>
+                   <p className="text-[11px] md:text-[11px] text-zinc-500 font-medium">{item.desc}</p>
                  </div>
                ))}
             </div>
@@ -195,7 +195,7 @@ export function AIToolsPage() {
                ].map((text, i) => (
                  <div key={i} className="flex items-center gap-3 md:gap-4 text-xs md:text-sm font-medium text-zinc-400 group">
                    <div className="h-7 w-7 md:h-8 md:w-8 rounded-lg bg-zinc-900 flex items-center justify-center shrink-0 group-hover:bg-primary transition-colors">
-                     <span className="text-[9px] md:text-[10px] font-black text-zinc-600 group-hover:text-white">{i + 1}</span>
+                     <span className="text-[10px] md:text-[11px] font-black text-zinc-600 group-hover:text-white">{i + 1}</span>
                    </div>
                    <span className="line-clamp-1 md:line-clamp-none">{text}</span>
                  </div>

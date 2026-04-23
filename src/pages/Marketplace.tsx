@@ -64,7 +64,7 @@ function EquipmentCard({ item, onClick }: { item: Equipment; onClick: () => void
 
         {/* Availability badge overlay */}
         <div className="absolute top-3 left-3 z-10 flex gap-2">
-          <Badge className={`${isAvailable ? 'bg-emerald-500/80 text-white border-emerald-500/20' : 'bg-red-500/80 text-white border-red-500/20'} uppercase font-black tracking-widest text-[9px] backdrop-blur-sm`}>
+          <Badge className={`${isAvailable ? 'bg-emerald-500/80 text-white border-emerald-500/20' : 'bg-red-500/80 text-white border-red-500/20'} uppercase font-black tracking-widest text-[11px] backdrop-blur-sm`}>
             {isAvailable ? `${item.stock_quantity} Disponíveis` : 'Esgotado'}
           </Badge>
         </div>
@@ -72,7 +72,7 @@ function EquipmentCard({ item, onClick }: { item: Equipment; onClick: () => void
         {/* Location badge overlay */}
         {item.state_uf && (
           <div className="absolute top-3 right-3 z-10">
-            <Badge className="bg-zinc-950/80 text-zinc-300 border-zinc-500/30 uppercase font-black tracking-widest text-[9px] backdrop-blur-sm">
+            <Badge className="bg-zinc-950/80 text-zinc-300 border-zinc-500/30 uppercase font-black tracking-widest text-[11px] backdrop-blur-sm">
               <MapPin className="w-3 h-3 mr-1" />
               {item.state_uf}
             </Badge>
@@ -88,7 +88,7 @@ function EquipmentCard({ item, onClick }: { item: Equipment; onClick: () => void
 
         <div className="mt-auto flex items-center justify-between bg-zinc-900/50 p-3 rounded-xl border border-zinc-800/50">
           <div className="flex flex-col">
-            <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-widest">Diária</span>
+            <span className="text-[11px] uppercase text-zinc-500 font-bold tracking-widest">Diária</span>
             <div className="text-base font-black text-zinc-100 tracking-tighter">
               {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.daily_rate)}
             </div>

@@ -57,7 +57,8 @@ export function useEquipments(options?: {
             // Fallback para filtros complexos (Marketplace)
             let query = supabase
                 .from('equipments')
-                .select('*');
+                .select('*')
+                .neq('status', 'unavailable');
 
             if (options?.companyId) {
                 query = query.eq('company_id', options.companyId);

@@ -278,7 +278,7 @@ export default function Dashboard() {
         </header>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-6 pb-24 md:pb-10 md:p-10 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 pb-28 md:pb-10 md:p-10 custom-scrollbar">
            
            {/* Tab Rendering */}
            {activeTab === 'overview' && (
@@ -292,14 +292,14 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                    <Card className="bg-zinc-900/50 border-zinc-900 rounded-3xl overflow-hidden hover:border-primary/20 transition-all group">
                       <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
-                         <CardTitle className="text-[10px] uppercase font-black text-zinc-500 tracking-[0.2em]">Receita Total</CardTitle>
+                         <CardTitle className="text-[11px] uppercase font-black text-zinc-500 tracking-[0.2em]">Receita Total</CardTitle>
                          <TrendingUp className="h-4 w-4 text-emerald-500" />
                       </CardHeader>
                       <CardContent className="p-6 pt-0">
                          <div className="text-3xl font-black tracking-tighter text-zinc-100 mb-1">
                             {formatCurrency(totalRevenue)}
                          </div>
-                         <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Baseado em itens entregues</p>
+                         <p className="text-[11px] text-zinc-600 font-bold uppercase tracking-widest">Baseado em itens entregues</p>
                       </CardContent>
                    </Card>
 
@@ -310,7 +310,7 @@ export default function Dashboard() {
                       </CardHeader>
                       <CardContent className="p-6 pt-0">
                          <div className="text-3xl font-black tracking-tighter text-zinc-100 mb-1">{activeBookings}</div>
-                         <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">{pendingBookingsCount} Pendentes</p>
+                         <p className="text-[11px] text-zinc-600 font-bold uppercase tracking-widest">{pendingBookingsCount} Pendentes</p>
                       </CardContent>
                    </Card>
 
@@ -360,7 +360,7 @@ export default function Dashboard() {
                                       </div>
                                       <div className="min-w-0">
                                          <p className="text-sm font-black text-zinc-100 uppercase truncate">{(booking as any).equipment?.name}</p>
-                                         <p className="text-[10px] uppercase text-zinc-500 font-bold tracking-widest truncate">
+                                         <p className="text-[11px] uppercase text-zinc-500 font-bold tracking-widest truncate">
                                             Solicitante: {booking.renter?.company?.name || booking.renter?.full_name || 'Usuário'}
                                          </p>
                                       </div>
@@ -431,7 +431,7 @@ export default function Dashboard() {
                                 <p className="font-black text-zinc-100 tracking-tight uppercase">
                                    {booking.renter?.company?.name || booking.renter?.full_name || 'Solicitante Desconhecido'}
                                 </p>
-                                <p className="text-[10px] uppercase font-bold text-zinc-500 tracking-widest">{booking.equipment?.name}</p>
+                                <p className="text-[11px] uppercase font-bold text-zinc-500 tracking-widest">{booking.equipment?.name}</p>
                              </div>
                           </div>
                           
@@ -553,44 +553,7 @@ export default function Dashboard() {
         loading={deleteMutation.isPending}
       />
 
-      {/* iFood Style Mobile Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-zinc-950 border-t border-zinc-900 flex justify-around items-center h-[72px] pb-safe px-2">
-         <button 
-            onClick={() => setActiveTab('overview')} 
-            className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${activeTab === 'overview' ? 'text-primary' : 'text-zinc-500 hover:text-zinc-400'}`}
-         >
-            <BarChart3 className="h-6 w-6" />
-            <span className="text-[9px] uppercase font-black tracking-widest">Resumo</span>
-         </button>
-         <button 
-            onClick={() => setActiveTab('inventory')} 
-            className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${activeTab === 'inventory' ? 'text-primary' : 'text-zinc-500 hover:text-zinc-400'}`}
-         >
-            <Package className="h-6 w-6" />
-            <span className="text-[9px] uppercase font-black tracking-widest">Frota</span>
-         </button>
-         <button 
-            onClick={() => setActiveTab('bookings')} 
-            className={`relative flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${activeTab === 'bookings' ? 'text-primary' : 'text-zinc-500 hover:text-zinc-400'}`}
-         >
-            <div className="relative">
-               <CalendarDays className="h-6 w-6" />
-               {pendingBookingsCount > 0 && (
-                  <span className="absolute -top-1 -right-2 h-4 w-4 bg-emerald-500 rounded-full flex items-center justify-center text-[9px] text-black font-black">
-                     {pendingBookingsCount}
-                  </span>
-               )}
-            </div>
-            <span className="text-[9px] uppercase font-black tracking-widest">Pedidos</span>
-         </button>
-         <button 
-            onClick={() => setActiveTab('logistics')} 
-            className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${activeTab === 'logistics' ? 'text-primary' : 'text-zinc-500 hover:text-zinc-400'}`}
-         >
-            <Truck className="h-6 w-6" />
-            <span className="text-[9px] uppercase font-black tracking-widest">Logística</span>
-         </button>
-      </div>
+
     </div>
   );
 }
