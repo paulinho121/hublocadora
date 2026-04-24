@@ -14,6 +14,10 @@ export function BranchesTab() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [city, setCity] = useState('');
+    const [address, setAddress] = useState('');
+    const [state, setState] = useState('');
+    const [phone, setPhone] = useState('');
+    const [document, setDocument] = useState('');
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
     const [isStockModalOpen, setIsStockModalOpen] = useState(false);
@@ -25,12 +29,20 @@ export function BranchesTab() {
                 name,
                 manager_email: email,
                 city,
+                address,
+                state,
+                phone,
+                document,
                 status: 'invited'
             });
             setIsCreating(false);
             setName('');
             setEmail('');
             setCity('');
+            setAddress('');
+            setState('');
+            setPhone('');
+            setDocument('');
             alert('Sub-Locadora cadastrada com sucesso!');
         } catch (error) {
             alert('Erro ao cadastrar sub-locadora');
@@ -71,41 +83,91 @@ export function BranchesTab() {
                         exit={{ opacity: 0, y: -20 }}
                         className="bg-zinc-900/50 border border-zinc-800 rounded-3xl p-6 sm:p-8"
                     >
-                        <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Nome</label>
-                                <Input 
-                                    placeholder="Ex: CineHub SP"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    className="bg-zinc-950/50 border-zinc-800 rounded-xl"
-                                    required
-                                />
+                        <form onSubmit={handleCreate} className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Nome da Unidade</label>
+                                    <Input 
+                                        placeholder="Ex: CineHub SP"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        className="bg-zinc-950/50 border-zinc-800 rounded-xl"
+                                        required
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Email do Gestor</label>
+                                    <Input 
+                                        type="email"
+                                        placeholder="gestor@unidade.com"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        className="bg-zinc-950/50 border-zinc-800 rounded-xl"
+                                        required
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Documento (CNPJ/CPF)</label>
+                                    <Input 
+                                        placeholder="00.000.000/0000-00"
+                                        value={document}
+                                        onChange={(e) => setDocument(e.target.value)}
+                                        className="bg-zinc-950/50 border-zinc-800 rounded-xl"
+                                        required
+                                    />
+                                </div>
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Email do Gestor</label>
-                                <Input 
-                                    type="email"
-                                    placeholder="gestor@unidade.com"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="bg-zinc-950/50 border-zinc-800 rounded-xl"
-                                    required
-                                />
+
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                                <div className="md:col-span-2 space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Endereço Completo</label>
+                                    <Input 
+                                        placeholder="Rua, Número, Bairro"
+                                        value={address}
+                                        onChange={(e) => setAddress(e.target.value)}
+                                        className="bg-zinc-950/50 border-zinc-800 rounded-xl"
+                                        required
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Cidade</label>
+                                    <Input 
+                                        placeholder="São Paulo"
+                                        value={city}
+                                        onChange={(e) => setCity(e.target.value)}
+                                        className="bg-zinc-950/50 border-zinc-800 rounded-xl"
+                                        required
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Estado (UF)</label>
+                                    <Input 
+                                        placeholder="SP"
+                                        value={state}
+                                        onChange={(e) => setState(e.target.value)}
+                                        className="bg-zinc-950/50 border-zinc-800 rounded-xl"
+                                        required
+                                        maxLength={2}
+                                    />
+                                </div>
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Cidade</label>
-                                <Input 
-                                    placeholder="São Paulo - SP"
-                                    value={city}
-                                    onChange={(e) => setCity(e.target.value)}
-                                    className="bg-zinc-950/50 border-zinc-800 rounded-xl"
-                                    required
-                                />
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Telefone/WhatsApp</label>
+                                    <Input 
+                                        placeholder="(11) 99999-9999"
+                                        value={phone}
+                                        onChange={(e) => setPhone(e.target.value)}
+                                        className="bg-zinc-950/50 border-zinc-800 rounded-xl"
+                                        required
+                                    />
+                                </div>
                             </div>
-                            <div className="md:col-span-3 flex justify-end gap-3 pt-2">
+
+                            <div className="flex justify-end gap-3 pt-4">
                                 <Button type="button" variant="ghost" onClick={() => setIsCreating(false)} className="text-zinc-500">Cancelar</Button>
-                                <Button type="submit" className="bg-zinc-100 text-black font-black uppercase tracking-widest px-8">Salvar</Button>
+                                <Button type="submit" className="bg-zinc-100 text-black font-black uppercase tracking-widest px-8">Salvar Unidade</Button>
                             </div>
                         </form>
                     </motion.div>

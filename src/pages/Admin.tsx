@@ -83,6 +83,9 @@ export default function Admin() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['admin-companies'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['all-companies'] });
+      queryClient.invalidateQueries({ queryKey: ['pending-companies'] });
       const statusMsg = variables.status === 'active' || variables.status === 'approved' ? 'APROVADA' : 'SUSPENSA';
       alert(`Sucesso! Unidade ${statusMsg} com sucesso. A página será atualizada.`);
     },
@@ -107,7 +110,7 @@ export default function Admin() {
 
   // Stats Calculations
   const pendingCompanies = companies?.filter(c => c.status === 'pending') || [];
-  const activeCompanies = companies?.filter(c => c.status === 'approved') || [];
+  const activeCompanies = companies?.filter(c => c.status === 'approved' || c.status === 'active') || [];
   
   const totalEquipments = equipments?.length || 0;
   const potentialGmv = equipments?.reduce((acc, eq) => acc + (eq.daily_rate || 0), 0) || 0;

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Building2, MapPin, Globe, ChevronDown, ChevronUp, Package, Check, Copy, Loader2 } from 'lucide-react';
+import { Building2, MapPin, Globe, ChevronDown, ChevronUp, Package, Check, Copy, Loader2, Phone, FileText } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -43,13 +43,16 @@ export function BranchCard({ branch, onManageStock, onCopyInvite, isCopied }: Br
                                 <h3 className="text-xl font-black uppercase tracking-tighter text-white">
                                     {branch.name}
                                 </h3>
-                                <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[8px] px-1.5 h-4 uppercase font-black">
-                                    {branch.status}
+                                <Badge className={cn(
+                                    "text-[8px] px-1.5 h-4 uppercase font-black",
+                                    branch.status === 'active' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                                )}>
+                                    {branch.status === 'invited' ? 'Pendente' : 'Ativo'}
                                 </Badge>
                             </div>
                             <div className="flex items-center gap-1.5 text-zinc-500 text-[10px] font-bold uppercase tracking-wider">
                                 <MapPin className="h-3 w-3" />
-                                <span>{branch.city}</span>
+                                <span>{branch.city} - {branch.state}</span>
                             </div>
                         </div>
                     </div>
@@ -76,37 +79,55 @@ export function BranchCard({ branch, onManageStock, onCopyInvite, isCopied }: Br
                             exit={{ height: 0, opacity: 0 }}
                             className="overflow-hidden"
                         >
-                            <div className="pt-4 border-t border-zinc-900 mt-2 space-y-3">
-                                {isLoading ? (
-                                    <div className="flex justify-center py-6">
-                                        <Loader2 className="h-5 w-5 animate-spin text-primary opacity-50" />
+                            <div className="space-y-4 pt-2 pb-4">
+                                <div className="grid grid-cols-1 gap-2 bg-zinc-900/30 p-4 rounded-2xl border border-zinc-800/50">
+                                    <div className="flex items-center gap-3 text-zinc-400">
+                                        <FileText className="h-3.5 w-3.5 text-primary/60" />
+                                        <span className="text-[10px] font-bold uppercase tracking-wider">{branch.document || 'Sem documento'}</span>
                                     </div>
-                                ) : activeItems.length > 0 ? (
-                                    <div className="space-y-2">
-                                        {activeItems.map((item) => (
-                                            <div key={item.id} className="flex items-center justify-between p-3 bg-zinc-900/20 rounded-xl border border-zinc-800/50">
-                                                <div className="flex items-center gap-3">
-                                                    {item.equipment?.images?.[0] ? (
-                                                        <img src={item.equipment.images[0]} className="h-10 w-10 rounded-lg object-cover border border-zinc-800" alt="" />
-                                                    ) : (
-                                                        <div className="h-10 w-10 rounded-lg bg-zinc-800 flex items-center justify-center">
-                                                            <Package className="h-4 w-4 text-zinc-600" />
+                                    <div className="flex items-center gap-3 text-zinc-400">
+                                        <Phone className="h-3.5 w-3.5 text-primary/60" />
+                                        <span className="text-[10px] font-bold uppercase tracking-wider">{branch.phone || 'Sem telefone'}</span>
+                                    </div>
+                                    <div className="flex items-center gap-3 text-zinc-400">
+                                        <MapPin className="h-3.5 w-3.5 text-primary/60" />
+                                        <span className="text-[10px] font-bold uppercase tracking-wider">{branch.address}, {branch.city}-{branch.state}</span>
+                                    </div>
+                                </div>
+
+                                <div className="pt-4 border-t border-zinc-900/50">
+                                    <h4 className="text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-3">Estoque Local</h4>
+                                    {isLoading ? (
+                                        <div className="flex justify-center py-6">
+                                            <Loader2 className="h-5 w-5 animate-spin text-primary opacity-50" />
+                                        </div>
+                                    ) : activeItems.length > 0 ? (
+                                        <div className="space-y-2">
+                                            {activeItems.map((item) => (
+                                                <div key={item.id} className="flex items-center justify-between p-3 bg-zinc-900/20 rounded-xl border border-zinc-800/50">
+                                                    <div className="flex items-center gap-3">
+                                                        {item.equipment?.images?.[0] ? (
+                                                            <img src={item.equipment.images[0]} className="h-10 w-10 rounded-lg object-cover border border-zinc-800" alt="" />
+                                                        ) : (
+                                                            <div className="h-10 w-10 rounded-lg bg-zinc-800 flex items-center justify-center">
+                                                                <Package className="h-4 w-4 text-zinc-600" />
+                                                            </div>
+                                                        )}
+                                                        <div>
+                                                            <p className="text-[10px] font-black uppercase text-zinc-200 leading-tight">{item.equipment?.name}</p>
+                                                            <p className="text-[8px] text-zinc-500 uppercase font-bold">{item.equipment?.category}</p>
                                                         </div>
-                                                    )}
-                                                    <div>
-                                                        <p className="text-[10px] font-black uppercase text-zinc-200 leading-tight">{item.equipment?.name}</p>
-                                                        <p className="text-[8px] text-zinc-500 uppercase font-bold">{item.equipment?.category}</p>
                                                     </div>
+                                                    <Badge className="bg-zinc-800 text-zinc-400 border-zinc-700 text-[10px] font-black">
+                                                        {item.quantity}
+                                                    </Badge>
                                                 </div>
-                                                <Badge className="bg-zinc-800 text-zinc-400 border-zinc-700 text-[10px] font-black">
-                                                    {item.quantity}
-                                                </Badge>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p className="text-[9px] text-zinc-600 uppercase font-black text-center py-4">Sem estoque atribuído</p>
-                                )}
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-[9px] text-zinc-600 uppercase font-black text-center py-4">Sem estoque atribuído</p>
+                                    )}
+                                </div>
                             </div>
                         </motion.div>
                     )}
