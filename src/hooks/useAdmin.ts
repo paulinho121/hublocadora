@@ -100,12 +100,8 @@ export function useApproveCompany() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async ({ id, status }: { id: string; status: 'approved' | 'rejected' }) => {
-            const { error } = await supabase
-                .from('companies')
-                .update({ status })
-                .eq('id', id);
-
+        mutationFn: async ({ id }: { id: string }) => {
+            const { error } = await supabase.rpc('approve_company', { p_company_id: id });
             if (error) throw error;
         },
         onSuccess: () => {

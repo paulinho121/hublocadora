@@ -22,7 +22,7 @@ export interface Company {
     address_city: string;
     address_state: string;
     address_zip: string;
-    status: 'pending' | 'approved' | 'rejected';
+    status: 'pending' | 'approved' | 'active' | 'rejected' | 'suspended';
     created_at: string;
 }
 
@@ -142,6 +142,8 @@ export interface Branch {
     address: string | null;
     city: string | null;
     state: string | null;
+    phone: string | null;
+    document: string | null;
     manager_email: string | null;
     invite_token: string;
     status: 'invited' | 'active' | 'inactive';
