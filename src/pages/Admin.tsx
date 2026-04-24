@@ -26,6 +26,7 @@ export default function Admin() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBookingContract, setSelectedBookingContract] = useState<any | null>(null);
   const [selectedLogisticsBooking, setSelectedLogisticsBooking] = useState<any | null>(null);
+  const [updatingCompanyId, setUpdatingCompanyId] = useState<string | null>(null);
 
   // Fetch Companies
   const { data: companies, isLoading: companiesLoading, error } = useQuery({
@@ -68,10 +69,17 @@ export default function Admin() {
   // Mutations
   const updateCompanyStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string, status: 'approved' | 'rejected' | 'pending' | 'active' | 'suspended' }) => {
+      setUpdatingCompanyId(id);
       if (status === 'approved' || status === 'active') {
         // Usamos a nova RPC para bypassar o RLS
-        const { error } = await supabase.rpc('approve_company', { p_company_id: id });
+        const { error, data } = await supabase.rpc('approve_company', { p_company_id: id });
+        console.log('RPC Response:', { data, error });
         if (error) throw error;
+        
+        if (data && data.startsWith('ERRO')) {
+          throw new Error(data);
+        }
+        
         return { success: true };
       } else {
         // Para rejeição/suspensão, mantemos o update padrão ou criamos outra RPC
@@ -89,9 +97,12 @@ export default function Admin() {
       const statusMsg = variables.status === 'active' || variables.status === 'approved' ? 'APROVADA' : 'SUSPENSA';
       alert(`Sucesso! Unidade ${statusMsg} com sucesso. A página será atualizada.`);
     },
+    onSettled: () => {
+      setUpdatingCompanyId(null);
+    },
     onError: (err: any) => {
-      alert("Erro ao atualizar: " + err.message);
-      console.error(err);
+      alert("Erro crítico ao atualizar: " + (err.message || err.details || "Erro desconhecido"));
+      console.error('Erro na mutation:', err);
     }
   });
 
@@ -392,10 +403,10 @@ export default function Admin() {
                                       </Button>
                                       <Button 
                                          onClick={() => updateCompanyStatus.mutate({ id: company.id, status: 'approved' })} 
-                                         disabled={updateCompanyStatus.isPending}
+                                         disabled={updatingCompanyId === company.id}
                                          className="h-12 bg-emerald-600 hover:bg-emerald-500 text-white uppercase text-[11px] font-black tracking-widest rounded-xl px-6"
                                       >
-                                         {updateCompanyStatus.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Aprovar Agora'}
+                                         {updatingCompanyId === company.id ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Aprovar Agora'}
                                       </Button>
                                    </div>
                                </div>
@@ -472,10 +483,10 @@ export default function Admin() {
                                  {company.status === 'pending' && (
                                    <Button 
                                      onClick={() => updateCompanyStatus.mutate({ id: company.id, status: 'approved' })} 
-                                     disabled={updateCompanyStatus.isPending}
+                                     disabled={updatingCompanyId === company.id}
                                      className="bg-primary hover:bg-primary/90 text-black font-black h-12 px-8 uppercase text-[11px] tracking-widest rounded-xl transition-all w-full md:w-auto"
                                    >
-                                      {updateCompanyStatus.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Aprovar KYC'}
+                                      {updatingCompanyId === company.id ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Aprovar KYC'}
                                    </Button>
                                  )}
                                  
