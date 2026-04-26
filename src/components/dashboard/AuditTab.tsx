@@ -11,7 +11,8 @@ import {
   Calendar,
   Clock,
   User as UserIcon,
-  Package
+  Package,
+  Building2
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -20,7 +21,25 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 export function AuditTab() {
-  const { data: logs, isLoading } = useQuery({
+  const { data: unavailableItems, isLoading: isLoadingUnavailable } = useQuery({
+    queryKey: ['unavailable-realtime'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('equipments')
+        .select(`
+          *,
+          owner:companies!company_id(name)
+        `)
+        .eq('status', 'unavailable')
+        .order('unavailable_since', { ascending: true });
+
+      if (error) throw error;
+      return data;
+    },
+    refetchInterval: 30000 // Atualiza a cada 30 segundos
+  });
+
+  const { data: logs, isLoading: isLoadingLogs } = useQuery({
     queryKey: ['network-audit-logs'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -50,7 +69,7 @@ export function AuditTab() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h2 className="text-4xl font-black tracking-tighter uppercase mb-2">Auditoria de Rede</h2>
@@ -64,14 +83,60 @@ export function AuditTab() {
               className="pl-10 bg-zinc-950 border-zinc-900 w-full md:w-64 h-12 rounded-xl focus:ring-primary/20 transition-all"
             />
           </div>
-          <button className="h-12 w-12 bg-zinc-950 border border-zinc-900 rounded-xl flex items-center justify-center hover:bg-zinc-900 transition-colors">
-            <Filter className="w-5 h-5 text-zinc-500" />
-          </button>
         </div>
       </header>
 
+      {/* MONITORAMENTO EM TEMPO REAL */}
+      <section className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-lg bg-red-500/20 flex items-center justify-center">
+            <div className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
+          </div>
+          <h3 className="text-xl font-black uppercase tracking-tighter">Monitor Real-Time: Fora do HUB</h3>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+           {unavailableItems?.length === 0 ? (
+             <div className="col-span-full h-32 flex items-center justify-center bg-zinc-900/30 rounded-3xl border border-zinc-900 border-dashed text-zinc-600 text-[10px] font-black uppercase tracking-widest">
+               Todos os equipamentos estão disponíveis no HUB
+             </div>
+           ) : (
+             unavailableItems?.map((item: any) => (
+               <Card key={item.id} className="bg-zinc-950 border-red-500/20 rounded-2xl overflow-hidden group hover:border-red-500/50 transition-all shadow-2xl">
+                 <CardContent className="p-5 space-y-4">
+                    <div className="flex justify-between items-start">
+                      <Badge className="bg-red-500/10 text-red-500 border-red-500/20 text-[9px] font-black uppercase">Oculto</Badge>
+                      <span className="text-[10px] text-zinc-500 font-bold flex items-center gap-1 uppercase tracking-widest">
+                        <Building2 className="w-3 h-3" /> {item.owner?.name}
+                      </span>
+                    </div>
+                    <div>
+                      <h4 className="font-black text-white uppercase tracking-tighter truncate">{item.name}</h4>
+                      <p className="text-[10px] text-zinc-500 font-bold uppercase">{item.category}</p>
+                    </div>
+                    <div className="pt-3 border-t border-zinc-900 flex items-center justify-between">
+                       <div className="flex items-center gap-2 text-zinc-400">
+                          <Clock className="w-3 h-3" />
+                          <span className="text-[10px] font-black">FORA DESDE:</span>
+                       </div>
+                       <span className="text-xs font-bold text-red-500">
+                         {item.unavailable_since ? format(new Date(item.unavailable_since), 'dd/MM HH:mm') : 'N/A'}
+                       </span>
+                    </div>
+                 </CardContent>
+               </Card>
+             ))
+           )}
+        </div>
+      </section>
+
       <div className="grid grid-cols-1 gap-4">
-        {isLoading ? (
+        <div className="flex items-center gap-3 mb-2">
+          <History className="w-5 h-5 text-primary" />
+          <h3 className="text-xl font-black uppercase tracking-tighter">Histórico Recente</h3>
+        </div>
+        
+        {(isLoadingLogs || isLoadingUnavailable) ? (
           <div className="h-64 flex items-center justify-center bg-zinc-950 rounded-3xl border border-zinc-900 border-dashed">
             <Clock className="w-8 h-8 text-zinc-800 animate-spin" />
           </div>
