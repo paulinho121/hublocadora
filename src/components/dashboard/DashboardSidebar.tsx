@@ -30,7 +30,10 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
     { id: 'inventory', label: 'Inventário', icon: Package },
     { id: 'bookings', label: 'Reservas', icon: CalendarDays },
     { id: 'logistics', label: 'Logística', icon: Truck },
-    ...(isAdmin ? [{ id: 'network', label: 'Minha Rede', icon: Globe }] : []),
+    ...(isAdmin ? [
+      { id: 'network', label: 'Minha Rede', icon: Globe },
+      { id: 'audit', label: 'Auditoria', icon: History }
+    ] : []),
     { id: 'settings', label: 'Configurações', icon: Settings },
   ];
 
