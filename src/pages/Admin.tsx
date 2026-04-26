@@ -70,39 +70,78 @@ export default function Admin() {
   const updateCompanyStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string, status: 'approved' | 'rejected' | 'pending' | 'active' | 'suspended' }) => {
       setUpdatingCompanyId(id);
+      
       if (status === 'approved' || status === 'active') {
-        // Usamos a nova RPC para bypassar o RLS
-        const { error, data } = await supabase.rpc('approve_company', { p_company_id: id });
-        console.log('RPC Response:', { data, error });
-        if (error) throw error;
+        // ESTRATÉGIA: Tenta RPC primeiro (bypass RLS), fallback para UPDATE direto
+        let rpcSuccess = false;
         
-        if (data && data.startsWith('ERRO')) {
-          throw new Error(data);
+        try {
+          const { error: rpcError, data: rpcData } = await supabase.rpc('approve_company', { p_company_id: id });
+          console.log('RPC approve_company Response:', { rpcData, rpcError });
+          
+          if (!rpcError && rpcData && !String(rpcData).startsWith('ERRO')) {
+            rpcSuccess = true;
+          } else if (rpcError) {
+            console.warn('RPC falhou, tentando UPDATE direto:', rpcError.message);
+          } else if (String(rpcData).startsWith('ERRO')) {
+            console.warn('RPC retornou erro de negócio, tentando UPDATE direto:', rpcData);
+          }
+        } catch (rpcException) {
+          console.warn('RPC exception, tentando UPDATE direto:', rpcException);
         }
         
-        return { success: true };
+        if (!rpcSuccess) {
+          // FALLBACK: UPDATE direto na tabela
+          console.log('Executando fallback UPDATE direto para empresa:', id);
+          const { error: updateError, data: updateData } = await supabase
+            .from('companies')
+            .update({ status: 'approved' })
+            .eq('id', id)
+            .select('id, status');
+          
+          console.log('Fallback UPDATE result:', { updateData, updateError });
+          
+          if (updateError) {
+            throw new Error('Falha ao aprovar: ' + updateError.message + '. Verifique as políticas RLS no Supabase.');
+          }
+          if (!updateData || updateData.length === 0) {
+            throw new Error('UPDATE não afetou nenhuma linha. Execute o SQL FIX_DEFINITIVO_APROVACAO.sql no Supabase.');
+          }
+        }
+        
+        return { success: true, method: rpcSuccess ? 'rpc' : 'direct' };
       } else {
-        // Para rejeição/suspensão, mantemos o update padrão ou criamos outra RPC
+        // Para suspensão/rejeição
         const dbStatus = (status === 'rejected' || status === 'suspended') ? 'suspended' : status;
-        const { error, data } = await supabase.from('companies').update({ status: dbStatus }).eq('id', id).select();
+        const { error, data } = await supabase
+          .from('companies')
+          .update({ status: dbStatus })
+          .eq('id', id)
+          .select();
         if (error) throw error;
         return data;
       }
     },
-    onSuccess: (_, variables) => {
+    onSuccess: (data, variables) => {
+      // Forçar re-fetch imediato de todas as queries relacionadas
       queryClient.invalidateQueries({ queryKey: ['admin-companies'] });
       queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
       queryClient.invalidateQueries({ queryKey: ['all-companies'] });
       queryClient.invalidateQueries({ queryKey: ['pending-companies'] });
+      queryClient.refetchQueries({ queryKey: ['admin-companies'] });
+      
       const statusMsg = variables.status === 'active' || variables.status === 'approved' ? 'APROVADA' : 'SUSPENSA';
-      alert(`Sucesso! Unidade ${statusMsg} com sucesso. A página será atualizada.`);
+      const method = (data as any)?.method;
+      const methodInfo = method ? ` (via ${method === 'rpc' ? 'RPC' : 'update direto'})` : '';
+      alert(`✅ Unidade ${statusMsg} com sucesso${methodInfo}! A lista será atualizada.`);
     },
     onSettled: () => {
       setUpdatingCompanyId(null);
     },
     onError: (err: any) => {
-      alert("Erro crítico ao atualizar: " + (err.message || err.details || "Erro desconhecido"));
-      console.error('Erro na mutation:', err);
+      const msg = err.message || err.details || 'Erro desconhecido';
+      alert(`❌ Erro ao atualizar: ${msg}\n\nSe persistir, execute o arquivo FIX_DEFINITIVO_APROVACAO.sql no Supabase SQL Editor.`);
+      console.error('Erro na mutation de aprovação:', err);
     }
   });
 
