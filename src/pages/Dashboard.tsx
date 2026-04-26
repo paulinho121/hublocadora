@@ -43,10 +43,10 @@ import { FinancialSettings } from '@/components/dashboard/FinancialSettings';
 import { BookingTrackingModal } from '@/components/dashboard/BookingTrackingModal';
 import { BranchesTab } from '@/components/dashboard/BranchesTab';
 import { PrivacySettings } from '@/components/dashboard/PrivacySettings';
+import { AuditTab } from '@/components/dashboard/AuditTab';
 
-
-type TabType = 'overview' | 'inventory' | 'bookings' | 'logistics' | 'network' | 'settings';
-const VALID_TABS: TabType[] = ['overview', 'inventory', 'bookings', 'logistics', 'network', 'settings'];
+type TabType = 'overview' | 'inventory' | 'bookings' | 'logistics' | 'network' | 'settings' | 'audit';
+const VALID_TABS: TabType[] = ['overview', 'inventory', 'bookings', 'logistics', 'network', 'settings', 'audit'];
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -556,6 +556,10 @@ export default function Dashboard() {
            {activeTab === 'network' && (
              <BranchesTab />
            )}
+
+            {activeTab === 'audit' && (
+              <AuditTab />
+            )}
 
            {activeTab === 'settings' && (
              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
