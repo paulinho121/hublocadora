@@ -42,6 +42,7 @@ import { LogisticsTab } from '@/components/dashboard/LogisticsTab';
 import { FinancialSettings } from '@/components/dashboard/FinancialSettings';
 import { BookingTrackingModal } from '@/components/dashboard/BookingTrackingModal';
 import { BranchesTab } from '@/components/dashboard/BranchesTab';
+import { PrivacySettings } from '@/components/dashboard/PrivacySettings';
 
 
 type TabType = 'overview' | 'inventory' | 'bookings' | 'logistics' | 'network' | 'settings';
@@ -564,10 +565,13 @@ export default function Dashboard() {
                 </header>
                 
                 {company && (
-                  <FinancialSettings 
-                    companyId={company.id} 
-                    initialConfig={(company as any).financial_config} 
-                  />
+                  <div className="space-y-12">
+                    <FinancialSettings 
+                      companyId={company.id} 
+                      initialConfig={(company as any).financial_config} 
+                    />
+                    <PrivacySettings />
+                  </div>
                 )}
              </div>
            )}
