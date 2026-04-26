@@ -66,42 +66,6 @@ export default function Dashboard() {
     renterId: user?.id
   });
 
-  // Pedidos de fornecimento recebidos pela sub-locadora (aguardando aceite)
-  const [subrentalInbox, setSubrentalInbox] = useState<any[]>([]);
-  const [loadingSubrental, setLoadingSubrental] = useState(false);
-
-  useEffect(() => {
-    if (!tenantId) return;
-    const fetchSubrentalInbox = async () => {
-      setLoadingSubrental(true);
-      const { data } = await supabase
-        .from('deliveries')
-        .select(`
-          *,
-          booking:bookings(
-            *,
-            equipment:equipments(name, images, category, daily_rate),
-            renter:profiles(full_name, email, company:companies!company_id(name))
-          )
-        `)
-        .eq('fulfilling_company_id', tenantId)
-        .eq('subrental_status', 'pending');
-      setSubrentalInbox(data || []);
-      setLoadingSubrental(false);
-    };
-    fetchSubrentalInbox();
-
-    // Realtime para novos pedidos de fornecimento
-    const channel = supabase
-      .channel('subrental_inbox')
-      .on('postgres_changes', {
-        event: 'UPDATE', schema: 'public', table: 'deliveries',
-        filter: `fulfilling_company_id=eq.${tenantId}`,
-      }, () => fetchSubrentalInbox())
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [tenantId]);
-
   const { data: equipments, isLoading: isLoadingEquipments } = useEquipments({
     companyId: tenantId || undefined,
     branchId: isBranchManager ? branchId : undefined
@@ -123,12 +87,12 @@ export default function Dashboard() {
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
-  // Modal de roteamento: quando master aprova e escolhe sub-locadora
+  // Modal de roteamento: master seleciona de qual sub-locadora o item sairá
   const [fulfillmentModal, setFulfillmentModal] = useState<{
     open: boolean;
     bookingId: string;
-    subrentalCompanyId: string | null;
-    subrentalCompanyName: string;
+    selectedSubrentalId: string | null;
+    subrentalOptions: Array<{ id: string; name: string; city?: string; state?: string }>;
   } | null>(null);
 
   // iFood Real-Time Notification State
@@ -252,18 +216,17 @@ export default function Dashboard() {
       setUpdatingId(id);
       await updateStatusMutation.mutateAsync({ id, status });
 
-      // Se foi aprovado e tem uma sub-locadora para fulfillment
+      // Se foi aprovado e tem sub-locadora: atribui direto com status 'accepted'
       if (status === 'approved' && fulfillCompanyId) {
         await new Promise(r => setTimeout(r, 1000));
-        // Seta fulfilling_company_id E subrental_status = 'pending' (aguarda aceite)
         const { error } = await supabase
           .from('deliveries')
           .update({ 
             fulfilling_company_id: fulfillCompanyId,
-            subrental_status: 'pending'
+            subrental_status: 'accepted'  // Sub-locadora já recebe aceito, sem etapa de confirmação
           })
           .eq('booking_id', id);
-        if (error) console.error('Erro ao atribuir fulfilling_company_id:', error);
+        if (error) console.error('Erro ao atribuir sub-locadora:', error);
       }
     } catch (error) {
       console.error('Erro ao atualizar status:', error);
@@ -274,55 +237,38 @@ export default function Dashboard() {
     }
   };
 
-  // Aceitar pedido de fornecimento (sub-locadora)
-  const handleAcceptSubrental = async (deliveryId: string) => {
-    const { error } = await supabase
-      .from('deliveries')
-      .update({ subrental_status: 'accepted' })
-      .eq('id', deliveryId);
-    if (!error) {
-      setSubrentalInbox(prev => prev.filter(d => d.id !== deliveryId));
-      alert('✅ Pedido aceito! Agora acesse Logística para iniciar o processo.');
-    } else {
-      alert('❌ Erro ao aceitar: ' + error.message);
-    }
-  };
-
-  // Recusar pedido de fornecimento (sub-locadora)
-  const handleRejectSubrental = async (deliveryId: string) => {
-    const { error } = await supabase
-      .from('deliveries')
-      .update({ 
-        subrental_status: 'rejected',
-        fulfilling_company_id: null 
-      })
-      .eq('id', deliveryId);
-    if (!error) {
-      setSubrentalInbox(prev => prev.filter(d => d.id !== deliveryId));
-      alert('Pedido recusado. A locadora principal foi notificada.');
-    } else {
-      alert('❌ Erro ao recusar: ' + error.message);
-    }
-  };
-
-  // Ao clicar "Aprovar agora": verifica se o equipamento tem sub-locadora
+  // Ao clicar "Aprovar agora": busca sub-locadoras que têm o item para o master escolher
   const handleApproveBooking = async (booking: any) => {
-    const subrentalId = booking.equipment?.subrental_company_id;
-    if (subrentalId) {
-      // Buscar nome da sub-locadora
-      const { data: company } = await supabase
+    const equipmentId = booking.equipment_id;
+    
+    // Busca todas as sub-locadoras que têm este item atribuído
+    const { data: eqData } = await supabase
+      .from('equipments')
+      .select('subrental_company_id')
+      .eq('id', equipmentId)
+      .not('subrental_company_id', 'is', null);
+    
+    const subrentalIds = (eqData || []).map((e: any) => e.subrental_company_id).filter(Boolean);
+    
+    if (subrentalIds.length > 0) {
+      const { data: companies } = await supabase
         .from('companies')
-        .select('id, name')
-        .eq('id', subrentalId)
-        .single();
-
+        .select('id, name, address_city, address_state')
+        .in('id', subrentalIds);
+      
       setFulfillmentModal({
         open: true,
         bookingId: booking.id,
-        subrentalCompanyId: subrentalId,
-        subrentalCompanyName: company?.name || 'Sub-locadora',
+        selectedSubrentalId: null,
+        subrentalOptions: (companies || []).map(c => ({
+          id: c.id,
+          name: c.name,
+          city: c.address_city,
+          state: c.address_state,
+        })),
       });
     } else {
+      // Sem sub-locadora: master gerencia diretamente
       await handleUpdateStatus(booking.id, 'approved', null);
     }
   };
@@ -529,77 +475,11 @@ export default function Dashboard() {
                    <div className="flex bg-zinc-900 p-1 rounded-xl border border-zinc-800">
                       <Button variant={bookingFilter === 'received' ? 'secondary' : 'ghost'} onClick={() => setBookingFilter('received')} className="h-9 rounded-lg text-[10px] font-black uppercase">Recebidos</Button>
                       <Button variant={bookingFilter === 'requested' ? 'secondary' : 'ghost'} onClick={() => setBookingFilter('requested')} className="h-9 rounded-lg text-[10px] font-black uppercase">Enviados</Button>
-                   </div>
-                </header>
+                    </div>
+                 </header>
                  
-                 {/* ===== PEDIDOS DE FORNECIMENTO (Sub-locadora aceita/recusa) ===== */}
-                 {subrentalInbox.length > 0 && (
-                   <div className="mb-8 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
-                     <div className="flex items-center gap-3">
-                       <div className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
-                       <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-amber-400">
-                         Pedidos de Fornecimento — {subrentalInbox.length} aguardando
-                       </h3>
-                     </div>
-                     {subrentalInbox.map((delivery: any) => (
-                       <Card key={delivery.id} className="bg-amber-500/5 border-amber-500/20 rounded-2xl overflow-hidden">
-                         <div className="p-6">
-                           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
-                             <div className="flex gap-4 items-center">
-                               <div className="h-14 w-14 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
-                                 {delivery.booking?.equipment?.images?.[0] ? (
-                                   <img src={delivery.booking.equipment.images[0]} alt="" className="w-full h-full object-cover" />
-                                 ) : (
-                                   <Package className="h-6 w-6 text-zinc-700" />
-                                 )}
-                               </div>
-                               <div>
-                                 <div className="flex items-center gap-2 mb-1">
-                                   <span className="text-[9px] font-black uppercase tracking-widest text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
-                                     Fornecimento Solicitado
-                                   </span>
-                                 </div>
-                                 <p className="font-black text-zinc-100 tracking-tight uppercase text-lg leading-none">
-                                   {delivery.booking?.equipment?.name || 'Equipamento'}
-                                 </p>
-                                 <p className="text-[11px] text-zinc-500 font-bold uppercase tracking-widest mt-1">
-                                   Cliente: {delivery.booking?.renter?.company?.name || delivery.booking?.renter?.full_name}
-                                 </p>
-                                 {delivery.booking?.start_date && (
-                                   <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">
-                                     {format(new Date(delivery.booking.start_date), "dd/MM")} → {format(new Date(delivery.booking.end_date), "dd/MM")}
-                                     {delivery.booking?.total_amount && ` • ${formatCurrency(delivery.booking.total_amount)}`}
-                                   </p>
-                                 )}
-                               </div>
-                             </div>
-                             <div className="flex gap-3 w-full sm:w-auto">
-                               <Button
-                                 variant="ghost"
-                                 size="sm"
-                                 onClick={() => handleRejectSubrental(delivery.id)}
-                                 className="flex-1 sm:flex-none text-destructive hover:bg-destructive/10 font-black uppercase text-[10px] tracking-widest border border-destructive/20 rounded-xl"
-                               >
-                                 Recusar
-                               </Button>
-                               <Button
-                                 size="sm"
-                                 onClick={() => handleAcceptSubrental(delivery.id)}
-                                 className="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-500 font-black uppercase text-[10px] tracking-widest rounded-xl px-6"
-                               >
-                                 ✓ Aceitar Pedido
-                               </Button>
-                             </div>
-                           </div>
-                         </div>
-                       </Card>
-                     ))}
-                     <div className="border-t border-zinc-800/50 pt-4" />
-                   </div>
-                 )}
-
                  <div className="space-y-4">
-                  {(bookingFilter === 'received' ? bookingsReceived : bookingsRequested)?.map((booking: any) => (
+                   {(bookingFilter === 'received' ? bookingsReceived : bookingsRequested)?.map((booking: any) => (
                     <Card key={booking.id} className="bg-zinc-900/30 border-zinc-900 rounded-2xl overflow-hidden hover:border-zinc-800 transition-colors">
                        <div className="p-6 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                           <div className="flex gap-4 items-center">
@@ -739,36 +619,65 @@ export default function Dashboard() {
         loading={deleteMutation.isPending}
       />
 
-      {/* Modal de Roteamento: Sub-locadora fulfillment */}
+      {/* Modal de Roteamento: Master seleciona de qual sub-locadora o item sairá */}
       <Dialog
         isOpen={!!fulfillmentModal?.open}
         onClose={() => setFulfillmentModal(null)}
-        title="Atribuir Entrega à Sub-locadora"
+        title="Unidade de Origem"
       >
         {fulfillmentModal && (
           <div className="space-y-6">
-            <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-4">
-              <p className="text-sm text-zinc-300 font-medium leading-relaxed">
-                Este equipamento está com a sub-locadora
-                <span className="text-blue-400 font-black"> {fulfillmentModal.subrentalCompanyName}</span>.
-                Deseja que ela gerencie a entrega deste pedido?
-              </p>
+            <p className="text-zinc-400 text-sm font-medium">
+              De qual sub-locadora este equipamento será enviado?
+            </p>
+
+            <div className="grid grid-cols-1 gap-3 max-h-72 overflow-y-auto pr-1">
+              {fulfillmentModal.subrentalOptions.map(opt => (
+                <button
+                  key={opt.id}
+                  onClick={() => setFulfillmentModal(prev => prev ? { ...prev, selectedSubrentalId: opt.id } : prev)}
+                  className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all text-left ${
+                    fulfillmentModal.selectedSubrentalId === opt.id
+                      ? 'border-primary bg-primary/10'
+                      : 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700'
+                  }`}
+                >
+                  <div>
+                    <p className="font-black uppercase tracking-tighter text-zinc-100">{opt.name}</p>
+                    {(opt.city || opt.state) && (
+                      <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">
+                        {opt.city}{opt.state ? ` - ${opt.state}` : ''}
+                      </p>
+                    )}
+                  </div>
+                  {fulfillmentModal.selectedSubrentalId === opt.id && (
+                    <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center text-black font-black text-xs">✓</div>
+                  )}
+                </button>
+              ))}
             </div>
-            <div className="flex flex-col gap-3">
+
+            <div className="flex flex-col gap-3 pt-2 border-t border-zinc-800">
               <Button
-                onClick={() => handleUpdateStatus(fulfillmentModal.bookingId, 'approved', fulfillmentModal.subrentalCompanyId)}
+                onClick={() => {
+                  if (!fulfillmentModal.selectedSubrentalId) {
+                    alert('Selecione uma sub-locadora para continuar.');
+                    return;
+                  }
+                  handleUpdateStatus(fulfillmentModal.bookingId, 'approved', fulfillmentModal.selectedSubrentalId);
+                }}
                 disabled={!!updatingId}
                 className="w-full h-12 bg-emerald-600 hover:bg-emerald-500 font-black uppercase tracking-widest rounded-xl"
               >
-                {updatingId ? <Loader2 className="h-4 w-4 animate-spin" /> : `Sim, ${fulfillmentModal.subrentalCompanyName} entrega`}
+                {updatingId ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Confirmar Origem'}
               </Button>
               <Button
-                variant="outline"
+                variant="ghost"
                 onClick={() => handleUpdateStatus(fulfillmentModal.bookingId, 'approved', null)}
                 disabled={!!updatingId}
-                className="w-full h-12 border-zinc-700 font-black uppercase tracking-widest rounded-xl"
+                className="w-full h-10 text-zinc-500 font-bold uppercase text-[10px] tracking-widest"
               >
-                Não, eu mesmo gerencio
+                Gerencio eu mesmo
               </Button>
             </div>
           </div>
