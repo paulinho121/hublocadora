@@ -241,14 +241,21 @@ export default function Dashboard() {
   const handleApproveBooking = async (booking: any) => {
     const equipmentId = booking.equipment_id;
     
-    // Busca todas as sub-locadoras que têm este item atribuído
+    // Busca todas as locadoras que têm este item (pelo nome exato)
     const { data: eqData } = await supabase
       .from('equipments')
-      .select('subrental_company_id')
-      .eq('id', equipmentId)
-      .not('subrental_company_id', 'is', null);
+      .select('company_id, subrental_company_id')
+      .eq('name', booking.equipment.name)
+      .neq('company_id', booking.company_id); // Não inclui o próprio master se for o caso
     
-    const subrentalIds = (eqData || []).map((e: any) => e.subrental_company_id).filter(Boolean);
+    // Coleta todos os IDs de empresas que possuem o item (seja como donas ou via sublocação atribuída)
+    const partnerIds = new Set<string>();
+    eqData?.forEach((e: any) => {
+      if (e.company_id) partnerIds.add(e.company_id);
+      if (e.subrental_company_id) partnerIds.add(e.subrental_company_id);
+    });
+    
+    const subrentalIds = Array.from(partnerIds);
     
     if (subrentalIds.length > 0) {
       const { data: companies } = await supabase
