@@ -2,10 +2,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Equipment } from "@/types/database";
-import { Edit2, Trash2, Package, Info, Zap, ZapOff, Clock } from "lucide-react";
+import { Edit2, Trash2, Package, Info, Zap, ZapOff, Clock, Truck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUpdateEquipment } from "@/hooks/useEquipments";
 import { useState } from "react";
+import { AssignEquipmentModal } from "./AssignEquipmentModal";
 
 interface InventoryCardProps {
   item: Equipment;
@@ -18,6 +19,7 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId }: InventoryCar
   const navigate = useNavigate();
   const updateMutation = useUpdateEquipment();
   const [loading, setLoading] = useState(false);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
 
   // Item cedido = pertence a outra empresa mas esta gerencia
   const isCeded = !!item.subrental_company_id && item.company_id !== tenantId;
@@ -134,6 +136,15 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId }: InventoryCar
                   <Button 
                     variant="ghost" 
                     size="icon" 
+                    onClick={() => setIsAssignModalOpen(true)}
+                    className="h-9 w-9 bg-zinc-900/50 hover:bg-blue-500/20 hover:text-blue-400 transition-all rounded-xl border border-zinc-800"
+                    title="Atribuir Unidade"
+                  >
+                    <Truck className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
                     onClick={() => onDelete(item.id)}
                     className="h-9 w-9 bg-zinc-900/50 hover:bg-destructive/10 text-zinc-600 hover:text-destructive transition-all rounded-xl border border-zinc-800"
                     title="Excluir"
@@ -190,6 +201,12 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId }: InventoryCar
            </Button>
         </div>
       </CardContent>
+
+      <AssignEquipmentModal 
+        equipment={item}
+        isOpen={isAssignModalOpen}
+        onClose={() => setIsAssignModalOpen(false)}
+      />
     </Card>
   );
 }
