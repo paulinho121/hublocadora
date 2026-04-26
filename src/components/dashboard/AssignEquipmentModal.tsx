@@ -38,6 +38,10 @@ export function AssignEquipmentModal({ equipment, isOpen, onClose }: AssignEquip
                     .maybeSingle();
                 
                 partnerCompanyId = partnerProfile?.company_id;
+
+                if (!partnerCompanyId) {
+                    console.warn(`Aviso: Perfil não encontrado para o email ${branch.manager_email}. O item será atribuído à unidade, mas pode não aparecer no inventário remoto da sub-locadora até que o perfil dela seja vinculado.`);
+                }
             }
 
             // 2. Atualiza o equipamento (localização e vínculo de sub-locação)
