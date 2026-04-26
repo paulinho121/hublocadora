@@ -111,13 +111,34 @@ export default function Marketplace() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showAll, setShowAll] = useState(false);
   
-  const { data: equipments, isLoading } = useEquipments({
+  const { data: rawEquipments, isLoading } = useEquipments({
     searchQuery: search,
     category: selectedCategory
   });
 
+  // ─── Consolidação "Pote Principal" ────────────────────────────────────────
+  // Agrupa itens pelo nome e soma a quantidade real disponível no Hub
+  const equipments = (() => {
+    if (!rawEquipments) return [];
+    
+    const consolidated = new Map<string, Equipment>();
+    
+    rawEquipments.forEach(item => {
+      const key = item.name.trim().toUpperCase();
+      if (consolidated.has(key)) {
+        const existing = consolidated.get(key)!;
+        existing.stock_quantity = (existing.stock_quantity || 0) + (item.stock_quantity || 0);
+      } else {
+        // Clona para não mutar o cache do react-query
+        consolidated.set(key, { ...item });
+      }
+    });
+    
+    return Array.from(consolidated.values());
+  })();
+
   const isDefaultView = !search && !selectedCategory && !showAll;
-  const displayedEquipments = isDefaultView ? equipments?.slice(0, 8) : equipments;
+  const displayedEquipments = isDefaultView ? equipments.slice(0, 8) : equipments;
 
   const handleSearch = () => {
     if (equipments && equipments.length === 1) {
