@@ -66,7 +66,7 @@ export function PrivacySettings() {
                             </h4>
                             <p className="text-[10px] text-zinc-500 font-medium">Baixe todos os seus dados pessoais em formato legível por máquina.</p>
                         </div>
-                        <Button variant="outline" onClick={handleExportData} className="rounded-xl border-zinc-800 text-[10px] uppercase font-black tracking-widest px-6">
+                        <Button variant="outline" onClick={handleExportData} className="w-full md:w-auto rounded-xl border-zinc-800 text-[10px] uppercase font-black tracking-widest px-6">
                             Exportar JSON
                         </Button>
                     </div>
@@ -83,7 +83,7 @@ export function PrivacySettings() {
                         <Button 
                             variant="destructive" 
                             onClick={() => setIsDialogOpen(true)}
-                            className="rounded-xl text-[10px] uppercase font-black tracking-widest px-6 shadow-lg shadow-red-500/20"
+                            className="w-full md:w-auto rounded-xl text-[10px] uppercase font-black tracking-widest px-6 shadow-lg shadow-red-500/20"
                         >
                             Solicitar Exclusão
                         </Button>

@@ -24,10 +24,10 @@ export default function PrivacyPolicy() {
         >
           <header className="border-b border-zinc-900 pb-10">
             <div className="flex items-center gap-4 mb-6">
-              <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
-                <Shield className="h-6 w-6" />
+              <div className="h-10 w-10 md:h-12 md:w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                <Shield className="h-5 w-5 md:h-6 md:w-6" />
               </div>
-              <h1 className="text-4xl font-black tracking-tighter uppercase text-white">Política de Privacidade</h1>
+              <h1 className="text-2xl md:text-4xl font-black tracking-tighter uppercase text-white">Política de Privacidade</h1>
             </div>
             <p className="text-zinc-500 font-medium">Última atualização: 26 de Abril de 2026</p>
           </header>
