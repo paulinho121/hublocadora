@@ -47,6 +47,7 @@ export interface MasterCatalog {
 export interface Equipment {
     id: string;
     company_id: string; 
+    subrental_company_id?: string | null; // Sub-locadora externa que gerencia este item
     name: string;
     category: string; 
     description: string;
