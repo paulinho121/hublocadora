@@ -66,6 +66,42 @@ export default function Dashboard() {
     renterId: user?.id
   });
 
+  // Pedidos de fornecimento recebidos pela sub-locadora (aguardando aceite)
+  const [subrentalInbox, setSubrentalInbox] = useState<any[]>([]);
+  const [loadingSubrental, setLoadingSubrental] = useState(false);
+
+  useEffect(() => {
+    if (!tenantId) return;
+    const fetchSubrentalInbox = async () => {
+      setLoadingSubrental(true);
+      const { data } = await supabase
+        .from('deliveries')
+        .select(`
+          *,
+          booking:bookings(
+            *,
+            equipment:equipments(name, images, category, daily_rate),
+            renter:profiles(full_name, email, company:companies!company_id(name))
+          )
+        `)
+        .eq('fulfilling_company_id', tenantId)
+        .eq('subrental_status', 'pending');
+      setSubrentalInbox(data || []);
+      setLoadingSubrental(false);
+    };
+    fetchSubrentalInbox();
+
+    // Realtime para novos pedidos de fornecimento
+    const channel = supabase
+      .channel('subrental_inbox')
+      .on('postgres_changes', {
+        event: 'UPDATE', schema: 'public', table: 'deliveries',
+        filter: `fulfilling_company_id=eq.${tenantId}`,
+      }, () => fetchSubrentalInbox())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [tenantId]);
+
   const { data: equipments, isLoading: isLoadingEquipments } = useEquipments({
     companyId: tenantId || undefined,
     branchId: isBranchManager ? branchId : undefined
@@ -216,13 +252,16 @@ export default function Dashboard() {
       setUpdatingId(id);
       await updateStatusMutation.mutateAsync({ id, status });
 
-      // Se foi aprovado e tem uma sub-locadora para fulfillment, atualiza a delivery
+      // Se foi aprovado e tem uma sub-locadora para fulfillment
       if (status === 'approved' && fulfillCompanyId) {
-        // Aguardar um tick para a trigger do banco criar a delivery
         await new Promise(r => setTimeout(r, 1000));
+        // Seta fulfilling_company_id E subrental_status = 'pending' (aguarda aceite)
         const { error } = await supabase
           .from('deliveries')
-          .update({ fulfilling_company_id: fulfillCompanyId })
+          .update({ 
+            fulfilling_company_id: fulfillCompanyId,
+            subrental_status: 'pending'
+          })
           .eq('booking_id', id);
         if (error) console.error('Erro ao atribuir fulfilling_company_id:', error);
       }
@@ -232,6 +271,37 @@ export default function Dashboard() {
     } finally {
       setUpdatingId(null);
       setFulfillmentModal(null);
+    }
+  };
+
+  // Aceitar pedido de fornecimento (sub-locadora)
+  const handleAcceptSubrental = async (deliveryId: string) => {
+    const { error } = await supabase
+      .from('deliveries')
+      .update({ subrental_status: 'accepted' })
+      .eq('id', deliveryId);
+    if (!error) {
+      setSubrentalInbox(prev => prev.filter(d => d.id !== deliveryId));
+      alert('✅ Pedido aceito! Agora acesse Logística para iniciar o processo.');
+    } else {
+      alert('❌ Erro ao aceitar: ' + error.message);
+    }
+  };
+
+  // Recusar pedido de fornecimento (sub-locadora)
+  const handleRejectSubrental = async (deliveryId: string) => {
+    const { error } = await supabase
+      .from('deliveries')
+      .update({ 
+        subrental_status: 'rejected',
+        fulfilling_company_id: null 
+      })
+      .eq('id', deliveryId);
+    if (!error) {
+      setSubrentalInbox(prev => prev.filter(d => d.id !== deliveryId));
+      alert('Pedido recusado. A locadora principal foi notificada.');
+    } else {
+      alert('❌ Erro ao recusar: ' + error.message);
     }
   };
 
@@ -461,8 +531,74 @@ export default function Dashboard() {
                       <Button variant={bookingFilter === 'requested' ? 'secondary' : 'ghost'} onClick={() => setBookingFilter('requested')} className="h-9 rounded-lg text-[10px] font-black uppercase">Enviados</Button>
                    </div>
                 </header>
-                
-                <div className="space-y-4">
+                 
+                 {/* ===== PEDIDOS DE FORNECIMENTO (Sub-locadora aceita/recusa) ===== */}
+                 {subrentalInbox.length > 0 && (
+                   <div className="mb-8 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                     <div className="flex items-center gap-3">
+                       <div className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+                       <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-amber-400">
+                         Pedidos de Fornecimento — {subrentalInbox.length} aguardando
+                       </h3>
+                     </div>
+                     {subrentalInbox.map((delivery: any) => (
+                       <Card key={delivery.id} className="bg-amber-500/5 border-amber-500/20 rounded-2xl overflow-hidden">
+                         <div className="p-6">
+                           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
+                             <div className="flex gap-4 items-center">
+                               <div className="h-14 w-14 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
+                                 {delivery.booking?.equipment?.images?.[0] ? (
+                                   <img src={delivery.booking.equipment.images[0]} alt="" className="w-full h-full object-cover" />
+                                 ) : (
+                                   <Package className="h-6 w-6 text-zinc-700" />
+                                 )}
+                               </div>
+                               <div>
+                                 <div className="flex items-center gap-2 mb-1">
+                                   <span className="text-[9px] font-black uppercase tracking-widest text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
+                                     Fornecimento Solicitado
+                                   </span>
+                                 </div>
+                                 <p className="font-black text-zinc-100 tracking-tight uppercase text-lg leading-none">
+                                   {delivery.booking?.equipment?.name || 'Equipamento'}
+                                 </p>
+                                 <p className="text-[11px] text-zinc-500 font-bold uppercase tracking-widest mt-1">
+                                   Cliente: {delivery.booking?.renter?.company?.name || delivery.booking?.renter?.full_name}
+                                 </p>
+                                 {delivery.booking?.start_date && (
+                                   <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">
+                                     {format(new Date(delivery.booking.start_date), "dd/MM")} → {format(new Date(delivery.booking.end_date), "dd/MM")}
+                                     {delivery.booking?.total_amount && ` • ${formatCurrency(delivery.booking.total_amount)}`}
+                                   </p>
+                                 )}
+                               </div>
+                             </div>
+                             <div className="flex gap-3 w-full sm:w-auto">
+                               <Button
+                                 variant="ghost"
+                                 size="sm"
+                                 onClick={() => handleRejectSubrental(delivery.id)}
+                                 className="flex-1 sm:flex-none text-destructive hover:bg-destructive/10 font-black uppercase text-[10px] tracking-widest border border-destructive/20 rounded-xl"
+                               >
+                                 Recusar
+                               </Button>
+                               <Button
+                                 size="sm"
+                                 onClick={() => handleAcceptSubrental(delivery.id)}
+                                 className="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-500 font-black uppercase text-[10px] tracking-widest rounded-xl px-6"
+                               >
+                                 ✓ Aceitar Pedido
+                               </Button>
+                             </div>
+                           </div>
+                         </div>
+                       </Card>
+                     ))}
+                     <div className="border-t border-zinc-800/50 pt-4" />
+                   </div>
+                 )}
+
+                 <div className="space-y-4">
                   {(bookingFilter === 'received' ? bookingsReceived : bookingsRequested)?.map((booking: any) => (
                     <Card key={booking.id} className="bg-zinc-900/30 border-zinc-900 rounded-2xl overflow-hidden hover:border-zinc-800 transition-colors">
                        <div className="p-6 flex flex-col sm:flex-row justify-between sm:items-center gap-4">

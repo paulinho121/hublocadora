@@ -24,11 +24,8 @@ export function useDeliveries(options?: {
                 query = query.eq('booking_id', options.bookingId);
             }
             
-            // If tenantId is provided, we need to filter deliveries by the company_id in the related booking
-            // In Supabase, this is often done via the booking relation filter if possible, 
-            // but for simplicity here we might rely on the RLS policies or a more complex query.
-            // Simplified: we'll filter by booking_id for now if specific, 
-            // otherwise RLS will handle the visibility.
+            // Excluir entregas ainda aguardando aceite da sub-locadora
+            query = query.or('subrental_status.is.null,subrental_status.eq.accepted');
             
             const { data, error } = await query.order('updated_at', { ascending: false });
 
