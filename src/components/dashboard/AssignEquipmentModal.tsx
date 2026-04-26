@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useBranches } from '@/hooks/useBranches';
 import { useUpdateEquipment } from '@/hooks/useEquipments';
+import { supabase } from '@/lib/supabase';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Loader2, MapPin, Building2, Check } from 'lucide-react';
@@ -23,24 +24,46 @@ export function AssignEquipmentModal({ equipment, isOpen, onClose }: AssignEquip
 
         setLoading(true);
         try {
-            // Se a branch tiver um invite_token aceito e virou uma company,
-            // poderíamos pegar o company_id real dela. 
-            // Por enquanto, vamos usar a lógica de vincular à unidade física.
-            
-            // 1. Atualiza a localização base no equipamento
             const branch = branches?.find(b => b.id === selectedBranchId);
+            if (!branch) throw new Error('Unidade não encontrada');
+
+            // 1. Tentar encontrar a EMPRESA vinculada a esta unidade (se for parceiro externo)
+            let partnerCompanyId = null;
+            if (branch.manager_email) {
+                // Busca o perfil pelo email para pegar o company_id real dele
+                const { data: partnerProfile } = await supabase
+                    .from('profiles')
+                    .select('company_id')
+                    .eq('email', branch.manager_email)
+                    .maybeSingle();
+                
+                partnerCompanyId = partnerProfile?.company_id;
+            }
+
+            // 2. Atualiza o equipamento (localização e vínculo de sub-locação)
             await updateMutation.mutateAsync({ 
                 id: equipment.id, 
-                location_base: branch?.name || equipment.location_base 
+                location_base: branch.name,
+                subrental_company_id: partnerCompanyId || null // Crucial para o RLS
             });
 
-            // 2. Se o sistema evoluir para sub-locação formal entre empresas,
-            // aqui poderíamos setar o subrental_company_id.
+            // 3. Garante que o item apareça no ESTOQUE da unidade (importante para filiais)
+            await supabase
+                .from('equipment_stock')
+                .upsert({
+                    branch_id: selectedBranchId,
+                    equipment_id: equipment.id,
+                    quantity: equipment.stock_quantity || 1, // Mantém a quantidade ou assume 1
+                    updated_at: new Date().toISOString()
+                }, {
+                    onConflict: 'branch_id,equipment_id'
+                });
             
-            alert(`Equipamento atribuído à unidade ${branch?.name} com sucesso!`);
+            alert(`Equipamento atribuído com sucesso! Agora ele aparecerá no inventário da unidade ${branch.name}.`);
             onClose();
-        } catch (error) {
-            alert('Erro ao atribuir equipamento');
+        } catch (error: any) {
+            console.error('Erro na atribuição:', error);
+            alert(`Erro ao atribuir: ${error.message || 'Erro desconhecido'}`);
         } finally {
             setLoading(false);
         }

@@ -119,6 +119,7 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
               item={item} 
               onEdit={onEdit} 
               onDelete={onDelete} 
+              tenantId={tenantId}
             />
           ))}
         </div>

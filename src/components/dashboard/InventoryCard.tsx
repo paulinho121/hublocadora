@@ -21,8 +21,11 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId }: InventoryCar
   const [loading, setLoading] = useState(false);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
 
-  // Item cedido = pertence a outra empresa mas esta gerencia
+  // Item cedido = pertence a outra empresa mas esta gerencia (Sub-locadora vendo item do Master)
   const isCeded = !!item.subrental_company_id && item.company_id !== tenantId;
+  
+  // Item atribuído = eu sou o dono mas outra empresa gerencia (Master vendo item que enviou)
+  const isAssigned = !!item.subrental_company_id && item.company_id === tenantId;
 
   const toggleExternalRental = async () => {
     try {
@@ -91,10 +94,17 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId }: InventoryCar
           {getStatusLabel(item.status)}
         </Badge>
         
-        {/* Badge de item cedido */}
+        {/* Badge de item cedido (Para a Sub-locadora) */}
         {isCeded && (
-          <div className="absolute top-3 left-3 bg-blue-500/20 border border-blue-500/30 text-blue-400 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full">
-            Cedido
+          <div className="absolute top-3 left-3 bg-blue-500/20 border border-blue-500/30 text-blue-400 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full backdrop-blur-md">
+            Recebido do Master
+          </div>
+        )}
+
+        {/* Badge de item atribuído (Para o Master) */}
+        {isAssigned && (
+          <div className="absolute top-3 left-3 bg-amber-500/20 border border-amber-500/30 text-amber-500 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full backdrop-blur-md">
+            Atribuído a Unidade
           </div>
         )}
       </div>
@@ -177,6 +187,7 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId }: InventoryCar
             <button 
               onClick={toggleExternalRental}
               disabled={loading}
+              title={isCeded ? "Mudar disponibilidade deste item no HUB" : "Mudar disponibilidade do meu item no HUB"}
               className={`w-full flex items-center justify-center gap-2 h-10 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border ${
                 item.status === 'unavailable' 
                 ? 'bg-zinc-900 text-zinc-500 border-zinc-800 hover:bg-zinc-800' 
@@ -184,7 +195,7 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId }: InventoryCar
               }`}
             >
               <div className={`h-1.5 w-1.5 rounded-full ${item.status === 'unavailable' ? 'bg-zinc-600' : 'bg-emerald-500 animate-pulse'}`} />
-              {item.status === 'unavailable' ? 'Invisível no HUB' : 'Ativo no HUB'}
+              {item.status === 'unavailable' ? 'Oculto no HUB' : 'Visível no HUB'}
             </button>
           </div>
         </div>
