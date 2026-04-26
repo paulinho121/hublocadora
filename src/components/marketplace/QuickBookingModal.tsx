@@ -275,10 +275,10 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                     />
                                     <label htmlFor="acceptContract" className="cursor-pointer">
                                         <p className="text-xs font-black uppercase text-white tracking-widest flex items-center gap-2">
-                                            <FileSignature className="w-3 h-3" /> Eu concordo com os Termos
+                                            <FileSignature className="w-3 h-3" /> Aceite de Termos e Privacidade
                                         </p>
                                         <p className="text-[10px] text-zinc-500 leading-relaxed mt-1">
-                                            Li e aceito os termos do contrato de sub-locação, ciente das regras de recolhimento, caução de risco, e das taxas contratuais de intermediamento deste marketplace.
+                                            Li e aceito os <a href="/terms" target="_blank" className="text-primary hover:underline">Termos de Uso</a> e a <a href="/privacy" target="_blank" className="text-primary hover:underline">Política de Privacidade</a>, e autorizo o compartilhamento dos meus dados com a locadora parceira para fins de entrega e contrato (LGPD).
                                         </p>
                                     </label>
                                 </div>
