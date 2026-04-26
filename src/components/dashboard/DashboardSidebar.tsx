@@ -23,14 +23,14 @@ interface SidebarProps {
 
 export function DashboardSidebar({ activeTab, onTabChange, companyName }: SidebarProps) {
   const { user, signOut } = useAuth();
-  const { isBranchManager } = useTenant();
+  const { isAdmin } = useTenant();
   
   const menuItems = [
     { id: 'overview', label: 'Visão Geral', icon: BarChart3 },
     { id: 'inventory', label: 'Inventário', icon: Package },
     { id: 'bookings', label: 'Reservas', icon: CalendarDays },
     { id: 'logistics', label: 'Logística', icon: Truck },
-    ...(isBranchManager ? [] : [{ id: 'network', label: 'Minha Rede', icon: Globe }]),
+    ...(isAdmin ? [{ id: 'network', label: 'Minha Rede', icon: Globe }] : []),
     { id: 'settings', label: 'Configurações', icon: Settings },
   ];
 
