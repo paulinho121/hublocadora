@@ -22,6 +22,9 @@ import EquipmentDetails from '@/pages/EquipmentDetails';
 import { AIToolsPage } from '@/pages/AITools';
 import { AIAssistant } from '@/components/ai/AIAssistant';
 import AcceptInvite from '@/pages/AcceptInvite';
+import PrivacyPolicy from '@/pages/PrivacyPolicy';
+import TermsOfUse from '@/pages/TermsOfUse';
+import { Footer } from '@/components/layout/Footer';
 
 function Navbar() {
   const { user, profile, signOut } = useAuth();
@@ -172,6 +175,8 @@ function MainLayout() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/invite/:token" element={<AcceptInvite />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfUse />} />
           <Route
             path="/dashboard"
             element={
@@ -190,6 +195,7 @@ function MainLayout() {
           />
         </Routes>
       </main>
+      {!isAuthPage && <Footer />}
       {!isAuthPage && <BottomNav />}
       <AIAssistant />
     </div>
