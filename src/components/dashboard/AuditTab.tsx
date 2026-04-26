@@ -28,7 +28,8 @@ export function AuditTab() {
         .from('equipments')
         .select(`
           *,
-          owner:companies!company_id(name)
+          owner:companies!company_id(name),
+          subrental:companies!subrental_company_id(name)
         `)
         .eq('status', 'unavailable')
         .order('unavailable_since', { ascending: true });
@@ -36,7 +37,7 @@ export function AuditTab() {
       if (error) throw error;
       return data;
     },
-    refetchInterval: 30000 // Atualiza a cada 30 segundos
+    refetchInterval: 30000 
   });
 
   const { data: logs, isLoading: isLoadingLogs } = useQuery({
@@ -106,8 +107,9 @@ export function AuditTab() {
                  <CardContent className="p-5 space-y-4">
                     <div className="flex justify-between items-start">
                       <Badge className="bg-red-500/10 text-red-500 border-red-500/20 text-[9px] font-black uppercase">Oculto</Badge>
-                      <span className="text-[10px] text-zinc-500 font-bold flex items-center gap-1 uppercase tracking-widest">
-                        <Building2 className="w-3 h-3" /> {item.owner?.name}
+                      <span className="text-[10px] text-zinc-500 font-bold flex items-center gap-1 uppercase tracking-widest flex-1 text-right truncate pl-4">
+                        <Building2 className="w-3 h-3 inline mr-1 text-primary" /> 
+                        {item.subrental?.name || item.owner?.name}
                       </span>
                     </div>
                     <div>
