@@ -253,8 +253,8 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
 
                                             {/* Action Sidebar */}
                                             <div className="w-full lg:w-72 flex flex-col justify-center gap-4 bg-zinc-950/20 sm:bg-zinc-950/50 p-4 sm:p-8 rounded-[1.2rem] sm:rounded-[2rem] border border-zinc-800/50">
-                                                {/* Provider Info (Token needed for shipping) */}
-                                                {delivery.status === 'shipped' && delivery.booking?.company_id === tenantId && (
+                                                {/* Token de 4 dígitos: aparece para quem entrega (locadora master ou sub-locadora) */}
+                                                {delivery.status === 'shipped' && (delivery.booking?.company_id === tenantId || delivery.fulfilling_company_id === tenantId) && (
                                                     <div className="space-y-2 mb-2 animate-in fade-in slide-in-from-top-2">
                                                         <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary">
                                                             <ShieldAlert className="h-3 w-3" />
@@ -282,7 +282,8 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                     </div>
                                                 )}
 
-                                                {delivery.status === 'picking' && delivery.booking?.company_id === tenantId && (
+                                                {/* Número de série: aparece para quem está separando */}
+                                                {delivery.status === 'picking' && (delivery.booking?.company_id === tenantId || delivery.fulfilling_company_id === tenantId) && (
                                                     <div className="space-y-2 mb-2 animate-in fade-in slide-in-from-top-2">
                                                         <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-500">
                                                             <Hash className="h-3 w-3" />
