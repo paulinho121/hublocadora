@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Dialog } from '@/components/ui/dialog';
 export function PrivacySettings() {
     const { user, signOut } = useAuth();
     const [isDeleting, setIsDeleting] = useState(false);
