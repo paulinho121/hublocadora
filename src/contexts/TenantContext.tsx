@@ -154,6 +154,41 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
         }
     }, [user, authLoading]);
 
+    // Realtime: Escuta mudanças no status da empresa atual
+    // Quando o admin aprova, o usuário vê automaticamente sem precisar de reload
+    useEffect(() => {
+        if (!company?.id) return;
+
+        const channel = supabase
+            .channel(`company_status_${company.id}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'companies',
+                    filter: `id=eq.${company.id}`,
+                },
+                (payload) => {
+                    console.log('[TenantContext] Company status changed via Realtime:', payload.new);
+                    const newStatus = (payload.new as any)?.status;
+                    if (newStatus && newStatus !== company.status) {
+                        // Atualiza o estado local imediatamente
+                        setCompany(prev => prev ? { ...prev, status: newStatus } : prev);
+                        // Se foi aprovada, faz um refresh completo
+                        if (newStatus === 'approved' || newStatus === 'active') {
+                            fetchData();
+                        }
+                    }
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [company?.id, company?.status]);
+
     const refreshTenant = async () => {
         await fetchData();
     };
