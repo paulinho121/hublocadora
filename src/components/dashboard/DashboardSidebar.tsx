@@ -8,7 +8,8 @@ import {
   LogOut, 
   ChevronRight, 
   User,
-  Globe
+  Globe,
+  History
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
