@@ -58,7 +58,8 @@ export default function Dashboard() {
   const setActiveTab = (tab: TabType) => setSearchParams({ tab }, { replace: true });
   
   const { data: bookingsReceived, isLoading: isLoadingReceived } = useBookings({
-    companyId: tenantId || undefined
+    companyId: tenantId || undefined,
+    includeEquipmentSubrental: true,
   });
 
   const { data: bookingsRequested } = useBookings({
@@ -85,6 +86,14 @@ export default function Dashboard() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  // Modal de roteamento: quando master aprova e escolhe sub-locadora
+  const [fulfillmentModal, setFulfillmentModal] = useState<{
+    open: boolean;
+    bookingId: string;
+    subrentalCompanyId: string | null;
+    subrentalCompanyName: string;
+  } | null>(null);
 
   // iFood Real-Time Notification State
   const queryClient = useQueryClient();
@@ -202,15 +211,49 @@ export default function Dashboard() {
     }
   };
 
-  const handleUpdateStatus = async (id: string, status: any) => {
+  const handleUpdateStatus = async (id: string, status: any, fulfillCompanyId?: string | null) => {
     try {
       setUpdatingId(id);
       await updateStatusMutation.mutateAsync({ id, status });
+
+      // Se foi aprovado e tem uma sub-locadora para fulfillment, atualiza a delivery
+      if (status === 'approved' && fulfillCompanyId) {
+        // Aguardar um tick para a trigger do banco criar a delivery
+        await new Promise(r => setTimeout(r, 1000));
+        const { error } = await supabase
+          .from('deliveries')
+          .update({ fulfilling_company_id: fulfillCompanyId })
+          .eq('booking_id', id);
+        if (error) console.error('Erro ao atribuir fulfilling_company_id:', error);
+      }
     } catch (error) {
       console.error('Erro ao atualizar status:', error);
       alert('Não foi possível atualizar o pedido. Tente novamente.');
     } finally {
       setUpdatingId(null);
+      setFulfillmentModal(null);
+    }
+  };
+
+  // Ao clicar "Aprovar agora": verifica se o equipamento tem sub-locadora
+  const handleApproveBooking = async (booking: any) => {
+    const subrentalId = booking.equipment?.subrental_company_id;
+    if (subrentalId) {
+      // Buscar nome da sub-locadora
+      const { data: company } = await supabase
+        .from('companies')
+        .select('id, name')
+        .eq('id', subrentalId)
+        .single();
+
+      setFulfillmentModal({
+        open: true,
+        bookingId: booking.id,
+        subrentalCompanyId: subrentalId,
+        subrentalCompanyName: company?.name || 'Sub-locadora',
+      });
+    } else {
+      await handleUpdateStatus(booking.id, 'approved', null);
     }
   };
 
@@ -464,11 +507,18 @@ export default function Dashboard() {
                        )}
 
                        {bookingFilter === 'received' && booking.status === 'pending' && (
-                         <div className="px-6 py-4 bg-zinc-900/50 flex justify-end gap-3 border-t border-zinc-800">
-                            <Button variant="ghost" size="sm" onClick={() => handleUpdateStatus(booking.id, 'rejected')} className="text-destructive font-black uppercase text-[10px] hover:bg-destructive/5 tracking-widest">Recusar</Button>
-                            <Button size="sm" onClick={() => handleUpdateStatus(booking.id, 'approved')} className="bg-emerald-600 hover:bg-emerald-500 font-black uppercase text-[10px] tracking-widest rounded-lg px-6">Aprovar agora</Button>
-                         </div>
-                       )}
+                          <div className="px-6 py-4 bg-zinc-900/50 flex justify-end gap-3 border-t border-zinc-800">
+                             <Button variant="ghost" size="sm" onClick={() => handleUpdateStatus(booking.id, 'rejected')} className="text-destructive font-black uppercase text-[10px] hover:bg-destructive/5 tracking-widest">Recusar</Button>
+                             <Button 
+                               size="sm" 
+                               disabled={updatingId === booking.id}
+                               onClick={() => handleApproveBooking(booking)} 
+                               className="bg-emerald-600 hover:bg-emerald-500 font-black uppercase text-[10px] tracking-widest rounded-lg px-6"
+                             >
+                               {updatingId === booking.id ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Aprovar agora'}
+                             </Button>
+                          </div>
+                        )}
                     </Card>
                   ))}
                 </div>
@@ -552,6 +602,42 @@ export default function Dashboard() {
         onConfirm={handleConfirmDelete}
         loading={deleteMutation.isPending}
       />
+
+      {/* Modal de Roteamento: Sub-locadora fulfillment */}
+      <Dialog
+        isOpen={!!fulfillmentModal?.open}
+        onClose={() => setFulfillmentModal(null)}
+        title="Atribuir Entrega à Sub-locadora"
+      >
+        {fulfillmentModal && (
+          <div className="space-y-6">
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-4">
+              <p className="text-sm text-zinc-300 font-medium leading-relaxed">
+                Este equipamento está com a sub-locadora
+                <span className="text-blue-400 font-black"> {fulfillmentModal.subrentalCompanyName}</span>.
+                Deseja que ela gerencie a entrega deste pedido?
+              </p>
+            </div>
+            <div className="flex flex-col gap-3">
+              <Button
+                onClick={() => handleUpdateStatus(fulfillmentModal.bookingId, 'approved', fulfillmentModal.subrentalCompanyId)}
+                disabled={!!updatingId}
+                className="w-full h-12 bg-emerald-600 hover:bg-emerald-500 font-black uppercase tracking-widest rounded-xl"
+              >
+                {updatingId ? <Loader2 className="h-4 w-4 animate-spin" /> : `Sim, ${fulfillmentModal.subrentalCompanyName} entrega`}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => handleUpdateStatus(fulfillmentModal.bookingId, 'approved', null)}
+                disabled={!!updatingId}
+                className="w-full h-12 border-zinc-700 font-black uppercase tracking-widest rounded-xl"
+              >
+                Não, eu mesmo gerencio
+              </Button>
+            </div>
+          </div>
+        )}
+      </Dialog>
 
 
     </div>

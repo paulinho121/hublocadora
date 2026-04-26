@@ -298,21 +298,30 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                 )}
 
                                                 {delivery.status !== 'delivered' && delivery.status !== 'cancelled' ? (
-                                                    delivery.booking?.company_id === tenantId ? (
-                                                        <Button 
-                                                            onClick={() => handleNextStatus(delivery)}
-                                                            disabled={updatingId === delivery.id}
-                                                            className="w-full h-16 rounded-2xl bg-primary hover:bg-primary/90 text-black font-black uppercase tracking-widest px-6 shadow-[0_0_30_rgba(var(--primary-rgb),0.2)] group"
-                                                        >
-                                                            {updatingId === delivery.id ? (
-                                                                <Loader2 className="h-5 w-5 animate-spin" />
-                                                            ) : (
-                                                                <>
-                                                                    <span className="flex-1">{getNextActionLabel(delivery.status)}</span>
-                                                                    <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                                                                </>
-                                                            )}
-                                                        </Button>
+                                                    (delivery.booking?.company_id === tenantId || delivery.fulfilling_company_id === tenantId) ? (
+                                                        <>
+                                                          {/* Badge quando sub-locadora está gerenciando entrega de outro */}
+                                                          {delivery.fulfilling_company_id === tenantId && delivery.booking?.company_id !== tenantId && (
+                                                            <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3 mb-2 text-center">
+                                                              <p className="text-[9px] text-blue-400 font-black uppercase tracking-widest">Você é o fornecedor</p>
+                                                              <p className="text-[10px] text-zinc-300 font-medium mt-0.5">Gerenciando entrega de outra locadora</p>
+                                                            </div>
+                                                          )}
+                                                          <Button 
+                                                              onClick={() => handleNextStatus(delivery)}
+                                                              disabled={updatingId === delivery.id}
+                                                              className="w-full h-16 rounded-2xl bg-primary hover:bg-primary/90 text-black font-black uppercase tracking-widest px-6 shadow-[0_0_30_rgba(var(--primary-rgb),0.2)] group"
+                                                          >
+                                                              {updatingId === delivery.id ? (
+                                                                  <Loader2 className="h-5 w-5 animate-spin" />
+                                                              ) : (
+                                                                  <>
+                                                                      <span className="flex-1">{getNextActionLabel(delivery.status)}</span>
+                                                                      <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                                                                  </>
+                                                              )}
+                                                          </Button>
+                                                        </>
                                                     ) : (
                                                         <div className="text-center py-4 bg-zinc-900/50 rounded-2xl border border-zinc-800/50">
                                                             <Clock className="h-10 w-10 text-primary/40 mx-auto mb-2 animate-pulse" />
