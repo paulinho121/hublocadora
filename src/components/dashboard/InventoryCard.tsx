@@ -11,12 +11,16 @@ interface InventoryCardProps {
   item: Equipment;
   onEdit: (item: Equipment) => void;
   onDelete: (id: string) => void;
+  tenantId?: string; // Para saber se o item é cedido
 }
 
-export function InventoryCard({ item, onEdit, onDelete }: InventoryCardProps) {
+export function InventoryCard({ item, onEdit, onDelete, tenantId }: InventoryCardProps) {
   const navigate = useNavigate();
   const updateMutation = useUpdateEquipment();
   const [loading, setLoading] = useState(false);
+
+  // Item cedido = pertence a outra empresa mas esta gerencia
+  const isCeded = !!item.subrental_company_id && item.company_id !== tenantId;
 
   const toggleExternalRental = async () => {
     try {
@@ -84,6 +88,13 @@ export function InventoryCard({ item, onEdit, onDelete }: InventoryCardProps) {
         >
           {getStatusLabel(item.status)}
         </Badge>
+        
+        {/* Badge de item cedido */}
+        {isCeded && (
+          <div className="absolute top-3 left-3 bg-blue-500/20 border border-blue-500/30 text-blue-400 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full">
+            Cedido
+          </div>
+        )}
       </div>
 
       <CardContent className="p-5">
@@ -108,24 +119,29 @@ export function InventoryCard({ item, onEdit, onDelete }: InventoryCardProps) {
             </div>
             
             <div className="flex gap-1">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => onEdit(item)} 
-                className="h-9 w-9 bg-zinc-900/50 hover:bg-primary/20 hover:text-primary transition-all rounded-xl border border-zinc-800"
-                title="Editar"
-              >
-                <Edit2 className="h-4 w-4" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => onDelete(item.id)}
-                className="h-9 w-9 bg-zinc-900/50 hover:bg-destructive/10 text-zinc-600 hover:text-destructive transition-all rounded-xl border border-zinc-800"
-                title="Excluir"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              {/* Só mostra editar/excluir se for item próprio */}
+              {!isCeded && (
+                <>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => onEdit(item)} 
+                    className="h-9 w-9 bg-zinc-900/50 hover:bg-primary/20 hover:text-primary transition-all rounded-xl border border-zinc-800"
+                    title="Editar"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => onDelete(item.id)}
+                    className="h-9 w-9 bg-zinc-900/50 hover:bg-destructive/10 text-zinc-600 hover:text-destructive transition-all rounded-xl border border-zinc-800"
+                    title="Excluir"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </>
+              )}
             </div>
           </div>
 

@@ -49,9 +49,26 @@ export function useEquipments(options?: {
                  return data as Equipment[];
              }
 
-             // Caso base (Master): se temos companyId sem outros filtros
+             // Caso base: buscar itens PRÓPRIOS + itens CEDIDOS à empresa (sub-locação)
              if (options?.companyId && !options.category && !options.searchQuery) {
-                 return EquipmentService.getAllByTenant(options.companyId);
+                 const [ownResult, assignedResult] = await Promise.all([
+                     // Itens próprios da empresa
+                     EquipmentService.getAllByTenant(options.companyId),
+                     // Itens cedidos por outra locadora para esta empresa gerenciar
+                     supabase
+                         .from('equipments')
+                         .select('*')
+                         .eq('subrental_company_id', options.companyId)
+                         .neq('company_id', options.companyId)
+                 ]);
+
+                 const ownItems = ownResult || [];
+                 const assignedItems = (assignedResult.data || []) as Equipment[];
+
+                 // Merge removendo duplicatas
+                 const allIds = new Set(ownItems.map((e: Equipment) => e.id));
+                 const newAssigned = assignedItems.filter(e => !allIds.has(e.id));
+                 return [...ownItems, ...newAssigned] as Equipment[];
              }
 
             // Fallback para filtros complexos (Marketplace)
@@ -61,7 +78,8 @@ export function useEquipments(options?: {
                 .neq('status', 'unavailable');
 
             if (options?.companyId) {
-                query = query.eq('company_id', options.companyId);
+                // Filtra por dono OU por sublocação
+                query = query.or(`company_id.eq.${options.companyId},subrental_company_id.eq.${options.companyId}`);
             }
 
             if (options?.category) {
