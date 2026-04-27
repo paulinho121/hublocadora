@@ -582,7 +582,7 @@ export default function Dashboard() {
            )}
 
            {activeTab === 'network' && (
-             <BranchesTab />
+             <BranchesTab tenantId={tenantId || ''} />
            )}
 
             {activeTab === 'audit' && (
