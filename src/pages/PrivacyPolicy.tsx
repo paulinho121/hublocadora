@@ -37,7 +37,7 @@ export default function PrivacyPolicy() {
               <Eye className="h-5 w-5 text-primary" /> 1. Coleta de Dados
             </h2>
             <p className="leading-relaxed">
-              O Cinehub coleta dados necessários para a prestação de serviços de locação de equipamentos audiovisuais, incluindo nome, e-mail, telefone, CPF/CNPJ e endereço. Esses dados são coletados no momento do cadastro e da reserva.
+              O Moving coleta dados necessários para a prestação de serviços de locação de equipamentos audiovisuais, incluindo nome, e-mail, telefone, CPF/CNPJ e endereço. Esses dados são coletados no momento do cadastro e da reserva.
             </p>
           </section>
 
@@ -66,7 +66,7 @@ export default function PrivacyPolicy() {
           </section>
 
           <footer className="pt-10 border-t border-zinc-900 text-sm text-zinc-600">
-            <p>Dúvidas sobre seus dados? Entre em contato com nosso DPO em: privacidade@cinehub.pro</p>
+            <p>Dúvidas sobre seus dados? Entre em contato com nosso DPO em: privacidade@moving.pro</p>
           </footer>
         </motion.div>
       </div>

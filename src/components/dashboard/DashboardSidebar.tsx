@@ -9,7 +9,8 @@ import {
   ChevronRight, 
   User,
   Globe,
-  History
+  History,
+  Activity
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -44,11 +45,11 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
       <div className="p-8 pb-10">
         <div className="flex items-center gap-3 mb-6 group cursor-default">
           <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center shadow-[0_0_20px_rgba(var(--primary),0.4)] group-hover:scale-110 transition-transform">
-             <Package className="h-5 w-5 text-white" />
+             <Activity className="h-5 w-5 text-white" />
           </div>
           <div>
             <h2 className="text-xl font-black tracking-tighter uppercase truncate leading-none mb-1">
-              {companyName || 'Cinehub'}
+              {companyName || 'Moving'}
             </h2>
             <div className="flex items-center gap-1.5 shrink-0">
                <div className="h-1 w-1 rounded-full bg-emerald-500" />

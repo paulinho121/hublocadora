@@ -129,8 +129,35 @@ export default function Dashboard() {
       })
       .subscribe();
 
+    // Listener para NOVAS ATRIBUIÇÕES (Sub-locadora)
+    const deliveriesChannel = supabase
+      .channel('deliveries_assignment')
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'deliveries',
+        filter: `fulfilling_company_id=eq.${tenantId}`
+      }, (payload) => {
+        // Se a sub-locadora acabou de ser atribuída e está aceita
+        if (payload.new.subrental_status === 'accepted' && (payload.old.fulfilling_company_id === null || payload.old.fulfilling_company_id !== tenantId)) {
+          console.log('Novo Pedido Atribuído para Sublocação:', payload);
+          
+          try {
+             const audio = new Audio('https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3?filename=success-1-6297.mp3'); 
+             audio.play().catch(e => console.log('Audio autoplay blocked', e));
+          } catch(e) {}
+
+          queryClient.invalidateQueries({ queryKey: ['deliveries'] });
+          setActiveTab('logistics'); // Direciona para logística
+          setShowLiveNotification(true);
+          setTimeout(() => setShowLiveNotification(false), 8000);
+        }
+      })
+      .subscribe();
+
     return () => {
       supabase.removeChannel(channel);
+      supabase.removeChannel(deliveriesChannel);
     };
   }, [tenantId, queryClient, setActiveTab]);
 
@@ -224,7 +251,8 @@ export default function Dashboard() {
           .from('deliveries')
           .update({ 
             fulfilling_company_id: fulfillCompanyId,
-            subrental_status: 'accepted'  // Sub-locadora já recebe aceito, sem etapa de confirmação
+            subrental_status: 'accepted',  // Sub-locadora já recebe aceito, sem etapa de confirmação
+            status: 'picking'              // Inicia a separação imediatamente
           })
           .eq('booking_id', id);
         if (error) console.error('Erro ao atribuir sub-locadora:', error);
@@ -303,8 +331,8 @@ export default function Dashboard() {
                   </div>
                </div>
                <div className="pl-4 py-2">
-                 <h3 className="text-black font-black uppercase tracking-widest text-lg leading-none mb-1">Nova Reserva no Hub!</h3>
-                 <p className="text-emerald-950 text-[11px] font-bold uppercase tracking-tighter">Um produtor acabou de alugar seu equipamento.</p>
+                 <h3 className="text-black font-black uppercase tracking-widest text-lg leading-none mb-1">Novo Pedido Recebido!</h3>
+                 <p className="text-emerald-950 text-[11px] font-bold uppercase tracking-tighter">O Hub acaba de direcionar um pedido para sua unidade.</p>
                </div>
             </motion.div>
          )}
