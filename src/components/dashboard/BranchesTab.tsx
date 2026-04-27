@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, LayoutGrid, List, MapPin, Package, Phone, Building2, ExternalLink, Copy, CheckCircle2 } from 'lucide-react';
+import { Plus, LayoutGrid, List, MapPin, Package, Phone, Building2, ExternalLink, Copy, CheckCircle2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useBranches } from '@/hooks/useBranches';
@@ -10,7 +10,7 @@ import { Branch } from '@/types/database';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
-export function BranchesTab() {
+export function BranchesTab({ tenantId }: { tenantId: string }) {
     const { branches, isLoading, createBranch } = useBranches();
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [isCreating, setIsCreating] = useState(false);
@@ -27,8 +27,15 @@ export function BranchesTab() {
 
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        if (!tenantId) {
+            alert('Erro: ID da empresa não encontrado. Verifique se seu perfil está vinculado a uma empresa.');
+            return;
+        }
+
         try {
             await createBranch.mutateAsync({
+                company_id: tenantId,
                 name,
                 manager_email: email,
                 city,
@@ -46,8 +53,9 @@ export function BranchesTab() {
             setState('');
             setPhone('');
             setDocument('');
-        } catch (error) {
-            console.error('Erro ao cadastrar sub-locadora');
+        } catch (error: any) {
+            console.error('Erro ao cadastrar sub-locadora:', error);
+            alert('Erro ao cadastrar: ' + (error.message || 'Verifique se você executou o script SQL no painel do Supabase.'));
         }
     };
 
@@ -195,7 +203,13 @@ export function BranchesTab() {
 
                             <div className="flex justify-end gap-3 pt-4">
                                 <Button type="button" variant="ghost" onClick={() => setIsCreating(false)} className="text-zinc-500 hover:text-white">Cancelar</Button>
-                                <Button type="submit" className="bg-zinc-100 text-black font-black uppercase tracking-widest px-8 h-12 rounded-xl">Salvar Unidade</Button>
+                                <Button 
+                                    type="submit" 
+                                    disabled={createBranch.isPending}
+                                    className="bg-zinc-100 text-black font-black uppercase tracking-widest px-8 h-12 rounded-xl"
+                                >
+                                    {createBranch.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Salvar Unidade'}
+                                </Button>
                             </div>
                         </form>
                     </motion.div>
