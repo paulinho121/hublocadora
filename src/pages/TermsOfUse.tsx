@@ -37,7 +37,7 @@ export default function TermsOfUse() {
               <FileCheck className="h-5 w-5 text-emerald-500" /> 1. Natureza do Serviço
             </h2>
             <p className="leading-relaxed">
-              O Cinehub é uma plataforma de marketplace e gestão de ativos audiovisuais. Atuamos como intermediários entre locadores (Master e Sublocadoras) e locatários (Produtores). Ao utilizar a plataforma, você concorda que o Cinehub facilita a transação e logística, mas a responsabilidade pelo uso do equipamento é do locatário.
+              O Moving é uma plataforma de marketplace e gestão de ativos audiovisuais. Atuamos como intermediários entre locadores (Master e Sublocadoras) e locatários (Produtores). Ao utilizar a plataforma, você concorda que o Moving facilita a transação e logística, mas a responsabilidade pelo uso do equipamento é do locatário.
             </p>
           </section>
 
@@ -57,7 +57,7 @@ export default function TermsOfUse() {
               <Scale className="h-5 w-5 text-emerald-500" /> 3. Sub-locação e Roteirização
             </h2>
             <p className="leading-relaxed">
-              Você está ciente de que seu pedido pode ser atendido por diferentes unidades da rede Cinehub (Roteirização). O valor pago e as condições contratuais permanecem as mesmas, independentemente da unidade de origem do ativo.
+              Você está ciente de que seu pedido pode ser atendido por diferentes unidades da rede Moving (Roteirização). O valor pago e as condições contratuais permanecem as mesmas, independentemente da unidade de origem do ativo.
             </p>
           </section>
 

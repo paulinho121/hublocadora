@@ -117,7 +117,7 @@ export function AIToolsPage() {
                 <div className="h-16 w-16 md:h-24 md:w-24 bg-primary/10 rounded-full flex items-center justify-center mb-6 md:mb-8 border border-primary/20">
                   <Bot className="h-8 w-8 md:h-12 md:w-12 text-primary" />
                 </div>
-                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter mb-4 px-2">Assistente IA CineHub</h2>
+                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter mb-4 px-2">Assistente IA Moving</h2>
                 <p className="text-sm md:text-base text-muted-foreground max-w-md mb-8 px-4">
                   Olá! Sou sua inteligência dedicada para dúvidas técnicas, verificações de estoque e recomendações de equipamentos.
                 </p>

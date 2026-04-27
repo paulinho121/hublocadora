@@ -28,29 +28,29 @@ export class EmailService {
   static async sendWelcome(params: { to: string; name: string; company: string }) {
     return this.send({
       to: params.to,
-      subject: `Bem-vindo ao CineHub, ${params.name}! 🎬`,
+      subject: `Bem-vindo ao MOVING, ${params.name}!`,
       html: `
         <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f0f;color:#f5f5f5;border-radius:12px;overflow:hidden;">
           <div style="background:linear-gradient(135deg,#6c3de6,#a855f7);padding:32px;text-align:center;">
-            <h1 style="margin:0;font-size:28px;color:#fff;">🎬 CineHub</h1>
+            <h1 style="margin:0;font-size:28px;color:#fff;">MOVING</h1>
           </div>
           <div style="padding:32px;">
             <h2 style="color:#a855f7;">Olá, ${params.name}!</h2>
             <p style="color:#ccc;line-height:1.6;">
-              Sua locadora <strong style="color:#fff;">${params.company}</strong> foi cadastrada com sucesso na plataforma CineHub.
+              Sua locadora <strong style="color:#fff;">${params.company}</strong> foi cadastrada com sucesso na plataforma MOVING.
             </p>
             <p style="color:#ccc;line-height:1.6;">
               Agora você pode gerenciar seu catálogo de equipamentos, aceitar reservas e muito mais.
             </p>
             <div style="text-align:center;margin:32px 0;">
-              <a href="${import.meta.env.VITE_APP_URL ?? 'https://cinehub.app'}/dashboard"
+              <a href="${import.meta.env.VITE_APP_URL ?? 'https://moving.pro'}/dashboard"
                  style="background:#6c3de6;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:bold;">
                 Acessar Dashboard →
               </a>
             </div>
           </div>
           <div style="border-top:1px solid #222;padding:16px 32px;text-align:center;color:#666;font-size:12px;">
-            CineHub · Plataforma de locação de equipamentos cinematográficos
+            MOVING · O Hub da sua produção
           </div>
         </div>
       `,
@@ -71,7 +71,7 @@ export class EmailService {
       html: `
         <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f0f;color:#f5f5f5;border-radius:12px;overflow:hidden;">
           <div style="background:linear-gradient(135deg,#6c3de6,#a855f7);padding:32px;text-align:center;">
-            <h1 style="margin:0;font-size:28px;color:#fff;">🎬 CineHub</h1>
+            <h1 style="margin:0;font-size:28px;color:#fff;">MOVING</h1>
           </div>
           <div style="padding:32px;">
             <h2 style="color:#a855f7;">Reserva Confirmada!</h2>
@@ -87,7 +87,7 @@ export class EmailService {
             <p style="color:#888;font-size:13px;">Em caso de dúvidas, entre em contato com a locadora.</p>
           </div>
           <div style="border-top:1px solid #222;padding:16px 32px;text-align:center;color:#666;font-size:12px;">
-            CineHub · Plataforma de locação de equipamentos cinematográficos
+            MOVING · O Hub da sua produção
           </div>
         </div>
       `,
@@ -97,11 +97,11 @@ export class EmailService {
   static async sendPasswordReset(params: { to: string; name: string; resetLink: string }) {
     return this.send({
       to: params.to,
-      subject: '🔑 Redefinição de senha — CineHub',
+      subject: '🔑 Redefinição de senha — MOVING',
       html: `
         <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f0f;color:#f5f5f5;border-radius:12px;overflow:hidden;">
           <div style="background:linear-gradient(135deg,#6c3de6,#a855f7);padding:32px;text-align:center;">
-            <h1 style="margin:0;font-size:28px;color:#fff;">🎬 CineHub</h1>
+            <h1 style="margin:0;font-size:28px;color:#fff;">MOVING</h1>
           </div>
           <div style="padding:32px;">
             <h2 style="color:#a855f7;">Redefinição de senha</h2>
@@ -112,10 +112,10 @@ export class EmailService {
                 Redefinir Senha →
               </a>
             </div>
-            <p style="color:#666;font-size:13px;">Este link expira em 1 hora. Se você não solicitou a redefinição, ignore este e-mail.</p>
+            <p style="color:#666;font-size:13px;">Este link expira em 1 hora. Se você não solicitou a redefinir, ignore este e-mail.</p>
           </div>
           <div style="border-top:1px solid #222;padding:16px 32px;text-align:center;color:#666;font-size:12px;">
-            CineHub · Plataforma de locação de equipamentos cinematográficos
+            MOVING · O Hub da sua produção
           </div>
         </div>
       `,

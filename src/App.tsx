@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, NavLink } from 'react-router-dom';
-import { Camera, LogOut, LayoutDashboard, Settings, ShoppingBag, User, BarChart3, Package, CalendarDays, Truck } from 'lucide-react';
+import { Camera, LogOut, LayoutDashboard, Settings, ShoppingBag, User, BarChart3, Package, CalendarDays, Truck, Activity } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useEffect } from 'react';
@@ -25,6 +25,7 @@ import AcceptInvite from '@/pages/AcceptInvite';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import TermsOfUse from '@/pages/TermsOfUse';
 import { Footer } from '@/components/layout/Footer';
+import ProfessionalBackground from '@/components/ui/professional-background';
 
 function Navbar() {
   const { user, profile, signOut } = useAuth();
@@ -36,33 +37,30 @@ function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-md border-b border-border/40">
-      <div className="container flex h-16 md:h-20 items-center justify-between mx-auto px-4 max-w-6xl">
-        <div className="flex items-center gap-8">
-          <Link to="/" className="flex items-center space-x-2 text-primary">
-            <Camera className="h-6 w-6 md:h-8 md:w-8" />
-            <span className="font-bold text-xl md:text-2xl tracking-tighter lowercase">
-              cinehub
-            </span>
+    <header className="sticky top-0 z-50 w-full bg-background/60 backdrop-blur-xl border-b border-white/5">
+      <div className="container flex h-16 md:h-20 items-center justify-between mx-auto px-6 max-w-7xl">
+        <div className="flex items-center gap-12">
+          <Link to="/" className="flex items-center transition-transform hover:scale-105 active:scale-95">
+            <img src="/logo.png" alt="Moving Logo" className="h-10 md:h-12 w-auto object-contain" />
           </Link>
-          <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-muted-foreground uppercase tracking-widest">
-            <NavLink to="/dashboard" className={({isActive}) => isActive ? "text-foreground" : "hover:text-foreground transition-colors"}>Locadora</NavLink>
-            <NavLink to="/ai-tools" className={({isActive}) => isActive ? "text-foreground" : "hover:text-foreground transition-colors"}>IA Tools</NavLink>
+          <nav className="hidden md:flex items-center space-x-8 text-[11px] font-black text-muted-foreground uppercase tracking-[0.2em]">
+            <NavLink to="/dashboard" className={({isActive}) => isActive ? "text-primary" : "hover:text-foreground transition-all"}>Locadora</NavLink>
+            <NavLink to="/ai-tools" className={({isActive}) => isActive ? "text-primary" : "hover:text-foreground transition-all"}>IA Tools</NavLink>
             {profile?.role === 'admin' && (
-              <NavLink to="/admin" className={({isActive}) => isActive ? "text-foreground" : "hover:text-foreground transition-colors"}>Gestão HUB</NavLink>
+              <NavLink to="/admin" className={({isActive}) => isActive ? "text-primary" : "hover:text-foreground transition-all"}>Gestão HUB</NavLink>
             )}
           </nav>
         </div>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-6">
           {user ? (
-            <div className="flex items-center gap-4">
-              <span className="text-xs text-muted-foreground hidden lg:inline-block">
+            <div className="flex items-center gap-6">
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hidden lg:inline-block">
                 {user.email}
               </span>
-              <Button size="sm" variant="ghost" onClick={handleLogout} className="text-muted-foreground hover:text-foreground h-9 md:h-10">
-                <LogOut className="h-4 w-4 md:mr-2" />
-                <span className="hidden md:inline">Sair</span>
+              <Button size="sm" variant="ghost" onClick={handleLogout} className="text-muted-foreground hover:text-destructive h-10 px-4 rounded-xl font-black uppercase text-[10px] tracking-widest">
+                <LogOut className="h-4 w-4 mr-2" />
+                Sair
               </Button>
             </div>
           ) : (
@@ -70,14 +68,14 @@ function Navbar() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-sm font-medium text-primary hover:text-primary/80 hover:bg-transparent hidden md:flex"
+                className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-primary hover:bg-transparent hidden md:flex"
                 onClick={() => navigate('/register')}
               >
                 criar conta
               </Button>
               <Button
                 size="sm"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 md:px-8 rounded-lg text-sm md:text-base h-9 md:h-11 font-bold"
+                className="bg-primary text-white hover:bg-primary/90 px-8 rounded-xl text-xs h-11 font-black uppercase tracking-[0.2em] shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5 active:translate-y-0"
                 onClick={() => navigate('/login')}
               >
                 Entrar
@@ -164,7 +162,8 @@ function MainLayout() {
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname.startsWith('/invite/');
 
   return (
-    <div className="min-h-screen bg-background font-sans antialiased flex flex-col">
+    <div className="min-h-screen bg-background font-sans antialiased flex flex-col relative overflow-x-hidden">
+      <ProfessionalBackground />
       {!isAuthPage && <Navbar />}
       <main className="flex-1 pb-20 md:pb-0">
         <Routes>

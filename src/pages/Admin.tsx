@@ -207,7 +207,7 @@ export default function Admin() {
         <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-zinc-900 px-10 py-6">
            <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
               <div>
-                <h1 className="text-4xl font-black tracking-tighter uppercase mb-1">CineHub Master</h1>
+                <h1 className="text-4xl font-black tracking-tighter uppercase mb-1">Moving Master</h1>
                 <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs">Torre de Controle Global</p>
               </div>
               <div className="flex items-center gap-3 px-5 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl shrink-0">
@@ -583,7 +583,7 @@ export default function Admin() {
                   </div>
                   <div className="bg-emerald-950/20 p-6 rounded-[24px] border border-emerald-900/30 flex flex-col justify-between">
                      <p className="text-[11px] text-emerald-600 font-black uppercase tracking-widest mb-2 flex items-center justify-between">
-                         Receita CineHub Master <Badge className="bg-emerald-900/50 text-emerald-400 text-[8px]">15%</Badge>
+                         Receita Moving Master <Badge className="bg-emerald-900/50 text-emerald-400 text-[8px]">15%</Badge>
                      </p>
                      <p className="text-3xl font-black text-emerald-500 tracking-tighter">
                         {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(hubRevenue)}
@@ -622,7 +622,7 @@ export default function Admin() {
                                  {booking.equipment?.name || 'Equipamento'}
                               </p>
                               <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">
-                                 Fornecedor: <span className="text-zinc-400">{booking.company?.name || 'CineHub Parceiro'}</span>
+                                 Fornecedor: <span className="text-zinc-400">{booking.company?.name || 'Moving Parceiro'}</span>
                               </p>
                            </div>
 
@@ -705,8 +705,8 @@ export default function Admin() {
                            Pelo presente instrumento particular, de um lado, na qualidade de <strong>LOCADOR</strong>, a empresa corporativa 
                            <span className="text-white font-bold ml-1">{selectedBookingContract.company?.name || 'Desconhecida'}</span>, e de outro lado, 
                            na qualidade de <strong>LOCATÁRIO</strong>, o cliente 
-                           <span className="text-white font-bold ml-1">{(selectedBookingContract as any).renter?.full_name || 'Usuário CineHub'}</span>, 
-                           têm entre si justo e acertado o presente TERMO DE LOCAÇÃO DE EQUIPAMENTOS AUDIOVISUAIS, intermediado pela plataforma CINEHUB MASTER.
+                           <span className="text-white font-bold ml-1">{(selectedBookingContract as any).renter?.full_name || 'Usuário Moving'}</span>, 
+                           têm entre si justo e acertado o presente TERMO DE LOCAÇÃO DE EQUIPAMENTOS AUDIOVISUAIS, intermediado pela plataforma MOVING MASTER.
                         </p>
                      </div>
 
@@ -739,7 +739,7 @@ export default function Admin() {
                            <span className="text-white font-bold">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(selectedBookingContract.total_amount * 0.85)}</span>
                         </div>
                         <div className="flex justify-between items-center text-sm border-b border-zinc-800/50 pb-2 mb-2">
-                           <span className="text-zinc-400">Taxa de Operação CineHub (15%)</span>
+                           <span className="text-zinc-400">Taxa de Operação Moving (15%)</span>
                            <span className="text-white font-bold">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(selectedBookingContract.total_amount * 0.15)}</span>
                         </div>
                         <div className="flex justify-between items-center pt-2">
@@ -753,7 +753,7 @@ export default function Admin() {
                         <p>O LOCATÁRIO obriga-se a utilizar o equipamento de forma profissional, responsabilizando-se integralmente por danos, furtos ou extravios ocorridos durante a vigência deste termo. O LOCADOR garante que o equipamento encontra-se testado e em perfeito estado de funcionamento.</p>
                         
                         <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mt-4">Cláusula 4ª - Foro Legal</h4>
-                        <p>As partes elegem o foro de domicílio do CINEHUB SERVIÇOS DE TECNOLOGIA LTDA para resolução de quaisquer disputas geradas a partir desta locação, firmando este presente sob os selos de certificação digital de nossa rede.</p>
+                        <p>As partes elegem o foro de domicílio do MOVING SERVIÇOS DE TECNOLOGIA LTDA para resolução de quaisquer disputas geradas a partir desta locação, firmando este presente sob os selos de certificação digital de nossa rede.</p>
                      </div>
 
                   </div>
