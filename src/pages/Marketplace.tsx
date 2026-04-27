@@ -5,10 +5,11 @@ import { Card, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { MapPin, ChevronRight, Camera, Loader2, Package } from 'lucide-react';
+import { MapPin, ChevronRight, Camera, Loader2, Package, Search, Sparkles, MousePointer2 } from 'lucide-react';
 import { BrandMarquee } from '@/components/home/BrandMarquee';
 import { QuickBookingModal } from '@/components/marketplace/QuickBookingModal';
 import { Equipment } from '@/types/database';
+import { motion, AnimatePresence } from 'motion/react';
 
 // ─── Equipment Card with auto-rotating image carousel ───────────────────────
 function EquipmentCard({ item, onClick }: { item: Equipment; onClick: () => void }) {
@@ -161,61 +162,100 @@ export default function Marketplace() {
 
   return (
     <div className="flex flex-col items-center pt-2 md:pt-4 pb-8 px-6 w-full max-w-7xl mx-auto">
-      <div className="text-center mb-4 md:mb-6 animate-in fade-in slide-in-from-top-8 duration-1000 ease-out">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 mb-2 md:mb-4">
-          <div className="h-1 w-1 rounded-full bg-primary animate-pulse" />
-          <span className="text-[9px] font-black uppercase tracking-[0.25em] text-primary">Sua produção no próximo nível</span>
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="text-center mb-8 md:mb-12 relative z-10"
+      >
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-6 backdrop-blur-md">
+          <Sparkles className="h-3 w-3 text-primary animate-pulse" />
+          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Sua produção no próximo nível</span>
         </div>
         
-        <div className="flex flex-col items-center gap-2 mb-2 md:mb-4">
+        <motion.div 
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.2, duration: 1 }}
+          className="flex flex-col items-center gap-2 mb-6"
+        >
           <img 
             src="/logo.png" 
             alt="Moving Logo" 
-            className="w-full max-w-[200px] sm:max-w-[280px] md:max-w-[380px] h-auto object-contain drop-shadow-[0_0_30px_rgba(var(--primary),0.2)] animate-in zoom-in-95 duration-1000 ease-out" 
+            className="w-full max-w-[200px] sm:max-w-[280px] md:max-w-[420px] h-auto object-contain drop-shadow-[0_0_50px_rgba(var(--primary),0.3)]" 
           />
-        </div>
+        </motion.div>
 
-        <p className="text-[10px] md:text-[12px] text-muted-foreground max-w-lg mx-auto px-6 font-medium leading-relaxed opacity-80">
-          Encontre câmeras, iluminação, áudio e agora <strong className="text-white font-black">telões de LED</strong> de alta definição para o seu set com as melhores locadoras do Brasil.
+        <p className="text-sm md:text-base text-zinc-400 max-w-2xl mx-auto px-6 font-medium leading-relaxed opacity-90 tracking-tight">
+          A maior infraestrutura de equipamentos cinematográficos do Brasil. 
+          <span className="block mt-1 text-zinc-500 text-xs uppercase tracking-widest font-bold">
+            Câmeras, Iluminação e os novos <strong className="text-white">Telões de LED</strong> High-End.
+          </span>
         </p>
-      </div>
+      </motion.div>
       
-      <div className="flex flex-col sm:flex-row w-full max-w-4xl items-stretch sm:items-center gap-4 mb-6 md:mb-8 px-0 group">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.4, duration: 0.6 }}
+        className="flex flex-col sm:flex-row w-full max-w-4xl items-stretch sm:items-center gap-4 mb-12 px-0 relative group"
+      >
+        {/* Search Aura Effect */}
+        <div className="absolute -inset-4 bg-primary/5 blur-3xl rounded-full opacity-50 group-focus-within:opacity-100 transition-opacity pointer-events-none" />
+        
         <div className="relative flex-1 group">
-          <div className="absolute inset-0 bg-primary/5 blur-2xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity" />
-          <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-primary h-5 w-5 group-focus-within:scale-110 transition-transform z-10" />
+          <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none z-20">
+            <Search className="h-5 w-5 text-primary group-focus-within:scale-110 transition-transform" />
+          </div>
           <Input 
-            className="h-14 md:h-16 pl-14 text-base md:text-lg rounded-2xl bg-zinc-950/40 border-white/5 focus:border-primary/50 focus:ring-primary/20 transition-all font-medium placeholder:text-zinc-600 relative z-10 backdrop-blur-sm shadow-2xl" 
-            placeholder="O que você está procurando hoje?"
+            className="h-14 md:h-16 pl-14 text-sm md:text-base rounded-2xl bg-zinc-900/40 border-white/10 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all font-medium placeholder:text-zinc-600 relative z-10 backdrop-blur-xl shadow-[0_0_40px_rgba(0,0,0,0.5)] border-2" 
+            placeholder="Qual equipamento você precisa para seu set hoje?"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
           />
         </div>
         <Button 
-          className="h-14 md:h-16 px-10 text-base md:text-lg rounded-2xl bg-primary hover:bg-primary/90 font-black uppercase tracking-widest sm:px-12 shadow-xl shadow-primary/20 transition-all hover:-translate-y-1 active:translate-y-0 relative z-10"
+          className="h-14 md:h-16 px-10 text-sm md:text-base rounded-2xl bg-primary hover:bg-primary/90 font-black uppercase tracking-[0.2em] sm:px-12 shadow-2xl shadow-primary/20 transition-all hover:-translate-y-1 active:translate-y-0 relative z-10 overflow-hidden group/btn"
           onClick={handleSearch}
         >
-          Buscar Agora
+          <span className="relative z-10 flex items-center gap-2">
+            Buscar Agora <ChevronRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
+          </span>
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000" />
         </Button>
-      </div>
+      </motion.div>
 
       {/* Categories Grid */}
-      <div className="w-full mb-12 overflow-x-auto pb-4 hide-scrollbar">
-        <div className="flex flex-nowrap md:grid md:grid-cols-4 lg:grid-cols-7 gap-4 min-w-max md:min-w-0">
-          {categories.map((cat) => (
-            <button
+      <div className="w-full mb-16 overflow-x-auto pb-4 hide-scrollbar">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.6 }}
+          className="flex flex-nowrap md:grid md:grid-cols-4 lg:grid-cols-7 gap-4 min-w-max md:min-w-0"
+        >
+          {categories.map((cat, idx) => (
+            <motion.button
               key={cat.name}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.6 + (idx * 0.05) }}
               onClick={() => setSelectedCategory(selectedCategory === cat.value ? undefined : cat.value)}
-              className={`flex flex-col items-center justify-center p-6 rounded-3xl transition-all border-2 w-40 md:w-auto group
+              className={`flex flex-col items-center justify-center p-6 rounded-[2rem] transition-all border-2 w-40 md:w-auto group relative overflow-hidden backdrop-blur-sm
                 ${selectedCategory === cat.value 
-                  ? `${cat.color} border-primary shadow-[0_0_30px_rgba(var(--primary),0.15)] scale-105` 
-                  : `${cat.color} border-white/5 hover:border-zinc-800 opacity-60 hover:opacity-100 hover:scale-105`}`}
+                  ? `${cat.color} border-primary shadow-[0_0_40px_rgba(var(--primary),0.2)] scale-105` 
+                  : `bg-zinc-900/20 border-white/5 hover:border-zinc-700 hover:bg-zinc-900/40 opacity-80 hover:opacity-100 hover:scale-105`}`}
             >
-              <span className={`font-black tracking-[0.15em] uppercase text-[9px] md:text-[10px] ${cat.text} group-hover:scale-110 transition-transform text-center`}>{cat.name}</span>
-            </button>
+              {selectedCategory === cat.value && (
+                <div className="absolute inset-0 bg-primary/5 animate-pulse" />
+              )}
+              <span className={`font-black tracking-[0.2em] uppercase text-[9px] md:text-[10px] ${cat.text} group-hover:scale-110 transition-transform text-center relative z-10`}>
+                {cat.name}
+              </span>
+              <div className={`absolute -bottom-2 -right-2 w-8 h-8 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity ${cat.color}`} />
+            </motion.button>
           ))}
-        </div>
+        </motion.div>
       </div>
 
       <div id="results-section" className="w-full mb-20 scroll-mt-24">
