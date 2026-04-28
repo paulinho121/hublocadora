@@ -326,7 +326,8 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                     {/* PARTNER ACTIONS (PICKING/SHIPPING) */}
                                                                     {(delivery.fulfilling_company_id === tenantId || 
                                                                       delivery.booking?.company_id === tenantId || 
-                                                                      delivery.booking?.subrental_company_id === tenantId) && (
+                                                                      delivery.booking?.subrental_company_id === tenantId ||
+                                                                      delivery.booking?.equipment?.subrental_company_id === tenantId) && (
                                                                         <div className="space-y-6">
                                                                             {/* Serial Input */}
                                                                             {delivery.status === 'picking' && (

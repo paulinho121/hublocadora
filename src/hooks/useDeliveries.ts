@@ -16,7 +16,7 @@ export function useDeliveries(options?: {
                     *,
                     booking:bookings(
                         *,
-                        equipment:equipments(name, images),
+                        equipment:equipments(name, images, subrental_company_id),
                         renter:profiles(full_name, email, company:companies!company_id(name))
                     )
                 `);
