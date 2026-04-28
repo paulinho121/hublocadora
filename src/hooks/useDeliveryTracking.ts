@@ -35,10 +35,11 @@ export function useDeliveryTracking(bookingId: string | null) {
           .from('deliveries')
           .select('*')
           .eq('booking_id', bookingId)
-          .single();
+          .order('created_at', { ascending: false })
+          .limit(1);
 
         if (sbError) throw sbError;
-        if (isMounted) setDelivery(data);
+        if (isMounted && data && data.length > 0) setDelivery(data[0]);
       } catch (err: any) {
         if (isMounted) setError(err.message);
       } finally {

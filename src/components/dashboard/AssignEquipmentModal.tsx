@@ -31,13 +31,13 @@ export function AssignEquipmentModal({ equipment, isOpen, onClose }: AssignEquip
             let partnerCompanyId = null;
             if (branch.manager_email) {
                 // Busca o perfil pelo email para pegar o company_id real dele
-                const { data: partnerProfile } = await supabase
+                const { data: profiles } = await supabase
                     .from('profiles')
                     .select('company_id')
                     .eq('email', branch.manager_email)
-                    .maybeSingle();
+                    .limit(1);
                 
-                partnerCompanyId = partnerProfile?.company_id;
+                partnerCompanyId = profiles?.[0]?.company_id;
 
                 if (!partnerCompanyId) {
                     console.warn(`Aviso: Perfil não encontrado para o email ${branch.manager_email}. O item será atribuído à unidade, mas pode não aparecer no inventário remoto da sub-locadora até que o perfil dela seja vinculado.`);
