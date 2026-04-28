@@ -374,6 +374,23 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                       </div>
                                                                   )}
 
+                                                                  {/* Token Validation for Delivery stage */}
+                                                                  {delivery.status === 'shipped' && (
+                                                                      <div className="space-y-2">
+                                                                          <label className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center gap-2">
+                                                                              <ShieldAlert className="h-3 w-3" /> Token de Confirmação (4 dígitos)
+                                                                          </label>
+                                                                          <Input 
+                                                                              placeholder="0000" 
+                                                                              maxLength={4}
+                                                                              value={tokenInputs[delivery.id] || ''}
+                                                                              onChange={(e) => setTokenInputs(prev => ({ ...prev, [delivery.id]: e.target.value.replace(/\D/g, '') }))}
+                                                                              className="bg-zinc-950 border-primary/20 focus:border-primary rounded-xl h-14 text-center text-2xl font-black tracking-[10px]"
+                                                                          />
+                                                                          <p className="text-[9px] text-zinc-500 text-center mt-1 uppercase font-bold">Peça este código ao cliente para finalizar</p>
+                                                                      </div>
+                                                                  )}
+
                                                                   <div className="space-y-3">
                                                                       <div className="flex items-center gap-2 px-4 py-2 bg-zinc-950 rounded-xl border border-zinc-800">
                                                                           <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
