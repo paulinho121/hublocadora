@@ -415,7 +415,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                         </>
                                                     ) : (
                                                         <div className="text-center py-4 bg-zinc-900/50 rounded-2xl border border-zinc-800/50">
-                                                            <Clock className="h-10 w-10 text-primary/40 mx-auto mb-2 animate-pulse" />
+                                                            <div className="h-1.5 w-1.5 rounded-full bg-zinc-600 animate-pulse mb-2" />
                                                             <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 px-4">
                                                                 Aguardando ação da locadora
                                                             </p>
