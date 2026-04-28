@@ -20,17 +20,19 @@ export function useBookings(options?: {
             let query = supabase
                 .from('bookings')
                 .select(`
-          *,
-          equipment:equipments(${equipmentSelect}),
-          renter:profiles(
-            full_name, 
-            email,
-            company:companies!company_id(name)
-          )
-        `);
+                  *,
+                  equipment:equipments(${equipmentSelect}),
+                  renter:profiles(
+                    full_name, 
+                    email,
+                    company:companies!company_id(name)
+                  ),
+                  delivery:deliveries(fulfilling_company_id)
+                `);
 
             if (options?.companyId) {
-                query = query.eq('company_id', options.companyId);
+                // Filtra reservas onde a empresa é a dona OU onde ela é a responsável pela entrega (sub-locação)
+                query = query.or(`company_id.eq.${options.companyId},delivery.fulfilling_company_id.eq.${options.companyId}`);
             }
 
             if (options?.renterId) {
