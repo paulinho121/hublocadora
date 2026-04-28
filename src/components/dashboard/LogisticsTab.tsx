@@ -339,7 +339,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                 )}
 
                                                 {delivery.status !== 'delivered' && delivery.status !== 'cancelled' ? (
-                                                    (delivery.booking?.company_id === tenantId || delivery.fulfilling_company_id === tenantId || !isBranchManager) ? (
+                                                    (delivery.fulfilling_company_id === tenantId || delivery.booking?.company_id === tenantId) ? (
                                                         <>
                                                           {/* Badge quando sub-locadora está gerenciando entrega de outro */}
                                                           {delivery.fulfilling_company_id === tenantId && (delivery.booking?.company_id !== tenantId || !delivery.booking) && (
