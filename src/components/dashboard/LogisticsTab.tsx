@@ -348,13 +348,10 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                     )}
 
                                                                     {/* PARTNER ACTIONS (PICKING/SHIPPING/ACCEPTING) */}
-                                                                    {(delivery.fulfilling_company_id === tenantId || 
-                                                                      delivery.booking?.company_id === tenantId || 
-                                                                      delivery.booking?.subrental_company_id === tenantId ||
-                                                                      delivery.booking?.equipment?.subrental_company_id === tenantId) && (
+                                                                    {delivery.booking?.renter_id !== user?.id && (
                                                                         <div className="space-y-6">
                                                                             {/* Sub-locadora precisa ACEITAR o pedido antes de separar */}
-                                                                            {delivery.subrental_status === 'pending' && delivery.booking?.subrental_company_id === tenantId ? (
+                                                                            {delivery.subrental_status === 'pending' && delivery.booking?.company_id !== tenantId ? (
                                                                                 <div className="space-y-4">
                                                                                     <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4">
                                                                                         <p className="text-[10px] text-amber-500 font-black uppercase tracking-widest mb-1">Solicitação de Atendimento</p>
