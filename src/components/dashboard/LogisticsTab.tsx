@@ -350,50 +350,60 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                           )}
                                                           
                                                           {/* Action Panel - Habilitado para o Master OU para a Branch dona da entrega */}
-                                                          <div className="bg-zinc-900/50 p-6 rounded-3xl border border-zinc-800 space-y-6">
-                                                              {/* Serial Number Input for Picking stage */}
-                                                              {delivery.status === 'picking' && (
-                                                                  <div className="space-y-2">
-                                                                      <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest flex items-center gap-2">
-                                                                          # Número de Série (Opcional)
-                                                                      </label>
-                                                                      <Input 
-                                                                          placeholder="Ex: SN-123456" 
-                                                                          value={serialNumbers[delivery.id] || delivery.serial_number || ''}
-                                                                          onChange={(e) => setSerialNumbers(prev => ({ ...prev, [delivery.id]: e.target.value }))}
-                                                                          className="bg-zinc-950 border-zinc-800 rounded-xl h-12"
-                                                                      />
-                                                                  </div>
-                                                              )}
+                                                          {((delivery.origin_branch_id === branchId || !isBranchManager) || (delivery.origin_branch_id && branch?.id === delivery.origin_branch_id)) ? (
+                                                              <div className="bg-zinc-900/50 p-6 rounded-3xl border border-zinc-800 space-y-6">
+                                                                  {/* Serial Number Input for Picking stage */}
+                                                                  {delivery.status === 'picking' && (
+                                                                      <div className="space-y-2">
+                                                                          <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest flex items-center gap-2">
+                                                                              # Número de Série (Opcional)
+                                                                          </label>
+                                                                          <Input 
+                                                                              placeholder="Ex: SN-123456" 
+                                                                              value={serialNumbers[delivery.id] || delivery.serial_number || ''}
+                                                                              onChange={(e) => setSerialNumbers(prev => ({ ...prev, [delivery.id]: e.target.value }))}
+                                                                              className="bg-zinc-950 border-zinc-800 rounded-xl h-12"
+                                                                          />
+                                                                      </div>
+                                                                  )}
 
-                                                              <div className="space-y-3">
-                                                                  <div className="flex items-center gap-2 px-4 py-2 bg-zinc-950 rounded-xl border border-zinc-800">
-                                                                      <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                                                                      <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Próxima Ação:</span>
+                                                                  <div className="space-y-3">
+                                                                      <div className="flex items-center gap-2 px-4 py-2 bg-zinc-950 rounded-xl border border-zinc-800">
+                                                                          <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                                                                          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Próxima Ação:</span>
+                                                                      </div>
+                                                                      
+                                                                      <Button 
+                                                                          onClick={() => handleNextStatus(delivery)}
+                                                                          disabled={updatingId === delivery.id}
+                                                                          className="w-full bg-primary hover:bg-primary/90 text-black font-black uppercase tracking-widest h-14 rounded-2xl shadow-[0_10px_30px_rgba(var(--primary-rgb),0.2)]"
+                                                                      >
+                                                                          {updatingId === delivery.id ? (
+                                                                              <Loader2 className="h-4 w-4 animate-spin" />
+                                                                          ) : (
+                                                                              getNextActionLabel(delivery.status)
+                                                                          )}
+                                                                      </Button>
                                                                   </div>
-                                                                  
-                                                                  <Button 
-                                                                      onClick={() => handleNextStatus(delivery)}
-                                                                      disabled={updatingId === delivery.id}
-                                                                      className="w-full bg-primary hover:bg-primary/90 text-black font-black uppercase tracking-widest h-14 rounded-2xl shadow-[0_10px_30px_rgba(var(--primary-rgb),0.2)]"
-                                                                  >
-                                                                      {updatingId === delivery.id ? (
-                                                                          <Loader2 className="h-4 w-4 animate-spin" />
-                                                                      ) : (
-                                                                          getNextActionLabel(delivery.status)
-                                                                      )}
-                                                                  </Button>
-                                                              </div>
 
-                                                              <div className="pt-2 flex flex-col gap-2">
-                                                                  <button className="flex items-center gap-2 text-[10px] font-bold uppercase text-zinc-500 hover:text-zinc-300 transition-colors">
-                                                                      <MapPin className="h-3 w-3" /> Ver Local de Entrega
-                                                                  </button>
-                                                                  <button className="flex items-center gap-2 text-[10px] font-bold uppercase text-zinc-500 hover:text-zinc-300 transition-colors">
-                                                                      <Phone className="h-3 w-3" /> Contatar Cliente
-                                                                  </button>
+                                                                  <div className="pt-2 flex flex-col gap-2">
+                                                                      <button className="flex items-center gap-2 text-[10px] font-bold uppercase text-zinc-500 hover:text-zinc-300 transition-colors">
+                                                                          <MapPin className="h-3 w-3" /> Ver Local de Entrega
+                                                                      </button>
+                                                                      <button className="flex items-center gap-2 text-[10px] font-bold uppercase text-zinc-500 hover:text-zinc-300 transition-colors">
+                                                                          <Phone className="h-3 w-3" /> Contatar Cliente
+                                                                      </button>
+                                                                  </div>
                                                               </div>
-                                                          </div>
+                                                          ) : (
+                                                              <div className="flex flex-col items-center justify-center p-8 bg-zinc-900/30 rounded-3xl border border-dashed border-zinc-800 text-center">
+                                                                  <div className="h-12 w-12 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-4">
+                                                                      <Clock className="h-6 w-6 text-zinc-700 animate-pulse" />
+                                                                  </div>
+                                                                  <p className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Aguardando Ação da Unidade</p>
+                                                                  <p className="text-[10px] text-zinc-300 font-medium mt-0.5">Gerenciando entrega de outra locadora</p>
+                                                              </div>
+                                                          )}
                                                         </>
                                                     ) : (
                                                         <div className="text-center py-4 bg-zinc-900/50 rounded-2xl border border-zinc-800/50">
