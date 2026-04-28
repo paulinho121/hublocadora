@@ -11,6 +11,7 @@ interface TenantContextType {
     isAdmin: boolean;
     isBranchManager: boolean;
     branchId: string | null;
+    branch: Branch | null;
     isLoading: boolean;
     refreshTenant: () => Promise<void>;
 }
@@ -22,6 +23,7 @@ const TenantContext = createContext<TenantContextType>({
     isAdmin: false,
     isBranchManager: false,
     branchId: null,
+    branch: null,
     isLoading: true,
     refreshTenant: async () => {},
 });
@@ -31,6 +33,7 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
     const [profile, setProfile] = useState<Profile | null>(null);
     const [company, setCompany] = useState<Company | null>(null);
     const [branchId, setBranchId] = useState<string | null>(null);
+    const [branch, setBranch] = useState<Branch | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchData = async () => {
@@ -110,11 +113,44 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
                 }
             }
 
+            // 5. Verificar se é um Branch Manager
+            let currentBranchId: string | null = null;
+            let currentBranch: Branch | null = null;
+            if (user.email) {
+                const { data: branchData } = await supabase
+                    .from('branches')
+                    .select('*')
+                    .eq('manager_email', user.email)
+                    .maybeSingle();
+                
+                if (branchData) {
+                    currentBranchId = branchData.id;
+                    currentBranch = branchData as Branch;
+
+                    // Se não encontramos empresa pelo perfil/owner, mas ele é manager de uma branch
+                    // Carregamos a empresa dessa branch para que ele tenha contexto (tenantId)
+                    if (!currentCompany && branchData.company_id) {
+                        const { data: branchCompany } = await supabase
+                            .from('companies')
+                            .select('*')
+                            .eq('id', branchData.company_id)
+                            .maybeSingle();
+                        
+                        if (branchCompany) {
+                            currentCompany = branchCompany as Company;
+                        }
+                    }
+                }
+            }
+
             // Sincronizar o perfil se encontrarmos uma empresa mas o perfil estiver desatualizado
             if (currentCompany && !currentProfile?.company_id) {
                 const { data: updatedProfile } = await supabase
                     .from('profiles')
-                    .update({ company_id: currentCompany.id })
+                    .update({ 
+                        company_id: currentCompany.id,
+                        role: currentBranchId ? 'rental_house' : currentProfile?.role || 'client'
+                    })
                     .eq('id', user.id)
                     .select()
                     .single();
@@ -124,23 +160,10 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
                 }
             }
 
-            // 5. Verificar se é um Branch Manager
-            let currentBranchId: string | null = null;
-            if (user.email) {
-                const { data: branchData } = await supabase
-                    .from('branches')
-                    .select('id')
-                    .eq('manager_email', user.email)
-                    .maybeSingle();
-                
-                if (branchData) {
-                    currentBranchId = branchData.id;
-                }
-            }
-
             setProfile(currentProfile);
             setCompany(currentCompany);
             setBranchId(currentBranchId);
+            setBranch(currentBranch);
         } catch (error) {
             console.error('[TenantContext] Error fetching tenant data:', error);
         } finally {
@@ -201,6 +224,7 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
             isAdmin: profile?.role === 'admin',
             isBranchManager: !!branchId,
             branchId,
+            branch,
             isLoading: isLoading || authLoading,
             refreshTenant 
         }}>

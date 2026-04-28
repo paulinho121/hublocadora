@@ -7,7 +7,8 @@ export function useBookings(options?: {
     companyId?: string; // Para locadoras verem reservas recebidas
     renterId?: string;  // Para produtores verem suas locações
     status?: Booking['status'];
-    includeEquipmentSubrental?: boolean; // Inclui subrental_company_id no equipamento
+    includeEquipmentSubrental?: boolean; 
+    branchId?: string | null;
 }) {
     return useQuery({
         queryKey: ['bookings', options],
@@ -38,6 +39,25 @@ export function useBookings(options?: {
 
             if (options?.status) {
                 query = query.eq('status', options.status);
+            }
+
+            if (options?.branchId) {
+                // Filtra reservas que foram atribuídas a esta filial via Deliveries
+                // Precisamos fazer um join ou usar subquery
+                const { data: deliveryBookings } = await supabase
+                    .from('deliveries')
+                    .select('booking_id')
+                    .eq('origin_branch_id', options.branchId);
+                
+                const bookingIds = deliveryBookings?.map(d => d.booking_id) || [];
+                if (bookingIds.length > 0) {
+                    query = query.in('id', bookingIds);
+                } else {
+                    // Se não há entregas para esta filial, não deve retornar nada de reservas atribuídas
+                    // mas pode retornar as que ela mesma recebeu se for o caso? 
+                    // No fluxo do diagrama, as reservas "caem" na sub escolhida.
+                    query = query.eq('id', '00000000-0000-0000-0000-000000000000'); // No results
+                }
             }
 
             query = query.order('created_at', { ascending: false });
