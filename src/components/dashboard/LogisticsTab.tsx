@@ -374,23 +374,34 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                       </div>
                                                                   )}
 
-                                                                  <div className="space-y-3">
                                                                       <div className="flex items-center gap-2 px-4 py-2 bg-zinc-950 rounded-xl border border-zinc-800">
                                                                           <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                                                                          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Próxima Ação:</span>
+                                                                          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                                                                              {delivery.booking?.renter_id === user?.id ? 'Seu Token de Segurança:' : 'Próxima Ação:'}
+                                                                          </span>
                                                                       </div>
                                                                       
-                                                                      <Button 
-                                                                          onClick={() => handleNextStatus(delivery)}
-                                                                          disabled={updatingId === delivery.id}
-                                                                          className="w-full bg-primary hover:bg-primary/90 text-black font-black uppercase tracking-widest h-14 rounded-2xl shadow-[0_10px_30px_rgba(var(--primary-rgb),0.2)]"
-                                                                      >
-                                                                          {updatingId === delivery.id ? (
-                                                                              <Loader2 className="h-4 w-4 animate-spin" />
-                                                                          ) : (
-                                                                              getNextActionLabel(delivery.status)
-                                                                          )}
-                                                                      </Button>
+                                                                      {delivery.booking?.renter_id === user?.id ? (
+                                                                          <div className="bg-primary/10 border border-primary/20 rounded-2xl p-6 text-center">
+                                                                              <p className="text-[10px] text-primary font-black uppercase tracking-widest mb-2">Código de Confirmação</p>
+                                                                              <p className="text-4xl font-black text-white tracking-[10px]">{delivery.delivery_token || '----'}</p>
+                                                                              <p className="text-[9px] text-zinc-500 mt-4 leading-relaxed">
+                                                                                  Apresente este código ao entregador para confirmar o recebimento do equipamento.
+                                                                              </p>
+                                                                          </div>
+                                                                      ) : (
+                                                                          <Button 
+                                                                              onClick={() => handleNextStatus(delivery)}
+                                                                              disabled={updatingId === delivery.id}
+                                                                              className="w-full bg-primary hover:bg-primary/90 text-black font-black uppercase tracking-widest h-14 rounded-2xl shadow-[0_10px_30px_rgba(var(--primary-rgb),0.2)]"
+                                                                          >
+                                                                              {updatingId === delivery.id ? (
+                                                                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                                                              ) : (
+                                                                                  getNextActionLabel(delivery.status)
+                                                                              )}
+                                                                          </Button>
+                                                                      )}
                                                                   </div>
 
                                                                   <div className="pt-2 flex flex-col gap-2">
