@@ -188,7 +188,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
             <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-4 border-b border-white/5">
                 <div className="space-y-1">
                     <h2 className="text-5xl font-black tracking-tighter uppercase leading-none">Logística</h2>
-                    <p className="text-zinc-500 font-bold uppercase tracking-[0.3em] text-[10px]">Hub de Operações em Tempo Real</p>
+                    <p className="text-zinc-500 font-bold uppercase tracking-[0.3em] text-xs">Hub de Operações em Tempo Real</p>
                 </div>
 
                 <div className="flex bg-zinc-950/60 p-1.5 rounded-[20px] border border-white/5 backdrop-blur-xl">
@@ -201,7 +201,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                             key={tab.id}
                             onClick={() => setActiveSubTab(tab.id as any)}
                             className={cn(
-                                "px-8 py-2.5 rounded-[14px] text-[10px] font-black uppercase tracking-widest transition-all duration-500",
+                                "px-8 py-2.5 rounded-[14px] text-xs font-black uppercase tracking-widest transition-all duration-500",
                                 activeSubTab === tab.id 
                                     ? "bg-zinc-800 text-white shadow-2xl shadow-black/50" 
                                     : "text-zinc-600 hover:text-zinc-400"
@@ -261,7 +261,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                         </div>
                                                         <div className="space-y-3">
                                                             <div className="flex flex-wrap items-center gap-3">
-                                                                <Badge variant="outline" className="text-[9px] uppercase font-black bg-white/5 text-zinc-400 border-white/10 px-3 py-1 tracking-widest">
+                                                                <Badge variant="outline" className="text-xs uppercase font-black bg-white/5 text-zinc-400 border-white/10 px-3 py-1 tracking-widest">
                                                                     ORD-{delivery.booking_id.slice(0, 8).toUpperCase()}
                                                                 </Badge>
                                                                 {delivery.serial_number && (
@@ -269,7 +269,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                         SERIAL: {delivery.serial_number}
                                                                     </Badge>
                                                                 )}
-                                                                <span className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em] flex items-center gap-2">
+                                                                <span className="text-xs font-black text-zinc-600 uppercase tracking-[0.2em] flex items-center gap-2">
                                                                     <Clock className="h-3 w-3" /> {format(new Date(delivery.created_at), "dd/MM '·' HH:mm")}
                                                                 </span>
                                                             </div>
@@ -279,13 +279,13 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                             <div className="flex flex-wrap items-center gap-4">
                                                                 <div className="flex items-center gap-2 bg-zinc-900/40 px-3 py-1.5 rounded-full border border-white/5">
                                                                     <div className="w-2 h-2 rounded-full bg-primary" />
-                                                                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                                                                    <span className="text-xs font-black uppercase tracking-widest text-zinc-400">
                                                                         {delivery.booking?.renter?.company?.name || delivery.booking?.renter?.full_name || 'Cliente'}
                                                                     </span>
                                                                 </div>
                                                                 <div className="flex items-center gap-2 bg-zinc-900/40 px-3 py-1.5 rounded-full border border-white/5">
                                                                     <MapPin className="h-3 w-3 text-zinc-500" />
-                                                                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                                                                    <span className="text-xs font-black uppercase tracking-widest text-zinc-400">
                                                                         {delivery.booking?.renter?.company?.city || 'HUB Central'}
                                                                     </span>
                                                                 </div>
@@ -295,15 +295,15 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                     
                                                     <div className="text-right flex flex-col items-end gap-3 shrink-0">
                                                         <div className="space-y-1">
-                                                            <span className="text-[8px] font-black uppercase text-zinc-700 tracking-[0.4em] block">Status Logístico</span>
-                                                            <div className="bg-zinc-900/80 backdrop-blur-md text-zinc-300 font-black uppercase text-[10px] py-2.5 px-6 rounded-full border border-white/5 shadow-2xl tracking-[0.2em] inline-block">
+                                                            <span className="text-xs font-black uppercase text-zinc-700 tracking-[0.4em] block">Status Logístico</span>
+                                                            <div className="bg-zinc-900/80 backdrop-blur-md text-zinc-300 font-black uppercase text-xs py-2.5 px-6 rounded-full border border-white/5 shadow-2xl tracking-[0.2em] inline-block">
                                                                 {getStatusLabel(delivery.status)}
                                                             </div>
                                                         </div>
                                                         
                                                         <div className="flex items-center gap-2 bg-black/40 px-3 py-1 rounded-full border border-white/5">
-                                                            <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">Volume:</span>
-                                                            <span className="text-[10px] font-black text-white">{delivery.booking?.quantity || 1} UN</span>
+                                                            <span className="text-xs font-black text-zinc-500 uppercase tracking-widest">Volume:</span>
+                                                            <span className="text-sm font-black text-white">{delivery.booking?.quantity || 1} UN</span>
                                                         </div>
                                                     </div>
                                                 </div>

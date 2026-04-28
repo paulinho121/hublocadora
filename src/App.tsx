@@ -43,7 +43,7 @@ function Navbar() {
           <Link to="/" className="flex items-center transition-transform hover:scale-105 active:scale-95">
             <img src="/logo.png" alt="Moving Logo" className="h-10 md:h-12 w-auto object-contain" />
           </Link>
-          <nav className="hidden md:flex items-center space-x-8 text-[11px] font-black text-muted-foreground uppercase tracking-[0.2em]">
+          <nav className="hidden md:flex items-center space-x-8 text-xs font-black text-muted-foreground uppercase tracking-[0.2em]">
             <NavLink to="/dashboard" className={({isActive}) => isActive ? "text-primary" : "hover:text-foreground transition-all"}>Locadora</NavLink>
             <NavLink to="/ai-tools" className={({isActive}) => isActive ? "text-primary" : "hover:text-foreground transition-all"}>IA Tools</NavLink>
             {profile?.role === 'admin' && (
@@ -55,10 +55,10 @@ function Navbar() {
         <div className="flex items-center space-x-6">
           {user ? (
             <div className="flex items-center gap-6">
-              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hidden lg:inline-block">
+              <span className="text-xs font-black uppercase tracking-widest text-muted-foreground hidden lg:inline-block">
                 {user.email}
               </span>
-              <Button size="sm" variant="ghost" onClick={handleLogout} className="text-muted-foreground hover:text-destructive h-10 px-4 rounded-xl font-black uppercase text-[10px] tracking-widest">
+              <Button size="sm" variant="ghost" onClick={handleLogout} className="text-muted-foreground hover:text-destructive h-10 px-4 rounded-xl font-black uppercase text-xs tracking-widest">
                 <LogOut className="h-4 w-4 mr-2" />
                 Sair
               </Button>
@@ -68,7 +68,7 @@ function Navbar() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-primary hover:bg-transparent hidden md:flex"
+                className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-primary hover:bg-transparent hidden md:flex"
                 onClick={() => navigate('/register')}
               >
                 criar conta
@@ -116,7 +116,7 @@ function BottomNav() {
             className={`flex flex-col items-center gap-1 transition-all px-2 ${currentTab === id ? 'text-primary' : 'text-muted-foreground'}`}
           >
             <Icon className="w-5 h-5" />
-            <span className="text-[11px] font-bold uppercase tracking-tighter">{label}</span>
+            <span className="text-xs font-bold uppercase tracking-tighter">{label}</span>
           </button>
         ))}
       </nav>
@@ -130,14 +130,14 @@ function BottomNav() {
         className={({isActive}) => `flex flex-col items-center gap-1 transition-all ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
       >
         <ShoppingBag className="w-6 h-6" />
-        <span className="text-[11px] font-bold uppercase tracking-tighter">Market</span>
+        <span className="text-xs font-bold uppercase tracking-tighter">Market</span>
       </NavLink>
       <NavLink 
         to="/dashboard" 
         className={({isActive}) => `flex flex-col items-center gap-1 transition-all ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
       >
         <LayoutDashboard className="w-6 h-6" />
-        <span className="text-[11px] font-bold uppercase tracking-tighter">Locadora</span>
+        <span className="text-xs font-bold uppercase tracking-tighter">Locadora</span>
       </NavLink>
       {profile?.role === 'admin' && (
         <NavLink 
@@ -145,12 +145,12 @@ function BottomNav() {
           className={({isActive}) => `flex flex-col items-center gap-1 transition-all ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
         >
           <Settings className="w-6 h-6" />
-          <span className="text-[11px] font-bold uppercase tracking-tighter">Admin</span>
+          <span className="text-xs font-bold uppercase tracking-tighter">Admin</span>
         </NavLink>
       )}
       <button className="flex flex-col items-center gap-1 text-muted-foreground">
         <User className="w-6 h-6" />
-        <span className="text-[11px] font-bold uppercase tracking-tighter">Perfil</span>
+        <span className="text-xs font-bold uppercase tracking-tighter">Perfil</span>
       </button>
     </nav>
   );
