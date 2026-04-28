@@ -24,8 +24,9 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId }: InventoryCar
   // Item cedido = pertence a outra empresa mas esta gerencia (Sub-locadora vendo item do Master)
   const isCeded = !!item.subrental_company_id && item.company_id !== tenantId;
   
-  // Item atribuído = eu sou o dono mas outra empresa gerencia (Master vendo item que enviou)
-  const isAssigned = !!item.subrental_company_id && item.company_id === tenantId;
+  // Item atribuído = eu sou o dono mas outra empresa gerencia OU está em filiais
+  const stockInOtherBranches = item.stock?.filter(s => !s.branch.is_main && s.quantity > 0) || [];
+  const isAssigned = (!!item.subrental_company_id && item.company_id === tenantId) || stockInOtherBranches.length > 0;
 
   const toggleExternalRental = async () => {
     try {
@@ -64,6 +65,15 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId }: InventoryCar
   };
 
   const imageUrl = item.images && item.images.length > 0 ? item.images[0] : null;
+
+  // Calcula a localização para exibir
+  const getLocationDisplay = () => {
+    if (stockInOtherBranches.length === 0) return 'Sede Principal';
+    if (stockInOtherBranches.length === 1 && (item.stock?.find(s => s.branch.is_main)?.quantity || 0) === 0) {
+      return stockInOtherBranches[0].branch.name;
+    }
+    return `Distribuído em ${item.stock?.filter(s => s.quantity > 0).length} Unidades`;
+  };
 
   return (
     <Card className="group relative overflow-hidden bg-zinc-950/40 border-zinc-800/50 hover:border-primary/30 transition-all duration-300">
@@ -168,14 +178,12 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId }: InventoryCar
 
           <div className="space-y-3">
             <div className="flex flex-wrap gap-2">
-              {item.location_base && (
-                <div className="flex items-center gap-1.5 text-zinc-400 bg-zinc-900 px-2 py-1 rounded-lg border border-zinc-800">
-                  <span className="w-1 h-1 rounded-full bg-primary shrink-0 animate-pulse"></span>
-                  <span className="text-[9px] font-bold uppercase tracking-widest">
-                    {item.location_base}
-                  </span>
-                </div>
-              )}
+              <div className="flex items-center gap-1.5 text-zinc-400 bg-zinc-900 px-2 py-1 rounded-lg border border-zinc-800">
+                <span className="w-1 h-1 rounded-full bg-primary shrink-0 animate-pulse"></span>
+                <span className="text-[9px] font-bold uppercase tracking-widest">
+                  {getLocationDisplay()}
+                </span>
+              </div>
               <div className="flex items-center gap-1.5 text-emerald-500 bg-emerald-500/5 px-2 py-1 rounded-lg border border-emerald-500/10">
                 <Package className="h-3 w-3" />
                 <span className="text-[9px] font-bold uppercase tracking-widest">

@@ -17,10 +17,11 @@ export function AssignEquipmentModal({ equipment, isOpen, onClose }: AssignEquip
     const { branches, isLoading: loadingBranches } = useBranches();
     const updateMutation = useUpdateEquipment();
     const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
+    const [quantity, setQuantity] = useState<number>(1);
     const [loading, setLoading] = useState(false);
 
     const handleAssign = async () => {
-        if (!equipment || !selectedBranchId) return;
+        if (!equipment || !selectedBranchId || quantity <= 0) return;
 
         setLoading(true);
         try {
@@ -30,7 +31,6 @@ export function AssignEquipmentModal({ equipment, isOpen, onClose }: AssignEquip
             // 1. Tentar encontrar a EMPRESA vinculada a esta unidade (se for parceiro externo)
             let partnerCompanyId = null;
             if (branch.manager_email) {
-                // Busca o perfil pelo email para pegar o company_id real dele
                 const { data: profiles } = await supabase
                     .from('profiles')
                     .select('company_id')
@@ -38,32 +38,60 @@ export function AssignEquipmentModal({ equipment, isOpen, onClose }: AssignEquip
                     .limit(1);
                 
                 partnerCompanyId = profiles?.[0]?.company_id;
-
-                if (!partnerCompanyId) {
-                    console.warn(`Aviso: Perfil não encontrado para o email ${branch.manager_email}. O item será atribuído à unidade, mas pode não aparecer no inventário remoto da sub-locadora até que o perfil dela seja vinculado.`);
-                }
             }
 
-            // 2. Atualiza o equipamento (localização e vínculo de sub-locação)
-            await updateMutation.mutateAsync({ 
-                id: equipment.id, 
-                location_base: branch.name,
-                subrental_company_id: partnerCompanyId || null // Crucial para o RLS
-            });
+            // 2. Atualiza o vínculo de sub-locação no equipamento (apenas se for externo)
+            if (partnerCompanyId) {
+                await updateMutation.mutateAsync({ 
+                    id: equipment.id, 
+                    subrental_company_id: partnerCompanyId
+                });
+            }
 
-            // 3. Garante que o item apareça no ESTOQUE da unidade (importante para filiais)
+            // 3. MOVIMENTAÇÃO DE ESTOQUE
+            // A. Pega a Sede Principal para subtrair
+            const mainBranch = branches?.find(b => b.is_main);
+            if (mainBranch && mainBranch.id !== selectedBranchId) {
+                const { data: currentStock } = await supabase
+                    .from('equipment_stock')
+                    .select('quantity')
+                    .eq('branch_id', mainBranch.id)
+                    .eq('equipment_id', equipment.id)
+                    .single();
+
+                const currentQty = currentStock?.quantity || 0;
+                
+                // Subtrai da Sede
+                await supabase
+                    .from('equipment_stock')
+                    .upsert({
+                        branch_id: mainBranch.id,
+                        equipment_id: equipment.id,
+                        quantity: Math.max(0, currentQty - quantity),
+                        updated_at: new Date().toISOString()
+                    }, { onConflict: 'branch_id,equipment_id' });
+            }
+
+            // B. Soma na unidade de destino
+            const { data: targetStock } = await supabase
+                .from('equipment_stock')
+                .select('quantity')
+                .eq('branch_id', selectedBranchId)
+                .eq('equipment_id', equipment.id)
+                .single();
+
+            const targetQty = targetStock?.quantity || 0;
+
             await supabase
                 .from('equipment_stock')
                 .upsert({
                     branch_id: selectedBranchId,
                     equipment_id: equipment.id,
-                    quantity: equipment.stock_quantity || 1, // Mantém a quantidade ou assume 1
+                    quantity: targetQty + quantity,
                     updated_at: new Date().toISOString()
-                }, {
-                    onConflict: 'branch_id,equipment_id'
-                });
+                }, { onConflict: 'branch_id,equipment_id' });
             
-            alert(`Equipamento atribuído com sucesso! Agora ele aparecerá no inventário da unidade ${branch.name}.`);
+            alert(`Sucesso! ${quantity} unidade(s) de "${equipment.name}" foram atribuídas a ${branch.name}.`);
             onClose();
         } catch (error: any) {
             console.error('Erro na atribuição:', error);
@@ -77,14 +105,28 @@ export function AssignEquipmentModal({ equipment, isOpen, onClose }: AssignEquip
         <Dialog 
             isOpen={isOpen} 
             onClose={onClose} 
-            title="Atribuir à Unidade"
+            title="Atribuir Estoque"
         >
             <div className="space-y-6 py-2">
-                <p className="text-zinc-500 text-sm font-medium">
-                    Selecione para qual unidade ou sub-locadora este item será enviado. Ele aparecerá no inventário local desta unidade.
-                </p>
+                <div className="p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800 flex items-center justify-between">
+                    <div>
+                        <p className="text-[10px] uppercase font-black text-zinc-500 tracking-widest mb-1">Equipamento Selecionado</p>
+                        <p className="text-sm font-black text-zinc-100 uppercase">{equipment?.name}</p>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-[10px] uppercase font-black text-zinc-500 tracking-widest mb-1">Qtd. a Enviar</p>
+                        <input 
+                            type="number" 
+                            value={quantity}
+                            onChange={(e) => setQuantity(Number(e.target.value))}
+                            min="1"
+                            max={equipment?.stock_quantity || 999}
+                            className="bg-zinc-950 border border-zinc-800 rounded-lg w-20 px-3 py-1 text-center font-black text-primary focus:outline-none focus:border-primary/50"
+                        />
+                    </div>
+                </div>
 
-                <div className="grid grid-cols-1 gap-3 max-h-80 overflow-y-auto pr-1 custom-scrollbar">
+                <div className="grid grid-cols-1 gap-3 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
                     {loadingBranches ? (
                         <div className="py-10 text-center">
                             <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
@@ -107,8 +149,8 @@ export function AssignEquipmentModal({ equipment, isOpen, onClose }: AssignEquip
                                     <p className="font-black uppercase tracking-tighter text-zinc-200">{branch.name}</p>
                                     <div className="flex items-center gap-2 mt-0.5">
                                         <MapPin className="h-3 w-3 text-zinc-600" />
-                                        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">
-                                            {branch.city} - {branch.state}
+                                        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest truncate">
+                                            {branch.city} - {branch.state} {branch.is_main && '(Sede)'}
                                         </p>
                                     </div>
                                 </div>
@@ -135,7 +177,7 @@ export function AssignEquipmentModal({ equipment, isOpen, onClose }: AssignEquip
                         disabled={loading || !selectedBranchId}
                         className="flex-[2] bg-primary hover:bg-primary/90 text-black font-black uppercase tracking-widest rounded-xl"
                     >
-                        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Confirmar Atribuição'}
+                        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Confirmar Envio'}
                     </Button>
                 </div>
             </div>

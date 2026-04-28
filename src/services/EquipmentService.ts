@@ -8,12 +8,18 @@ export class EquipmentService {
     static async getAllByTenant(companyId: string) {
         const { data, error } = await supabase
             .from('equipments')
-            .select('*')
+            .select(`
+                *,
+                stock:equipment_stock(
+                    *,
+                    branch:branches(*)
+                )
+            `)
             .eq('company_id', companyId)
             .order('created_at', { ascending: false });
 
         if (error) throw error;
-        return data as Equipment[];
+        return data as (Equipment & { stock: any[] })[];
     }
 
     /**
@@ -24,7 +30,11 @@ export class EquipmentService {
             .from('equipments')
             .select(`
                 *,
-                company:companies(*)
+                company:companies(*),
+                stock:equipment_stock(
+                    *,
+                    branch:branches(*)
+                )
             `)
             .eq('id', id)
             .maybeSingle();
