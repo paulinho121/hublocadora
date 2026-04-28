@@ -349,10 +349,25 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                             </div>
                                                           )}
                                                           
-                                                          {/* Next Action Button - Habilitado para o Master OU para a Branch dona da entrega */}
-                                                          {(delivery.origin_branch_id === branchId || !isBranchManager) && delivery.status !== 'delivered' && (
+                                                          {/* Action Panel - Habilitado para o Master OU para a Branch dona da entrega */}
+                                                          <div className="bg-zinc-900/50 p-6 rounded-3xl border border-zinc-800 space-y-6">
+                                                              {/* Serial Number Input for Picking stage */}
+                                                              {delivery.status === 'picking' && (
+                                                                  <div className="space-y-2">
+                                                                      <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest flex items-center gap-2">
+                                                                          # Número de Série (Opcional)
+                                                                      </label>
+                                                                      <Input 
+                                                                          placeholder="Ex: SN-123456" 
+                                                                          value={serialNumbers[delivery.id] || delivery.serial_number || ''}
+                                                                          onChange={(e) => setSerialNumbers(prev => ({ ...prev, [delivery.id]: e.target.value }))}
+                                                                          className="bg-zinc-950 border-zinc-800 rounded-xl h-12"
+                                                                      />
+                                                                  </div>
+                                                              )}
+
                                                               <div className="space-y-3">
-                                                                  <div className="flex items-center gap-2 px-4 py-2 bg-zinc-900/50 rounded-xl border border-zinc-800">
+                                                                  <div className="flex items-center gap-2 px-4 py-2 bg-zinc-950 rounded-xl border border-zinc-800">
                                                                       <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
                                                                       <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Próxima Ação:</span>
                                                                   </div>
@@ -360,7 +375,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                   <Button 
                                                                       onClick={() => handleNextStatus(delivery)}
                                                                       disabled={updatingId === delivery.id}
-                                                                      className="w-full bg-primary hover:bg-primary/90 text-black font-black uppercase tracking-widest h-12 rounded-xl shadow-[0_0_20px_rgba(var(--primary),0.2)]"
+                                                                      className="w-full bg-primary hover:bg-primary/90 text-black font-black uppercase tracking-widest h-14 rounded-2xl shadow-[0_10px_30px_rgba(var(--primary-rgb),0.2)]"
                                                                   >
                                                                       {updatingId === delivery.id ? (
                                                                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -369,7 +384,16 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                       )}
                                                                   </Button>
                                                               </div>
-                                                          )}
+
+                                                              <div className="pt-2 flex flex-col gap-2">
+                                                                  <button className="flex items-center gap-2 text-[10px] font-bold uppercase text-zinc-500 hover:text-zinc-300 transition-colors">
+                                                                      <MapPin className="h-3 w-3" /> Ver Local de Entrega
+                                                                  </button>
+                                                                  <button className="flex items-center gap-2 text-[10px] font-bold uppercase text-zinc-500 hover:text-zinc-300 transition-colors">
+                                                                      <Phone className="h-3 w-3" /> Contatar Cliente
+                                                                  </button>
+                                                              </div>
+                                                          </div>
                                                         </>
                                                     ) : (
                                                         <div className="text-center py-4 bg-zinc-900/50 rounded-2xl border border-zinc-800/50">
