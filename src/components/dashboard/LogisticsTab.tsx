@@ -265,19 +265,21 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                         {delivery.booking?.renter?.company?.city || 'HUB Central'}
                                                                     </span>
                                                                 </div>
-                                                                <div className="flex items-center gap-2 bg-zinc-950 px-3 py-1.5 rounded-full border border-white/10">
-                                                                    <span className="text-[10px] font-black text-white">
-                                                                        {delivery.booking?.quantity || 1} { (delivery.booking?.quantity || 1) > 1 ? 'UNIDADES' : 'UNIDADE' }
-                                                                    </span>
-                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                     
-                                                    <div className="text-right flex flex-col items-end gap-2">
-                                                        <span className="text-[9px] font-black uppercase text-zinc-700 tracking-[0.3em]">Status Logístico</span>
-                                                        <div className="bg-zinc-900/80 backdrop-blur-md text-zinc-300 font-black uppercase text-[10px] py-2 px-6 rounded-full border border-white/5 shadow-xl tracking-widest">
-                                                            {getStatusLabel(delivery.status)}
+                                                    <div className="text-right flex flex-col items-end gap-3 shrink-0">
+                                                        <div className="space-y-1">
+                                                            <span className="text-[8px] font-black uppercase text-zinc-700 tracking-[0.4em] block">Status Logístico</span>
+                                                            <div className="bg-zinc-900/80 backdrop-blur-md text-zinc-300 font-black uppercase text-[10px] py-2.5 px-6 rounded-full border border-white/5 shadow-2xl tracking-[0.2em] inline-block">
+                                                                {getStatusLabel(delivery.status)}
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div className="flex items-center gap-2 bg-black/40 px-3 py-1 rounded-full border border-white/5">
+                                                            <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">Volume:</span>
+                                                            <span className="text-[10px] font-black text-white">{delivery.booking?.quantity || 1} UN</span>
                                                         </div>
                                                     </div>
                                                 </div>
