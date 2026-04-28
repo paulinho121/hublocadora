@@ -253,14 +253,27 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                     <Clock className="h-3 w-3" /> {format(new Date(delivery.created_at), "dd/MM 'às' HH:mm")}
                                                                 </span>
                                                             </div>
-                                                            <h3 className="text-2xl font-black uppercase tracking-tighter text-zinc-100">
-                                                                {delivery.booking?.equipment?.name || 'Equipamento'}
-                                                            </h3>
-                                                            <div className="flex items-center gap-2 text-zinc-500">
-                                                                <User className="h-3 w-3" />
-                                                                <span className="text-[10px] font-bold uppercase tracking-widest">
-                                                                    {delivery.booking?.renter?.company?.name || delivery.booking?.renter?.full_name || 'Solicitante'}
-                                                                </span>
+                                                            <div className="flex items-center gap-3">
+                                                                <h3 className="text-2xl font-black uppercase tracking-tighter text-zinc-100">
+                                                                    {delivery.booking?.equipment?.name || 'Equipamento'}
+                                                                </h3>
+                                                                <Badge className="bg-zinc-800 text-zinc-300 border-zinc-700 font-black text-[10px] px-2 h-6">
+                                                                    {delivery.booking?.quantity || 1} { (delivery.booking?.quantity || 1) > 1 ? 'UNIDADES' : 'UNIDADE' }
+                                                                </Badge>
+                                                            </div>
+                                                            <div className="flex items-center gap-3 text-zinc-500">
+                                                                <div className="flex items-center gap-1 bg-zinc-900/50 px-2 py-0.5 rounded-lg border border-zinc-800/50">
+                                                                    <User className="h-3 w-3" />
+                                                                    <span className="text-[10px] font-black uppercase tracking-widest">
+                                                                        {delivery.booking?.renter?.company?.name || delivery.booking?.renter?.full_name || 'Solicitante'}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="flex items-center gap-1 bg-zinc-900/50 px-2 py-0.5 rounded-lg border border-zinc-800/50">
+                                                                    <MapPin className="h-3 w-3" />
+                                                                    <span className="text-[10px] font-black uppercase tracking-widest">
+                                                                        {delivery.booking?.renter?.company?.city || 'HUB Local'}
+                                                                    </span>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>

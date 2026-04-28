@@ -99,18 +99,42 @@ export function BookingTrackingModal({ bookingId }: BookingTrackingModalProps) {
         </motion.div>
       )}
 
+      {/* Activity Log - Transparência Total */}
+      <div className="space-y-4">
+        <h4 className="text-[10px] uppercase font-black text-zinc-500 tracking-[0.2em] px-1">Histórico de Movimentação</h4>
+        <div className="bg-zinc-900/30 rounded-3xl border border-zinc-800/50 p-6 space-y-6">
+            <div className="flex gap-4">
+                <div className="relative">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                    <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[1px] h-10 bg-zinc-800" />
+                </div>
+                <div>
+                    <p className="text-[11px] font-black uppercase text-zinc-100">Status atualizado para: {delivery.status}</p>
+                    <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">{new Date(delivery.updated_at).toLocaleDateString()} às {new Date(delivery.updated_at).toLocaleTimeString().slice(0, 5)}</p>
+                </div>
+            </div>
+            <div className="flex gap-4">
+                <div className="w-2 h-2 rounded-full bg-zinc-800" />
+                <div>
+                    <p className="text-[11px] font-black uppercase text-zinc-500">Pedido recebido pelo HUB</p>
+                    <p className="text-[9px] font-bold text-zinc-700 uppercase tracking-widest">{new Date(delivery.created_at).toLocaleDateString()} às {new Date(delivery.created_at).toLocaleTimeString().slice(0, 5)}</p>
+                </div>
+            </div>
+        </div>
+      </div>
+
       {/* General Info */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4 pt-4">
         <div className="bg-zinc-900/30 p-4 rounded-2xl border border-zinc-800/50">
             <p className="text-[9px] font-black uppercase text-zinc-600 tracking-widest mb-1">Previsão</p>
             <p className="text-xs font-bold text-zinc-300">
-                {delivery.estimated_arrival ? new Date(delivery.estimated_arrival).toLocaleTimeString() : 'Calculando...'}
+                {delivery.estimated_arrival ? new Date(delivery.estimated_arrival).toLocaleTimeString() : 'Em processamento'}
             </p>
         </div>
         <div className="bg-zinc-900/30 p-4 rounded-2xl border border-zinc-800/50">
-            <p className="text-[9px] font-black uppercase text-zinc-600 tracking-widest mb-1">Origem</p>
+            <p className="text-[9px] font-black uppercase text-zinc-600 tracking-widest mb-1">Unidade de Origem</p>
             <p className="text-xs font-bold text-zinc-300 truncate">
-                {delivery.booking?.company?.name || 'Locadora'}
+                {delivery.origin_branch_id ? 'Filial Designada' : 'Hub Central'}
             </p>
         </div>
       </div>
