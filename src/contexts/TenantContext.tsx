@@ -54,7 +54,9 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
                 .eq('id', user.id)
                 .maybeSingle();
 
-            if (profileError) throw profileError;
+            if (profileError) {
+                console.warn('[TenantContext] Profile fetch error (non-fatal):', profileError.message);
+            }
             
             let currentProfile = profileData as Profile;
             let currentCompany: Company | null = null;
