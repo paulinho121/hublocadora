@@ -187,7 +187,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-1000">
             <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-4 border-b border-white/5">
                 <div className="space-y-1">
-                    <h2 className="text-5xl font-black tracking-tighter uppercase leading-none">Logística</h2>
+                    <h2 className="text-4xl font-black tracking-tighter uppercase leading-none">Logística</h2>
                     <p className="text-zinc-500 font-bold uppercase tracking-[0.3em] text-xs">Hub de Operações em Tempo Real</p>
                 </div>
 
@@ -273,7 +273,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                     <Clock className="h-3 w-3" /> {format(new Date(delivery.created_at), "dd/MM '·' HH:mm")}
                                                                 </span>
                                                             </div>
-                                                            <h3 className="text-3xl sm:text-4xl font-black uppercase tracking-tighter text-white leading-tight">
+                                                            <h3 className="text-2xl sm:text-3xl font-black uppercase tracking-tighter text-white leading-tight">
                                                                 {delivery.booking?.equipment?.name || 'Equipamento em Trânsito'}
                                                             </h3>
                                                             <div className="flex flex-wrap items-center gap-4">
