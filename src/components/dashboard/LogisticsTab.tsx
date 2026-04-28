@@ -20,12 +20,13 @@ import { useTenant } from '@/contexts/TenantContext';
 
 export function LogisticsTab({ tenantId }: { tenantId: string }) {
     const { user } = useAuth();
-    const { branches, isBranchManager, branchId } = useTenant();
+    const { isBranchManager, branchId } = useTenant();
+    const { branches } = useBranches();
     const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
     const [branchModalOpen, setBranchModalOpen] = useState(false);
     const [pendingDelivery, setPendingDelivery] = useState<any>(null);
     const queryClient = useQueryClient();
-    const { data: deliveries, isLoading } = useDeliveries({ 
+    const { data: deliveries, isLoading, error: fetchError } = useDeliveries({ 
         tenantId,
         branchId: isBranchManager ? branchId : undefined
     });
@@ -136,6 +137,25 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
             <div className="flex flex-col items-center justify-center py-20">
                 <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
                 <p className="text-zinc-500 font-medium tracking-widest uppercase text-xs">Carregando Fluxo Logístico...</p>
+            </div>
+        );
+    }
+
+    if (fetchError) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+                <ShieldAlert className="h-12 w-12 text-destructive mb-4 opacity-50" />
+                <h3 className="text-xl font-black uppercase text-zinc-100 mb-2">Erro ao carregar logística</h3>
+                <p className="text-zinc-500 text-xs font-medium max-w-md">
+                    Ocorreu um erro ao buscar os dados do servidor. Verifique sua conexão e as permissões de acesso.
+                </p>
+                <Button 
+                    variant="outline" 
+                    className="mt-6 border-zinc-800 text-[10px] font-black uppercase tracking-widest"
+                    onClick={() => queryClient.invalidateQueries({ queryKey: ['deliveries'] })}
+                >
+                    Tentar Novamente
+                </Button>
             </div>
         );
     }
