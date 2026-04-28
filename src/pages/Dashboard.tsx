@@ -458,7 +458,7 @@ export default function Dashboard() {
                          <div className="text-3xl font-black tracking-tighter text-zinc-100 mb-1">
                             {formatCurrency(totalDebt)}
                          </div>
-                         <p className="text-[11px] text-zinc-600 font-bold uppercase tracking-widest">A pagar para parceiros</p>
+                         <p className="text-[11px] text-zinc-600 font-bold uppercase tracking-widest">A PAGAR PARA O HUB</p>
                       </CardContent>
                    </Card>
 
