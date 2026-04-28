@@ -255,7 +255,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                             </div>
                                                             <div className="flex items-center gap-3">
                                                                 <h3 className="text-2xl font-black uppercase tracking-tighter text-zinc-100">
-                                                                    {delivery.booking?.equipment?.name || 'Equipamento'}
+                                                                    {delivery.booking?.equipment?.name || (delivery.fulfilling_company_id === tenantId ? 'Item sob sua responsabilidade' : 'Equipamento')}
                                                                 </h3>
                                                                 <Badge className="bg-zinc-800 text-zinc-300 border-zinc-700 font-black text-[10px] px-2 h-6">
                                                                     {delivery.booking?.quantity || 1} { (delivery.booking?.quantity || 1) > 1 ? 'UNIDADES' : 'UNIDADE' }
@@ -265,7 +265,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                 <div className="flex items-center gap-1 bg-zinc-900/50 px-2 py-0.5 rounded-lg border border-zinc-800/50">
                                                                     <User className="h-3 w-3" />
                                                                     <span className="text-[10px] font-black uppercase tracking-widest">
-                                                                        {delivery.booking?.renter?.company?.name || delivery.booking?.renter?.full_name || 'Solicitante'}
+                                                                        {delivery.booking?.renter?.company?.name || delivery.booking?.renter?.full_name || (delivery.fulfilling_company_id === tenantId ? 'Cliente Hub' : 'Solicitante')}
                                                                     </span>
                                                                 </div>
                                                                 <div className="flex items-center gap-1 bg-zinc-900/50 px-2 py-0.5 rounded-lg border border-zinc-800/50">
@@ -339,10 +339,10 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                 )}
 
                                                 {delivery.status !== 'delivered' && delivery.status !== 'cancelled' ? (
-                                                    (delivery.booking?.company_id === tenantId || delivery.fulfilling_company_id === tenantId) ? (
+                                                    (delivery.booking?.company_id === tenantId || delivery.fulfilling_company_id === tenantId || !isBranchManager) ? (
                                                         <>
                                                           {/* Badge quando sub-locadora está gerenciando entrega de outro */}
-                                                          {delivery.fulfilling_company_id === tenantId && delivery.booking?.company_id !== tenantId && (
+                                                          {delivery.fulfilling_company_id === tenantId && (delivery.booking?.company_id !== tenantId || !delivery.booking) && (
                                                             <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3 mb-2 text-center">
                                                               <p className="text-[9px] text-blue-400 font-black uppercase tracking-widest">Você é o fornecedor</p>
                                                               <p className="text-[10px] text-zinc-300 font-medium mt-0.5">Gerenciando entrega de outra locadora</p>
