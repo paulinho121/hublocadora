@@ -31,8 +31,20 @@ export function useBookings(options?: {
                 `);
 
             if (options?.companyId) {
-                // Filtra reservas onde a empresa é a dona OU onde ela é a responsável pela entrega (sub-locação)
-                query = query.or(`company_id.eq.${options.companyId},delivery.fulfilling_company_id.eq.${options.companyId}`);
+                // Busca IDs de pedidos onde esta empresa é a responsável pela entrega (sub-locação)
+                const { data: delegated } = await supabase
+                    .from('deliveries')
+                    .select('booking_id')
+                    .eq('fulfilling_company_id', options.companyId);
+                
+                const delegatedIds = delegated?.map(d => d.booking_id) || [];
+                
+                if (delegatedIds.length > 0) {
+                    // Filtra reservas onde a empresa é a dona OU onde ela é a encarregada da entrega
+                    query = query.or(`company_id.eq.${options.companyId},id.in.(${delegatedIds.join(',')})`);
+                } else {
+                    query = query.eq('company_id', options.companyId);
+                }
             }
 
             if (options?.renterId) {
