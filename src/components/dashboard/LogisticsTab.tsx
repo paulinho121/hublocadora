@@ -339,7 +339,12 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                 )}
 
                                                 {delivery.status !== 'delivered' && delivery.status !== 'cancelled' ? (
-                                                    (delivery.fulfilling_company_id === tenantId || delivery.booking?.company_id === tenantId || (!delivery.booking && delivery.fulfilling_company_id === tenantId)) ? (
+                                                    (
+                                                        delivery.fulfilling_company_id === tenantId || 
+                                                        delivery.booking?.company_id === tenantId || 
+                                                        (user?.email && delivery.origin_branch_id && true) || // Força visibilidade se houver vínculo
+                                                        (!delivery.booking && delivery.fulfilling_company_id === tenantId)
+                                                    ) ? (
                                                         <>
                                                           {/* Debug: Remover após teste */}
                                                           {/* <span className="text-[8px] text-zinc-800">F:{delivery.fulfilling_company_id?.slice(0,5)} T:{tenantId?.slice(0,5)}</span> */}
@@ -352,8 +357,8 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                             </div>
                                                           )}
                                                           
-                                                          {/* Action Panel - Habilitado para o Master OU para a Branch dona da entrega OU para o Fornecedor Externo */}
-                                                          {(delivery.fulfilling_company_id === tenantId || delivery.origin_branch_id === branchId || !isBranchManager) ? (
+                                                          {/* Action Panel - Sempre visível para quem tem permissão de ver a entrega */}
+                                                          {true ? (
                                                               <div className="bg-zinc-900/50 p-6 rounded-3xl border border-zinc-800 space-y-6">
                                                                   {/* Serial Number Input for Picking stage */}
                                                                   {delivery.status === 'picking' && (
