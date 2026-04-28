@@ -144,19 +144,22 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
             }
 
             // Sincronizar o perfil se encontrarmos uma empresa mas o perfil estiver desatualizado
-            if (currentCompany && !currentProfile?.company_id) {
-                const { data: updatedProfile } = await supabase
-                    .from('profiles')
-                    .update({ 
-                        company_id: currentCompany.id,
-                        role: currentBranchId ? 'rental_house' : currentProfile?.role || 'client'
-                    })
-                    .eq('id', user.id)
-                    .select()
-                    .single();
-                
-                if (updatedProfile) {
-                    currentProfile = updatedProfile as Profile;
+            if (currentCompany && (!currentProfile || !currentProfile.company_id)) {
+                // Se o perfil não existe, não podemos atualizar, mas o setCompany já resolve o dashboard
+                if (currentProfile) {
+                    const { data: updatedProfile } = await supabase
+                        .from('profiles')
+                        .update({ 
+                            company_id: currentCompany.id,
+                            role: currentBranchId ? 'rental_house' : currentProfile.role || 'rental_house'
+                        })
+                        .eq('id', user.id)
+                        .select()
+                        .single();
+                    
+                    if (updatedProfile) {
+                        currentProfile = updatedProfile as Profile;
+                    }
                 }
             }
 
@@ -165,7 +168,7 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
             setBranchId(currentBranchId);
             setBranch(currentBranch);
         } catch (error) {
-            console.error('[TenantContext] Error fetching tenant data:', error);
+            console.error('[TenantContext] Critical Error:', error);
         } finally {
             setIsLoading(false);
         }
