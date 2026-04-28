@@ -273,7 +273,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                     <Clock className="h-3 w-3" /> {format(new Date(delivery.created_at), "dd/MM '·' HH:mm")}
                                                                 </span>
                                                             </div>
-                                                            <h3 className="text-2xl sm:text-3xl font-black uppercase tracking-tighter text-white leading-tight">
+                                                            <h3 className="text-xl sm:text-2xl font-bold uppercase tracking-tight text-white leading-tight">
                                                                 {delivery.booking?.equipment?.name || 'Equipamento em Trânsito'}
                                                             </h3>
                                                             <div className="flex flex-wrap items-center gap-4">
@@ -296,14 +296,14 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                     <div className="text-right flex flex-col items-end gap-3 shrink-0">
                                                         <div className="space-y-1">
                                                             <span className="text-xs font-black uppercase text-zinc-700 tracking-[0.4em] block">Status Logístico</span>
-                                                            <div className="bg-zinc-900/80 backdrop-blur-md text-zinc-300 font-black uppercase text-xs py-2.5 px-6 rounded-full border border-white/5 shadow-2xl tracking-[0.2em] inline-block">
+                                                            <div className="bg-zinc-900/80 backdrop-blur-md text-zinc-300 font-bold uppercase text-[10px] py-1.5 px-4 rounded-full border border-white/5 shadow-2xl tracking-[0.2em] inline-block">
                                                                 {getStatusLabel(delivery.status)}
                                                             </div>
                                                         </div>
                                                         
                                                         <div className="flex items-center gap-2 bg-black/40 px-3 py-1 rounded-full border border-white/5">
-                                                            <span className="text-xs font-black text-zinc-500 uppercase tracking-widest">Volume:</span>
-                                                            <span className="text-sm font-black text-white">{delivery.booking?.quantity || 1} UN</span>
+                                                            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Volume:</span>
+                                                            <span className="text-xs font-bold text-white">{delivery.booking?.quantity || 1} UN</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -321,7 +321,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                         <div className="flex items-center justify-between border-b border-white/5 pb-4">
                                                             <div className="flex items-center gap-2">
                                                                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Fluxo Operacional</span>
+                                                                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Fluxo Operacional</span>
                                                             </div>
                                                             <Navigation className="h-4 w-4 text-zinc-800" />
                                                         </div>
@@ -441,8 +441,8 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                         <CheckCircle2 className="h-10 w-10 text-emerald-500 relative z-10" />
                                                                     </div>
                                                                     <div className="text-center">
-                                                                        <p className="text-[11px] font-black uppercase tracking-[0.3em] text-emerald-500">Operação Finalizada</p>
-                                                                        <p className="text-[9px] text-zinc-600 font-bold uppercase mt-1">Concluído em {format(new Date(), "dd/MM")}</p>
+                                                                        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-emerald-500">Operação Finalizada</p>
+                                                                        <p className="text-[9px] text-zinc-600 font-medium uppercase mt-1">Concluído em {format(new Date(), "dd/MM")}</p>
                                                                     </div>
                                                                 </motion.div>
                                                             )}

@@ -115,7 +115,7 @@ export function OrderStatusTracker({ status }: OrderStatusTrackerProps) {
 
               {/* High-End Labeling */}
               <div className="absolute -bottom-10 sm:-bottom-12 whitespace-nowrap text-center">
-                <p className={`text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${
+                <p className={`text-[7px] sm:text-[9px] font-bold uppercase tracking-[0.2em] transition-all duration-500 ${
                   isCurrent ? 'text-emerald-400' : isCompleted ? 'text-zinc-400' : 'text-zinc-800'
                 }`}>
                   {step.label}
