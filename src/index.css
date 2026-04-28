@@ -35,6 +35,17 @@
 
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
   --font-display: "Outfit", system-ui, -apple-system, sans-serif;
+
+  /* Fluid Typography Scale */
+  --font-size-xs: clamp(0.65rem, 0.6rem + 0.2vw, 0.75rem);
+  --font-size-sm: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --font-size-base: clamp(0.875rem, 0.8rem + 0.3vw, 1rem);
+  --font-size-lg: clamp(1rem, 0.9rem + 0.5vw, 1.125rem);
+  --font-size-xl: clamp(1.125rem, 1rem + 0.7vw, 1.25rem);
+  --font-size-2xl: clamp(1.25rem, 1.1rem + 1.2vw, 1.75rem);
+  --font-size-3xl: clamp(1.75rem, 1.5rem + 2vw, 2.5rem);
+  --font-size-4xl: clamp(2.25rem, 1.75rem + 3.5vw, 3.75rem);
+  --font-size-5xl: clamp(3rem, 2.25rem + 5vw, 5.5rem);
 }
 
 @layer base {

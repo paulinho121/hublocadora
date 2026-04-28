@@ -53,7 +53,7 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
             </h2>
             <div className="flex items-center gap-1.5 shrink-0">
                <div className="h-1 w-1 rounded-full bg-emerald-500" />
-               <span className="text-[9px] font-black uppercase text-zinc-500 tracking-[0.2em]">Locadora Verificada</span>
+               <span className="text-xs font-black uppercase text-zinc-500 tracking-[0.2em]">Locadora Verificada</span>
             </div>
           </div>
         </div>
@@ -99,15 +99,15 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
               <User className="h-4 w-4 text-zinc-400" />
            </div>
            <div className="min-w-0 flex-1">
-              <p className="text-[10px] uppercase font-black text-zinc-300 truncate tracking-wider leading-none mb-1">Empresário</p>
-              <p className="text-[10px] text-zinc-500 truncate lowercase font-medium">{user?.email}</p>
+              <p className="text-xs uppercase font-black text-zinc-300 truncate tracking-wider leading-none mb-1">Empresário</p>
+              <p className="text-xs text-zinc-500 truncate lowercase font-medium">{user?.email}</p>
            </div>
         </div>
         
         <Button 
           variant="ghost" 
           onClick={() => signOut()}
-          className="w-full justify-start text-[10px] uppercase font-black tracking-widest text-zinc-600 hover:text-destructive hover:bg-destructive/5 h-10 rounded-xl"
+          className="w-full justify-start text-xs uppercase font-black tracking-widest text-zinc-600 hover:text-destructive hover:bg-destructive/5 h-10 rounded-xl"
         >
           <LogOut className="mr-2 h-3.5 w-3.5" /> Sair da Plataforma
         </Button>

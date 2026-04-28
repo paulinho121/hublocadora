@@ -419,7 +419,7 @@ export default function Dashboard() {
               <Button 
                 onClick={() => setIsHubDialogOpen(true)} 
                 variant="outline"
-                className="h-10 text-[10px] font-black uppercase tracking-widest border-primary/30 text-primary hover:bg-primary/5 rounded-xl hidden sm:flex"
+                className="h-10 text-xs font-black uppercase tracking-widest border-primary/30 text-primary hover:bg-primary/5 rounded-xl hidden sm:flex"
               >
                 Solicitar Equipamento
               </Button>
@@ -441,66 +441,66 @@ export default function Dashboard() {
                 </header>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-                   <Card className="bg-zinc-900/50 border-zinc-900 rounded-3xl overflow-hidden hover:border-emerald-500/20 transition-all group">
-                      <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
-                         <CardTitle className="text-[11px] uppercase font-black text-zinc-500 tracking-[0.2em]">Ganhos Líquidos</CardTitle>
-                         <TrendingUp className="h-4 w-4 text-emerald-500" />
-                      </CardHeader>
-                      <CardContent className="p-6 pt-0">
-                         <div className="text-3xl font-black tracking-tighter text-zinc-100 mb-1">
-                            {formatCurrency(totalRevenue)}
-                         </div>
-                         <p className="text-[11px] text-zinc-600 font-bold uppercase tracking-widest">Saldo disponível</p>
-                      </CardContent>
-                   </Card>
+                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+                    <Card className="bg-zinc-900/50 border-zinc-900 rounded-3xl overflow-hidden hover:border-emerald-500/20 transition-all group">
+                       <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
+                          <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-[0.2em]">Ganhos Líquidos</CardTitle>
+                          <TrendingUp className="h-4 w-4 text-emerald-500" />
+                       </CardHeader>
+                       <CardContent className="p-6 pt-0">
+                          <div className="text-3xl font-black tracking-tighter text-zinc-100 mb-1">
+                             {formatCurrency(totalRevenue)}
+                          </div>
+                          <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">Saldo disponível</p>
+                       </CardContent>
+                    </Card>
 
-                   <Card className="bg-zinc-900/50 border-zinc-900 rounded-3xl overflow-hidden hover:border-red-500/20 transition-all group">
-                      <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
-                         <CardTitle className="text-[11px] uppercase font-black text-zinc-500 tracking-[0.2em]">Débitos Operacionais</CardTitle>
-                         <AlertCircle className="h-4 w-4 text-red-500" />
-                      </CardHeader>
-                      <CardContent className="p-6 pt-0">
-                         <div className="text-3xl font-black tracking-tighter text-zinc-100 mb-1">
-                            {formatCurrency(totalDebt)}
-                         </div>
-                         <p className="text-[11px] text-zinc-600 font-bold uppercase tracking-widest">A PAGAR PARA O HUB</p>
-                      </CardContent>
-                   </Card>
+                    <Card className="bg-zinc-900/50 border-zinc-900 rounded-3xl overflow-hidden hover:border-red-500/20 transition-all group">
+                       <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
+                          <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-[0.2em]">Débitos Operacionais</CardTitle>
+                          <AlertCircle className="h-4 w-4 text-red-500" />
+                       </CardHeader>
+                       <CardContent className="p-6 pt-0">
+                          <div className="text-3xl font-black tracking-tighter text-zinc-100 mb-1">
+                             {formatCurrency(totalDebt)}
+                          </div>
+                          <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">A PAGAR PARA O HUB</p>
+                       </CardContent>
+                    </Card>
 
-                   <Card className="bg-zinc-900/50 border-zinc-900 rounded-3xl overflow-hidden hover:border-primary/20 transition-all">
-                      <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
-                         <CardTitle className="text-[10px] uppercase font-black text-zinc-500 tracking-[0.2em]">Reservas Ativas</CardTitle>
-                         <CalendarDays className="h-4 w-4 text-zinc-600" />
-                      </CardHeader>
-                      <CardContent className="p-6 pt-0">
-                         <div className="text-3xl font-black tracking-tighter text-zinc-100 mb-1">{activeBookings}</div>
-                         <p className="text-[11px] text-zinc-600 font-bold uppercase tracking-widest">{pendingBookingsCount} Pendentes</p>
-                      </CardContent>
-                   </Card>
+                    <Card className="bg-zinc-900/50 border-zinc-900 rounded-3xl overflow-hidden hover:border-primary/20 transition-all">
+                       <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
+                          <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-[0.2em]">Reservas Ativas</CardTitle>
+                          <CalendarDays className="h-4 w-4 text-zinc-600" />
+                       </CardHeader>
+                       <CardContent className="p-6 pt-0">
+                          <div className="text-3xl font-black tracking-tighter text-zinc-100 mb-1">{activeBookings}</div>
+                          <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">{pendingBookingsCount} Pendentes</p>
+                       </CardContent>
+                    </Card>
 
-                   <Card className="bg-zinc-900/50 border-zinc-900 rounded-3xl overflow-hidden hover:border-primary/20 transition-all">
-                      <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
-                         <CardTitle className="text-[10px] uppercase font-black text-zinc-500 tracking-[0.2em]">Frota Estocada</CardTitle>
-                         <Package className="h-4 w-4 text-zinc-600" />
-                      </CardHeader>
-                      <CardContent className="p-6 pt-0">
-                         <div className="text-3xl font-black tracking-tighter text-zinc-100 mb-1">{equipments?.length || 0}</div>
-                         <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Itens cadastrados</p>
-                      </CardContent>
-                   </Card>
+                    <Card className="bg-zinc-900/50 border-zinc-900 rounded-3xl overflow-hidden hover:border-primary/20 transition-all">
+                       <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
+                          <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-[0.2em]">Frota Estocada</CardTitle>
+                          <Package className="h-4 w-4 text-zinc-600" />
+                       </CardHeader>
+                       <CardContent className="p-6 pt-0">
+                          <div className="text-3xl font-black tracking-tighter text-zinc-100 mb-1">{equipments?.length || 0}</div>
+                          <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">Itens cadastrados</p>
+                       </CardContent>
+                    </Card>
 
-                   <Card className="bg-zinc-900/50 border-zinc-900 rounded-3xl overflow-hidden hover:border-destructive/20 transition-all">
-                      <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
-                         <CardTitle className="text-[10px] uppercase font-black text-zinc-500 tracking-[0.2em]">Em Manutenção</CardTitle>
-                         <AlertCircle className="h-4 w-4 text-destructive" />
-                      </CardHeader>
-                      <CardContent className="p-6 pt-0">
-                         <div className="text-3xl font-black tracking-tighter text-destructive mb-1">{maintenanceCount}</div>
-                         <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Atenção requerida</p>
-                      </CardContent>
-                   </Card>
-                </div>
+                    <Card className="bg-zinc-900/50 border-zinc-900 rounded-3xl overflow-hidden hover:border-destructive/20 transition-all">
+                       <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
+                          <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-[0.2em]">Em Manutenção</CardTitle>
+                          <AlertCircle className="h-4 w-4 text-destructive" />
+                       </CardHeader>
+                       <CardContent className="p-6 pt-0">
+                          <div className="text-3xl font-black tracking-tighter text-destructive mb-1">{maintenanceCount}</div>
+                          <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">Atenção requerida</p>
+                       </CardContent>
+                    </Card>
+                 </div>
 
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
                    <Card className="xl:col-span-2 bg-zinc-950 border-zinc-900 rounded-3xl">
