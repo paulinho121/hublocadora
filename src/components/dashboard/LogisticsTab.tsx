@@ -53,6 +53,30 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
     }, [queryClient]);
 
     const handleNextStatus = async (delivery: any) => {
+        // Lógica de ACEITE para Sub-locadoras
+        if (delivery.subrental_status === 'pending' && delivery.booking?.subrental_company_id === tenantId) {
+            setUpdatingId(delivery.id);
+            try {
+                const { error } = await supabase
+                    .from('deliveries')
+                    .update({ 
+                        subrental_status: 'accepted',
+                        fulfilling_company_id: tenantId // Vincula oficialmente a empresa à entrega
+                    })
+                    .eq('id', delivery.id);
+                
+                if (error) throw error;
+                queryClient.invalidateQueries({ queryKey: ['deliveries'] });
+                return;
+            } catch (error: any) {
+                console.error('Erro ao aceitar pedido:', error);
+                alert(`Erro ao aceitar: ${error.message}`);
+                return;
+            } finally {
+                setUpdatingId(null);
+            }
+        }
+
         const statusFlow: any = {
             'pending': 'picking',
             'picking': 'ready',
@@ -323,57 +347,75 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                         </div>
                                                                     )}
 
-                                                                    {/* PARTNER ACTIONS (PICKING/SHIPPING) */}
+                                                                    {/* PARTNER ACTIONS (PICKING/SHIPPING/ACCEPTING) */}
                                                                     {(delivery.fulfilling_company_id === tenantId || 
                                                                       delivery.booking?.company_id === tenantId || 
                                                                       delivery.booking?.subrental_company_id === tenantId ||
                                                                       delivery.booking?.equipment?.subrental_company_id === tenantId) && (
                                                                         <div className="space-y-6">
-                                                                            {/* Serial Input */}
-                                                                            {delivery.status === 'picking' && (
-                                                                                <div className="space-y-3">
-                                                                                    <label className="text-[9px] font-black uppercase text-zinc-600 tracking-widest flex items-center gap-2 ml-1">
-                                                                                        <Hash className="h-3.5 w-3.5" /> Identificação Serial
-                                                                                    </label>
-                                                                                    <Input 
-                                                                                        placeholder="DIGITE O SN DO EQUIPAMENTO"
-                                                                                        className="bg-black/50 border-white/5 rounded-xl h-14 text-center text-xs font-black tracking-widest focus:border-primary/50 transition-all"
-                                                                                        value={serialNumbers[delivery.id] || delivery.serial_number || ''}
-                                                                                        onChange={(e) => setSerialNumbers(prev => ({ ...prev, [delivery.id]: e.target.value.toUpperCase() }))}
-                                                                                    />
+                                                                            {/* Sub-locadora precisa ACEITAR o pedido antes de separar */}
+                                                                            {delivery.subrental_status === 'pending' && delivery.booking?.subrental_company_id === tenantId ? (
+                                                                                <div className="space-y-4">
+                                                                                    <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4">
+                                                                                        <p className="text-[10px] text-amber-500 font-black uppercase tracking-widest mb-1">Solicitação de Atendimento</p>
+                                                                                        <p className="text-[11px] text-zinc-400">O CineHub designou este pedido para você. Aceite para iniciar a separação.</p>
+                                                                                    </div>
+                                                                                    <Button 
+                                                                                        onClick={() => handleNextStatus(delivery)}
+                                                                                        className="w-full bg-amber-500 hover:bg-amber-400 text-black font-black uppercase tracking-widest h-14 rounded-xl shadow-lg"
+                                                                                    >
+                                                                                        Aceitar e Iniciar
+                                                                                    </Button>
+                                                                                </div>
+                                                                            ) : (
+                                                                                <div className="space-y-6">
+                                                                                    {/* Serial Input */}
+                                                                                    {delivery.status === 'picking' && (
+                                                                                        <div className="space-y-3">
+                                                                                            <label className="text-[9px] font-black uppercase text-zinc-600 tracking-widest flex items-center gap-2 ml-1">
+                                                                                                <Hash className="h-3.5 w-3.5" /> Identificação Serial
+                                                                                            </label>
+                                                                                            <Input 
+                                                                                                placeholder="DIGITE O SN DO EQUIPAMENTO"
+                                                                                                className="bg-black/50 border-white/5 rounded-xl h-14 text-center text-xs font-black tracking-widest focus:border-primary/50 transition-all"
+                                                                                                value={serialNumbers[delivery.id] || delivery.serial_number || ''}
+                                                                                                onChange={(e) => setSerialNumbers(prev => ({ ...prev, [delivery.id]: e.target.value.toUpperCase() }))}
+                                                                                            />
+                                                                                        </div>
+                                                                                    )}
+
+                                                                                    {/* Token Input for Confirmation */}
+                                                                                    {delivery.status === 'shipped' && (
+                                                                                        <div className="space-y-3">
+                                                                                            <label className="text-[9px] font-black uppercase text-emerald-500 tracking-widest flex items-center gap-2 ml-1">
+                                                                                                <ShieldAlert className="h-3.5 w-3.5" /> Validar Recebimento
+                                                                                            </label>
+                                                                                            <Input 
+                                                                                                placeholder="----"
+                                                                                                maxLength={4}
+                                                                                                className="bg-black/50 border-emerald-500/20 rounded-xl h-16 text-center text-3xl font-black tracking-[0.5em] focus:border-emerald-500/50 transition-all text-white"
+                                                                                                value={tokenInputs[delivery.id] || ''}
+                                                                                                onChange={(e) => setTokenInputs(prev => ({ ...prev, [delivery.id]: e.target.value.replace(/\D/g, '') }))}
+                                                                                            />
+                                                                                            <p className="text-[8px] text-zinc-600 text-center uppercase font-bold">Solicite o token de 4 dígitos ao cliente</p>
+                                                                                        </div>
+                                                                                    )}
+
+                                                                                    <Button 
+                                                                                        onClick={() => handleNextStatus(delivery)}
+                                                                                        disabled={updatingId === delivery.id}
+                                                                                        className="w-full bg-white text-black hover:bg-zinc-200 font-black uppercase tracking-[0.2em] h-16 rounded-2xl shadow-[0_20px_50px_rgba(255,255,255,0.1)] transition-all active:scale-[0.98]"
+                                                                                    >
+                                                                                        {updatingId === delivery.id ? (
+                                                                                            <Loader2 className="h-5 w-5 animate-spin" />
+                                                                                        ) : (
+                                                                                            <span className="flex items-center gap-3">
+                                                                                                {getNextActionLabel(delivery.status)} <ArrowRight className="h-4 w-4" />
+                                                                                            </span>
+                                                                                        )}
+                                                                                    </Button>
                                                                                 </div>
                                                                             )}
-
-                                                                            {/* Token Input for Confirmation */}
-                                                                            {delivery.status === 'shipped' && (
-                                                                                <div className="space-y-3">
-                                                                                    <label className="text-[9px] font-black uppercase text-emerald-500 tracking-widest flex items-center gap-2 ml-1">
-                                                                                        <ShieldAlert className="h-3.5 w-3.5" /> Validar Recebimento
-                                                                                    </label>
-                                                                                    <Input 
-                                                                                        placeholder="----"
-                                                                                        maxLength={4}
-                                                                                        className="bg-black/50 border-emerald-500/20 rounded-xl h-16 text-center text-3xl font-black tracking-[0.5em] focus:border-emerald-500/50 transition-all text-white"
-                                                                                        value={tokenInputs[delivery.id] || ''}
-                                                                                        onChange={(e) => setTokenInputs(prev => ({ ...prev, [delivery.id]: e.target.value.replace(/\D/g, '') }))}
-                                                                                    />
-                                                                                    <p className="text-[8px] text-zinc-600 text-center uppercase font-bold">Solicite o token de 4 dígitos ao cliente</p>
-                                                                                </div>
-                                                                            )}
-
-                                                                            <Button 
-                                                                                onClick={() => handleNextStatus(delivery)}
-                                                                                disabled={updatingId === delivery.id}
-                                                                                className="w-full bg-white text-black hover:bg-zinc-200 font-black uppercase tracking-[0.2em] h-16 rounded-2xl shadow-[0_20px_50px_rgba(255,255,255,0.1)] transition-all active:scale-[0.98]"
-                                                                            >
-                                                                                {updatingId === delivery.id ? (
-                                                                                    <Loader2 className="h-5 w-5 animate-spin" />
-                                                                                ) : (
-                                                                                    <span className="flex items-center gap-3">
-                                                                                        {getNextActionLabel(delivery.status)} <ArrowRight className="h-4 w-4" />
-                                                                                    </span>
-                                                                                )}
-                                                                            </Button>
                                                                         </div>
                                                                     )}
 
