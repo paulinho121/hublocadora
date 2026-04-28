@@ -61,6 +61,7 @@ export interface Equipment {
     location_base?: string;
     state_uf?: string;
     created_at: string;
+    stock?: (EquipmentStock & { branch: Branch })[];
 }
 
 export interface Booking {
@@ -147,6 +148,7 @@ export interface Branch {
     document: string | null;
     manager_email: string | null;
     invite_token: string;
+    is_main: boolean;
     status: 'invited' | 'active' | 'inactive';
     created_at: string;
     updated_at: string;
