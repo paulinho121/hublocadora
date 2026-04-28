@@ -62,10 +62,9 @@ export class BookingService {
         const { data, error } = await supabase
             .from('bookings')
             .insert([booking])
-            .select()
-            .single();
+            .select();
 
         if (error) throw error;
-        return data as Booking;
+        return data?.[0] as Booking;
     }
 }

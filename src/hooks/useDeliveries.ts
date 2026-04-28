@@ -87,11 +87,10 @@ export function useCreateDelivery() {
             const { data, error } = await supabase
                 .from('deliveries')
                 .insert([delivery])
-                .select()
-                .single();
+                .select();
 
             if (error) throw error;
-            return data;
+            return data?.[0];
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['deliveries'] });
