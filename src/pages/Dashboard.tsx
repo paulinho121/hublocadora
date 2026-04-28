@@ -171,7 +171,11 @@ export default function Dashboard() {
     );
   }
 
-  if (!company && user) {
+  // O Dashboard agora é resiliente: só mostra o setup se realmente não houver empresa 
+  // após o carregamento completo e se o usuário não for um admin/sub-locadora.
+  const showSetup = !isLoadingTenant && !company && !isBranchManager && user;
+  
+  if (showSetup) {
     return (
       <div className="container mx-auto py-12">
         <CompanySetup ownerId={user.id} />
