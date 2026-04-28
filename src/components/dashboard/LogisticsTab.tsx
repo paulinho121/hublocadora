@@ -374,6 +374,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                       </div>
                                                                   )}
 
+                                                                  <div className="space-y-3">
                                                                       <div className="flex items-center gap-2 px-4 py-2 bg-zinc-950 rounded-xl border border-zinc-800">
                                                                           <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
                                                                           <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
