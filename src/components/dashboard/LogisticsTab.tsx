@@ -256,9 +256,12 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                             <h3 className="text-2xl font-black uppercase tracking-tighter text-zinc-100">
                                                                 {delivery.booking?.equipment?.name || 'Equipamento'}
                                                             </h3>
-                                                            <p className="text-zinc-500 text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 mt-1">
-                                                                <User className="h-3 w-3" /> {delivery.booking?.renter?.company?.name || delivery.booking?.renter?.full_name}
-                                                            </p>
+                                                            <div className="flex items-center gap-2 text-zinc-500">
+                                                                <User className="h-3 w-3" />
+                                                                <span className="text-[10px] font-bold uppercase tracking-widest">
+                                                                    {delivery.booking?.renter?.company?.name || delivery.booking?.renter?.full_name || 'Solicitante'}
+                                                                </span>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     
@@ -332,20 +335,28 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                               <p className="text-[10px] text-zinc-300 font-medium mt-0.5">Gerenciando entrega de outra locadora</p>
                                                             </div>
                                                           )}
-                                                          <Button 
-                                                              onClick={() => handleNextStatus(delivery)}
-                                                              disabled={updatingId === delivery.id}
-                                                              className="w-full h-16 rounded-2xl bg-primary hover:bg-primary/90 text-black font-black uppercase tracking-widest px-6 shadow-[0_0_30_rgba(var(--primary-rgb),0.2)] group"
-                                                          >
-                                                              {updatingId === delivery.id ? (
-                                                                  <Loader2 className="h-5 w-5 animate-spin" />
-                                                              ) : (
-                                                                  <>
-                                                                      <span className="flex-1">{getNextActionLabel(delivery.status)}</span>
-                                                                      <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                                                                  </>
-                                                              )}
-                                                          </Button>
+                                                          
+                                                          {/* Next Action Button - Habilitado para o Master OU para a Branch dona da entrega */}
+                                                          {(delivery.origin_branch_id === branchId || !isBranchManager) && delivery.status !== 'delivered' && (
+                                                              <div className="space-y-3">
+                                                                  <div className="flex items-center gap-2 px-4 py-2 bg-zinc-900/50 rounded-xl border border-zinc-800">
+                                                                      <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                                                                      <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Próxima Ação:</span>
+                                                                  </div>
+                                                                  
+                                                                  <Button 
+                                                                      onClick={() => handleNextStatus(delivery)}
+                                                                      disabled={updatingId === delivery.id}
+                                                                      className="w-full bg-primary hover:bg-primary/90 text-black font-black uppercase tracking-widest h-12 rounded-xl shadow-[0_0_20px_rgba(var(--primary),0.2)]"
+                                                                  >
+                                                                      {updatingId === delivery.id ? (
+                                                                          <Loader2 className="h-4 w-4 animate-spin" />
+                                                                      ) : (
+                                                                          getNextActionLabel(delivery.status)
+                                                                      )}
+                                                                  </Button>
+                                                              </div>
+                                                          )}
                                                         </>
                                                     ) : (
                                                         <div className="text-center py-4 bg-zinc-900/50 rounded-2xl border border-zinc-800/50">

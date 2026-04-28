@@ -204,6 +204,34 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                     </div>
                                 </div>
 
+                                <div className="space-y-4">
+                                    <h4 className="text-[10px] uppercase font-black text-zinc-500 tracking-widest flex items-center gap-2">
+                                        <Package className="w-3 h-3" /> Quantidade
+                                    </h4>
+                                    <div className="flex items-center gap-4 bg-zinc-900/50 p-2 rounded-2xl border border-zinc-800">
+                                        <Button 
+                                            variant="ghost" 
+                                            size="sm"
+                                            className="h-10 w-10 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-black text-lg"
+                                            onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                        >
+                                            -
+                                        </Button>
+                                        <div className="flex-1 text-center">
+                                            <span className="text-xl font-black text-zinc-100">{quantity}</span>
+                                            <span className="text-[10px] text-zinc-500 font-bold uppercase ml-2">unidades</span>
+                                        </div>
+                                        <Button 
+                                            variant="ghost" 
+                                            size="sm"
+                                            className="h-10 w-10 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-black text-lg"
+                                            onClick={() => setQuantity(Math.min(equipment.stock_quantity || 1, quantity + 1))}
+                                        >
+                                            +
+                                        </Button>
+                                    </div>
+                                </div>
+
                                 <div>
                                     <h4 className="text-[10px] uppercase font-black text-zinc-500 mb-4 tracking-widest flex items-center gap-2">
                                         <Truck className="w-3 h-3" /> Logística Opcional
