@@ -13,7 +13,9 @@ import {
   BarChart3, 
   ArrowRight,
   MapPin,
-  Truck
+  Truck,
+  ArrowDownLeft,
+  ArrowUpRight
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -225,6 +227,10 @@ export default function Dashboard() {
         return acc + curr.total_amount;
       }
     }, 0) || 0;
+
+  const recentOrders = [...(bookingsReceived || []), ...(bookingsRequested || [])]
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 10);
 
   const totalDebt = bookingsReceived
     ?.filter(b => b.status === 'completed' || b.status === 'approved')
@@ -503,45 +509,67 @@ export default function Dashboard() {
                          <Button variant="ghost" className="text-[10px] uppercase font-black tracking-widest text-zinc-500">Ver Todos</Button>
                       </CardHeader>
                       <CardContent className="p-0">
-                         {bookingsReceived?.length === 0 ? (
+                         {recentOrders.length === 0 ? (
                            <div className="p-12 text-center text-zinc-600">Nenhum pedido recente.</div>
                          ) : (
                            <div className="divide-y divide-zinc-900/50">
-                              {bookingsReceived?.slice(0, 5).map((booking: any) => (
-                                <div key={booking.id} className="p-6 flex items-center justify-between hover:bg-zinc-900/30 transition-all group/item">
-                                   <div className="flex gap-4 items-center min-w-0 flex-1">
-                                      <div className="h-12 w-12 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold text-zinc-400 overflow-hidden shrink-0">
-                                         {booking.equipment?.images?.[0] ? (
-                                           <img src={booking.equipment.images[0]} alt="" className="w-full h-full object-cover group-hover/item:scale-110 transition-transform" />
-                                         ) : (
-                                           <Package className="h-4 w-4 text-zinc-700" />
-                                         )}
-                                      </div>
-                                      <div className="min-w-0">
-                                         <p className="text-sm font-black text-zinc-100 uppercase truncate">{(booking as any).equipment?.name}</p>
-                                         <p className="text-[11px] uppercase text-zinc-500 font-bold tracking-widest truncate">
-                                            Solicitante: {booking.renter?.company?.name || booking.renter?.full_name || 'Usuário'}
-                                         </p>
-                                      </div>
-                                   </div>
-                                   <div className="text-right shrink-0">
-                                      <div className="text-sm font-black text-zinc-100">
-                                         {(() => {
-                                            const fulfillmentId = (booking as any).delivery?.[0]?.fulfilling_company_id;
-                                            const isFulfiller = fulfillmentId === tenantId;
-                                            const isOwner = booking.company_id === tenantId;
-                                            let amount = booking.total_amount;
-
-                                            if (isFulfiller && !isOwner) amount = amount * 0.5;
-                                            else if (isOwner && fulfillmentId && fulfillmentId !== tenantId) amount = amount * 0.5;
-                                            
-                                            return formatCurrency(amount);
-                                         })()}
-                                      </div>
-                                      <Badge variant="outline" className="text-[8px] uppercase font-black h-4 px-1 border-zinc-800 text-zinc-500">{booking.status}</Badge>
-                                   </div>
-                                </div>
-                              ))}
+                              {recentOrders.map((booking: any) => {
+                                const isRequested = booking.renter_id === user?.id;
+                                const fulfillmentId = (booking as any).delivery?.[0]?.fulfilling_company_id;
+                                const isFulfiller = fulfillmentId === tenantId;
+                                const isOwner = booking.company_id === tenantId;
+                                
+                                return (
+                                  <div key={booking.id} className="p-6 flex items-center justify-between hover:bg-zinc-900/30 transition-all group/item">
+                                     <div className="flex gap-4 items-center min-w-0 flex-1">
+                                        <div className="relative">
+                                           <div className="h-12 w-12 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold text-zinc-400 overflow-hidden shrink-0">
+                                              {booking.equipment?.images?.[0] ? (
+                                                <img src={booking.equipment.images[0]} alt="" className="w-full h-full object-cover group-hover/item:scale-110 transition-transform" />
+                                              ) : (
+                                                <Package className="h-4 w-4 text-zinc-700" />
+                                              )}
+                                           </div>
+                                           <div className={`absolute -bottom-1 -right-1 h-5 w-5 rounded-full border-2 border-zinc-950 flex items-center justify-center shadow-xl ${isRequested ? 'bg-amber-500' : 'bg-emerald-500'}`}>
+                                              {isRequested ? <ArrowUpRight className="h-2.5 w-2.5 text-black" /> : <ArrowDownLeft className="h-2.5 w-2.5 text-black" />}
+                                           </div>
+                                        </div>
+                                        <div className="min-w-0">
+                                           <div className="flex items-center gap-2 mb-0.5">
+                                              <p className="text-sm font-black text-zinc-100 uppercase truncate">{(booking as any).equipment?.name}</p>
+                                              <Badge variant="outline" className={`text-[7px] h-3.5 px-1.5 font-black uppercase tracking-[0.1em] border-none ${isRequested ? 'bg-amber-500/10 text-amber-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
+                                                 {isRequested ? 'Saída' : 'Entrada'}
+                                              </Badge>
+                                           </div>
+                                           <p className="text-[10px] uppercase text-zinc-500 font-bold tracking-widest truncate">
+                                              {isRequested ? 'Destino: Seu Estoque' : `Solicitante: ${booking.renter?.company?.name || booking.renter?.full_name}`}
+                                           </p>
+                                        </div>
+                                     </div>
+                                     
+                                     <div className="flex items-center gap-8">
+                                        <div className="text-right hidden sm:block">
+                                           <p className="text-[8px] uppercase font-black text-zinc-600 tracking-[0.2em] mb-1">Previsão Retorno</p>
+                                           <div className="flex items-center justify-end gap-1.5 text-[11px] font-black text-zinc-400 uppercase tracking-tighter">
+                                              <CalendarDays className="h-3 w-3 text-primary" />
+                                              {format(new Date(booking.end_date), "dd 'DE' MMM", { locale: ptBR })}
+                                           </div>
+                                        </div>
+                                        <div className="text-right shrink-0 min-w-[100px]">
+                                           <div className="text-sm font-black text-zinc-100">
+                                              {(() => {
+                                                 let amount = booking.total_amount;
+                                                 if (isFulfiller && !isOwner) amount = amount * 0.5;
+                                                 else if (isOwner && fulfillmentId && fulfillmentId !== tenantId) amount = amount * 0.5;
+                                                 return formatCurrency(amount);
+                                              })()}
+                                           </div>
+                                           <p className="text-[8px] uppercase font-black text-zinc-600 tracking-widest">{booking.status}</p>
+                                        </div>
+                                     </div>
+                                  </div>
+                                );
+                              })}
                            </div>
                          )}
                       </CardContent>
