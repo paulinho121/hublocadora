@@ -16,15 +16,19 @@ import { Dialog } from '@/components/ui/dialog';
 import { InternalTransfersSection } from './InternalTransfersSection';
 import { cn } from '@/lib/utils';
 import { InventoryStatusReport } from './InventoryStatusReport';
+import { useTenant } from '@/contexts/TenantContext';
 
 export function LogisticsTab({ tenantId }: { tenantId: string }) {
     const { user } = useAuth();
-    const { branches } = useBranches();
+    const { branches, isBranchManager, branchId } = useTenant();
     const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
     const [branchModalOpen, setBranchModalOpen] = useState(false);
     const [pendingDelivery, setPendingDelivery] = useState<any>(null);
     const queryClient = useQueryClient();
-    const { data: deliveries, isLoading } = useDeliveries();
+    const { data: deliveries, isLoading } = useDeliveries({ 
+        tenantId,
+        branchId: isBranchManager ? branchId : undefined
+    });
     const updateMutation = useUpdateDeliveryStatus();
     const [updatingId, setUpdatingId] = useState<string | null>(null);
     const [serialNumbers, setSerialNumbers] = useState<Record<string, string>>({});

@@ -50,7 +50,7 @@ const VALID_TABS: TabType[] = ['overview', 'inventory', 'bookings', 'logistics',
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { company, isLoading: isLoadingTenant, tenantId, isBranchManager, branchId } = useTenant();
+  const { company, branch, isLoading: isLoadingTenant, tenantId, isBranchManager, branchId } = useTenant();
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Tab is driven by URL ?tab= param — enables mobile BottomNav to switch tabs
@@ -60,6 +60,7 @@ export default function Dashboard() {
   
   const { data: bookingsReceived, isLoading: isLoadingReceived } = useBookings({
     companyId: tenantId || undefined,
+    branchId: isBranchManager ? branchId : undefined,
     includeEquipmentSubrental: true,
   });
 
@@ -93,7 +94,8 @@ export default function Dashboard() {
     open: boolean;
     bookingId: string;
     selectedSubrentalId: string | null;
-    subrentalOptions: Array<{ id: string; name: string; city?: string; state?: string }>;
+    selectedSubrentalType: 'branch' | 'external' | null;
+    subrentalOptions: Array<{ id: string; name: string; city?: string; state?: string; type: 'branch' | 'external' }>;
   } | null>(null);
 
   // iFood Real-Time Notification State
@@ -244,15 +246,18 @@ export default function Dashboard() {
       setUpdatingId(id);
       await updateStatusMutation.mutateAsync({ id, status });
 
-      // Se foi aprovado e tem sub-locadora: atribui direto com status 'accepted'
+      // Se foi aprovado e tem sub-locadora ou filial
       if (status === 'approved' && fulfillCompanyId) {
+        const isBranch = fulfillmentModal?.selectedSubrentalType === 'branch';
+        
         await new Promise(r => setTimeout(r, 1000));
         const { error } = await supabase
           .from('deliveries')
           .update({ 
-            fulfilling_company_id: fulfillCompanyId,
-            subrental_status: 'accepted',  // Sub-locadora já recebe aceito, sem etapa de confirmação
-            status: 'picking'              // Inicia a separação imediatamente
+            fulfilling_company_id: isBranch ? (tenantId || undefined) : fulfillCompanyId,
+            origin_branch_id: isBranch ? fulfillCompanyId : null,
+            subrental_status: 'accepted',  
+            status: 'picking'              
           })
           .eq('booking_id', id);
         if (error) console.error('Erro ao atribuir sub-locadora:', error);
@@ -270,41 +275,58 @@ export default function Dashboard() {
   const handleApproveBooking = async (booking: any) => {
     const equipmentId = booking.equipment_id;
     
-    // Busca todas as locadoras que têm este item (pelo nome exato)
+    // 1. Busca branches da MINHA REDE que possuem este item no estoque
+    const { data: stockData } = await supabase
+      .from('equipment_stock')
+      .select('branch_id, branches(id, name, city, state)')
+      .eq('equipment_id', equipmentId)
+      .gt('quantity', 0);
+    
+    // 2. Busca outras locadoras (externas) que têm este item (pelo nome)
     const { data: eqData } = await supabase
       .from('equipments')
-      .select('company_id, subrental_company_id')
+      .select('company_id, companies(id, name, address_city, address_state)')
       .eq('name', booking.equipment.name)
-      .neq('company_id', booking.company_id); // Não inclui o próprio master se for o caso
+      .neq('company_id', booking.company_id);
     
-    // Coleta todos os IDs de empresas que possuem o item (seja como donas ou via sublocação atribuída)
-    const partnerIds = new Set<string>();
+    const options: Array<{ id: string; name: string; city?: string; state?: string; type: 'branch' | 'external' }> = [];
+
+    // Adiciona branches da rede
+    stockData?.forEach((s: any) => {
+      if (s.branches) {
+        options.push({
+          id: s.branches.id,
+          name: s.branches.name,
+          city: s.branches.city,
+          state: s.branches.state,
+          type: 'branch'
+        });
+      }
+    });
+
+    // Adiciona empresas externas
     eqData?.forEach((e: any) => {
-      if (e.company_id) partnerIds.add(e.company_id);
-      if (e.subrental_company_id) partnerIds.add(e.subrental_company_id);
+      if (e.companies) {
+        options.push({
+          id: e.companies.id,
+          name: e.companies.name,
+          city: (e.companies as any).address_city,
+          state: (e.companies as any).address_state,
+          type: 'external'
+        });
+      }
     });
     
-    const subrentalIds = Array.from(partnerIds);
-    
-    if (subrentalIds.length > 0) {
-      const { data: companies } = await supabase
-        .from('companies')
-        .select('id, name, address_city, address_state')
-        .in('id', subrentalIds);
-      
+    if (options.length > 0) {
       setFulfillmentModal({
         open: true,
         bookingId: booking.id,
         selectedSubrentalId: null,
-        subrentalOptions: (companies || []).map(c => ({
-          id: c.id,
-          name: c.name,
-          city: c.address_city,
-          state: c.address_state,
-        })),
+        selectedSubrentalType: null,
+        subrentalOptions: options,
       });
     } else {
-      // Sem sub-locadora: master gerencia diretamente
+      // Sem opções: master gerencia diretamente
       await handleUpdateStatus(booking.id, 'approved', null);
     }
   };
@@ -342,7 +364,7 @@ export default function Dashboard() {
       <DashboardSidebar 
         activeTab={activeTab} 
         onTabChange={(tab) => setActiveTab(tab)} 
-        companyName={company?.name} 
+        companyName={isBranchManager ? branch?.name : company?.name} 
       />
 
       {/* Main Content Area */}
@@ -351,7 +373,7 @@ export default function Dashboard() {
         <header className="h-20 border-b border-zinc-900 flex items-center justify-between px-6 md:px-10 shrink-0">
            <div className="flex items-center gap-3 md:hidden">
               <Package className="h-6 w-6 text-primary" />
-              <span className="font-black uppercase tracking-tighter text-lg">{company?.name}</span>
+              <span className="font-black uppercase tracking-tighter text-lg">{isBranchManager ? branch?.name : company?.name}</span>
            </div>
            
            <div className="hidden md:block">
@@ -678,7 +700,7 @@ export default function Dashboard() {
               {fulfillmentModal.subrentalOptions.map(opt => (
                 <button
                   key={opt.id}
-                  onClick={() => setFulfillmentModal(prev => prev ? { ...prev, selectedSubrentalId: opt.id } : prev)}
+                  onClick={() => setFulfillmentModal(prev => prev ? { ...prev, selectedSubrentalId: opt.id, selectedSubrentalType: opt.type } : prev)}
                   className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all text-left ${
                     fulfillmentModal.selectedSubrentalId === opt.id
                       ? 'border-primary bg-primary/10'
