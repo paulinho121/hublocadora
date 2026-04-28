@@ -122,7 +122,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
 
     const getNextActionLabel = (status: string) => {
         const actions: any = {
-            'pending': 'Iniciar Separação',
+            'pending': 'Confirmar Pedido',
             'picking': 'Finalizar Separação',
             'ready': 'Despachar Equipamento',
             'shipped': 'Confirmar Entrega'

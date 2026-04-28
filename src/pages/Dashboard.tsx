@@ -261,7 +261,7 @@ export default function Dashboard() {
             fulfilling_company_id: isBranch ? (tenantId || undefined) : fulfillCompanyId,
             origin_branch_id: isBranch ? fulfillCompanyId : null,
             subrental_status: 'accepted',  
-            status: 'picking'              
+            status: 'pending'              
           })
           .eq('booking_id', id);
         if (error) console.error('Erro ao atribuir sub-locadora:', error);
