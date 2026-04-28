@@ -22,6 +22,7 @@ import { Input } from '@/components/ui/input';
 import { Equipment } from '@/types/database';
 import { useCreateBooking, useEquipmentOccupiedDates } from '@/hooks/useBookings';
 import { useTenant } from '@/contexts/TenantContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { format, differenceInDays, isWithinInterval, parseISO, isAfter, startOfDay, addDays } from 'date-fns';
 
 interface QuickBookingModalProps {
@@ -32,6 +33,7 @@ interface QuickBookingModalProps {
 
 export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingModalProps) {
     const { tenantId, company } = useTenant();
+    const { user } = useAuth();
     const createBooking = useCreateBooking();
     
     const [startDate, setStartDate] = useState(format(new Date(), 'yyyy-MM-dd'));
@@ -80,13 +82,13 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
     if (!equipment) return null;
 
     const handleReserve = async () => {
-        if (!tenantId || !isAvailable) return;
+        if (!user?.id || !isAvailable) return;
 
         try {
             await createBooking.mutateAsync({
                 equipment_id: equipment.id,
                 company_id: equipment.company_id,
-                renter_id: company?.owner_id || '', 
+                renter_id: user.id, 
                 start_date: parseISO(startDate).toISOString(),
                 end_date: parseISO(endDate).toISOString(),
                 total_amount: equipment.daily_rate * totalDays * quantity,
