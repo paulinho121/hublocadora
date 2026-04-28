@@ -350,7 +350,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                           )}
                                                           
                                                           {/* Action Panel - Habilitado para o Master OU para a Branch dona da entrega */}
-                                                          {((delivery.origin_branch_id === branchId || !isBranchManager) || (delivery.origin_branch_id && branch?.id === delivery.origin_branch_id)) ? (
+                                                          {(delivery.origin_branch_id === branchId || !isBranchManager) ? (
                                                               <div className="bg-zinc-900/50 p-6 rounded-3xl border border-zinc-800 space-y-6">
                                                                   {/* Serial Number Input for Picking stage */}
                                                                   {delivery.status === 'picking' && (
@@ -420,16 +420,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                     </div>
                                                 )}
 
-                                                <div className="space-y-3 pt-2">
-                                                    <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-300 cursor-pointer transition-colors">
-                                                        <MapPin className="h-4 w-4" />
-                                                        <span>Ver Local de Entrega</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-300 cursor-pointer transition-colors">
-                                                        <Phone className="h-4 w-4" />
-                                                        <span>Contatar Cliente</span>
-                                                    </div>
-                                                </div>
+
                                             </div>
                                         </div>
                                     </div>
