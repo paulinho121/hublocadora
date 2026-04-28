@@ -339,10 +339,13 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                 )}
 
                                                 {delivery.status !== 'delivered' && delivery.status !== 'cancelled' ? (
-                                                    (delivery.fulfilling_company_id === tenantId || delivery.booking?.company_id === tenantId) ? (
+                                                    (delivery.fulfilling_company_id === tenantId || delivery.booking?.company_id === tenantId || (!delivery.booking && delivery.fulfilling_company_id === tenantId)) ? (
                                                         <>
+                                                          {/* Debug: Remover após teste */}
+                                                          {/* <span className="text-[8px] text-zinc-800">F:{delivery.fulfilling_company_id?.slice(0,5)} T:{tenantId?.slice(0,5)}</span> */}
+                                                          
                                                           {/* Badge quando sub-locadora está gerenciando entrega de outro */}
-                                                          {delivery.fulfilling_company_id === tenantId && (delivery.booking?.company_id !== tenantId || !delivery.booking) && (
+                                                          {(delivery.fulfilling_company_id === tenantId && (delivery.booking?.company_id !== tenantId || !delivery.booking)) && (
                                                             <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3 mb-2 text-center">
                                                               <p className="text-[9px] text-blue-400 font-black uppercase tracking-widest">Você é o fornecedor</p>
                                                               <p className="text-[10px] text-zinc-300 font-medium mt-0.5">Gerenciando entrega de outra locadora</p>
