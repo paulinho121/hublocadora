@@ -448,7 +448,7 @@ export default function Dashboard() {
                           <TrendingUp className="h-4 w-4 text-emerald-500" />
                        </CardHeader>
                        <CardContent className="p-6 pt-0">
-                          <div className="text-3xl font-black tracking-tighter text-zinc-100 mb-1">
+                          <div className="text-2xl font-black tracking-tighter text-zinc-100 mb-1">
                              {formatCurrency(totalRevenue)}
                           </div>
                           <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">Saldo disponível</p>
@@ -461,7 +461,7 @@ export default function Dashboard() {
                           <AlertCircle className="h-4 w-4 text-red-500" />
                        </CardHeader>
                        <CardContent className="p-6 pt-0">
-                          <div className="text-3xl font-black tracking-tighter text-zinc-100 mb-1">
+                          <div className="text-2xl font-black tracking-tighter text-zinc-100 mb-1">
                              {formatCurrency(totalDebt)}
                           </div>
                           <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">A PAGAR PARA O HUB</p>
@@ -474,7 +474,7 @@ export default function Dashboard() {
                           <CalendarDays className="h-4 w-4 text-zinc-600" />
                        </CardHeader>
                        <CardContent className="p-6 pt-0">
-                          <div className="text-3xl font-black tracking-tighter text-zinc-100 mb-1">{activeBookings}</div>
+                          <div className="text-2xl font-black tracking-tighter text-zinc-100 mb-1">{activeBookings}</div>
                           <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">{pendingBookingsCount} Pendentes</p>
                        </CardContent>
                     </Card>
@@ -485,7 +485,7 @@ export default function Dashboard() {
                           <Package className="h-4 w-4 text-zinc-600" />
                        </CardHeader>
                        <CardContent className="p-6 pt-0">
-                          <div className="text-3xl font-black tracking-tighter text-zinc-100 mb-1">{equipments?.length || 0}</div>
+                          <div className="text-2xl font-black tracking-tighter text-zinc-100 mb-1">{equipments?.length || 0}</div>
                           <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">Itens cadastrados</p>
                        </CardContent>
                     </Card>
@@ -496,7 +496,7 @@ export default function Dashboard() {
                           <AlertCircle className="h-4 w-4 text-destructive" />
                        </CardHeader>
                        <CardContent className="p-6 pt-0">
-                          <div className="text-3xl font-black tracking-tighter text-destructive mb-1">{maintenanceCount}</div>
+                          <div className="text-2xl font-black tracking-tighter text-destructive mb-1">{maintenanceCount}</div>
                           <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">Atenção requerida</p>
                        </CardContent>
                     </Card>
