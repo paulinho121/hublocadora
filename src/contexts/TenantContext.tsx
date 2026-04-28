@@ -104,11 +104,14 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
 
                     if (companyByEmail) {
                         currentCompany = companyByEmail as Company;
-                        // Sincronizar o owner_id da empresa e o company_id do perfil atual
-                        await supabase
+                        // Sincronizar o owner_id da empresa - Silencioso, não deve travar o fluxo
+                        supabase
                             .from('companies')
                             .update({ owner_id: user.id })
-                            .eq('id', companyByEmail.id);
+                            .eq('id', companyByEmail.id)
+                            .then(({ error }) => {
+                                if (error) console.warn('[TenantContext] Background sync failed (company owner):', error.message);
+                            });
                     }
                 }
             }
@@ -144,31 +147,30 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
             }
 
             // Sincronizar o perfil se encontrarmos uma empresa mas o perfil estiver desatualizado
+            // Sincronizar o perfil de forma segura
             if (currentCompany && (!currentProfile || !currentProfile.company_id)) {
-                // Se o perfil não existe, não podemos atualizar, mas o setCompany já resolve o dashboard
+                // Se o perfil existe, tentamos atualizar o company_id e o role
                 if (currentProfile) {
-                    const { data: updatedProfile } = await supabase
+                    supabase
                         .from('profiles')
                         .update({ 
                             company_id: currentCompany.id,
-                            role: currentBranchId ? 'rental_house' : currentProfile.role || 'rental_house'
+                            role: currentBranchId ? 'rental_house' : (currentProfile.role === 'client' ? 'rental_house' : currentProfile.role)
                         })
                         .eq('id', user.id)
-                        .select()
-                        .single();
-                    
-                    if (updatedProfile) {
-                        currentProfile = updatedProfile as Profile;
-                    }
+                        .then(({ error }) => {
+                            if (error) console.warn('[TenantContext] Background sync failed (profile company):', error.message);
+                        });
                 }
             }
 
+            // Garante que o estado seja definido mesmo se as sincronizações falharem
             setProfile(currentProfile);
             setCompany(currentCompany);
             setBranchId(currentBranchId);
             setBranch(currentBranch);
         } catch (error) {
-            console.error('[TenantContext] Critical Error:', error);
+            console.error('[TenantContext] Fatal error in fetchData:', error);
         } finally {
             setIsLoading(false);
         }
