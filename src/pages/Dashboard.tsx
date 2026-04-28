@@ -212,7 +212,19 @@ export default function Dashboard() {
 
   const totalRevenue = bookingsReceived
     ?.filter(b => b.status === 'completed' || b.status === 'approved')
-    .reduce((acc, curr) => acc + curr.total_amount, 0) || 0;
+    .reduce((acc, curr) => {
+      const fulfillmentId = (curr as any).delivery?.[0]?.fulfilling_company_id;
+      const isFulfiller = fulfillmentId === tenantId;
+      const isOwner = curr.company_id === tenantId;
+
+      if (isFulfiller && !isOwner) {
+        return acc + (curr.total_amount * 0.5);
+      } else if (isOwner && fulfillmentId && fulfillmentId !== tenantId) {
+        return acc + (curr.total_amount * 0.5);
+      } else {
+        return acc + curr.total_amount;
+      }
+    }, 0) || 0;
 
   const activeBookings = bookingsReceived?.filter(b => b.status === 'active' || b.status === 'approved').length || 0;
   const pendingBookingsCount = bookingsReceived?.filter(b => b.status === 'pending').length || 0;
@@ -413,14 +425,14 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                    <Card className="bg-zinc-900/50 border-zinc-900 rounded-3xl overflow-hidden hover:border-primary/20 transition-all group">
                       <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
-                         <CardTitle className="text-[11px] uppercase font-black text-zinc-500 tracking-[0.2em]">Receita Total</CardTitle>
+                         <CardTitle className="text-[11px] uppercase font-black text-zinc-500 tracking-[0.2em]">Ganhos Líquidos</CardTitle>
                          <TrendingUp className="h-4 w-4 text-emerald-500" />
                       </CardHeader>
                       <CardContent className="p-6 pt-0">
                          <div className="text-3xl font-black tracking-tighter text-zinc-100 mb-1">
                             {formatCurrency(totalRevenue)}
                          </div>
-                         <p className="text-[11px] text-zinc-600 font-bold uppercase tracking-widest">Baseado em itens entregues</p>
+                         <p className="text-[11px] text-zinc-600 font-bold uppercase tracking-widest">Já aplicado split de 50% em sublocações</p>
                       </CardContent>
                    </Card>
 
@@ -487,7 +499,19 @@ export default function Dashboard() {
                                       </div>
                                    </div>
                                    <div className="text-right shrink-0">
-                                      <div className="text-sm font-black text-zinc-100">{formatCurrency(booking.total_amount)}</div>
+                                      <div className="text-sm font-black text-zinc-100">
+                                         {(() => {
+                                            const fulfillmentId = (booking as any).delivery?.[0]?.fulfilling_company_id;
+                                            const isFulfiller = fulfillmentId === tenantId;
+                                            const isOwner = booking.company_id === tenantId;
+                                            let amount = booking.total_amount;
+
+                                            if (isFulfiller && !isOwner) amount = amount * 0.5;
+                                            else if (isOwner && fulfillmentId && fulfillmentId !== tenantId) amount = amount * 0.5;
+                                            
+                                            return formatCurrency(amount);
+                                         })()}
+                                      </div>
                                       <Badge variant="outline" className="text-[8px] uppercase font-black h-4 px-1 border-zinc-800 text-zinc-500">{booking.status}</Badge>
                                    </div>
                                 </div>
@@ -562,7 +586,19 @@ export default function Dashboard() {
                                 <p className="text-xs font-bold text-zinc-400">{format(new Date(booking.start_date), "dd/MM")} - {format(new Date(booking.end_date), "dd/MM")}</p>
                              </div>
                              <div className="text-right">
-                                <div className="text-lg font-black text-zinc-100">{formatCurrency(booking.total_amount)}</div>
+                                <div className="text-lg font-black text-zinc-100">
+                                   {(() => {
+                                      const fulfillmentId = (booking as any).delivery?.[0]?.fulfilling_company_id;
+                                      const isFulfiller = fulfillmentId === tenantId;
+                                      const isOwner = booking.company_id === tenantId;
+                                      let amount = booking.total_amount;
+
+                                      if (isFulfiller && !isOwner) amount = amount * 0.5;
+                                      else if (isOwner && fulfillmentId && fulfillmentId !== tenantId) amount = amount * 0.5;
+                                      
+                                      return formatCurrency(amount);
+                                   })()}
+                                </div>
                                 <Badge className={`text-[8px] uppercase font-black tracking-tighter h-4 ${
                                    booking.status === 'approved' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 
                                    booking.status === 'pending' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : ''
