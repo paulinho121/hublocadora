@@ -27,7 +27,7 @@ export class EquipmentService {
                 company:companies(*)
             `)
             .eq('id', id)
-            .single();
+            .maybeSingle();
 
         if (error) throw error;
         return data;
@@ -44,11 +44,10 @@ export class EquipmentService {
                 company_id: companyId,
                 status: equipment.status || 'available'
             }])
-            .select()
-            .single();
+            .select();
 
         if (error) throw error;
-        return data as Equipment;
+        return data?.[0] as Equipment;
     }
 
     /**
@@ -59,11 +58,10 @@ export class EquipmentService {
             .from('equipments')
             .update(updates)
             .eq('id', id)
-            .select()
-            .single();
+            .select();
 
         if (error) throw error;
-        return data as Equipment;
+        return data?.[0] as Equipment;
     }
 
     /**
