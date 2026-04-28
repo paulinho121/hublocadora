@@ -226,6 +226,19 @@ export default function Dashboard() {
       }
     }, 0) || 0;
 
+  const totalDebt = bookingsReceived
+    ?.filter(b => b.status === 'completed' || b.status === 'approved')
+    .reduce((acc, curr) => {
+      const fulfillmentId = (curr as any).delivery?.[0]?.fulfilling_company_id;
+      const isOwner = curr.company_id === tenantId;
+      
+      // Se sou o dono mas outra empresa entregou, eu devo 50% do valor para ela
+      if (isOwner && fulfillmentId && fulfillmentId !== tenantId) {
+        return acc + (curr.total_amount * 0.5);
+      }
+      return acc;
+    }, 0) || 0;
+
   const activeBookings = bookingsReceived?.filter(b => b.status === 'active' || b.status === 'approved').length || 0;
   const pendingBookingsCount = bookingsReceived?.filter(b => b.status === 'pending').length || 0;
   const maintenanceCount = equipments?.filter(e => e.status === 'maintenance').length || 0;
@@ -422,8 +435,8 @@ export default function Dashboard() {
                 </header>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                   <Card className="bg-zinc-900/50 border-zinc-900 rounded-3xl overflow-hidden hover:border-primary/20 transition-all group">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+                   <Card className="bg-zinc-900/50 border-zinc-900 rounded-3xl overflow-hidden hover:border-emerald-500/20 transition-all group">
                       <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
                          <CardTitle className="text-[11px] uppercase font-black text-zinc-500 tracking-[0.2em]">Ganhos Líquidos</CardTitle>
                          <TrendingUp className="h-4 w-4 text-emerald-500" />
@@ -432,7 +445,20 @@ export default function Dashboard() {
                          <div className="text-3xl font-black tracking-tighter text-zinc-100 mb-1">
                             {formatCurrency(totalRevenue)}
                          </div>
-                         <p className="text-[11px] text-zinc-600 font-bold uppercase tracking-widest">Já aplicado split de 50% em sublocações</p>
+                         <p className="text-[11px] text-zinc-600 font-bold uppercase tracking-widest">Saldo disponível</p>
+                      </CardContent>
+                   </Card>
+
+                   <Card className="bg-zinc-900/50 border-zinc-900 rounded-3xl overflow-hidden hover:border-red-500/20 transition-all group">
+                      <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
+                         <CardTitle className="text-[11px] uppercase font-black text-zinc-500 tracking-[0.2em]">Débitos Operacionais</CardTitle>
+                         <AlertCircle className="h-4 w-4 text-red-500" />
+                      </CardHeader>
+                      <CardContent className="p-6 pt-0">
+                         <div className="text-3xl font-black tracking-tighter text-zinc-100 mb-1">
+                            {formatCurrency(totalDebt)}
+                         </div>
+                         <p className="text-[11px] text-zinc-600 font-bold uppercase tracking-widest">A pagar para parceiros</p>
                       </CardContent>
                    </Card>
 
