@@ -349,8 +349,8 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                             </div>
                                                           )}
                                                           
-                                                          {/* Action Panel - Habilitado para o Master OU para a Branch dona da entrega */}
-                                                          {(delivery.origin_branch_id === branchId || !isBranchManager) ? (
+                                                          {/* Action Panel - Habilitado para o Master OU para a Branch dona da entrega OU para o Fornecedor Externo */}
+                                                          {(delivery.fulfilling_company_id === tenantId || delivery.origin_branch_id === branchId || !isBranchManager) ? (
                                                               <div className="bg-zinc-900/50 p-6 rounded-3xl border border-zinc-800 space-y-6">
                                                                   {/* Serial Number Input for Picking stage */}
                                                                   {delivery.status === 'picking' && (
