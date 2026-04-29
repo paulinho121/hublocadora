@@ -932,9 +932,18 @@ export default function Dashboard() {
                   }`}
                 >
                   <div>
-                    <p className="font-black uppercase tracking-tighter text-zinc-100">{opt.name}</p>
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="font-black uppercase tracking-tighter text-zinc-100">{opt.name}</p>
+                      <span className={`text-[8px] px-2 py-0.5 rounded-full font-black uppercase tracking-widest ${
+                        opt.type === 'branch' 
+                          ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' 
+                          : 'bg-purple-500/10 text-purple-500 border border-purple-500/20'
+                      }`}>
+                        {opt.type === 'branch' ? 'Filial' : 'Sub-locadora'}
+                      </span>
+                    </div>
                     {(opt.city || opt.state) && (
-                      <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">
+                      <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">
                         {opt.city}{opt.state ? ` - ${opt.state}` : ''}
                       </p>
                     )}
