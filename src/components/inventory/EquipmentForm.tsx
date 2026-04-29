@@ -28,6 +28,7 @@ const equipmentSchema = z.object({
   stock_quantity: z.coerce.number().min(1, 'Quantidade deve ser pelo menos 1'),
   location_base: z.string().min(2, 'A Cidade / Base Logística é obrigatória'),
   state_uf: z.string().length(2, 'Insira a UF do estado, ex: SP'),
+  subrental_company_id: z.string().nullable().optional(),
 });
 
 const CITY_STATE_MAP: Record<string, string> = {
@@ -48,6 +49,7 @@ interface EquipmentFormValues {
   stock_quantity: number;
   location_base: string;
   state_uf: string;
+  subrental_company_id?: string | null;
 }
 
 interface EquipmentFormProps {
@@ -60,6 +62,7 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
   const [images, setImages] = useState<string[]>(equipment?.images || []);
   const [uploading, setUploading] = useState(false);
   const [isAiGenerating, setIsAiGenerating] = useState(false);
+  const [externalCompanies, setExternalCompanies] = useState<any[]>([]);
 
   const createMutation = useCreateEquipment(companyId);
   const updateMutation = useUpdateEquipment();
@@ -91,6 +94,7 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
       stock_quantity: equipment?.stock_quantity || 1,
       location_base: equipment?.location_base || (equipment?.features as any)?.city || (equipment?.features as any)?.location || '',
       state_uf: equipment?.state_uf || (equipment?.features as any)?.state || '',
+      subrental_company_id: equipment?.subrental_company_id || '',
     },
   });
   
@@ -105,7 +109,19 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
         setBranchStock(stockMap);
       });
     }
-  }, [equipment?.id]);
+
+    // Carrega empresas externas para o select de sub-locação
+    const fetchCompanies = async () => {
+      const { data } = await supabase
+        .from('companies')
+        .select('id, name')
+        .neq('id', companyId)
+        .eq('status', 'active')
+        .order('name');
+      if (data) setExternalCompanies(data);
+    };
+    fetchCompanies();
+  }, [equipment?.id, companyId]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -157,10 +173,11 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
 
   const onSubmit = async (values: EquipmentFormValues) => {
     try {
-      const { location_base, state_uf, ...dbValues } = values;
+      const { location_base, state_uf, subrental_company_id, ...dbValues } = values;
       const payload = {
         ...dbValues,
         company_id: companyId,
+        subrental_company_id: subrental_company_id || null,
         images,
         location_base,
         state_uf,
@@ -284,6 +301,25 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
             <option value="unavailable">Indisponível</option>
           </select>
         </div>
+      </div>
+
+      <div className="space-y-2 p-4 bg-zinc-900/30 border border-zinc-800 rounded-2xl">
+        <Label htmlFor="subrental_company_id" className="text-purple-400 font-black uppercase text-[10px] tracking-widest">Empresa Parceira (Sub-locação Externa)</Label>
+        <select 
+          id="subrental_company_id" 
+          {...register('subrental_company_id')}
+          className="flex h-10 w-full rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500/20"
+        >
+          <option value="">Nenhuma (Equipamento Próprio)</option>
+          {externalCompanies.map((comp) => (
+            <option key={comp.id} value={comp.id}>
+              {comp.name}
+            </option>
+          ))}
+        </select>
+        <p className="text-[10px] text-zinc-500 font-medium">
+          Selecione se este equipamento pertence ou é administrado por uma locadora parceira (Tenant externo).
+        </p>
       </div>
 
       <div className="grid grid-cols-1 gap-4">
