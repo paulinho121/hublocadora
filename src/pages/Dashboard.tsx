@@ -133,19 +133,24 @@ export default function Dashboard() {
       })
       .subscribe();
 
-    // Listener para NOVAS ATRIBUIÇÕES (Sub-locadora)
+    // Listener para NOVAS ATRIBUIÇÕES (Sub-locadora ou Filial)
     const deliveriesChannel = supabase
       .channel('deliveries_assignment')
       .on('postgres_changes', {
         event: 'UPDATE',
         schema: 'public',
         table: 'deliveries',
-        filter: `fulfilling_company_id=eq.${tenantId}`
+        filter: isBranchManager && branchId ? `origin_branch_id=eq.${branchId}` : `fulfilling_company_id=eq.${tenantId}`
       }, (payload) => {
         // Se a sub-locadora acabou de ser atribuída (seja pendente ou já aceita)
+        // Para filial (isBranchManager), o ID vai para origin_branch_id. Para sub, fulfilling_company_id.
+        const isNewFulfiller = isBranchManager 
+          ? (payload.old.origin_branch_id === null || payload.old.origin_branch_id !== branchId)
+          : (payload.old.fulfilling_company_id === null || payload.old.fulfilling_company_id !== tenantId);
+
         if (
           (payload.new.subrental_status === 'accepted' || payload.new.subrental_status === 'pending') && 
-          (payload.old.fulfilling_company_id === null || payload.old.fulfilling_company_id !== tenantId)
+          isNewFulfiller
         ) {
           console.log('Novo Pedido Atribuído para Sublocação:', payload);
           
@@ -315,7 +320,7 @@ export default function Dashboard() {
         const isBranch = fulfillmentModal?.selectedSubrentalType === 'branch';
         
         await new Promise(r => setTimeout(r, 1000));
-        const { error } = await supabase
+        const { data: updatedDelivery, error } = await supabase
           .from('deliveries')
           .update({ 
             fulfilling_company_id: isBranch ? null : fulfillCompanyId,
@@ -323,16 +328,31 @@ export default function Dashboard() {
             subrental_status: isBranch ? 'accepted' : 'pending',  
             status: 'pending'              
           })
-          .eq('booking_id', id);
+          .eq('booking_id', id)
+          .select();
         
         if (error) {
            console.error('Erro ao atribuir sub-locadora:', error);
-           alert('Falha ao registrar a sub-locação: ' + error.message);
-        } else {
-           // Invalidate again to ensure the frontend sees the new deliveries state!
-           queryClient.invalidateQueries({ queryKey: ['bookings'] });
-           queryClient.invalidateQueries({ queryKey: ['deliveries'] });
+           alert('Falha ao registrar a logística: ' + error.message);
+        } else if (updatedDelivery && updatedDelivery.length === 0) {
+           // O gatilho do banco pode ter falhado em criar a linha, então inserimos forçadamente
+           const { error: insertError } = await supabase
+              .from('deliveries')
+              .insert({
+                booking_id: id,
+                fulfilling_company_id: isBranch ? null : fulfillCompanyId,
+                origin_branch_id: isBranch ? fulfillCompanyId : null,
+                subrental_status: isBranch ? 'accepted' : 'pending',  
+                status: 'pending'
+              });
+           if (insertError) {
+              alert('Falha ao criar registro de logística: ' + insertError.message);
+           }
         }
+        
+        // Invalidate again to ensure the frontend sees the new deliveries state!
+        queryClient.invalidateQueries({ queryKey: ['bookings'] });
+        queryClient.invalidateQueries({ queryKey: ['deliveries'] });
       }
     } catch (error) {
       console.error('Erro ao atualizar status:', error);
