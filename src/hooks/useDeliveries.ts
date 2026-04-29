@@ -36,8 +36,7 @@ export function useDeliveries(options?: {
                 // Mas as RLS do banco já costumam cuidar disso.
             }
             
-            // Excluir entregas ainda aguardando aceite da sub-locadora
-            query = query.or('subrental_status.is.null,subrental_status.eq.accepted');
+            // All deliveries matching RLS and options should be returned so sub-locadoras can see 'pending' ones and accept them.
             
             const { data, error } = await query.order('updated_at', { ascending: false });
 
