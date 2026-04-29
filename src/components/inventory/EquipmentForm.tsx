@@ -17,6 +17,7 @@ import { AIService } from '@/services/AIService';
 import { EquipmentService } from '@/services/EquipmentService';
 import { useTenant } from '@/contexts/TenantContext';
 import { Sparkles, Wand2 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 const equipmentSchema = z.object({
   name: z.string().min(3, 'Nome deve ter pelo menos 3 caracteres'),
