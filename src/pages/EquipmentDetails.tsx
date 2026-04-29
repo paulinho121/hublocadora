@@ -197,8 +197,8 @@ export default function EquipmentDetails() {
           <div className="flex flex-col">
             <div className="mb-8">
               <div className="flex items-center gap-2 mb-4">
-                <span className={`px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest ${conditionColors[equipment.condition]}`}>
-                  {conditionLabels[equipment.condition]}
+                <span className={`px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest ${conditionColors[equipment.condition as keyof typeof conditionColors] || 'bg-zinc-800 text-zinc-400'}`}>
+                  {conditionLabels[equipment.condition as keyof typeof conditionLabels] || 'N/A'}
                 </span>
                 <span className="text-zinc-500">•</span>
                 <div className="flex items-center gap-1 text-zinc-400 text-xs">
@@ -318,7 +318,7 @@ export default function EquipmentDetails() {
                        <p className="font-bold text-zinc-300">{String(value)}</p>
                     </div>
                   ))}
-                  {!equipment.features || Object.keys(equipment.features).length === 0 && (
+                  {(!equipment.features || Object.keys(equipment.features).length === 0) && (
                      <p className="text-zinc-500 text-sm col-span-2">Consulte a locadora para especificações completas de montagem e acessórios.</p>
                   )}
                </div>
