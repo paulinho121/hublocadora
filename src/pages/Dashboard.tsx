@@ -142,8 +142,11 @@ export default function Dashboard() {
         table: 'deliveries',
         filter: `fulfilling_company_id=eq.${tenantId}`
       }, (payload) => {
-        // Se a sub-locadora acabou de ser atribuída e está aceita
-        if (payload.new.subrental_status === 'accepted' && (payload.old.fulfilling_company_id === null || payload.old.fulfilling_company_id !== tenantId)) {
+        // Se a sub-locadora acabou de ser atribuída (seja pendente ou já aceita)
+        if (
+          (payload.new.subrental_status === 'accepted' || payload.new.subrental_status === 'pending') && 
+          (payload.old.fulfilling_company_id === null || payload.old.fulfilling_company_id !== tenantId)
+        ) {
           console.log('Novo Pedido Atribuído para Sublocação:', payload);
           
           try {
@@ -151,8 +154,15 @@ export default function Dashboard() {
              audio.play().catch(e => console.log('Audio autoplay blocked', e));
           } catch(e) {}
 
+          queryClient.invalidateQueries({ queryKey: ['bookings'] });
           queryClient.invalidateQueries({ queryKey: ['deliveries'] });
-          setActiveTab('logistics'); // Direciona para logística
+          
+          if (payload.new.subrental_status === 'pending') {
+             setActiveTab('bookings'); // Vai pra aba de pedidos aceitar
+          } else {
+             setActiveTab('logistics'); // Direciona para logística
+          }
+          
           setShowLiveNotification(true);
           setTimeout(() => setShowLiveNotification(false), 8000);
         }
@@ -308,15 +318,21 @@ export default function Dashboard() {
         const { error } = await supabase
           .from('deliveries')
           .update({ 
-            // fulfilling_company_id é SEMPRE o ID de quem vai entregar (branch ou externa)
             fulfilling_company_id: fulfillCompanyId,
-            // origin_branch_id só é preenchido se for uma filial interna
             origin_branch_id: isBranch ? fulfillCompanyId : null,
             subrental_status: isBranch ? 'accepted' : 'pending',  
             status: 'pending'              
           })
           .eq('booking_id', id);
-        if (error) console.error('Erro ao atribuir sub-locadora:', error);
+        
+        if (error) {
+           console.error('Erro ao atribuir sub-locadora:', error);
+           alert('Falha ao registrar a sub-locação: ' + error.message);
+        } else {
+           // Invalidate again to ensure the frontend sees the new deliveries state!
+           queryClient.invalidateQueries({ queryKey: ['bookings'] });
+           queryClient.invalidateQueries({ queryKey: ['deliveries'] });
+        }
       }
     } catch (error) {
       console.error('Erro ao atualizar status:', error);
