@@ -212,20 +212,39 @@ export default function Dashboard() {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
   };
 
+  // Helper robusto para extrair o ID de quem entrega (Sub-locadora ou Filial)
+  const getFulfillmentId = (booking: any) => {
+    if (!booking) return null;
+    const delivery = booking.delivery || booking.deliveries;
+    if (!delivery) return null;
+    
+    // Se for um array (padrão PostgREST para joins 1:N)
+    if (Array.isArray(delivery)) {
+      return delivery[0]?.fulfilling_company_id;
+    }
+    
+    // Se for um objeto (padrão para joins 1:1)
+    return (delivery as any).fulfilling_company_id;
+  };
+
   const totalRevenue = bookingsReceived
-    ?.filter(b => b.status === 'completed' || b.status === 'approved')
+    ?.filter(b => b.status === 'completed' || b.status === 'approved' || b.status === 'active')
     .reduce((acc, curr) => {
-      const fulfillmentId = (curr as any).delivery?.[0]?.fulfilling_company_id;
+      const fulfillmentId = getFulfillmentId(curr);
       const isFulfiller = fulfillmentId === tenantId;
       const isOwner = curr.company_id === tenantId;
 
       if (isFulfiller && !isOwner) {
+        // Sou sub-locadora: ganho 50% do total
         return acc + (curr.total_amount * 0.5);
       } else if (isOwner && fulfillmentId && fulfillmentId !== tenantId) {
+        // Sou o dono, mas terceirizei: fico com 50% (comissão)
         return acc + (curr.total_amount * 0.5);
-      } else {
+      } else if (isOwner) {
+        // Sou o dono e eu mesmo entreguei: ganho 100%
         return acc + curr.total_amount;
       }
+      return acc;
     }, 0) || 0;
 
   const recentOrders = [...(bookingsReceived || []), ...(bookingsRequested || [])]
@@ -233,9 +252,9 @@ export default function Dashboard() {
     .slice(0, 10);
 
   const totalDebt = bookingsReceived
-    ?.filter(b => b.status === 'completed' || b.status === 'approved')
+    ?.filter(b => b.status === 'completed' || b.status === 'approved' || b.status === 'active')
     .reduce((acc, curr) => {
-      const fulfillmentId = (curr as any).delivery?.[0]?.fulfilling_company_id;
+      const fulfillmentId = getFulfillmentId(curr);
       const isOwner = curr.company_id === tenantId;
       
       // Se sou o dono mas outra empresa entregou, eu devo 50% do valor para ela
@@ -515,7 +534,7 @@ export default function Dashboard() {
                            <div className="divide-y divide-zinc-900/50">
                               {recentOrders.map((booking: any) => {
                                 const isRequested = booking.renter_id === user?.id;
-                                const fulfillmentId = (booking as any).delivery?.[0]?.fulfilling_company_id;
+                                const fulfillmentId = getFulfillmentId(booking);
                                 const isFulfiller = fulfillmentId === tenantId;
                                 const isOwner = booking.company_id === tenantId;
                                 
@@ -642,7 +661,7 @@ export default function Dashboard() {
                              <div className="text-right">
                                 <div className="text-lg font-black text-zinc-100">
                                    {(() => {
-                                      const fulfillmentId = (booking as any).delivery?.[0]?.fulfilling_company_id;
+                                      const fulfillmentId = getFulfillmentId(booking);
                                       const isFulfiller = fulfillmentId === tenantId;
                                       const isOwner = booking.company_id === tenantId;
                                       let amount = booking.total_amount;
