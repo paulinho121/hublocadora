@@ -428,6 +428,29 @@ export default function Dashboard() {
       }
     });
     
+    // 3. Adiciona a empresa sub-locadora consignada (se houver)
+    const subrentalCompanyId = Array.isArray(booking.equipment) 
+      ? booking.equipment[0]?.subrental_company_id 
+      : booking.equipment?.subrental_company_id;
+      
+    if (subrentalCompanyId) {
+      const { data: subComp } = await supabase
+        .from('companies')
+        .select('id, name, address_city, address_state')
+        .eq('id', subrentalCompanyId)
+        .single();
+        
+      if (subComp && !options.some(o => o.id === subComp.id)) {
+        options.push({
+          id: subComp.id,
+          name: subComp.name,
+          city: (subComp as any).address_city,
+          state: (subComp as any).address_state,
+          type: 'external'
+        });
+      }
+    }
+    
     if (options.length > 0) {
       setFulfillmentModal({
         open: true,
