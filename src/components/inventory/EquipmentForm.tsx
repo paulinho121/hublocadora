@@ -116,7 +116,7 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
         .from('companies')
         .select('id, name')
         .neq('id', companyId)
-        .eq('status', 'active')
+        .in('status', ['active', 'approved'])
         .order('name');
       if (data) setExternalCompanies(data);
     };
