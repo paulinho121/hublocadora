@@ -366,51 +366,72 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                                 </div>
                                                                             ) : (
                                                                                 <div className="space-y-6">
-                                                                                    {/* Serial Input */}
-                                                                                    {delivery.status === 'picking' && (
-                                                                                        <div className="space-y-3">
-                                                                                            <label className="text-[9px] font-black uppercase text-zinc-600 tracking-widest flex items-center gap-2 ml-1">
-                                                                                                <Hash className="h-3.5 w-3.5" /> Identificação Serial
-                                                                                            </label>
-                                                                                            <Input 
-                                                                                                placeholder="DIGITE O SN DO EQUIPAMENTO"
-                                                                                                className="bg-black/50 border-white/5 rounded-xl h-14 text-center text-xs font-black tracking-widest focus:border-primary/50 transition-all"
-                                                                                                value={serialNumbers[delivery.id] || delivery.serial_number || ''}
-                                                                                                onChange={(e) => setSerialNumbers(prev => ({ ...prev, [delivery.id]: e.target.value.toUpperCase() }))}
-                                                                                            />
-                                                                                        </div>
-                                                                                    )}
+                                                                                    {(() => {
+                                                                                        const fulfillmentId = delivery.fulfilling_company_id || delivery.origin_branch_id;
+                                                                                        const isFulfiller = isBranchManager 
+                                                                                            ? delivery.origin_branch_id === branchId 
+                                                                                            : fulfillmentId === tenantId;
+                                                                                        
+                                                                                        if (isFulfiller) {
+                                                                                            return (
+                                                                                                <>
+                                                                                                    {/* Serial Input */}
+                                                                                                    {delivery.status === 'picking' && (
+                                                                                                        <div className="space-y-3">
+                                                                                                            <label className="text-[9px] font-black uppercase text-zinc-600 tracking-widest flex items-center gap-2 ml-1">
+                                                                                                                <Hash className="h-3.5 w-3.5" /> Identificação Serial
+                                                                                                            </label>
+                                                                                                            <Input 
+                                                                                                                placeholder="DIGITE O SN DO EQUIPAMENTO"
+                                                                                                                className="bg-black/50 border-white/5 rounded-xl h-14 text-center text-xs font-black tracking-widest focus:border-primary/50 transition-all"
+                                                                                                                value={serialNumbers[delivery.id] || delivery.serial_number || ''}
+                                                                                                                onChange={(e) => setSerialNumbers(prev => ({ ...prev, [delivery.id]: e.target.value.toUpperCase() }))}
+                                                                                                            />
+                                                                                                        </div>
+                                                                                                    )}
 
-                                                                                    {/* Token Input for Confirmation */}
-                                                                                    {delivery.status === 'shipped' && (
-                                                                                        <div className="space-y-3">
-                                                                                            <label className="text-[9px] font-black uppercase text-emerald-500 tracking-widest flex items-center gap-2 ml-1">
-                                                                                                <ShieldAlert className="h-3.5 w-3.5" /> Validar Recebimento
-                                                                                            </label>
-                                                                                            <Input 
-                                                                                                placeholder="----"
-                                                                                                maxLength={4}
-                                                                                                className="bg-black/50 border-emerald-500/20 rounded-xl h-16 text-center text-3xl font-black tracking-[0.5em] focus:border-emerald-500/50 transition-all text-white"
-                                                                                                value={tokenInputs[delivery.id] || ''}
-                                                                                                onChange={(e) => setTokenInputs(prev => ({ ...prev, [delivery.id]: e.target.value.replace(/\D/g, '') }))}
-                                                                                            />
-                                                                                            <p className="text-[8px] text-zinc-600 text-center uppercase font-bold">Solicite o token de 4 dígitos ao cliente</p>
-                                                                                        </div>
-                                                                                    )}
+                                                                                                    {/* Token Input for Confirmation */}
+                                                                                                    {delivery.status === 'shipped' && (
+                                                                                                        <div className="space-y-3">
+                                                                                                            <label className="text-[9px] font-black uppercase text-emerald-500 tracking-widest flex items-center gap-2 ml-1">
+                                                                                                                <ShieldAlert className="h-3.5 w-3.5" /> Validar Recebimento
+                                                                                                            </label>
+                                                                                                            <Input 
+                                                                                                                placeholder="----"
+                                                                                                                maxLength={4}
+                                                                                                                className="bg-black/50 border-emerald-500/20 rounded-xl h-16 text-center text-3xl font-black tracking-[0.5em] focus:border-emerald-500/50 transition-all text-white"
+                                                                                                                value={tokenInputs[delivery.id] || ''}
+                                                                                                                onChange={(e) => setTokenInputs(prev => ({ ...prev, [delivery.id]: e.target.value.replace(/\D/g, '') }))}
+                                                                                                            />
+                                                                                                            <p className="text-[8px] text-zinc-600 text-center uppercase font-bold">Solicite o token de 4 dígitos ao cliente</p>
+                                                                                                        </div>
+                                                                                                    )}
 
-                                                                                    <Button 
-                                                                                        onClick={() => handleNextStatus(delivery)}
-                                                                                        disabled={updatingId === delivery.id}
-                                                                                        className="w-full bg-white text-black hover:bg-zinc-200 font-black uppercase tracking-[0.2em] h-16 rounded-2xl shadow-[0_20px_50px_rgba(255,255,255,0.1)] transition-all active:scale-[0.98]"
-                                                                                    >
-                                                                                        {updatingId === delivery.id ? (
-                                                                                            <Loader2 className="h-5 w-5 animate-spin" />
-                                                                                        ) : (
-                                                                                            <span className="flex items-center gap-3">
-                                                                                                {getNextActionLabel(delivery.status)} <ArrowRight className="h-4 w-4" />
-                                                                                            </span>
-                                                                                        )}
-                                                                                    </Button>
+                                                                                                    <Button 
+                                                                                                        onClick={() => handleNextStatus(delivery)}
+                                                                                                        disabled={updatingId === delivery.id}
+                                                                                                        className="w-full bg-white text-black hover:bg-zinc-200 font-black uppercase tracking-[0.2em] h-16 rounded-2xl shadow-[0_20px_50px_rgba(255,255,255,0.1)] transition-all active:scale-[0.98]"
+                                                                                                    >
+                                                                                                        {updatingId === delivery.id ? (
+                                                                                                            <Loader2 className="h-5 w-5 animate-spin" />
+                                                                                                        ) : (
+                                                                                                            <span className="flex items-center gap-3">
+                                                                                                                {getNextActionLabel(delivery.status)} <ArrowRight className="h-4 w-4" />
+                                                                                                            </span>
+                                                                                                        )}
+                                                                                                    </Button>
+                                                                                                </>
+                                                                                            );
+                                                                                        }
+                                                                                        
+                                                                                        return (
+                                                                                            <div className="bg-zinc-900/50 border border-white/5 rounded-2xl p-6 text-center">
+                                                                                                <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest leading-relaxed">
+                                                                                                    Aguardando {delivery.fulfilling_company_id ? 'Fornecedor' : 'Filial'}
+                                                                                                </p>
+                                                                                            </div>
+                                                                                        );
+                                                                                    })()}
                                                                                 </div>
                                                                             )}
                                                                         </div>
