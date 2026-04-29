@@ -305,7 +305,9 @@ export default function Dashboard() {
         const { error } = await supabase
           .from('deliveries')
           .update({ 
-            fulfilling_company_id: isBranch ? (tenantId || undefined) : fulfillCompanyId,
+            // fulfilling_company_id é SEMPRE o ID de quem vai entregar (branch ou externa)
+            fulfilling_company_id: fulfillCompanyId,
+            // origin_branch_id só é preenchido se for uma filial interna
             origin_branch_id: isBranch ? fulfillCompanyId : null,
             subrental_status: 'accepted',  
             status: 'pending'              
