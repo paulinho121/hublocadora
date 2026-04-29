@@ -335,11 +335,15 @@ export default function Dashboard() {
       .eq('equipment_id', equipmentId)
       .gt('quantity', 0);
     
+    const equipmentName = Array.isArray(booking.equipment) 
+      ? booking.equipment[0]?.name 
+      : booking.equipment?.name;
+
     // 2. Busca outras locadoras (externas) que têm este item (pelo nome)
     const { data: eqData } = await supabase
       .from('equipments')
       .select('company_id, companies(id, name, address_city, address_state)')
-      .eq('name', booking.equipment.name)
+      .eq('name', equipmentName)
       .neq('company_id', booking.company_id);
     
     const options: Array<{ id: string; name: string; city?: string; state?: string; type: 'branch' | 'external' }> = [];
