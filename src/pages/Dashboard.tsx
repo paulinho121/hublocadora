@@ -212,12 +212,15 @@ export default function Dashboard() {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
   };
 
-  // Helper robusto para extrair o ID de quem entrega (Sub-locadora ou Filial)
-  const getFulfillmentId = (booking: any) => {
+  const getDelivery = (booking: any) => {
     const delivery = booking.delivery || booking.deliveries;
     if (!delivery) return null;
+    return Array.isArray(delivery) ? delivery[0] : delivery;
+  };
 
-    const d = Array.isArray(delivery) ? delivery[0] : delivery;
+  // Helper robusto para extrair o ID de quem entrega (Sub-locadora ou Filial)
+  const getFulfillmentId = (booking: any) => {
+    const d = getDelivery(booking);
     if (!d) return null;
 
     // Retorna ou o ID da empresa externa ou o ID da filial interna
@@ -309,7 +312,7 @@ export default function Dashboard() {
             fulfilling_company_id: fulfillCompanyId,
             // origin_branch_id só é preenchido se for uma filial interna
             origin_branch_id: isBranch ? fulfillCompanyId : null,
-            subrental_status: 'accepted',  
+            subrental_status: isBranch ? 'accepted' : 'pending',  
             status: 'pending'              
           })
           .eq('booking_id', id);
@@ -321,6 +324,21 @@ export default function Dashboard() {
     } finally {
       setUpdatingId(null);
       setFulfillmentModal(null);
+    }
+  };
+
+  const handleAcceptSubrental = async (deliveryId: string) => {
+    try {
+      setUpdatingId(deliveryId);
+      const { error } = await supabase.from('deliveries').update({ subrental_status: 'accepted' }).eq('id', deliveryId);
+      if (error) throw error;
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['deliveries'] });
+    } catch (e) {
+      console.error(e);
+      alert('Não foi possível aceitar a sub-locação.');
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -696,19 +714,50 @@ export default function Dashboard() {
                           </div>
                        )}
 
-                       {bookingFilter === 'received' && booking.status === 'pending' && (
-                          <div className="px-6 py-4 bg-zinc-900/50 flex justify-end gap-3 border-t border-zinc-800">
-                             <Button variant="ghost" size="sm" onClick={() => handleUpdateStatus(booking.id, 'rejected')} className="text-destructive font-black uppercase text-[10px] hover:bg-destructive/5 tracking-widest">Recusar</Button>
-                             <Button 
-                               size="sm" 
-                               disabled={updatingId === booking.id}
-                               onClick={() => handleApproveBooking(booking)} 
-                               className="bg-emerald-600 hover:bg-emerald-500 font-black uppercase text-[10px] tracking-widest rounded-lg px-6"
-                             >
-                               {updatingId === booking.id ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Aprovar agora'}
-                             </Button>
-                          </div>
-                        )}
+                       {(() => {
+                           const d = getDelivery(booking);
+                           const fulfillmentId = getFulfillmentId(booking);
+                           const isFulfiller = fulfillmentId === tenantId;
+                           const isOwner = booking.company_id === tenantId;
+                           const isSubrentalPending = d?.subrental_status === 'pending' && isFulfiller && !isOwner;
+                           
+                           if (isSubrentalPending) {
+                              return (
+                                 <div className="px-6 py-4 bg-amber-500/10 flex justify-end gap-3 border-t border-amber-500/20">
+                                    <div className="flex-1 flex items-center px-2">
+                                       <p className="text-[10px] text-amber-500 font-black uppercase tracking-widest">Aguardando seu aceite</p>
+                                    </div>
+                                    <Button variant="ghost" size="sm" onClick={() => handleUpdateStatus(booking.id, 'rejected')} className="text-destructive font-black uppercase text-[10px] hover:bg-destructive/5 tracking-widest">Recusar</Button>
+                                    <Button 
+                                      size="sm" 
+                                      disabled={updatingId === d.id}
+                                      onClick={() => handleAcceptSubrental(d.id)} 
+                                      className="bg-amber-500 text-black hover:bg-amber-400 font-black uppercase text-[10px] tracking-widest rounded-lg px-6"
+                                    >
+                                      {updatingId === d.id ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Aceitar Sub-locação'}
+                                    </Button>
+                                 </div>
+                              );
+                           }
+
+                           if (bookingFilter === 'received' && booking.status === 'pending') {
+                              return (
+                                 <div className="px-6 py-4 bg-zinc-900/50 flex justify-end gap-3 border-t border-zinc-800">
+                                    <Button variant="ghost" size="sm" onClick={() => handleUpdateStatus(booking.id, 'rejected')} className="text-destructive font-black uppercase text-[10px] hover:bg-destructive/5 tracking-widest">Recusar</Button>
+                                    <Button 
+                                      size="sm" 
+                                      disabled={updatingId === booking.id}
+                                      onClick={() => handleApproveBooking(booking)} 
+                                      className="bg-emerald-600 hover:bg-emerald-500 font-black uppercase text-[10px] tracking-widest rounded-lg px-6"
+                                    >
+                                      {updatingId === booking.id ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Aprovar agora'}
+                                    </Button>
+                                 </div>
+                              );
+                           }
+                           
+                           return null;
+                        })()}
                     </Card>
                   ))}
                 </div>
