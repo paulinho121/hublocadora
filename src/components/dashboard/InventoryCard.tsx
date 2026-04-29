@@ -1,5 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Equipment } from "@/types/database";
 import { Edit2, Trash2, Package, Info, Zap, ZapOff, Clock, Truck } from "lucide-react";
@@ -192,19 +194,22 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId }: InventoryCar
               </div>
             </div>
 
-            <button 
-              onClick={toggleExternalRental}
-              disabled={loading}
-              title={isCeded ? "Mudar disponibilidade deste item no HUB" : "Mudar disponibilidade do meu item no HUB"}
-              className={`w-full flex items-center justify-center gap-2 h-10 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border ${
-                item.status === 'unavailable' 
-                ? 'bg-zinc-900 text-zinc-500 border-zinc-800 hover:bg-zinc-800' 
-                : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.05)]'
-              }`}
-            >
-              <div className={`h-1.5 w-1.5 rounded-full ${item.status === 'unavailable' ? 'bg-zinc-600' : 'bg-emerald-500 animate-pulse'}`} />
-              {item.status === 'unavailable' ? 'Oculto no HUB' : 'Visível no HUB'}
-            </button>
+            <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-900/50 border border-zinc-800/50 hover:border-zinc-700 transition-colors">
+              <div className="flex flex-col gap-0.5">
+                <Label htmlFor={`visibility-${item.id}`} className="text-[10px] font-black uppercase tracking-widest cursor-pointer">
+                  Status no HUB
+                </Label>
+                <span className={`text-[9px] font-bold uppercase tracking-tight ${item.status === 'unavailable' ? 'text-zinc-500' : 'text-emerald-500'}`}>
+                  {item.status === 'unavailable' ? 'Oculto para Clientes' : 'Visível para Clientes'}
+                </span>
+              </div>
+              <Switch 
+                id={`visibility-${item.id}`}
+                checked={item.status !== 'unavailable'}
+                onCheckedChange={toggleExternalRental}
+                disabled={loading}
+              />
+            </div>
           </div>
         </div>
 
