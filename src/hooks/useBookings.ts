@@ -27,7 +27,7 @@ export function useBookings(options?: {
                     email,
                     company:companies!company_id(name)
                   ),
-                  delivery:deliveries(id, status, fulfilling_company_id, origin_branch_id)
+                  delivery:deliveries(id, status, fulfilling_company_id, origin_branch_id, subrental_status)
                 `);
 
             if (options?.companyId) {
