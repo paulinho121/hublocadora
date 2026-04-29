@@ -214,17 +214,14 @@ export default function Dashboard() {
 
   // Helper robusto para extrair o ID de quem entrega (Sub-locadora ou Filial)
   const getFulfillmentId = (booking: any) => {
-    if (!booking) return null;
     const delivery = booking.delivery || booking.deliveries;
     if (!delivery) return null;
-    
-    // Se for um array (padrão PostgREST para joins 1:N)
-    if (Array.isArray(delivery)) {
-      return delivery[0]?.fulfilling_company_id;
-    }
-    
-    // Se for um objeto (padrão para joins 1:1)
-    return (delivery as any).fulfilling_company_id;
+
+    const d = Array.isArray(delivery) ? delivery[0] : delivery;
+    if (!d) return null;
+
+    // Retorna ou o ID da empresa externa ou o ID da filial interna
+    return (d as any).fulfilling_company_id || (d as any).origin_branch_id;
   };
 
   const totalRevenue = bookingsReceived
