@@ -318,7 +318,7 @@ export default function Dashboard() {
         const { error } = await supabase
           .from('deliveries')
           .update({ 
-            fulfilling_company_id: fulfillCompanyId,
+            fulfilling_company_id: isBranch ? null : fulfillCompanyId,
             origin_branch_id: isBranch ? fulfillCompanyId : null,
             subrental_status: isBranch ? 'accepted' : 'pending',  
             status: 'pending'              
