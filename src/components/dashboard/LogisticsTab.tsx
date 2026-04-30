@@ -53,7 +53,6 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
 
     const activeDeliveries = logisticsMode === 'to_send' ? toSendDeliveries : toReceiveDeliveries;
 
-    // Real-Time Update Implementation
     useEffect(() => {
         const channel = supabase
             .channel('logistics_realtime')
@@ -69,6 +68,18 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
             supabase.removeChannel(channel);
         };
     }, [queryClient]);
+
+    const getRemainingTime = (endDate: string) => {
+        if (!endDate) return "Sem data";
+        const total = Date.parse(endDate) - Date.parse(new Date().toISOString());
+        if (total <= 0) return "Prazo Esgotado";
+        const days = Math.floor(total / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((total / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((total / 1000 / 60) % 60);
+        
+        if (days > 0) return `${days}d ${hours}h restantes`;
+        return `${hours}h ${minutes}m restantes`;
+    };
 
     const handleNextStatus = async (delivery: any) => {
         // Lógica de ACEITE para Sub-locadoras
@@ -344,15 +355,26 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                         </div>
                                                     </div>
                                                     
-                                                    <div className="text-right flex flex-col items-end gap-3 shrink-0">
-                                                        <div className="space-y-1">
-                                                            <span className="text-xs font-black uppercase text-zinc-700 tracking-[0.4em] block">Status Logístico</span>
-                                                            <div className="bg-zinc-900/80 backdrop-blur-md text-zinc-300 font-bold uppercase text-[10px] py-1.5 px-4 rounded-full border border-white/5 shadow-2xl tracking-[0.2em] inline-block">
-                                                                {getStatusLabel(delivery.status)}
+                                                        <div className="text-right flex flex-col items-end gap-3 shrink-0">
+                                                            <div className="space-y-1">
+                                                                <span className="text-xs font-black uppercase text-zinc-700 tracking-[0.4em] block">Status Logístico</span>
+                                                                <div className="bg-zinc-900/80 backdrop-blur-md text-zinc-300 font-bold uppercase text-[10px] py-1.5 px-4 rounded-full border border-white/5 shadow-2xl tracking-[0.2em] inline-block">
+                                                                    {getStatusLabel(delivery.status)}
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        
-                                                        <div className="flex items-center gap-2 bg-black/40 px-3 py-1 rounded-full border border-white/5">
+                                                            
+                                                            {/* TIMER DE DEVOLUÇÃO (Para o Solicitante quando entregue) */}
+                                                            {delivery.status === 'delivered' && logisticsMode === 'to_receive' && (
+                                                                <div className="bg-primary/10 border border-primary/20 px-4 py-2 rounded-2xl flex items-center gap-3 animate-pulse">
+                                                                    <Clock className="h-4 w-4 text-primary" />
+                                                                    <div className="text-left">
+                                                                        <p className="text-[7px] font-black uppercase text-primary tracking-widest leading-none">Prazo de Devolução</p>
+                                                                        <p className="text-[10px] font-black text-white uppercase">{getRemainingTime(delivery.booking?.end_date)}</p>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+
+                                                            <div className="flex items-center gap-2 bg-black/40 px-3 py-1 rounded-full border border-white/5">
                                                             <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Volume:</span>
                                                             <span className="text-xs font-bold text-white">{delivery.booking?.quantity || 1} UN</span>
                                                         </div>
