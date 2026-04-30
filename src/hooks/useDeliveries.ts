@@ -10,6 +10,22 @@ export function useDeliveries(options?: {
     return useQuery({
         queryKey: ['deliveries', options],
         queryFn: async () => {
+            // 1. Primeiro, buscamos os IDs de bookings onde a empresa é dona ou sub-locadora
+            // Isso evita o erro 400 de joins complexos no filtro OR
+            let bookingIds: string[] = [];
+            
+            if (options?.tenantId) {
+                const { data: relatedBookings } = await supabase
+                    .from('bookings')
+                    .select('id')
+                    .or(`company_id.eq.${options.tenantId},subrental_company_id.eq.${options.tenantId},renter_id.in.(select id from profiles where company_id = '${options.tenantId}')`);
+                
+                if (relatedBookings) {
+                    bookingIds = relatedBookings.map(b => b.id);
+                }
+            }
+
+            // 2. Agora buscamos as entregas
             let query = supabase
                 .from('deliveries')
                 .select(`
@@ -25,9 +41,13 @@ export function useDeliveries(options?: {
                 `);
 
             if (options?.tenantId) {
-                // Filtra entregas onde sou o fornecedor OU onde sou o locatário/dono da reserva
-                // Usamos o or para garantir visibilidade nas duas pontas
-                query = query.or(`fulfilling_company_id.eq.${options.tenantId},booking.company_id.eq.${options.tenantId},booking.subrental_company_id.eq.${options.tenantId}`);
+                if (bookingIds.length > 0) {
+                    // Traz entregas onde sou o fornecedor OU onde a reserva é minha
+                    query = query.or(`fulfilling_company_id.eq.${options.tenantId},booking_id.in.(${bookingIds.join(',')})`);
+                } else {
+                    // Se não tem bookings relacionados, traz apenas onde sou o fornecedor direto
+                    query = query.eq('fulfilling_company_id', options.tenantId);
+                }
             }
 
             if (options?.branchId) {
