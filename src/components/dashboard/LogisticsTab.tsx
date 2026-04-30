@@ -44,9 +44,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
 
     const toReceiveDeliveries = deliveries?.filter((d: any) => {
         const isRenter = d.booking?.renter?.company_id === tenantId || d.booking?.company_id === tenantId;
-        const fulfillmentId = d.fulfilling_company_id || d.origin_branch_id;
-        const isFulfiller = isBranchManager ? d.origin_branch_id === branchId : (fulfillmentId === tenantId);
-        return isRenter && !isFulfiller;
+        return isRenter;
     });
 
     const activeDeliveries = logisticsMode === 'to_send' ? toSendDeliveries : toReceiveDeliveries;
