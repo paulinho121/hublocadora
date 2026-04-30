@@ -319,8 +319,8 @@ export default function Dashboard() {
       await updateStatusMutation.mutateAsync({ 
         id, 
         status,
-        subrental_company_id: (status === 'approved' && !isBranch) ? fulfillId : undefined,
-        origin_branch_id: (status === 'approved' && isBranch) ? fulfillId : undefined
+        subrental_company_id: (status === 'approved' && fulfillmentModal?.selectedSubrentalType === 'external') ? fulfillId : undefined,
+        origin_branch_id: (status === 'approved' && fulfillmentModal?.selectedSubrentalType === 'branch') ? fulfillId : undefined
       });
 
       console.log('Status do pedido atualizado. Logística disparada via trigger.');
