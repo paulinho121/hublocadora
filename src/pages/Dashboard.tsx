@@ -52,7 +52,7 @@ const VALID_TABS: TabType[] = ['overview', 'inventory', 'bookings', 'logistics',
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { company, branch, isLoading: isLoadingTenant, tenantId, isBranchManager, branchId } = useTenant();
+  const { company, branch, isLoading: isLoadingTenant, tenantId, isBranchManager, branchId, isAdmin } = useTenant();
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Tab is driven by URL ?tab= param — enables mobile BottomNav to switch tabs
@@ -189,8 +189,9 @@ export default function Dashboard() {
   }
 
   // O Dashboard agora é resiliente: só mostra o setup se realmente não houver empresa 
-  // após o carregamento completo e se o usuário não for um admin/sub-locadora.
-  const showSetup = !isLoadingTenant && !company && !isBranchManager && user;
+  // após o carregamento completo e se o usuário não for um admin/sub-locadora/gerente.
+  const showSetup = !isLoadingTenant && !company && !isBranchManager && !isAdmin && user;
+
   
   if (showSetup) {
     return (
