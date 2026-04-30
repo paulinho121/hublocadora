@@ -54,7 +54,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
 
     const handleNextStatus = async (delivery: any) => {
         // Lógica de ACEITE para Sub-locadoras
-        if (delivery.subrental_status === 'pending' && delivery.booking?.subrental_company_id === tenantId) {
+        if (delivery.subrental_status === 'pending' && delivery.booking?.equipment?.subrental_company_id === tenantId) {
             setUpdatingId(delivery.id);
             try {
                 const { error } = await supabase
