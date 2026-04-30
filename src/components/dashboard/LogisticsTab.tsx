@@ -229,6 +229,39 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                 </div>
             </header>
 
+            {activeSubTab === 'deliveries' && (
+                <div className="flex gap-4 bg-zinc-900/20 p-2 rounded-[22px] w-fit border border-white/5 shadow-2xl backdrop-blur-md">
+                    <button
+                        onClick={() => setLogisticsMode('to_send')}
+                        className={cn(
+                            "px-8 py-3 rounded-[16px] text-[10px] font-black uppercase tracking-widest transition-all duration-500",
+                            logisticsMode === 'to_send' 
+                                ? "bg-white text-black shadow-xl shadow-white/10" 
+                                : "text-zinc-500 hover:text-zinc-300"
+                        )}
+                    >
+                        <div className="flex items-center gap-3">
+                            <ShoppingBag className="h-3.5 w-3.5" />
+                            Pedidos a Enviar ({toSendDeliveries?.length || 0})
+                        </div>
+                    </button>
+                    <button
+                        onClick={() => setLogisticsMode('to_receive')}
+                        className={cn(
+                            "px-8 py-3 rounded-[16px] text-[10px] font-black uppercase tracking-widest transition-all duration-500",
+                            logisticsMode === 'to_receive' 
+                                ? "bg-emerald-500 text-black shadow-xl shadow-emerald-500/20" 
+                                : "text-zinc-500 hover:text-zinc-300"
+                        )}
+                    >
+                        <div className="flex items-center gap-3">
+                            <Truck className="h-3.5 w-3.5" />
+                            Pedidos a Receber ({toReceiveDeliveries?.length || 0})
+                        </div>
+                    </button>
+                </div>
+            )}
+
             {activeSubTab === 'availability' ? (
                 <InventoryStatusReport companyId={tenantId} />
             ) : activeSubTab === 'transfers' ? (
