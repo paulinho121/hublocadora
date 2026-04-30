@@ -34,6 +34,22 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
     const [updatingId, setUpdatingId] = useState<string | null>(null);
     const [serialNumbers, setSerialNumbers] = useState<Record<string, string>>({});
     const [tokenInputs, setTokenInputs] = useState<Record<string, string>>({});
+    const [logisticsMode, setLogisticsMode] = useState<'to_send' | 'to_receive'>('to_send');
+
+    // Lógica de separação dos pedidos
+    const toSendDeliveries = deliveries?.filter((d: any) => {
+        const fulfillmentId = d.fulfilling_company_id || d.origin_branch_id;
+        return isBranchManager ? d.origin_branch_id === branchId : (fulfillmentId === tenantId || (d.origin_branch_id && !d.fulfilling_company_id && d.booking?.company_id === tenantId));
+    });
+
+    const toReceiveDeliveries = deliveries?.filter((d: any) => {
+        const isRenter = d.booking?.renter?.company_id === tenantId || d.booking?.company_id === tenantId;
+        const fulfillmentId = d.fulfilling_company_id || d.origin_branch_id;
+        const isFulfiller = isBranchManager ? d.origin_branch_id === branchId : (fulfillmentId === tenantId);
+        return isRenter && !isFulfiller;
+    });
+
+    const activeDeliveries = logisticsMode === 'to_send' ? toSendDeliveries : toReceiveDeliveries;
 
     // Real-Time Update Implementation
     useEffect(() => {
@@ -220,7 +236,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
             ) : (
                 <div className="grid grid-cols-1 gap-10">
                     <AnimatePresence mode="popLayout">
-                        {deliveries?.length === 0 ? (
+                        {activeDeliveries?.length === 0 ? (
                         <motion.div 
                             initial={{ opacity: 0, scale: 0.98 }}
                             animate={{ opacity: 1, scale: 1 }}
@@ -231,10 +247,10 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                 <Truck className="h-16 w-16 text-zinc-800 relative z-10 mx-auto" />
                             </div>
                             <h3 className="text-2xl font-black uppercase tracking-tighter text-zinc-600">Silêncio na Malha</h3>
-                            <p className="text-zinc-700 text-xs mt-3 font-bold uppercase tracking-widest">Nenhum fluxo de saída detectado.</p>
+                            <p className="text-zinc-700 text-xs mt-3 font-bold uppercase tracking-widest">Nenhum fluxo {logisticsMode === 'to_send' ? 'de saída' : 'de entrada'} detectado.</p>
                         </motion.div>
                     ) : (
-                        deliveries?.map((delivery: any) => (
+                        activeDeliveries?.map((delivery: any) => (
                             <motion.div
                                 key={delivery.id}
                                 layout
@@ -336,16 +352,29 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                     exit={{ opacity: 0, x: -20 }}
                                                                     className="space-y-6"
                                                                 >
-                                                                    {/* TOKEN PARA QUEM SOLICITOU (LOCATÁRIA) */}
-                                                                    {(delivery.booking?.renter?.company_id === tenantId || delivery.booking?.company_id === tenantId) && (
-                                                                        <div className="bg-primary/5 border border-primary/10 rounded-2xl p-6 text-center space-y-4">
-                                                                            <p className="text-[10px] font-black uppercase tracking-widest text-primary">Seu Token de Resgate</p>
-                                                                            <div className="text-5xl font-black tracking-[0.2em] text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">
-                                                                                {delivery.delivery_token || '----'}
-                                                                            </div>
-                                                                            <p className="text-[9px] text-zinc-600 font-bold uppercase leading-relaxed">Forneça este código ao motorista para finalizar</p>
-                                                                        </div>
-                                                                    )}
+                                                                    {/* TOKEN APENAS PARA O SOLICITANTE (RENTER) */}
+                                                                    {(() => {
+                                                                        const fulfillmentId = delivery.fulfilling_company_id || delivery.origin_branch_id;
+                                                                        const isFulfiller = isBranchManager 
+                                                                            ? delivery.origin_branch_id === branchId 
+                                                                            : fulfillmentId === tenantId;
+                                                                        
+                                                                        // Só mostra o token se eu sou o locatário E NÃO sou quem está entregando
+                                                                        const isRenter = delivery.booking?.renter_id === user?.id;
+
+                                                                        if (isRenter && !isFulfiller) {
+                                                                            return (
+                                                                                <div className="bg-primary/5 border border-primary/10 rounded-2xl p-6 text-center space-y-4">
+                                                                                    <p className="text-[10px] font-black uppercase tracking-widest text-primary">Seu Token de Resgate</p>
+                                                                                    <div className="text-5xl font-black tracking-[0.2em] text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                                                                                        {delivery.delivery_token || '----'}
+                                                                                    </div>
+                                                                                    <p className="text-[9px] text-zinc-600 font-bold uppercase leading-relaxed">Forneça este código ao motorista para finalizar</p>
+                                                                                </div>
+                                                                            );
+                                                                        }
+                                                                        return null;
+                                                                    })()}
 
                                                                     {/* PARTNER ACTIONS (PICKING/SHIPPING/ACCEPTING) */}
                                                                     {delivery.booking?.renter_id !== user?.id && (
