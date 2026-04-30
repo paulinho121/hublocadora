@@ -10,22 +10,39 @@ export function useDeliveries(options?: {
     return useQuery({
         queryKey: ['deliveries', options],
         queryFn: async () => {
-            // 1. Primeiro, buscamos os IDs de bookings onde a empresa é dona ou sub-locadora
-            // Isso evita o erro 400 de joins complexos no filtro OR
             let bookingIds: string[] = [];
             
             if (options?.tenantId) {
-                const { data: relatedBookings } = await supabase
-                    .from('bookings')
+                // 1. Busca perfis da empresa para filtrar como renter
+                const { data: profiles } = await supabase
+                    .from('profiles')
                     .select('id')
-                    .or(`company_id.eq.${options.tenantId},subrental_company_id.eq.${options.tenantId},renter_id.in.(select id from profiles where company_id = '${options.tenantId}')`);
+                    .eq('company_id', options.tenantId);
+                
+                const profileIds = profiles?.map(p => p.id) || [];
+
+                // 2. Busca Bookings onde a empresa participa de alguma forma
+                let bookingQuery = supabase
+                    .from('bookings')
+                    .select('id');
+                
+                const orFilters = [
+                    `company_id.eq.${options.tenantId}`,
+                    `subrental_company_id.eq.${options.tenantId}`
+                ];
+
+                if (profileIds.length > 0) {
+                    orFilters.push(`renter_id.in.(${profileIds.join(',')})`);
+                }
+
+                const { data: relatedBookings } = await bookingQuery.or(orFilters.join(','));
                 
                 if (relatedBookings) {
                     bookingIds = relatedBookings.map(b => b.id);
                 }
             }
 
-            // 2. Agora buscamos as entregas
+            // 3. Busca as entregas finais
             let query = supabase
                 .from('deliveries')
                 .select(`
@@ -42,10 +59,8 @@ export function useDeliveries(options?: {
 
             if (options?.tenantId) {
                 if (bookingIds.length > 0) {
-                    // Traz entregas onde sou o fornecedor OU onde a reserva é minha
                     query = query.or(`fulfilling_company_id.eq.${options.tenantId},booking_id.in.(${bookingIds.join(',')})`);
                 } else {
-                    // Se não tem bookings relacionados, traz apenas onde sou o fornecedor direto
                     query = query.eq('fulfilling_company_id', options.tenantId);
                 }
             }
