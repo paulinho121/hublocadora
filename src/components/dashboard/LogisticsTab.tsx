@@ -44,7 +44,11 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
 
     const toReceiveDeliveries = deliveries?.filter((d: any) => {
         const isRenter = d.booking?.renter?.company_id === tenantId || d.booking?.company_id === tenantId;
-        return isRenter;
+        const fulfillmentId = d.fulfilling_company_id || d.origin_branch_id;
+        const isFulfiller = isBranchManager ? d.origin_branch_id === branchId : (fulfillmentId === tenantId);
+        
+        // Só aparece em "A Receber" se eu sou o locatário e NÃO sou o responsável pelo envio
+        return isRenter && !isFulfiller;
     });
 
     const activeDeliveries = logisticsMode === 'to_send' ? toSendDeliveries : toReceiveDeliveries;
