@@ -43,7 +43,9 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
     });
 
     const toReceiveDeliveries = deliveries?.filter((d: any) => {
-        const isRenter = d.booking?.renter?.company_id === tenantId || d.booking?.company_id === tenantId;
+        // Correção do caminho: o company_id vem do profile ou do objeto company aninhado
+        const renterCompanyId = d.booking?.renter?.company_id || d.booking?.renter?.company?.id;
+        const isRenter = renterCompanyId === tenantId || d.booking?.company_id === tenantId;
         const fulfillmentId = d.fulfilling_company_id || d.origin_branch_id;
         const isFulfiller = isBranchManager ? d.origin_branch_id === branchId : (fulfillmentId === tenantId);
         
@@ -327,8 +329,8 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                     ORD-{delivery.booking_id.slice(0, 8).toUpperCase()}
                                                                 </Badge>
                                                                 {delivery.serial_number && (
-                                                                    <Badge variant="outline" className="text-[9px] uppercase font-black bg-emerald-500/5 text-emerald-500 border-emerald-500/10 px-3 py-1 tracking-widest">
-                                                                        SERIAL: {delivery.serial_number}
+                                                                    <Badge variant="outline" className={`text-[7px] h-3.5 px-1.5 font-black uppercase tracking-[0.1em] border-none ${isRequested ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
+                                                                        {isRequested ? 'Entrada' : 'Saída'}
                                                                     </Badge>
                                                                 )}
                                                                 <span className="text-xs font-black text-zinc-600 uppercase tracking-[0.2em] flex items-center gap-2">

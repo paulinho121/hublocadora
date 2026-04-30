@@ -16,7 +16,7 @@ export function useDeliveries(options?: {
                 // 1. Busca perfis da empresa para filtrar como renter
                 const { data: profiles } = await supabase
                     .from('profiles')
-                    .select('id')
+                    .select('id, company_id')
                     .eq('company_id', options.tenantId);
                 
                 const profileIds = profiles?.map(p => p.id) || [];
@@ -50,15 +50,16 @@ export function useDeliveries(options?: {
                         *,
                         equipment:equipments(name, images, subrental_company_id),
                         renter:profiles(
+                            id,
                             full_name,
-                            company:companies!company_id(name, address_city)
+                            company_id,
+                            company:companies!company_id(id, name, address_city)
                         )
                     )
                 `);
 
             if (options?.tenantId) {
                 if (bookingIds.length > 0) {
-                    // Traz entregas onde sou o fornecedor OU onde o booking me pertence
                     query = query.or(`fulfilling_company_id.eq.${options.tenantId},booking_id.in.(${bookingIds.join(',')})`);
                 } else {
                     query = query.eq('fulfilling_company_id', options.tenantId);

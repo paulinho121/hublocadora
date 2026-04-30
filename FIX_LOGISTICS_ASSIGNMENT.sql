@@ -1,11 +1,13 @@
 -- ======================================================
--- FIX: INTELIGÊNCIA LOGÍSTICA DE SUB-LOCAÇÃO (V2)
+-- FIX: INTELIGÊNCIA LOGÍSTICA DE SUB-LOCAÇÃO (V2.1)
 -- Garante que pedidos de sub-locação cheguem ao parceiro
+-- E gera o Token de Segurança de 4 dígitos
 -- ======================================================
 
 -- 1. GARANTIR COLUNAS NECESSÁRIAS
 ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS subrental_company_id UUID REFERENCES public.companies(id);
 ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS origin_branch_id UUID REFERENCES public.branches(id);
+ALTER TABLE public.deliveries ADD COLUMN IF NOT EXISTS delivery_token TEXT DEFAULT floor(random() * 9000 + 1000)::text;
 
 CREATE OR REPLACE FUNCTION public.handle_booking_approval_logistics()
 RETURNS TRIGGER AS $$
@@ -34,7 +36,8 @@ BEGIN
                 status, 
                 fulfilling_company_id, 
                 origin_branch_id,
-                subrental_status
+                subrental_status,
+                delivery_token
             )
             VALUES (
                 NEW.id, 
@@ -45,19 +48,21 @@ BEGIN
                     WHEN v_target_company_id IS NOT NULL THEN 'pending' -- Parceiro externo precisa aceitar
                     WHEN v_target_branch_id IS NOT NULL THEN 'accepted' -- Filial interna já nasce aceito
                     ELSE NULL 
-                END
+                END,
+                floor(random() * 9000 + 1000)::text -- Gera o Token de 4 dígitos
             );
         ELSE
-            -- 4. Se a entrega já existe, sincroniza o responsável
+            -- 4. Se a entrega já existe, sincroniza o responsável e gera o token se estiver vazio
             UPDATE public.deliveries 
             SET fulfilling_company_id = v_target_company_id,
                 origin_branch_id = v_target_branch_id,
+                delivery_token = COALESCE(delivery_token, floor(random() * 9000 + 1000)::text),
                 subrental_status = CASE 
                     WHEN v_target_company_id IS NOT NULL THEN 'pending'
                     WHEN v_target_branch_id IS NOT NULL THEN 'accepted'
                     ELSE NULL 
                 END
-            WHERE booking_id = NEW.id AND fulfilling_company_id IS NULL AND origin_branch_id IS NULL;
+            WHERE booking_id = NEW.id AND (fulfilling_company_id IS NULL OR origin_branch_id IS NULL);
         END IF;
     END IF;
     RETURN NEW;
@@ -72,4 +77,4 @@ FOR EACH ROW
 EXECUTE FUNCTION public.handle_booking_approval_logistics();
 
 -- Notificação
-DO $$ BEGIN RAISE NOTICE 'Gatilho logístico atualizado: suporte a sub-locação automática habilitado.'; END $$;
+DO $$ BEGIN RAISE NOTICE 'Gatilho logístico V2.1 atualizado: suporte a Token de 4 dígitos habilitado.'; END $$;
