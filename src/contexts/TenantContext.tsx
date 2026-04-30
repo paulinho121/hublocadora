@@ -80,6 +80,7 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
                     .from('companies')
                     .select('*')
                     .eq('owner_id', user.id)
+                    .limit(1)
                     .maybeSingle();
 
                 if (ownedCompany) {
@@ -95,6 +96,7 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
                     .select('company_id')
                     .eq('email', user.email)
                     .not('company_id', 'is', null)
+                    .limit(1)
                     .maybeSingle();
 
                 if (otherProfile?.company_id) {
@@ -102,6 +104,7 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
                         .from('companies')
                         .select('*')
                         .eq('id', otherProfile.company_id)
+                        .limit(1)
                         .maybeSingle();
 
                     if (companyByEmail) {
@@ -126,6 +129,7 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
                     .from('branches')
                     .select('*')
                     .eq('manager_email', user.email)
+                    .limit(1)
                     .maybeSingle();
                 
                 if (branchData) {
@@ -139,6 +143,7 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
                             .from('companies')
                             .select('*')
                             .eq('id', branchData.company_id)
+                            .limit(1)
                             .maybeSingle();
                         
                         if (branchCompany) {
