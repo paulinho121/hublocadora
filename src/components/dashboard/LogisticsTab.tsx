@@ -632,8 +632,9 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                     </div>
                                 </Card>
                             </motion.div>
-                        ))
-                    )}
+                        ))}
+                    </div>
+                )}
                 </AnimatePresence>
             </div>
             )}
