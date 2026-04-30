@@ -87,8 +87,8 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
         const nextStatus = statusFlow[delivery.status];
         if (!nextStatus) return;
 
-        // Se for a primeira movimentação (pending -> picking), abre modal de escolha de filial APENAS se não houver fornecedor externo
-        if (delivery.status === 'pending' && nextStatus === 'picking' && branches && branches.length > 0 && !selectedBranchId && !delivery.fulfilling_company_id) {
+        // Se for o primeiro passo (pending -> picking), precisamos definir a filial de origem
+        if (delivery.status === 'pending' && nextStatus === 'picking' && branches && branches.length > 0 && !selectedBranchId && !delivery.fulfilling_company_id && !delivery.origin_branch_id) {
             setPendingDelivery(delivery);
             setBranchModalOpen(true);
             return;
