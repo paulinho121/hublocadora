@@ -1,11 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { Delivery, DeliveryStatus } from '@/types/database';
+import { Delivery } from '@/types/database';
 
-export function useDeliveries(options?: {
-    bookingId?: string;
-    tenantId?: string;
-    branchId?: string | null;
+export function useDeliveries(options?: { 
+    tenantId?: string; 
+    branchId?: string;
+    status?: string;
 }) {
     return useQuery({
         queryKey: ['deliveries', options],
@@ -17,29 +17,30 @@ export function useDeliveries(options?: {
                     booking:bookings(
                         *,
                         equipment:equipments(name, images, subrental_company_id),
-                        renter:profiles(full_name, email, company:companies!company_id(name))
+                        renter:profiles(
+                            full_name,
+                            company:companies!company_id(name, address_city)
+                        )
                     )
                 `);
 
-            if (options?.bookingId) {
-                query = query.eq('booking_id', options.bookingId);
+            if (options?.tenantId) {
+                // Filtra entregas onde sou o fornecedor OU onde sou o locatário/dono da reserva
+                // Usamos o or para garantir visibilidade nas duas pontas
+                query = query.or(`fulfilling_company_id.eq.${options.tenantId},booking.company_id.eq.${options.tenantId},booking.subrental_company_id.eq.${options.tenantId}`);
             }
 
             if (options?.branchId) {
                 query = query.eq('origin_branch_id', options.branchId);
             }
-            
-            if (options?.tenantId) {
-                // Filtra entregas onde a empresa é o dono da reserva OU o fornecedor (sub-locação)
-                // Usando uma subquery ou filtrando no cliente se as RLS permitirem
-                // Para simplificar aqui, vamos filtrar por fulfilling_company_id se for sub-locadora
-                // Mas as RLS do banco já costumam cuidar disso.
-            }
-            
-            // All deliveries matching RLS and options should be returned so sub-locadoras can see 'pending' ones and accept them.
-            
-            const { data, error } = await query.order('updated_at', { ascending: false });
 
+            if (options?.status) {
+                query = query.eq('status', options.status);
+            }
+
+            query = query.order('created_at', { ascending: false });
+
+            const { data, error } = await query;
             if (error) throw error;
             return data;
         },
@@ -50,22 +51,27 @@ export function useUpdateDeliveryStatus() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async ({ id, status, driver_name, driver_phone, serial_number, origin_branch_id }: { 
+        mutationFn: async ({ 
+            id, 
+            status, 
+            serial_number, 
+            driver_name, 
+            driver_phone 
+        }: { 
             id: string; 
-            status: DeliveryStatus; 
-            driver_name?: string; 
-            driver_phone?: string; 
+            status: string; 
             serial_number?: string;
-            origin_branch_id?: string;
+            driver_name?: string;
+            driver_phone?: string;
         }) => {
             const { error } = await supabase
                 .from('deliveries')
                 .update({ 
                     status, 
+                    ...(serial_number && { serial_number }),
                     ...(driver_name && { driver_name }),
                     ...(driver_phone && { driver_phone }),
-                    ...(serial_number && { serial_number }),
-                    ...(origin_branch_id && { origin_branch_id })
+                    updated_at: new Date().toISOString()
                 })
                 .eq('id', id);
 
@@ -74,25 +80,6 @@ export function useUpdateDeliveryStatus() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['deliveries'] });
             queryClient.invalidateQueries({ queryKey: ['bookings'] });
-        },
-    });
-}
-
-export function useCreateDelivery() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: async (delivery: Omit<Delivery, 'id' | 'created_at' | 'updated_at'>) => {
-            const { data, error } = await supabase
-                .from('deliveries')
-                .insert([delivery])
-                .select();
-
-            if (error) throw error;
-            return data?.[0];
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['deliveries'] });
         },
     });
 }

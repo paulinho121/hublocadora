@@ -336,14 +336,14 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                     exit={{ opacity: 0, x: -20 }}
                                                                     className="space-y-6"
                                                                 >
-                                                                    {/* TOKEN FOR RENTER */}
-                                                                    {delivery.booking?.renter_id === user?.id && (
+                                                                    {/* TOKEN PARA QUEM SOLICITOU (LOCATÁRIA) */}
+                                                                    {(delivery.booking?.renter?.company_id === tenantId || delivery.booking?.company_id === tenantId) && (
                                                                         <div className="bg-primary/5 border border-primary/10 rounded-2xl p-6 text-center space-y-4">
                                                                             <p className="text-[10px] font-black uppercase tracking-widest text-primary">Seu Token de Resgate</p>
                                                                             <div className="text-5xl font-black tracking-[0.2em] text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">
                                                                                 {delivery.delivery_token || '----'}
                                                                             </div>
-                                                                            <p className="text-[9px] text-zinc-600 font-bold uppercase leading-relaxed">Informe ao fornecedor no ato da conferência</p>
+                                                                            <p className="text-[9px] text-zinc-600 font-bold uppercase leading-relaxed">Forneça este código ao motorista para finalizar</p>
                                                                         </div>
                                                                     )}
 
