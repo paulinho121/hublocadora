@@ -21,11 +21,7 @@ export function useDeliveries(options?: {
                 
                 const profileIds = profiles?.map(p => p.id) || [];
 
-                // 2. Busca Bookings onde a empresa participa de alguma forma
-                let bookingQuery = supabase
-                    .from('bookings')
-                    .select('id');
-                
+                // 2. Busca Bookings onde a empresa participa (Master, Sub ou Renter)
                 const orFilters = [
                     `company_id.eq.${options.tenantId}`,
                     `subrental_company_id.eq.${options.tenantId}`
@@ -35,7 +31,10 @@ export function useDeliveries(options?: {
                     orFilters.push(`renter_id.in.(${profileIds.join(',')})`);
                 }
 
-                const { data: relatedBookings } = await bookingQuery.or(orFilters.join(','));
+                const { data: relatedBookings } = await supabase
+                    .from('bookings')
+                    .select('id')
+                    .or(orFilters.join(','));
                 
                 if (relatedBookings) {
                     bookingIds = relatedBookings.map(b => b.id);
@@ -59,6 +58,7 @@ export function useDeliveries(options?: {
 
             if (options?.tenantId) {
                 if (bookingIds.length > 0) {
+                    // Traz entregas onde sou o fornecedor OU onde o booking me pertence
                     query = query.or(`fulfilling_company_id.eq.${options.tenantId},booking_id.in.(${bookingIds.join(',')})`);
                 } else {
                     query = query.eq('fulfilling_company_id', options.tenantId);
