@@ -101,10 +101,19 @@ export function useUpdateBookingStatus() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async ({ id, status }: { id: string; status: Booking['status'] }) => {
+        mutationFn: async ({ id, status, subrental_company_id, origin_branch_id }: { 
+            id: string; 
+            status: Booking['status']; 
+            subrental_company_id?: string | null;
+            origin_branch_id?: string | null;
+        }) => {
             const { error } = await supabase
                 .from('bookings')
-                .update({ status })
+                .update({ 
+                    status,
+                    ...(subrental_company_id !== undefined && { subrental_company_id }),
+                    ...(origin_branch_id !== undefined && { origin_branch_id })
+                })
                 .eq('id', id);
 
             if (error) throw error;

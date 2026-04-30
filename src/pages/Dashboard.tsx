@@ -310,50 +310,24 @@ export default function Dashboard() {
     }
   };
 
-  const handleUpdateStatus = async (id: string, status: any, fulfillCompanyId?: string | null) => {
+  const handleUpdateStatus = async (id: string, status: any, fulfillId?: string | null) => {
     try {
       setUpdatingId(id);
-      await updateStatusMutation.mutateAsync({ id, status });
+      
+      const isBranch = fulfillmentModal?.selectedSubrentalType === 'branch';
+      
+      await updateStatusMutation.mutateAsync({ 
+        id, 
+        status,
+        subrental_company_id: (status === 'approved' && !isBranch) ? fulfillId : undefined,
+        origin_branch_id: (status === 'approved' && isBranch) ? fulfillId : undefined
+      });
 
-      // Se foi aprovado e tem sub-locadora ou filial
-      if (status === 'approved' && fulfillCompanyId) {
-        const isBranch = fulfillmentModal?.selectedSubrentalType === 'branch';
-        
-        await new Promise(r => setTimeout(r, 1000));
-        const { data: updatedDelivery, error } = await supabase
-          .from('deliveries')
-          .update({ 
-            fulfilling_company_id: isBranch ? null : fulfillCompanyId,
-            origin_branch_id: isBranch ? fulfillCompanyId : null,
-            subrental_status: isBranch ? 'accepted' : 'pending',  
-            status: 'pending'              
-          })
-          .eq('booking_id', id)
-          .select();
-        
-        if (error) {
-           console.error('Erro ao atribuir sub-locadora:', error);
-           alert('Falha ao registrar a logística: ' + error.message);
-        } else if (updatedDelivery && updatedDelivery.length === 0) {
-           // O gatilho do banco pode ter falhado em criar a linha, então inserimos forçadamente
-           const { error: insertError } = await supabase
-              .from('deliveries')
-              .insert({
-                booking_id: id,
-                fulfilling_company_id: isBranch ? null : fulfillCompanyId,
-                origin_branch_id: isBranch ? fulfillCompanyId : null,
-                subrental_status: isBranch ? 'accepted' : 'pending',  
-                status: 'pending'
-              });
-           if (insertError) {
-              alert('Falha ao criar registro de logística: ' + insertError.message);
-           }
-        }
-        
-        // Invalidate again to ensure the frontend sees the new deliveries state!
-        queryClient.invalidateQueries({ queryKey: ['bookings'] });
-        queryClient.invalidateQueries({ queryKey: ['deliveries'] });
-      }
+      console.log('Status do pedido atualizado. Logística disparada via trigger.');
+      
+      // Invalidamos para garantir que o Realtime e o UI mostrem a nova entrega
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['deliveries'] });
     } catch (error) {
       console.error('Erro ao atualizar status:', error);
       alert('Não foi possível atualizar o pedido. Tente novamente.');

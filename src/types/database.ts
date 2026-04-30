@@ -77,6 +77,8 @@ export interface Booking {
     quantity: number;
     delivery_method: 'pickup' | 'delivery';
     delivery_address: string | null;
+    subrental_company_id: string | null;
+    origin_branch_id: string | null;
     created_at: string;
 }
 
