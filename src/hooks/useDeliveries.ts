@@ -10,43 +10,12 @@ export function useDeliveries(options?: {
     return useQuery({
         queryKey: ['deliveries', options],
         queryFn: async () => {
-            let bookingIds: string[] = [];
-            
-            if (options?.tenantId) {
-                // 1. Busca perfis da empresa para filtrar como renter
-                const { data: profiles } = await supabase
-                    .from('profiles')
-                    .select('id, company_id')
-                    .eq('company_id', options.tenantId);
-                
-                const profileIds = profiles?.map(p => p.id) || [];
-
-                // 2. Busca Bookings onde a empresa participa (Master, Sub ou Renter)
-                const orFilters = [
-                    `company_id.eq.${options.tenantId}`,
-                    `subrental_company_id.eq.${options.tenantId}`
-                ];
-
-                if (profileIds.length > 0) {
-                    orFilters.push(`renter_id.in.(${profileIds.join(',')})`);
-                }
-
-                const { data: relatedBookings } = await supabase
-                    .from('bookings')
-                    .select('id')
-                    .or(orFilters.join(','));
-                
-                if (relatedBookings) {
-                    bookingIds = relatedBookings.map(b => b.id);
-                }
-            }
-
-            // 3. Busca as entregas finais
+            // 1. Inicia a query básica com os joins necessários
             let query = supabase
                 .from('deliveries')
                 .select(`
                     *,
-                    booking:bookings(
+                    booking:bookings!inner(
                         *,
                         equipment:equipments(name, images, subrental_company_id),
                         renter:profiles(
@@ -58,15 +27,27 @@ export function useDeliveries(options?: {
                     )
                 `);
 
+            // 2. Aplica filtros de visibilidade contextual
             if (options?.tenantId) {
-                if (bookingIds.length > 0) {
-                    query = query.or(`fulfilling_company_id.eq.${options.tenantId},booking_id.in.(${bookingIds.join(',')})`);
-                } else {
-                    query = query.eq('fulfilling_company_id', options.tenantId);
-                }
-            }
+                // Busca todos os IDs de bookings que o usuário tem acesso (já filtrado por RLS)
+                // Isso garante que veremos pedidos de outros membros da mesma empresa/filial
+                const { data: bookings } = await supabase.from('bookings').select('id');
+                const bookingIds = bookings?.map(b => b.id) || [];
 
-            if (options?.branchId) {
+                if (options.branchId) {
+                    if (bookingIds.length > 0) {
+                        query = query.or(`origin_branch_id.eq.${options.branchId},fulfilling_company_id.eq.${options.tenantId},booking_id.in.(${bookingIds.join(',')})`);
+                    } else {
+                        query = query.or(`origin_branch_id.eq.${options.branchId},fulfilling_company_id.eq.${options.tenantId}`);
+                    }
+                } else {
+                    if (bookingIds.length > 0) {
+                        query = query.or(`fulfilling_company_id.eq.${options.tenantId},booking_id.in.(${bookingIds.join(',')})`);
+                    } else {
+                        query = query.eq('fulfilling_company_id', options.tenantId);
+                    }
+                }
+            } else if (options?.branchId) {
                 query = query.eq('origin_branch_id', options.branchId);
             }
 

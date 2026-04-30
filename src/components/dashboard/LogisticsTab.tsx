@@ -14,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useBranches } from '@/hooks/useBranches';
 import { Dialog } from '@/components/ui/dialog';
 import { InternalTransfersSection } from './InternalTransfersSection';
+import { useTransfers } from '@/hooks/useTransfers';
 import { cn } from '@/lib/utils';
 import { InventoryStatusReport } from './InventoryStatusReport';
 import { useTenant } from '@/contexts/TenantContext';
@@ -35,6 +36,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
     const [serialNumbers, setSerialNumbers] = useState<Record<string, string>>({});
     const [tokenInputs, setTokenInputs] = useState<Record<string, string>>({});
     const [logisticsMode, setLogisticsMode] = useState<'to_send' | 'to_receive'>('to_send');
+    const { transfers } = useTransfers();
 
     // Lógica de separação dos pedidos
     const toSendDeliveries = deliveries?.filter((d: any) => {
@@ -51,7 +53,15 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
         
         // Só aparece em "A Receber" se eu sou o locatário e NÃO sou o responsável pelo envio
         return isRenter && !isFulfiller;
-    });
+    }) || [];
+
+    // Incluir transferências internas em entrada
+    const toReceiveTransfers = transfers?.filter(t => 
+        (isBranchManager ? t.requester_branch_id === branchId : true) && 
+        t.status !== 'completed' && t.status !== 'rejected' && t.status !== 'pending_master'
+    ) || [];
+
+    const toReceiveCount = toReceiveDeliveries.length + toReceiveTransfers.length;
 
     const activeDeliveries = logisticsMode === 'to_send' ? toSendDeliveries : toReceiveDeliveries;
 
@@ -271,7 +281,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                     >
                         <div className="flex items-center gap-3">
                             <Truck className="h-3.5 w-3.5" />
-                            Pedidos a Receber ({toReceiveDeliveries?.length || 0})
+                            Pedidos a Receber ({toReceiveCount})
                         </div>
                     </button>
                 </div>
@@ -298,7 +308,59 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                             <p className="text-zinc-700 text-xs mt-3 font-bold uppercase tracking-widest">Nenhum fluxo {logisticsMode === 'to_send' ? 'de saída' : 'de entrada'} detectado.</p>
                         </motion.div>
                     ) : (
-                        activeDeliveries?.map((delivery: any) => (
+                        <div className="space-y-10">
+                            {/* Renderizar Transferências em Entrada primeiro se estiver em modo 'to_receive' */}
+                            {logisticsMode === 'to_receive' && toReceiveTransfers.map((transfer: any) => (
+                                <motion.div
+                                    key={transfer.id}
+                                    layout
+                                    initial={{ opacity: 0, y: 30 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="group"
+                                >
+                                    <Card className="bg-zinc-950/40 border-emerald-500/10 rounded-[40px] overflow-hidden hover:border-emerald-500/20 transition-all duration-700 shadow-2xl backdrop-blur-3xl relative">
+                                        <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/50" />
+                                        <div className="p-8 sm:p-12">
+                                            <div className="flex flex-col lg:flex-row gap-12">
+                                                <div className="flex-1 space-y-8">
+                                                    <div className="flex items-start justify-between">
+                                                        <div className="flex gap-6">
+                                                            <div className="h-20 w-20 rounded-[28px] bg-black border border-white/5 flex items-center justify-center overflow-hidden shrink-0">
+                                                                {transfer.equipment?.images?.[0] ? (
+                                                                    <img src={transfer.equipment.images[0]} alt="" className="w-full h-full object-cover" />
+                                                                ) : (
+                                                                    <Package className="h-8 w-8 text-zinc-800" />
+                                                                )}
+                                                            </div>
+                                                            <div className="space-y-2">
+                                                                <div className="flex items-center gap-3">
+                                                                    <Badge className="bg-emerald-500/10 text-emerald-500 border-none text-[9px] font-black uppercase tracking-widest px-3 py-1">Transferência de Suprimento</Badge>
+                                                                    <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">TRF-{transfer.id.slice(0, 8).toUpperCase()}</span>
+                                                                </div>
+                                                                <h3 className="text-2xl font-black uppercase tracking-tighter text-white">{transfer.equipment?.name}</h3>
+                                                                <div className="flex items-center gap-2 text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                                                                    <MapPin className="h-3 w-3" /> ORIGEM: <span className="text-zinc-300">{transfer.source_branch?.name || 'Aguardando Liberação'}</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <span className="text-[9px] font-black uppercase text-zinc-700 tracking-[0.4em] block mb-1">Status</span>
+                                                            <Badge variant="outline" className="bg-zinc-900 text-zinc-400 border-white/5 font-black uppercase text-[10px] px-4 py-1.5">{transfer.status}</Badge>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="w-full lg:w-[340px] bg-zinc-950/60 rounded-[32px] p-8 border border-white/5 flex flex-col items-center justify-center text-center gap-4">
+                                                    <Truck className="h-8 w-8 text-emerald-500/20 mb-2" />
+                                                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Fluxo Interno de Reposição</p>
+                                                    <p className="text-[11px] text-zinc-400 font-medium">Este item está sendo movimentado entre suas unidades.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </Card>
+                                </motion.div>
+                            ))}
+
+                            {activeDeliveries?.map((delivery: any) => (
                             <motion.div
                                 key={delivery.id}
                                 layout
@@ -419,7 +481,8 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                             : fulfillmentId === tenantId;
                                                                         
                                                                         // Só mostra o token se eu sou o locatário E NÃO sou quem está entregando
-                                                                        const isRenter = delivery.booking?.renter_id === user?.id;
+                                                                        const renterCompanyId = delivery.booking?.renter?.company_id || delivery.booking?.renter?.company?.id;
+                                                                        const isRenter = renterCompanyId === tenantId || delivery.booking?.company_id === tenantId;
 
                                                                         if (isRenter && !isFulfiller) {
                                                                             return (
