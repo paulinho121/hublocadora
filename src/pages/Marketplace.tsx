@@ -31,7 +31,7 @@ function EquipmentCard({ item, onClick }: { item: Equipment; onClick: () => void
   return (
     <Card
       onClick={onClick}
-      className="group overflow-hidden border-white/5 bg-zinc-950/40 hover:bg-zinc-950/80 hover:border-primary/30 transition-all duration-500 cursor-pointer shadow-2xl flex flex-col rounded-2xl"
+      className="group overflow-hidden clay-card transition-all duration-500 cursor-pointer flex flex-col"
     >
       {/* ── Image area ── */}
       <div className="relative w-full h-48 overflow-hidden bg-zinc-900/50 shrink-0">
@@ -94,7 +94,7 @@ function EquipmentCard({ item, onClick }: { item: Equipment; onClick: () => void
               {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.daily_rate)}
             </div>
           </div>
-          <Button size="icon" className="h-10 w-10 rounded-xl bg-zinc-900 group-hover:bg-primary transition-all shadow-xl text-white group-hover:-translate-y-0.5 border border-white/5">
+          <Button size="icon" className="h-10 w-10 clay-button-primary transition-all text-white group-hover:-translate-y-0.5">
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
@@ -216,7 +216,7 @@ export default function Marketplace() {
           />
         </div>
         <Button 
-          className="h-14 md:h-16 px-10 text-sm md:text-base rounded-2xl bg-primary hover:bg-primary/90 font-black uppercase tracking-[0.2em] sm:px-12 shadow-2xl shadow-primary/20 transition-all hover:-translate-y-1 active:translate-y-0 relative z-10 overflow-hidden group/btn"
+          className="h-14 md:h-16 px-10 text-sm md:text-base clay-button-primary font-black uppercase tracking-[0.2em] sm:px-12 relative z-10 overflow-hidden group/btn"
           onClick={handleSearch}
         >
           <span className="relative z-10 flex items-center gap-2">
@@ -241,10 +241,10 @@ export default function Marketplace() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.6 + (idx * 0.05) }}
               onClick={() => setSelectedCategory(selectedCategory === cat.value ? undefined : cat.value)}
-              className={`flex flex-col items-center justify-center p-6 rounded-[2rem] transition-all border-2 w-40 md:w-auto group relative overflow-hidden backdrop-blur-sm
+              className={`flex flex-col items-center justify-center p-6 transition-all w-40 md:w-auto group relative overflow-hidden backdrop-blur-sm
                 ${selectedCategory === cat.value 
-                  ? `${cat.color} border-primary shadow-[0_0_40px_rgba(var(--primary),0.2)] scale-105` 
-                  : `bg-zinc-900/20 border-white/5 hover:border-zinc-700 hover:bg-zinc-900/40 opacity-80 hover:opacity-100 hover:scale-105`}`}
+                  ? `${cat.color} clay-card border-primary scale-105` 
+                  : `bg-zinc-900/20 clay-card opacity-80 hover:opacity-100 hover:scale-105`}`}
             >
               {selectedCategory === cat.value && (
                 <div className="absolute inset-0 bg-primary/5 animate-pulse" />

@@ -70,7 +70,7 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
               className={cn(
                 "group w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 relative overflow-hidden",
                 isActive 
-                  ? "bg-primary/10 text-primary shadow-[inset_0_0_0_1px_rgba(var(--primary),0.2)]" 
+                  ? "clay-nav-active text-white shadow-lg shadow-primary/20" 
                   : "text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900/50"
               )}
             >

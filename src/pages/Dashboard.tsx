@@ -492,8 +492,8 @@ export default function Dashboard() {
            <div className="flex items-center gap-4">
               <Button 
                 onClick={() => setIsHubDialogOpen(true)} 
-                variant="outline"
-                className="h-10 text-xs font-black uppercase tracking-widest border-primary/30 text-primary hover:bg-primary/5 rounded-xl hidden sm:flex"
+                variant="clay"
+                className="h-10 text-[10px] font-black uppercase tracking-widest px-6"
               >
                 Solicitar Equipamento
               </Button>
@@ -516,7 +516,7 @@ export default function Dashboard() {
 
                 {/* Stats Grid */}
                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-                    <Card className="bg-zinc-900/50 border-zinc-900 rounded-3xl overflow-hidden hover:border-emerald-500/20 transition-all group">
+                    <Card className="clay-card">
                        <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
                           <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-[0.2em]">Ganhos Líquidos</CardTitle>
                           <TrendingUp className="h-4 w-4 text-emerald-500" />
@@ -529,7 +529,7 @@ export default function Dashboard() {
                        </CardContent>
                     </Card>
 
-                    <Card className="bg-zinc-900/50 border-zinc-900 rounded-3xl overflow-hidden hover:border-red-500/20 transition-all group">
+                    <Card className="clay-card">
                        <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
                           <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-[0.2em]">Débitos Operacionais</CardTitle>
                           <AlertCircle className="h-4 w-4 text-red-500" />
@@ -542,7 +542,7 @@ export default function Dashboard() {
                        </CardContent>
                     </Card>
 
-                    <Card className="bg-zinc-900/50 border-zinc-900 rounded-3xl overflow-hidden hover:border-primary/20 transition-all">
+                    <Card className="clay-card">
                        <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
                           <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-[0.2em]">Reservas Ativas</CardTitle>
                           <CalendarDays className="h-4 w-4 text-zinc-600" />
@@ -553,7 +553,7 @@ export default function Dashboard() {
                        </CardContent>
                     </Card>
 
-                    <Card className="bg-zinc-900/50 border-zinc-900 rounded-3xl overflow-hidden hover:border-primary/20 transition-all">
+                    <Card className="clay-card">
                        <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
                           <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-[0.2em]">Frota Estocada</CardTitle>
                           <Package className="h-4 w-4 text-zinc-600" />
@@ -564,7 +564,7 @@ export default function Dashboard() {
                        </CardContent>
                     </Card>
 
-                    <Card className="bg-zinc-900/50 border-zinc-900 rounded-3xl overflow-hidden hover:border-destructive/20 transition-all">
+                    <Card className="clay-card">
                        <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
                           <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-[0.2em]">Em Manutenção</CardTitle>
                           <AlertCircle className="h-4 w-4 text-destructive" />

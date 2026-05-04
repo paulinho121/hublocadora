@@ -151,3 +151,51 @@
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.03);
 }
+
+/* Claymorphism */
+.clay-card {
+  background: hsl(var(--card));
+  border-radius: 2.5rem;
+  box-shadow: 
+    8px 8px 16px rgba(0, 0, 0, 0.4),
+    inset -6px -6px 12px rgba(0, 0, 0, 0.5),
+    inset 6px 6px 12px rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.01);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.clay-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 
+    12px 12px 24px rgba(0, 0, 0, 0.5),
+    inset -6px -6px 12px rgba(0, 0, 0, 0.5),
+    inset 6px 6px 12px rgba(255, 255, 255, 0.05);
+}
+
+.clay-button-primary {
+  background: hsl(var(--primary));
+  border-radius: 1.25rem;
+  box-shadow: 
+    4px 4px 10px rgba(0, 0, 0, 0.3),
+    inset -4px -4px 8px rgba(0, 0, 0, 0.3),
+    inset 4px 4px 8px rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.clay-nav-active {
+  background: hsl(var(--primary));
+  box-shadow: 
+    inset -4px -4px 8px rgba(0, 0, 0, 0.3),
+    inset 4px 4px 8px rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.clay-inset {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 1.25rem;
+  box-shadow: 
+    inset 6px 6px 12px rgba(0, 0, 0, 0.5),
+    inset -6px -6px 12px rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+}
