@@ -168,8 +168,7 @@ export default function Marketplace() {
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="text-center mb-8 md:mb-12 relative z-10"
       >
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-6 backdrop-blur-md">
-          <Sparkles className="h-3 w-3 text-primary animate-pulse" />
+        <div className="inline-flex items-center gap-2 px-6 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-6 backdrop-blur-md">
           <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Sua produção no próximo nível</span>
         </div>
         
@@ -187,9 +186,9 @@ export default function Marketplace() {
         </motion.div>
 
         <p className="text-sm md:text-base text-zinc-400 max-w-2xl mx-auto px-6 font-medium leading-relaxed opacity-90 tracking-tight">
-          A maior infraestrutura de equipamentos cinematográficos do Brasil. 
+          A maior infraestrutura de equipamentos cinematográficos do Brasil.
           <span className="block mt-1 text-zinc-500 text-xs uppercase tracking-widest font-bold">
-            Câmeras, Iluminação e os novos <strong className="text-white">Telões de LED</strong> High-End.
+            Tecnologia High-End e logística inteligente <strong className="text-white">integradas em um só ecossistema.</strong>
           </span>
         </p>
       </motion.div>
