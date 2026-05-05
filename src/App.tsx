@@ -1,31 +1,46 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, NavLink } from 'react-router-dom';
-import { Camera, LogOut, LayoutDashboard, Settings, ShoppingBag, User, BarChart3, Package, CalendarDays, Truck, Activity } from 'lucide-react';
+import { lazy, Suspense, useEffect } from 'react';
+import { LogOut, LayoutDashboard, Settings, ShoppingBag, User, BarChart3, Package, CalendarDays, Truck } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { useEffect } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 
 // Context & Auth
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { TenantProvider } from '@/contexts/TenantContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { AdminRoute } from '@/components/auth/AdminRoute';
 import { queryClient } from '@/lib/react-query';
 
-// Pages
+// Pages — eager (pequenas, carregam sempre)
 import Marketplace from '@/pages/Marketplace';
-import Dashboard from '@/pages/Dashboard';
-import Admin from '@/pages/Admin';
-import Docs from '@/pages/Docs';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import EquipmentDetails from '@/pages/EquipmentDetails';
-import { AIToolsPage } from '@/pages/AITools';
-import { AIAssistant } from '@/components/ai/AIAssistant';
-import AcceptInvite from '@/pages/AcceptInvite';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import TermsOfUse from '@/pages/TermsOfUse';
+import NotFound from '@/pages/NotFound';
+
+// Pages — lazy (pesadas, só carregam quando o usuário navega até elas)
+const Dashboard = lazy(() => import('@/pages/Dashboard'));
+const Admin = lazy(() => import('@/pages/Admin'));
+const Docs = lazy(() => import('@/pages/Docs'));
+const AIToolsPage = lazy(() => import('@/pages/AITools').then(m => ({ default: m.AIToolsPage })));
+const AcceptInvite = lazy(() => import('@/pages/AcceptInvite'));
+
+import { AIAssistant } from '@/components/ai/AIAssistant';
 import { Footer } from '@/components/layout/Footer';
 import ProfessionalBackground from '@/components/ui/professional-background';
+
+// Fallback de loading para Suspense
+function PageLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    </div>
+  );
+}
 
 function Navbar() {
   const { user, profile, signOut } = useAuth();
@@ -166,33 +181,37 @@ function MainLayout() {
       <ProfessionalBackground />
       {!isAuthPage && <Navbar />}
       <main className="flex-1 pb-20 md:pb-0">
-        <Routes>
-          <Route path="/" element={<Marketplace />} />
-          <Route path="/equipment/:id" element={<EquipmentDetails />} />
-          <Route path="/docs" element={<Docs />} />
-          <Route path="/ai-tools" element={<AIToolsPage />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/invite/:token" element={<AcceptInvite />} />
-          <Route path="/privacy" element={<PrivacyPolicy />} />
-          <Route path="/terms" element={<TermsOfUse />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <Admin />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/" element={<Marketplace />} />
+            <Route path="/equipment/:id" element={<EquipmentDetails />} />
+            <Route path="/docs" element={<Docs />} />
+            <Route path="/ai-tools" element={<AIToolsPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/invite/:token" element={<AcceptInvite />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsOfUse />} />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <Admin />
+                </AdminRoute>
+              }
+            />
+            {/* Catch-all: rota inválida exibe 404 */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
       </main>
       {!isAuthPage && <Footer />}
       {!isAuthPage && <BottomNav />}

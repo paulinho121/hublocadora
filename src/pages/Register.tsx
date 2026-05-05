@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ export default function Register() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [termsAccepted, setTermsAccepted] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -155,7 +156,29 @@ export default function Register() {
                                 </p>
                             </div>
                         )}
-                        <Button className="w-full h-12 bg-primary hover:bg-primary/90 font-black uppercase tracking-tighter text-lg mt-4 shadow-lg shadow-primary/20" type="submit" disabled={loading}>
+                        {/* Terms acceptance — LGPD */}
+                        <div className="flex items-start gap-3 pt-1">
+                            <input
+                                id="terms-accept"
+                                type="checkbox"
+                                checked={termsAccepted}
+                                onChange={(e) => setTermsAccepted(e.target.checked)}
+                                className="mt-1 h-4 w-4 shrink-0 rounded border-zinc-700 bg-zinc-900 accent-primary cursor-pointer"
+                            />
+                            <label htmlFor="terms-accept" className="text-[11px] text-zinc-500 leading-relaxed cursor-pointer">
+                                Li e concordo com os{' '}
+                                <Link to="/terms" className="text-primary underline underline-offset-2 hover:text-primary/80 font-bold">Termos de Uso</Link>
+                                {' '}e a{' '}
+                                <Link to="/privacy" className="text-primary underline underline-offset-2 hover:text-primary/80 font-bold">Política de Privacidade</Link>
+                                {' '}do Moving Hub.
+                            </label>
+                        </div>
+
+                        <Button
+                            className="w-full h-12 bg-primary hover:bg-primary/90 font-black uppercase tracking-tighter text-lg mt-2 shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                            type="submit"
+                            disabled={loading || !termsAccepted}
+                        >
                             {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
                             {loading ? 'Preparando Setup...' : 'Cadastrar agora'}
                         </Button>
