@@ -71,6 +71,8 @@ export default function EquipmentDetails() {
         quantity: 1,
         delivery_method: 'pickup',
         delivery_address: null,
+        subrental_company_id: null,
+        origin_branch_id: null,
         notes: null
       });
 

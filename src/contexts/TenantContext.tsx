@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useAuth } from './AuthContext';
 import { supabase } from '@/lib/supabase';
-import { Profile, Company } from '@/types/database';
+import { Profile, Company, Branch } from '@/types/database';
 import { isMasterUser } from '@/lib/masterUsers';
 
 interface TenantContextType {
