@@ -26,24 +26,8 @@ export function useDeliveries(options?: {
                     )
                 `);
 
-            // 2. Aplica filtros de visibilidade contextual
-            if (options?.tenantId) {
-                // Se eu tenho uma empresa, vejo o que eu envio OU o que eu recebo
-                if (options.branchId) {
-                    // Visão de Gerente de Filial
-                    query = query.or(`origin_branch_id.eq.${options.branchId},fulfilling_company_id.eq.${options.tenantId}`);
-                } else {
-                    // Visão de Dono de Empresa (Master)
-                    query = query.or(`fulfilling_company_id.eq.${options.tenantId},booking.company_id.eq.${options.tenantId},booking.renter.company_id.eq.${options.tenantId}`);
-                }
-            } else if (options?.branchId) {
-                query = query.eq('origin_branch_id', options.branchId);
-            } else {
-                // Se não sou empresa nem filial (sou um cliente individual), 
-                // o RLS do banco já vai filtrar para ver apenas meus próprios bookings.
-                // Mas podemos reforçar aqui se necessário.
-            }
-
+            // 2. A visibilidade é controlada automaticamente pelo RLS do banco de dados.
+            // Não precisamos de filtros manuais complexos aqui que podem quebrar a query.
             if (options?.status) {
                 query = query.eq('status', options.status);
             }
