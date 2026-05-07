@@ -405,8 +405,8 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                     ORD-{delivery.booking_id.slice(0, 8).toUpperCase()}
                                                                 </Badge>
                                                                 {delivery.serial_number && (
-                                                                    <Badge variant="outline" className={`text-[7px] h-3.5 px-1.5 font-black uppercase tracking-[0.1em] border-none ${isRequested ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
-                                                                        {isRequested ? 'Entrada' : 'Saída'}
+                                                                    <Badge variant="outline" className={`text-[7px] h-3.5 px-1.5 font-black uppercase tracking-[0.1em] border-none ${logisticsMode === 'to_receive' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
+                                                                        {logisticsMode === 'to_receive' ? 'Entrada' : 'Saída'}
                                                                     </Badge>
                                                                 )}
                                                                 <span className="text-xs font-black text-zinc-600 uppercase tracking-[0.2em] flex items-center gap-2">
@@ -416,6 +416,18 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                             <h3 className="text-xl sm:text-2xl font-bold uppercase tracking-tight text-white leading-tight">
                                                                 {delivery.booking?.equipment?.name || 'Equipamento em Trânsito'}
                                                             </h3>
+                                                            <div className="flex flex-wrap items-center gap-4">
+                                                                <div className="flex items-center gap-2 bg-zinc-900/40 px-3 py-1.5 rounded-full border border-white/5">
+                                                                    <div className="w-2 h-2 rounded-full bg-primary" />
+                                                                    <span className="text-xs font-black uppercase tracking-widest text-zinc-400">
+                                                                        {delivery.booking?.renter?.company?.name || delivery.booking?.renter?.full_name || 'Cliente'}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="flex items-center gap-2 bg-zinc-900/40 px-3 py-1.5 rounded-full border border-white/5">
+                                                                    <MapPin className="h-3 w-3 text-zinc-500" />
+                                                                    <span className="text-xs font-black uppercase tracking-widest text-zinc-400">
+                                                                        {delivery.booking?.renter?.company?.city || 'HUB Central'}
+                                                                    </span>
                                                                 </div>
                                                                 {delivery.reverse_logistics_address && (
                                                                     <div className="flex items-center gap-2 bg-emerald-500/5 px-3 py-1.5 rounded-full border border-emerald-500/10">
