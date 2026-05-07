@@ -225,7 +225,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                 <ShieldAlert className="h-12 w-12 text-destructive mb-4 opacity-50" />
                 <h3 className="text-xl font-black uppercase text-zinc-100 mb-2">Erro ao carregar logística</h3>
                 <p className="text-zinc-500 text-xs font-medium max-w-md">
-                    Ocorreu um erro ao buscar os dados do servidor. Verifique sua conexão e as permissões de acesso.
+                    {fetchError instanceof Error ? fetchError.message : (fetchError as any)?.message || 'Erro desconhecido'}
                 </p>
                 <Button 
                     variant="outline" 

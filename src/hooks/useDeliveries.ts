@@ -15,14 +15,13 @@ export function useDeliveries(options?: {
                 .from('deliveries')
                 .select(`
                     *,
-                    booking:bookings!inner(
+                    booking:bookings(
                         *,
-                        equipment:equipments(name, images, subrental_company_id),
+                        equipment:equipments(name, images),
                         renter:profiles(
                             id,
                             full_name,
-                            company_id,
-                            company:companies!company_id(id, name, address_city)
+                            company:companies(id, name, address_city)
                         )
                     )
                 `);
