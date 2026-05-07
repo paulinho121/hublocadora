@@ -122,15 +122,16 @@ export function MasterCatalogSelector({ companyId, onSuccess }: MasterCatalogSel
                 : 'border-zinc-900 bg-zinc-950 hover:border-zinc-700'
             }`}
           >
-            <div className="w-20 h-20 rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 flex flex-col items-center justify-center flex-shrink-0 relative group">
+            <div className="w-24 h-24 rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 flex flex-col items-center justify-center flex-shrink-0 relative group">
                 <img 
                   src={item.image_url || ''} 
                   alt={item.name} 
-                  className="w-full h-full object-cover z-10"
+                  className="w-full h-full object-contain z-10 transition-transform group-hover:scale-110"
                   onError={(e) => {
                     // Fallback para quando a imagem da Aputure/Amaran estiver fora do ar
                     e.currentTarget.style.display = 'none';
-                    e.currentTarget.parentElement?.querySelector('.fallback-icon')?.classList.remove('hidden');
+                    const fallback = e.currentTarget.parentElement?.querySelector('.fallback-icon');
+                    if (fallback) fallback.classList.remove('hidden');
                   }} 
                 />
                 <div className="fallback-icon absolute inset-0 hidden flex flex-col items-center justify-center text-zinc-700 bg-zinc-900 z-0">
