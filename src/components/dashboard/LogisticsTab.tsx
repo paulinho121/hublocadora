@@ -441,6 +441,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                         )}
                     </div>
                 </div>
+            )}
             {activeSubTab === 'availability' && (
                 <InventoryStatusReport companyId={tenantId} />
             )}
