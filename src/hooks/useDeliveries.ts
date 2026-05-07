@@ -21,7 +21,7 @@ export function useDeliveries(options?: {
                         renter:profiles(
                             id,
                             full_name,
-                            company:companies(id, name, address_city)
+                            company:companies!profiles_company_id_fkey(id, name, address_city)
                         )
                     )
                 `);
