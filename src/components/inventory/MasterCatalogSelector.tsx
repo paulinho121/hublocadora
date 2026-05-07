@@ -62,6 +62,7 @@ export function MasterCatalogSelector({ companyId, onSuccess }: MasterCatalogSel
         // Mode: New Creation
         await createEquipment.mutateAsync({
           name: selectedItem.name,
+          brand: selectedItem.brand,
           category: selectedItem.category,
           description: selectedItem.description,
           images: [selectedItem.image_url],

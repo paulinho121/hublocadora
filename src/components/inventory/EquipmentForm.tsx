@@ -13,6 +13,7 @@ import { useCreateEquipment, useUpdateEquipment, uploadEquipmentImage } from '@/
 import { useCategories } from '@/hooks/useCategories';
 import { AIService } from '@/services/AIService';
 import { MasterCatalogSelector } from './MasterCatalogSelector';
+import { useTenant } from '@/contexts/TenantContext';
 
 const equipmentSchema = z.object({
   name: z.string().min(3, 'Nome deve ter pelo menos 3 caracteres'),
@@ -54,7 +55,10 @@ interface EquipmentFormProps {
   onSuccess: () => void;
 }
 
-export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentFormProps) {
+export function EquipmentForm({ equipment, companyId: propCompanyId, onSuccess }: EquipmentFormProps) {
+  const { company, tenantId: contextCompanyId } = useTenant();
+  const companyId = propCompanyId || contextCompanyId || '';
+
   const [step, setStep] = useState<'selection' | 'master_catalog' | 'manual_form'>(
     equipment ? 'manual_form' : 'selection'
   );
@@ -84,8 +88,8 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
       condition: equipment?.condition || 'good',
       status: equipment?.status || 'available',
       stock_quantity: equipment?.stock_quantity || 1,
-      location_base: equipment?.location_base || (equipment?.features as any)?.city || (equipment?.features as any)?.location || '',
-      state_uf: equipment?.state_uf || (equipment?.features as any)?.state || '',
+      location_base: equipment?.location_base || company?.address_city || '',
+      state_uf: equipment?.state_uf || company?.address_state || '',
     },
   });
 
@@ -116,22 +120,27 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
     }
   };
 
-  const handleAiDescription = async () => {
+  const handleSmartFill = async () => {
     const name = watch('name');
     if (!name || name.length < 3) {
-      alert('Digite o nome do modelo para usar a IA');
+      alert('Digite pelo menos o modelo (ex: Sony A7S III) para que a IA possa ajudar.');
       return;
     }
 
     try {
       setIsAiGenerating(true);
       const data = await AIService.generateCatalog(name);
-      if (data.description) {
-        setValue('description', data.description);
+      
+      if (data.brand) setValue('brand', data.brand);
+      if (data.category) setValue('category', data.category);
+      if (data.description) setValue('description', data.description);
+      
+      if (data.brand || data.category || data.description) {
+        // console.log('Smart fill success');
       }
     } catch (error) {
       console.error('AI Error:', error);
-      alert('Erro ao gerar descrição com IA. O servidor do Genkit está rodando?');
+      alert('Não foi possível completar os dados com IA no momento. Tente preencher manualmente.');
     } finally {
       setIsAiGenerating(false);
     }
@@ -143,11 +152,17 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
       return;
     }
 
+    if (!companyId) {
+      alert('Erro: Sua conta ainda não está vinculada a uma empresa. Por favor, complete seu cadastro de perfil primeiro.');
+      return;
+    }
+
     try {
       const { location_base, state_uf, brand, ...dbValues } = values;
       const payload = {
         ...dbValues,
         company_id: companyId,
+        brand,
         images,
         location_base,
         state_uf,
@@ -234,17 +249,17 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
             <Label htmlFor="name">Nome do Equipamento {equipment?.master_item_id && <span className="text-[10px] text-primary">(Catálogo Oficial)</span>}</Label>
             <button
               type="button"
-              onClick={handleAiDescription}
+              onClick={handleSmartFill}
               disabled={isAiGenerating || !!equipment?.master_item_id}
-              className="flex items-center gap-1 text-[10px] text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
-              title="Gerar descrição com IA"
+              className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-[10px] text-primary hover:bg-primary/20 transition-all disabled:opacity-50 border border-primary/20 animate-pulse-subtle"
+              title="Preencher Marca, Categoria e Descrição com IA"
             >
               {isAiGenerating ? (
                 <Loader2 className="h-3 w-3 animate-spin" />
               ) : (
                 <>
-                  <Sparkles className="h-3 w-3" />
-                  Gerar Descrição IA
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Preenchimento Inteligente IA
                 </>
               )}
             </button>
@@ -410,15 +425,14 @@ export function EquipmentForm({ equipment, companyId, onSuccess }: EquipmentForm
 
       <div className="flex justify-end gap-2 pt-4 border-t border-zinc-800/50">
         {!equipment && (
-          <Button 
+          <button 
             type="button" 
-            variant="ghost" 
             onClick={() => setStep('selection')}
             disabled={isSubmitting || uploading}
-            className="uppercase font-bold tracking-widest text-xs"
+            className="uppercase font-bold tracking-widest text-xs px-4 text-zinc-500 hover:text-zinc-300 transition-colors"
           >
             Voltar
-          </Button>
+          </button>
         )}
         <Button 
           type="submit" 
