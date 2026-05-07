@@ -4,7 +4,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Equipment } from "@/types/database";
-import { Edit2, Trash2, Package, Info } from "lucide-react";
+import { Edit2, Trash2, Package, Info, Truck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUpdateEquipment } from "@/hooks/useEquipments";
 import { useState } from "react";
@@ -14,9 +14,11 @@ interface InventoryCardProps {
   onEdit: (item: Equipment) => void;
   onDelete: (id: string) => void;
   tenantId?: string;
+  onAssign?: (item: Equipment) => void;
 }
 
-export function InventoryCard({ item, onEdit, onDelete }: InventoryCardProps) {
+export function InventoryCard({ item, onEdit, onDelete, onAssign }: InventoryCardProps) {
+    const { isBranchManager } = useTenant();
   const navigate = useNavigate();
   const updateMutation = useUpdateEquipment();
   const [loading, setLoading] = useState(false);
@@ -127,6 +129,17 @@ export function InventoryCard({ item, onEdit, onDelete }: InventoryCardProps) {
               >
                 <Edit2 className="h-4 w-4" />
               </Button>
+              {!isBranchManager && onAssign && (
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => onAssign(item)}
+                  className="h-9 w-9 bg-zinc-900/50 hover:bg-emerald-500/10 text-zinc-600 hover:text-emerald-500 transition-all rounded-xl border border-zinc-800"
+                  title="Atribuir à Filial"
+                >
+                  <Truck className="h-4 w-4" />
+                </Button>
+              )}
               <Button 
                 variant="ghost" 
                 size="icon" 

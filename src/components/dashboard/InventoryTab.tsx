@@ -12,6 +12,8 @@ import {
   AlertCircle 
 } from 'lucide-react';
 import { Select } from '@/components/ui/select';
+import { AssignEquipmentModal } from './AssignEquipmentModal';
+import { Equipment } from '@/types/database';
 
 import { useTenant } from '@/contexts/TenantContext';
 
@@ -25,6 +27,7 @@ interface InventoryTabProps {
 export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTabProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [assigningItem, setAssigningItem] = useState<Equipment | null>(null);
   const { isBranchManager, branchId } = useTenant();
 
   const { data: equipments, isLoading } = useEquipments({
@@ -119,6 +122,7 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
               item={item} 
               onEdit={onEdit} 
               onDelete={onDelete} 
+              onAssign={(item) => setAssigningItem(item)}
               tenantId={tenantId}
             />
           ))}
@@ -159,6 +163,12 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
            </div>
         </div>
       )}
+
+      <AssignEquipmentModal 
+        equipment={assigningItem}
+        isOpen={!!assigningItem}
+        onClose={() => setAssigningItem(null)}
+      />
     </div>
   );
 }
