@@ -441,11 +441,15 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                         )}
                     </div>
                 </div>
-            )}
+            {activeSubTab === 'availability' && (
                 <InventoryStatusReport companyId={tenantId} />
-            ) : activeSubTab === 'transfers' ? (
+            )}
+
+            {activeSubTab === 'transfers' && (
                 <InternalTransfersSection />
-            ) : (
+            )}
+
+            {activeSubTab === 'deliveries' && (
                 <div className="grid grid-cols-1 gap-10">
                     <AnimatePresence mode="popLayout">
                         {activeDeliveries?.length === 0 ? (
@@ -871,10 +875,10 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                 </Card>
                             </motion.div>
                         ))}
-                    </div>
-                )}
-                </AnimatePresence>
-            </div>
+                            </div>
+                        )}
+                    </AnimatePresence>
+                </div>
             )}
 
 
