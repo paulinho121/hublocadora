@@ -178,9 +178,11 @@ export function EquipmentForm({ equipment, companyId: propCompanyId, onSuccess }
         await createMutation.mutateAsync(payload);
       }
       onSuccess();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving equipment:', error);
-      alert('Erro ao salvar equipamento');
+      const errorMsg = error?.message || 'Erro ao salvar equipamento';
+      const errorDetails = error?.details || '';
+      alert(`${errorMsg} ${errorDetails}`);
     }
   };
 
