@@ -8,6 +8,7 @@ import { Edit2, Trash2, Package, Info, Truck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUpdateEquipment } from "@/hooks/useEquipments";
 import { useState } from "react";
+import { useTenant } from "@/contexts/TenantContext";
 
 interface InventoryCardProps {
   item: Equipment;
