@@ -187,6 +187,8 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
         await handleNextStatus(pendingDelivery);
     };
 
+    const getStatusLabel = (status: string) => {
+        const labels: any = {
             'pending': 'Pedido Recebido',
             'picking': 'Em Separação',
             'ready': 'Pronto para Enviar',
@@ -198,6 +200,8 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
         return labels[status] || status;
     };
 
+    const getNextActionLabel = (status: string) => {
+        const actions: any = {
             'pending': 'Confirmar Pedido',
             'picking': 'Finalizar Separação',
             'ready': 'Despachar Equipamento',
