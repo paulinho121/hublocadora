@@ -249,7 +249,7 @@ export function EquipmentForm({ equipment, companyId: propCompanyId, onSuccess }
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="name">Nome do Equipamento {equipment?.master_item_id && <span className="text-[10px] text-primary">(Catálogo Oficial)</span>}</Label>
-            <button
+            {/* <button
               type="button"
               onClick={handleSmartFill}
               disabled={isAiGenerating || !!equipment?.master_item_id}
@@ -264,7 +264,7 @@ export function EquipmentForm({ equipment, companyId: propCompanyId, onSuccess }
                   Preenchimento Inteligente IA
                 </>
               )}
-            </button>
+            </button> */}
           </div>
           <Input 
             id="name" 

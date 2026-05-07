@@ -60,7 +60,7 @@ function Navbar() {
           </Link>
           <nav className="hidden md:flex items-center space-x-8 text-xs font-black text-muted-foreground uppercase tracking-[0.2em]">
             <NavLink to="/dashboard" className={({isActive}) => isActive ? "text-primary" : "hover:text-foreground transition-all"}>Locadora</NavLink>
-            <NavLink to="/ai-tools" className={({isActive}) => isActive ? "text-primary" : "hover:text-foreground transition-all"}>IA Tools</NavLink>
+            {/* <NavLink to="/ai-tools" className={({isActive}) => isActive ? "text-primary" : "hover:text-foreground transition-all"}>IA Tools</NavLink> */}
             {profile?.role === 'admin' && (
               <NavLink to="/admin" className={({isActive}) => isActive ? "text-primary" : "hover:text-foreground transition-all"}>Gestão HUB</NavLink>
             )}
@@ -186,7 +186,7 @@ function MainLayout() {
             <Route path="/" element={<Marketplace />} />
             <Route path="/equipment/:id" element={<EquipmentDetails />} />
             <Route path="/docs" element={<Docs />} />
-            <Route path="/ai-tools" element={<AIToolsPage />} />
+            {/* <Route path="/ai-tools" element={<AIToolsPage />} /> */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/invite/:token" element={<AcceptInvite />} />
@@ -215,7 +215,7 @@ function MainLayout() {
       </main>
       {!isAuthPage && <Footer />}
       {!isAuthPage && <BottomNav />}
-      <AIAssistant />
+      {/* <AIAssistant /> */}
     </div>
   );
 }
