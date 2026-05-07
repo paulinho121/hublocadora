@@ -121,7 +121,7 @@ export interface Notification {
     created_at: string;
 }
 
-export type DeliveryStatus = 'pending' | 'picking' | 'ready' | 'shipped' | 'delivered' | 'cancelled';
+export type DeliveryStatus = 'pending' | 'picking' | 'ready' | 'shipped' | 'delivered' | 'confirmed' | 'cancelled';
 
 export interface Delivery {
     id: string;
@@ -136,7 +136,7 @@ export interface Delivery {
     current_lng: number | null;
     estimated_arrival: string | null;
     // Reverse Logistics
-    reverse_logistics_status: 'not_started' | 'requested' | 'collecting' | 'in_transit' | 'returned' | 'cancelled';
+    reverse_logistics_status: 'not_started' | 'requested' | 'collecting' | 'in_transit' | 'returned' | 'completed' | 'cancelled';
     reverse_logistics_address: string | null;
     reverse_logistics_branch_id: string | null;
     reverse_driver_name: string | null;

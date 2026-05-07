@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Package, Truck, Clock, MapPin, CheckCircle2, ShoppingBag, ArrowRight, Loader2, Phone, User, Hash, ShieldAlert, Navigation } from 'lucide-react';
+import { Package, Truck, Clock, MapPin, CheckCircle2, ShoppingBag, ArrowRight, Loader2, Phone, User, Hash, ShieldAlert, Navigation, RotateCcw, Building2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -136,7 +136,8 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
             'pending': 'picking',
             'picking': 'ready',
             'ready': 'shipped',
-            'shipped': 'delivered'
+            'shipped': 'delivered',
+            'delivered': 'confirmed'
         };
 
         const nextStatus = statusFlow[delivery.status];
@@ -186,24 +187,22 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
         await handleNextStatus(pendingDelivery);
     };
 
-    const getStatusLabel = (status: string) => {
-        const labels: any = {
             'pending': 'Pedido Recebido',
             'picking': 'Em Separação',
             'ready': 'Pronto para Enviar',
             'shipped': 'Em Trânsito',
-            'delivered': 'Entregue',
+            'delivered': 'Entregue (Aguardando Conferência)',
+            'confirmed': 'Recebido e Conferido',
             'cancelled': 'Cancelado'
         };
         return labels[status] || status;
     };
 
-    const getNextActionLabel = (status: string) => {
-        const actions: any = {
             'pending': 'Confirmar Pedido',
             'picking': 'Finalizar Separação',
             'ready': 'Despachar Equipamento',
-            'shipped': 'Confirmar Entrega'
+            'shipped': 'Confirmar Entrega',
+            'delivered': 'Conferir e Aceitar Equipamento'
         };
         return actions[status];
     };
@@ -248,7 +247,8 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
 
                 <div className="flex bg-zinc-950/60 p-1.5 rounded-[20px] border border-white/5 backdrop-blur-xl">
                     {[
-                        { id: 'deliveries', label: 'Pedidos Ativos' },
+                        { id: 'deliveries', label: 'Expedição' },
+                        { id: 'reverse', label: 'Fluxo de Retorno' },
                         { id: 'transfers', label: 'Transferências' },
                         { id: 'availability', label: 'Disponibilidade' }
                     ].map((tab) => (
@@ -301,7 +301,143 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                 </div>
             )}
 
-            {activeSubTab === 'availability' ? (
+            {activeSubTab === 'reverse' && (
+                <div className="space-y-10 animate-in fade-in slide-in-from-top-4 duration-700">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-indigo-500/5 p-6 rounded-[32px] border border-indigo-500/10 backdrop-blur-xl">
+                        <div className="flex items-center gap-4">
+                            <div className="h-14 w-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 shadow-[0_0_30px_rgba(99,102,241,0.2)]">
+                                <RotateCcw className="h-7 w-7 text-indigo-400" />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-black uppercase tracking-tighter">Reverse Hub</h3>
+                                <p className="text-[10px] text-indigo-400/60 font-bold uppercase tracking-[0.2em]">Monitoramento de Devoluções e Reentrada</p>
+                            </div>
+                        </div>
+                        <div className="flex gap-4">
+                            <div className="text-right">
+                                <p className="text-[9px] font-black uppercase text-indigo-500/40 tracking-widest">Coletas Pendentes</p>
+                                <p className="text-2xl font-black text-indigo-400">
+                                    {deliveries?.filter(d => d.reverse_logistics_status === 'requested').length || 0}
+                                </p>
+                            </div>
+                            <div className="w-[1px] h-10 bg-indigo-500/10" />
+                            <div className="text-right">
+                                <p className="text-[9px] font-black uppercase text-indigo-500/40 tracking-widest">Em Triagem Técnica</p>
+                                <p className="text-2xl font-black text-indigo-400">
+                                    {deliveries?.filter(d => d.reverse_logistics_status === 'returned').length || 0}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-10">
+                        {deliveries?.filter(d => d.reverse_logistics_status !== 'not_started').length === 0 ? (
+                            <div className="bg-zinc-950/20 border border-dashed border-white/5 rounded-[40px] p-32 text-center backdrop-blur-md">
+                                <p className="text-zinc-700 text-[10px] font-black uppercase tracking-[0.4em]">Nenhum fluxo de retorno em andamento</p>
+                            </div>
+                        ) : (
+                            deliveries?.filter(d => d.reverse_logistics_status !== 'not_started').map(delivery => (
+                                <motion.div key={`rev-${delivery.id}`} layout className="group">
+                                    <Card className="bg-zinc-950/40 border-indigo-500/10 rounded-[40px] overflow-hidden hover:border-indigo-500/30 transition-all duration-700 shadow-2xl relative">
+                                        <div className="absolute top-0 right-0 p-8">
+                                            <Badge className="bg-indigo-500 text-black font-black uppercase text-[10px] tracking-widest px-4 py-1.5 rounded-full shadow-lg shadow-indigo-500/20">REVERSA</Badge>
+                                        </div>
+                                        <div className="p-12 flex flex-col lg:flex-row gap-12">
+                                            <div className="flex-1 space-y-8">
+                                                <div className="flex gap-8">
+                                                    <div className="h-24 w-24 rounded-[32px] bg-black border border-white/5 flex items-center justify-center overflow-hidden shrink-0">
+                                                        {delivery.booking?.equipment?.images?.[0] ? (
+                                                            <img src={delivery.booking.equipment.images[0]} alt="" className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <Package className="h-10 w-10 text-zinc-800" />
+                                                        )}
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <p className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.2em]">Fluxo de Devolução · TRF-REV-{delivery.id.slice(0,6).toUpperCase()}</p>
+                                                        <h4 className="text-3xl font-black uppercase tracking-tighter text-white">{delivery.booking?.equipment?.name}</h4>
+                                                        <div className="flex items-center gap-4 pt-2">
+                                                            <div className="flex items-center gap-2 text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                                                                <MapPin className="h-3.5 w-3.5 text-indigo-500" /> DE: <span className="text-zinc-300">{delivery.booking?.renter?.company?.city || 'Cliente'}</span>
+                                                            </div>
+                                                            <ArrowRight className="h-3 w-3 text-zinc-700" />
+                                                            <div className="flex items-center gap-2 text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                                                                <Building2 className="h-3.5 w-3.5 text-indigo-500" /> PARA: <span className="text-zinc-300">{delivery.reverse_logistics_address?.split(',')[0] || 'Base Original'}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="pt-6">
+                                                    <div className="flex justify-between mb-4">
+                                                        {['Solicitado', 'Em Coleta', 'Em Trânsito', 'Triagem', 'Concluído'].map((step, i) => {
+                                                            const statusIdx = ['requested', 'collecting', 'in_transit', 'returned', 'completed'].indexOf(delivery.reverse_logistics_status);
+                                                            const isActive = i <= statusIdx;
+                                                            return (
+                                                                <div key={step} className="flex flex-col items-center gap-2">
+                                                                    <div className={cn(
+                                                                        "h-2 w-2 rounded-full transition-all duration-500",
+                                                                        isActive ? "bg-indigo-400 shadow-[0_0_10px_rgba(129,140,248,0.5)] scale-125" : "bg-zinc-800"
+                                                                    )} />
+                                                                    <span className={cn("text-[8px] font-black uppercase tracking-widest", isActive ? "text-indigo-400" : "text-zinc-700")}>{step}</span>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                    <div className="h-1.5 w-full bg-zinc-900 rounded-full overflow-hidden">
+                                                        <motion.div 
+                                                            initial={{ width: 0 }}
+                                                            animate={{ width: `${(['requested', 'collecting', 'in_transit', 'returned', 'completed'].indexOf(delivery.reverse_logistics_status) + 1) * 20}%` }}
+                                                            className="h-full bg-gradient-to-r from-indigo-600 to-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.3)]"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="w-full lg:w-[320px] bg-zinc-950/60 rounded-[32px] p-8 border border-white/5 flex flex-col justify-between items-center text-center gap-6">
+                                                <div className="space-y-4">
+                                                    <div className="h-12 w-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center mx-auto border border-indigo-500/20">
+                                                        {delivery.reverse_logistics_status === 'requested' ? <Clock className="h-6 w-6 text-indigo-400" /> : <ShieldAlert className="h-6 w-6 text-indigo-400" />}
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-1">{delivery.reverse_logistics_status}</p>
+                                                        <p className="text-xs text-zinc-500 font-medium leading-relaxed">
+                                                            {delivery.reverse_logistics_status === 'requested' ? 'Aguardando início da coleta no endereço do cliente.' : 'Item em processo de retorno e validação técnica.'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                
+                                                {delivery.reverse_logistics_status === 'returned' && (
+                                                    <div className="space-y-4 w-full">
+                                                        <div className="p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl">
+                                                            <p className="text-[10px] text-indigo-400 font-black uppercase tracking-widest mb-1">Aguardando Conferência de Reentrada</p>
+                                                            <p className="text-[11px] text-zinc-500">Valide o estado físico dos itens antes de liberar para o estoque.</p>
+                                                        </div>
+                                                        <Button 
+                                                            onClick={async () => {
+                                                                const { error } = await supabase
+                                                                    .from('deliveries')
+                                                                    .update({ reverse_logistics_status: 'completed' })
+                                                                    .eq('id', delivery.id);
+                                                                if (!error) queryClient.invalidateQueries({ queryKey: ['deliveries'] });
+                                                            }}
+                                                            className="w-full bg-white text-black font-black uppercase text-[10px] tracking-widest h-14 rounded-2xl shadow-xl flex items-center gap-2"
+                                                        >
+                                                            <CheckCircle2 className="h-4 w-4" /> Conferência OK - Guardar
+                                                        </Button>
+                                                    </div>
+                                                )}
+
+                                                <div className="text-[9px] font-bold text-zinc-700 uppercase tracking-widest">
+                                                    Token de Coleta: <span className="text-white font-black">{delivery.reverse_token}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </Card>
+                                </motion.div>
+                            ))
+                        )}
+                    </div>
+                </div>
+            )}
                 <InventoryStatusReport companyId={tenantId} />
             ) : activeSubTab === 'transfers' ? (
                 <InternalTransfersSection />
@@ -640,48 +776,78 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                     </div>
 
                                                                     <div className="space-y-4">
-                                                                        <div className="flex items-center justify-between">
-                                                                            <span className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Logística Reversa</span>
-                                                                            <Badge variant="outline" className="text-[9px] font-bold uppercase border-emerald-500/20 text-emerald-500">
-                                                                                {delivery.reverse_logistics_status === 'not_started' ? 'Aguardando' : delivery.reverse_logistics_status}
-                                                                            </Badge>
-                                                                        </div>
-
-                                                                        {delivery.reverse_logistics_status === 'not_started' ? (
-                                                                            <Button 
-                                                                                onClick={async () => {
-                                                                                    const { error } = await supabase
-                                                                                        .from('deliveries')
-                                                                                        .update({ reverse_logistics_status: 'requested' })
-                                                                                        .eq('id', delivery.id);
-                                                                                    if (error) alert(error.message);
-                                                                                    else queryClient.invalidateQueries({ queryKey: ['deliveries'] });
-                                                                                }}
-                                                                                className="w-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border border-emerald-500/20 font-black uppercase tracking-widest h-14 rounded-2xl"
-                                                                            >
-                                                                                Solicitar Coleta de Retorno
-                                                                            </Button>
-                                                                        ) : (
-                                                                            <div className="bg-zinc-900/40 p-5 rounded-[24px] border border-white/5 space-y-4">
-                                                                                <div className="flex items-start gap-4">
-                                                                                    <div className="p-2 bg-zinc-950 rounded-xl border border-white/5">
-                                                                                        <MapPin className="h-4 w-4 text-emerald-500" />
-                                                                                    </div>
-                                                                                    <div>
-                                                                                        <p className="text-[8px] font-black uppercase text-zinc-600 tracking-widest">Destino da Devolução</p>
-                                                                                        <p className="text-[11px] font-bold text-zinc-300 leading-tight mt-1">{delivery.reverse_logistics_address || 'HUB Central'}</p>
-                                                                                    </div>
+                                                                        {delivery.status === 'delivered' ? (
+                                                                            <div className="space-y-4">
+                                                                                <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
+                                                                                    <p className="text-[10px] text-emerald-500 font-black uppercase tracking-widest mb-1">Conferência de Recebimento</p>
+                                                                                    <p className="text-[11px] text-zinc-400">Verifique se todos os itens estão presentes e em ordem conforme o contrato.</p>
                                                                                 </div>
-                                                                                
-                                                                                {delivery.reverse_token && (
-                                                                                    <div className="pt-4 border-t border-white/5 text-center">
-                                                                                        <p className="text-[8px] font-black uppercase text-zinc-600 mb-2 tracking-widest">Token de Coleta (Reversa)</p>
-                                                                                        <div className="text-3xl font-black text-white tracking-[0.3em] drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]">
-                                                                                            {delivery.reverse_token}
+                                                                                {(() => {
+                                                                                    const renterCompanyId = delivery.booking?.renter?.company_id || delivery.booking?.renter?.company?.id;
+                                                                                    const isRenter = renterCompanyId === tenantId || delivery.booking?.company_id === tenantId;
+                                                                                    
+                                                                                    if (isRenter) {
+                                                                                        return (
+                                                                                            <Button 
+                                                                                                onClick={() => handleNextStatus(delivery)}
+                                                                                                disabled={updatingId === delivery.id}
+                                                                                                className="w-full bg-emerald-500 text-black font-black uppercase tracking-widest h-14 rounded-2xl shadow-lg"
+                                                                                            >
+                                                                                                {updatingId === delivery.id ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Conferir e Aceitar Agora'}
+                                                                                            </Button>
+                                                                                        );
+                                                                                    }
+                                                                                    return (
+                                                                                        <p className="text-[10px] text-zinc-600 font-bold uppercase text-center py-2">Aguardando aceite do cliente...</p>
+                                                                                    );
+                                                                                })()}
+                                                                            </div>
+                                                                        ) : (
+                                                                            <>
+                                                                                <div className="flex items-center justify-between">
+                                                                                    <span className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Logística Reversa</span>
+                                                                                    <Badge variant="outline" className="text-[9px] font-bold uppercase border-emerald-500/20 text-emerald-500">
+                                                                                        {delivery.reverse_logistics_status === 'not_started' ? 'Disponível' : delivery.reverse_logistics_status}
+                                                                                    </Badge>
+                                                                                </div>
+
+                                                                                {delivery.reverse_logistics_status === 'not_started' ? (
+                                                                                    <Button 
+                                                                                        onClick={async () => {
+                                                                                            const { error } = await supabase
+                                                                                                .from('deliveries')
+                                                                                                .update({ reverse_logistics_status: 'requested' })
+                                                                                                .eq('id', delivery.id);
+                                                                                            if (error) alert(error.message);
+                                                                                            else queryClient.invalidateQueries({ queryKey: ['deliveries'] });
+                                                                                        }}
+                                                                                        className="w-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border border-emerald-500/20 font-black uppercase tracking-widest h-14 rounded-2xl"
+                                                                                    >
+                                                                                        Solicitar Coleta de Retorno
+                                                                                    </Button>
+                                                                                ) : (
+                                                                                    <div className="bg-zinc-900/40 p-5 rounded-[24px] border border-white/5 space-y-4">
+                                                                                        <div className="flex items-start gap-4">
+                                                                                            <div className="p-2 bg-zinc-950 rounded-xl border border-white/5">
+                                                                                                <MapPin className="h-4 w-4 text-emerald-500" />
+                                                                                            </div>
+                                                                                            <div>
+                                                                                                <p className="text-[8px] font-black uppercase text-zinc-600 tracking-widest">Destino da Devolução</p>
+                                                                                                <p className="text-[11px] font-bold text-zinc-300 leading-tight mt-1">{delivery.reverse_logistics_address || 'HUB Central'}</p>
+                                                                                            </div>
                                                                                         </div>
+                                                                                        
+                                                                                        {delivery.reverse_token && (
+                                                                                            <div className="pt-4 border-t border-white/5 text-center">
+                                                                                                <p className="text-[8px] font-black uppercase text-zinc-600 mb-2 tracking-widest">Token de Coleta (Reversa)</p>
+                                                                                                <div className="text-3xl font-black text-white tracking-[0.3em] drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                                                                                                    {delivery.reverse_token}
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        )}
                                                                                     </div>
                                                                                 )}
-                                                                            </div>
+                                                                            </>
                                                                         )}
                                                                     </div>
                                                                 </motion.div>

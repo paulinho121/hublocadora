@@ -431,13 +431,6 @@ export default function Dashboard() {
            </div>
 
            <div className="flex items-center gap-4">
-              <Button 
-                onClick={() => setIsHubDialogOpen(true)} 
-                variant="clay"
-                className="h-10 text-[10px] font-black uppercase tracking-widest px-6"
-              >
-                Solicitar Equipamento
-              </Button>
               <div className="h-8 w-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center">
                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               </div>
