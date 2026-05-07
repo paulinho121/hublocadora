@@ -4,31 +4,22 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Equipment } from "@/types/database";
-import { Edit2, Trash2, Package, Info, Zap, ZapOff, Clock, Truck } from "lucide-react";
+import { Edit2, Trash2, Package, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUpdateEquipment } from "@/hooks/useEquipments";
 import { useState } from "react";
-import { AssignEquipmentModal } from "./AssignEquipmentModal";
 
 interface InventoryCardProps {
   item: Equipment;
   onEdit: (item: Equipment) => void;
   onDelete: (id: string) => void;
-  tenantId?: string; // Para saber se o item é cedido
+  tenantId?: string;
 }
 
-export function InventoryCard({ item, onEdit, onDelete, tenantId }: InventoryCardProps) {
+export function InventoryCard({ item, onEdit, onDelete }: InventoryCardProps) {
   const navigate = useNavigate();
   const updateMutation = useUpdateEquipment();
   const [loading, setLoading] = useState(false);
-  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
-
-  // Item cedido = pertence a outra empresa mas esta gerencia (Sub-locadora vendo item do Master)
-  const isCeded = !!item.subrental_company_id && item.company_id !== tenantId;
-  
-  // Item atribuído = eu sou o dono mas outra empresa gerencia OU está em filiais
-  const stockInOtherBranches = item.stock?.filter(s => !s.branch.is_main && s.quantity > 0) || [];
-  const isAssigned = (!!item.subrental_company_id && item.company_id === tenantId) || stockInOtherBranches.length > 0;
 
   const toggleExternalRental = async () => {
     try {
@@ -67,30 +58,21 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId }: InventoryCar
   };
 
   const imageUrl = item.images && item.images.length > 0 ? item.images[0] : null;
-
-  // Calcula a localização para exibir
-  const getLocationDisplay = () => {
-    if (stockInOtherBranches.length === 0) return 'Sede Principal';
-    if (stockInOtherBranches.length === 1 && (item.stock?.find(s => s.branch.is_main)?.quantity || 0) === 0) {
-      return stockInOtherBranches[0].branch.name;
-    }
-    return `Distribuído em ${item.stock?.filter(s => s.quantity > 0).length} Unidades`;
-  };
+  const brand = (item.features as any)?.brand;
 
   return (
     <Card className="group relative overflow-hidden bg-zinc-950/40 border-zinc-800/50 hover:border-primary/30 transition-all duration-300">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
       
-      {/* Item Image or Placeholder */}
       <div 
-        className="relative h-32 w-full overflow-hidden bg-zinc-900 flex items-center justify-center cursor-pointer"
+        className="relative h-40 w-full overflow-hidden bg-zinc-900 flex items-center justify-center cursor-pointer"
         onClick={() => navigate(`/equipment/${item.id}`)}
       >
         {imageUrl ? (
           <img 
             src={imageUrl} 
             alt={item.name} 
-            className="w-full h-full object-contain p-3 transition-all duration-500"
+            className="w-full h-full object-contain p-4 transition-all duration-500 group-hover:scale-105"
           />
         ) : (
           <div className="flex flex-col items-center gap-2 text-zinc-700">
@@ -105,25 +87,18 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId }: InventoryCar
         >
           {getStatusLabel(item.status)}
         </Badge>
-        
-        {/* Badge de item cedido (Para a Sub-locadora) */}
-        {isCeded && (
-          <div className="absolute top-3 left-3 bg-blue-500/20 border border-blue-500/30 text-blue-400 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full backdrop-blur-md">
-            Recebido do Master
-          </div>
-        )}
-
-        {/* Badge de item atribuído (Para o Master) */}
-        {isAssigned && (
-          <div className="absolute top-3 left-3 bg-amber-500/20 border border-amber-500/30 text-amber-500 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full backdrop-blur-md">
-            Atribuído a Unidade
-          </div>
-        )}
       </div>
 
       <CardContent className="p-5">
         <div className="mb-4">
-          <p className="text-[10px] uppercase text-zinc-500 font-bold tracking-widest mb-1">{item.category}</p>
+          <div className="flex items-center gap-2 mb-1">
+            {brand && (
+              <span className="text-[10px] uppercase font-black tracking-widest text-primary bg-primary/10 px-2 py-0.5 rounded">
+                {brand}
+              </span>
+            )}
+            <p className="text-[10px] uppercase text-zinc-500 font-bold tracking-widest">{item.category}</p>
+          </div>
           <h3 
             className="font-bold text-lg leading-tight truncate group-hover:text-primary transition-colors cursor-pointer"
             onClick={() => navigate(`/equipment/${item.id}`)}
@@ -143,38 +118,24 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId }: InventoryCar
             </div>
             
             <div className="flex gap-1">
-              {/* Só mostra editar/excluir se for item próprio */}
-              {!isCeded && (
-                <>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => onEdit(item)} 
-                    className="h-9 w-9 bg-zinc-900/50 hover:bg-primary/20 hover:text-primary transition-all rounded-xl border border-zinc-800"
-                    title="Editar"
-                  >
-                    <Edit2 className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => setIsAssignModalOpen(true)}
-                    className="h-9 w-9 bg-zinc-900/50 hover:bg-blue-500/20 hover:text-blue-400 transition-all rounded-xl border border-zinc-800"
-                    title="Atribuir Unidade"
-                  >
-                    <Truck className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => onDelete(item.id)}
-                    className="h-9 w-9 bg-zinc-900/50 hover:bg-destructive/10 text-zinc-600 hover:text-destructive transition-all rounded-xl border border-zinc-800"
-                    title="Excluir"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </>
-              )}
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => onEdit(item)} 
+                className="h-9 w-9 bg-zinc-900/50 hover:bg-primary/20 hover:text-primary transition-all rounded-xl border border-zinc-800"
+                title="Editar"
+              >
+                <Edit2 className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => onDelete(item.id)}
+                className="h-9 w-9 bg-zinc-900/50 hover:bg-destructive/10 text-zinc-600 hover:text-destructive transition-all rounded-xl border border-zinc-800"
+                title="Excluir"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           </div>
 
@@ -183,7 +144,7 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId }: InventoryCar
               <div className="flex items-center gap-1.5 text-zinc-400 bg-zinc-900 px-2 py-1 rounded-lg border border-zinc-800">
                 <span className="w-1 h-1 rounded-full bg-primary shrink-0 animate-pulse"></span>
                 <span className="text-[9px] font-bold uppercase tracking-widest">
-                  {getLocationDisplay()}
+                  {item.location_base || 'Sede Principal'}
                 </span>
               </div>
               <div className="flex items-center gap-1.5 text-emerald-500 bg-emerald-500/5 px-2 py-1 rounded-lg border border-emerald-500/10">
@@ -213,7 +174,6 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId }: InventoryCar
           </div>
         </div>
 
-        {/* Action Reveal Overlay (optional, but nice) */}
         <div className="mt-4 pt-4 border-t border-zinc-900 hidden group-hover:block animate-in fade-in slide-in-from-top-2 duration-300">
            <Button 
             variant="outline" 
@@ -225,12 +185,6 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId }: InventoryCar
            </Button>
         </div>
       </CardContent>
-
-      <AssignEquipmentModal 
-        equipment={item}
-        isOpen={isAssignModalOpen}
-        onClose={() => setIsAssignModalOpen(false)}
-      />
     </Card>
   );
 }

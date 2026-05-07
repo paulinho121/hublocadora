@@ -96,7 +96,9 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                 quantity,
                 delivery_method: deliveryMethod,
                 delivery_address: deliveryMethod === 'delivery' ? company?.address_street : null,
-                notes: `Reserva rápida via HUB`
+                notes: `Reserva rápida via HUB`,
+                subrental_company_id: null,
+                origin_branch_id: null
             });
             setIsSuccess(true);
             setTimeout(() => {

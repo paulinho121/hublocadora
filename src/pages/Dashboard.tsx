@@ -316,17 +316,40 @@ export default function Dashboard() {
       setUpdatingId(id);
       
       const isBranch = fulfillmentModal?.selectedSubrentalType === 'branch';
+      const isExternal = fulfillmentModal?.selectedSubrentalType === 'external';
       
+      // Se não houver fulfillmentId (fulfillment direto pelo master), usamos o tenantId atual
+      const finalFulfillId = fulfillId || tenantId;
+      const finalFulfillType = fulfillmentModal?.selectedSubrentalType || 'direct';
+
       await updateStatusMutation.mutateAsync({ 
         id, 
         status,
-        subrental_company_id: (status === 'approved' && fulfillmentModal?.selectedSubrentalType === 'external') ? fulfillId : undefined,
-        origin_branch_id: (status === 'approved' && fulfillmentModal?.selectedSubrentalType === 'branch') ? fulfillId : undefined
+        subrental_company_id: (status === 'approved' && isExternal) ? fulfillId : undefined,
+        origin_branch_id: (status === 'approved' && isBranch) ? fulfillId : undefined
       });
 
-      console.log('Status do pedido atualizado. Logística disparada via trigger.');
+      // Cria o registro de logística quando o pedido é aprovado
+      if (status === 'approved') {
+        const token = Math.floor(1000 + Math.random() * 9000).toString();
+        
+        const { error: deliveryError } = await supabase
+          .from('deliveries')
+          .upsert({
+            booking_id: id,
+            status: 'pending',
+            delivery_token: token,
+            fulfilling_company_id: isExternal ? fulfillId : (isBranch ? null : finalFulfillId),
+            origin_branch_id: isBranch ? fulfillId : null,
+            subrental_status: isExternal ? 'pending' : null,
+          }, { onConflict: 'booking_id', ignoreDuplicates: true });
+
+        if (deliveryError) {
+          console.error('Erro ao criar registro de logística:', deliveryError);
+        }
+      }
       
-      // Invalidamos para garantir que o Realtime e o UI mostrem a nova entrega
+      // Invalida queries para atualizar a UI
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
       queryClient.invalidateQueries({ queryKey: ['deliveries'] });
     } catch (error) {
@@ -355,89 +378,7 @@ export default function Dashboard() {
 
   // Ao clicar "Aprovar agora": busca sub-locadoras que têm o item para o master escolher
   const handleApproveBooking = async (booking: any) => {
-    const equipmentId = booking.equipment_id;
-    
-    // 1. Busca branches da MINHA REDE que possuem este item no estoque
-    const { data: stockData } = await supabase
-      .from('equipment_stock')
-      .select('branch_id, branches(id, name, city, state)')
-      .eq('equipment_id', equipmentId)
-      .gt('quantity', 0);
-    
-    const equipmentName = Array.isArray(booking.equipment) 
-      ? booking.equipment[0]?.name 
-      : booking.equipment?.name;
-
-    // 2. Busca outras locadoras (externas) que têm este item (pelo nome)
-    const { data: eqData } = await supabase
-      .from('equipments')
-      .select('company_id, companies(id, name, address_city, address_state)')
-      .eq('name', equipmentName)
-      .neq('company_id', booking.company_id);
-    
-    const options: Array<{ id: string; name: string; city?: string; state?: string; type: 'branch' | 'external' }> = [];
-
-    // Adiciona branches da rede
-    stockData?.forEach((s: any) => {
-      if (s.branches) {
-        options.push({
-          id: s.branches.id,
-          name: s.branches.name,
-          city: s.branches.city,
-          state: s.branches.state,
-          type: 'branch'
-        });
-      }
-    });
-
-    // Adiciona empresas externas
-    eqData?.forEach((e: any) => {
-      if (e.companies) {
-        options.push({
-          id: e.companies.id,
-          name: e.companies.name,
-          city: (e.companies as any).address_city,
-          state: (e.companies as any).address_state,
-          type: 'external'
-        });
-      }
-    });
-    
-    // 3. Adiciona a empresa sub-locadora consignada (se houver)
-    const subrentalCompanyId = Array.isArray(booking.equipment) 
-      ? booking.equipment[0]?.subrental_company_id 
-      : booking.equipment?.subrental_company_id;
-      
-    if (subrentalCompanyId) {
-      const { data: subComp } = await supabase
-        .from('companies')
-        .select('id, name, address_city, address_state')
-        .eq('id', subrentalCompanyId)
-        .single();
-        
-      if (subComp && !options.some(o => o.id === subComp.id)) {
-        options.push({
-          id: subComp.id,
-          name: subComp.name,
-          city: (subComp as any).address_city,
-          state: (subComp as any).address_state,
-          type: 'external'
-        });
-      }
-    }
-    
-    if (options.length > 0) {
-      setFulfillmentModal({
-        open: true,
-        bookingId: booking.id,
-        selectedSubrentalId: null,
-        selectedSubrentalType: null,
-        subrentalOptions: options,
-      });
-    } else {
-      // Sem opções: master gerencia diretamente
-      await handleUpdateStatus(booking.id, 'approved', null);
-    }
+    await handleUpdateStatus(booking.id, 'approved', null);
   };
 
   return (
@@ -883,79 +824,6 @@ export default function Dashboard() {
         loading={deleteMutation.isPending}
       />
 
-      {/* Modal de Roteamento: Master seleciona de qual sub-locadora o item sairá */}
-      <Dialog
-        isOpen={!!fulfillmentModal?.open}
-        onClose={() => setFulfillmentModal(null)}
-        title="Unidade de Origem"
-      >
-        {fulfillmentModal && (
-          <div className="space-y-6">
-            <p className="text-zinc-400 text-sm font-medium">
-              De qual sub-locadora este equipamento será enviado?
-            </p>
-
-            <div className="grid grid-cols-1 gap-3 max-h-72 overflow-y-auto pr-1">
-              {fulfillmentModal.subrentalOptions.map(opt => (
-                <button
-                  key={opt.id}
-                  onClick={() => setFulfillmentModal(prev => prev ? { ...prev, selectedSubrentalId: opt.id, selectedSubrentalType: opt.type } : prev)}
-                  className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all text-left ${
-                    fulfillmentModal.selectedSubrentalId === opt.id
-                      ? 'border-primary bg-primary/10'
-                      : 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700'
-                  }`}
-                >
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="font-black uppercase tracking-tighter text-zinc-100">{opt.name}</p>
-                      <span className={`text-[8px] px-2 py-0.5 rounded-full font-black uppercase tracking-widest ${
-                        opt.type === 'branch' 
-                          ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' 
-                          : 'bg-purple-500/10 text-purple-500 border border-purple-500/20'
-                      }`}>
-                        {opt.type === 'branch' ? 'Filial' : 'Sub-locadora'}
-                      </span>
-                    </div>
-                    {(opt.city || opt.state) && (
-                      <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">
-                        {opt.city}{opt.state ? ` - ${opt.state}` : ''}
-                      </p>
-                    )}
-                  </div>
-                  {fulfillmentModal.selectedSubrentalId === opt.id && (
-                    <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center text-black font-black text-xs">✓</div>
-                  )}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex flex-col gap-3 pt-2 border-t border-zinc-800">
-              <Button
-                onClick={() => {
-                  if (!fulfillmentModal.selectedSubrentalId) {
-                    alert('Selecione uma sub-locadora para continuar.');
-                    return;
-                  }
-                  handleUpdateStatus(fulfillmentModal.bookingId, 'approved', fulfillmentModal.selectedSubrentalId);
-                }}
-                disabled={!!updatingId}
-                className="w-full h-12 bg-emerald-600 hover:bg-emerald-500 font-black uppercase tracking-widest rounded-xl"
-              >
-                {updatingId ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Confirmar Origem'}
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => handleUpdateStatus(fulfillmentModal.bookingId, 'approved', null)}
-                disabled={!!updatingId}
-                className="w-full h-10 text-zinc-500 font-bold uppercase text-[10px] tracking-widest"
-              >
-                Gerencio eu mesmo
-              </Button>
-            </div>
-          </div>
-        )}
-      </Dialog>
 
 
     </div>

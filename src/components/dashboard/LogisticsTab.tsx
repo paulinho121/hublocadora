@@ -41,18 +41,32 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
     // Lógica de separação dos pedidos
     const toSendDeliveries = deliveries?.filter((d: any) => {
         const fulfillmentId = d.fulfilling_company_id || d.origin_branch_id;
-        return isBranchManager ? d.origin_branch_id === branchId : (fulfillmentId === tenantId || (d.origin_branch_id && !d.fulfilling_company_id && d.booking?.company_id === tenantId));
+        
+        // 1. Gerente de Filial: Vê o que sai da sua unidade
+        if (isBranchManager) return d.origin_branch_id === branchId;
+        
+        // 2. Empresa Fulfiller (Sub-locadora ou Master): Vê o que ela mesma deve enviar
+        if (tenantId && d.fulfilling_company_id === tenantId) return true;
+        
+        // 3. Master: Se não houver fulfiller definido mas a empresa dona é a sua, ela envia por padrão
+        if (tenantId && !fulfillmentId && d.booking?.company_id === tenantId) return true;
+        
+        return false;
     });
 
     const toReceiveDeliveries = deliveries?.filter((d: any) => {
-        // Correção do caminho: o company_id vem do profile ou do objeto company aninhado
-        const renterCompanyId = d.booking?.renter?.company_id || d.booking?.renter?.company?.id;
-        const isRenter = renterCompanyId === tenantId || d.booking?.company_id === tenantId;
         const fulfillmentId = d.fulfilling_company_id || d.origin_branch_id;
-        const isFulfiller = isBranchManager ? d.origin_branch_id === branchId : (fulfillmentId === tenantId);
+        const isFulfiller = isBranchManager ? d.origin_branch_id === branchId : (tenantId && d.fulfilling_company_id === tenantId);
         
-        // Só aparece em "A Receber" se eu sou o locatário e NÃO sou o responsável pelo envio
-        return isRenter && !isFulfiller;
+        // 1. Identificar se sou o locatário (por ID de usuário ou Empresa)
+        const isRenter = d.booking?.renter_id === user?.id || (tenantId && d.booking?.renter?.company_id === tenantId);
+        
+        // 2. Identificar se sou o dono do equipamento (Master)
+        const isOwner = tenantId && d.booking?.company_id === tenantId;
+
+        // Só aparece em "A Receber" se eu sou o destinatário final (locatário ou dono acompanhando sub-locação) 
+        // e NÃO sou eu quem estou enviando o item agora
+        return (isRenter || isOwner) && !isFulfiller;
     }) || [];
 
     // Incluir transferências internas em entrada
