@@ -416,19 +416,15 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                             <h3 className="text-xl sm:text-2xl font-bold uppercase tracking-tight text-white leading-tight">
                                                                 {delivery.booking?.equipment?.name || 'Equipamento em Trânsito'}
                                                             </h3>
-                                                            <div className="flex flex-wrap items-center gap-4">
-                                                                <div className="flex items-center gap-2 bg-zinc-900/40 px-3 py-1.5 rounded-full border border-white/5">
-                                                                    <div className="w-2 h-2 rounded-full bg-primary" />
-                                                                    <span className="text-xs font-black uppercase tracking-widest text-zinc-400">
-                                                                        {delivery.booking?.renter?.company?.name || delivery.booking?.renter?.full_name || 'Cliente'}
-                                                                    </span>
                                                                 </div>
-                                                                <div className="flex items-center gap-2 bg-zinc-900/40 px-3 py-1.5 rounded-full border border-white/5">
-                                                                    <MapPin className="h-3 w-3 text-zinc-500" />
-                                                                    <span className="text-xs font-black uppercase tracking-widest text-zinc-400">
-                                                                        {delivery.booking?.renter?.company?.city || 'HUB Central'}
-                                                                    </span>
-                                                                </div>
+                                                                {delivery.reverse_logistics_address && (
+                                                                    <div className="flex items-center gap-2 bg-emerald-500/5 px-3 py-1.5 rounded-full border border-emerald-500/10">
+                                                                        <Navigation className="h-3 w-3 text-emerald-500 rotate-180" />
+                                                                        <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500/80">
+                                                                            Retorno: {delivery.reverse_logistics_address.split(',')[0]}
+                                                                        </span>
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     </div>
@@ -617,18 +613,64 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                 </motion.div>
                                                             ) : (
                                                                 <motion.div 
-                                                                    key="completed"
-                                                                    initial={{ opacity: 0, scale: 0.9 }}
-                                                                    animate={{ opacity: 1, scale: 1 }}
-                                                                    className="flex flex-col items-center justify-center py-10 space-y-4"
+                                                                    key="reverse-logistics"
+                                                                    initial={{ opacity: 0, y: 10 }}
+                                                                    animate={{ opacity: 1, y: 0 }}
+                                                                    className="space-y-6"
                                                                 >
-                                                                    <div className="h-20 w-20 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center relative">
-                                                                        <div className="absolute inset-0 bg-emerald-500/20 blur-2xl rounded-full animate-pulse" />
-                                                                        <CheckCircle2 className="h-10 w-10 text-emerald-500 relative z-10" />
+                                                                    <div className="flex flex-col items-center justify-center py-4 space-y-4 border-b border-white/5 mb-4">
+                                                                        <div className="h-16 w-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                                                                            <CheckCircle2 className="h-8 w-8 text-emerald-500" />
+                                                                        </div>
+                                                                        <div className="text-center">
+                                                                            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-emerald-500">Entrega Concluída</p>
+                                                                        </div>
                                                                     </div>
-                                                                    <div className="text-center">
-                                                                        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-emerald-500">Operação Finalizada</p>
-                                                                        <p className="text-[9px] text-zinc-600 font-medium uppercase mt-1">Concluído em {format(new Date(), "dd/MM")}</p>
+
+                                                                    <div className="space-y-4">
+                                                                        <div className="flex items-center justify-between">
+                                                                            <span className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Logística Reversa</span>
+                                                                            <Badge variant="outline" className="text-[9px] font-bold uppercase border-emerald-500/20 text-emerald-500">
+                                                                                {delivery.reverse_logistics_status === 'not_started' ? 'Aguardando' : delivery.reverse_logistics_status}
+                                                                            </Badge>
+                                                                        </div>
+
+                                                                        {delivery.reverse_logistics_status === 'not_started' ? (
+                                                                            <Button 
+                                                                                onClick={async () => {
+                                                                                    const { error } = await supabase
+                                                                                        .from('deliveries')
+                                                                                        .update({ reverse_logistics_status: 'requested' })
+                                                                                        .eq('id', delivery.id);
+                                                                                    if (error) alert(error.message);
+                                                                                    else queryClient.invalidateQueries({ queryKey: ['deliveries'] });
+                                                                                }}
+                                                                                className="w-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border border-emerald-500/20 font-black uppercase tracking-widest h-14 rounded-2xl"
+                                                                            >
+                                                                                Solicitar Coleta de Retorno
+                                                                            </Button>
+                                                                        ) : (
+                                                                            <div className="bg-zinc-900/40 p-5 rounded-[24px] border border-white/5 space-y-4">
+                                                                                <div className="flex items-start gap-4">
+                                                                                    <div className="p-2 bg-zinc-950 rounded-xl border border-white/5">
+                                                                                        <MapPin className="h-4 w-4 text-emerald-500" />
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <p className="text-[8px] font-black uppercase text-zinc-600 tracking-widest">Destino da Devolução</p>
+                                                                                        <p className="text-[11px] font-bold text-zinc-300 leading-tight mt-1">{delivery.reverse_logistics_address || 'HUB Central'}</p>
+                                                                                    </div>
+                                                                                </div>
+                                                                                
+                                                                                {delivery.reverse_token && (
+                                                                                    <div className="pt-4 border-t border-white/5 text-center">
+                                                                                        <p className="text-[8px] font-black uppercase text-zinc-600 mb-2 tracking-widest">Token de Coleta (Reversa)</p>
+                                                                                        <div className="text-3xl font-black text-white tracking-[0.3em] drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                                                                                            {delivery.reverse_token}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
+                                                                        )}
                                                                     </div>
                                                                 </motion.div>
                                                             )}

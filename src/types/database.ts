@@ -135,6 +135,14 @@ export interface Delivery {
     current_lat: number | null;
     current_lng: number | null;
     estimated_arrival: string | null;
+    // Reverse Logistics
+    reverse_logistics_status: 'not_started' | 'requested' | 'collecting' | 'in_transit' | 'returned' | 'cancelled';
+    reverse_logistics_address: string | null;
+    reverse_logistics_branch_id: string | null;
+    reverse_driver_name: string | null;
+    reverse_driver_phone: string | null;
+    reverse_token: string | null;
+
     created_at: string;
     updated_at: string;
 }
