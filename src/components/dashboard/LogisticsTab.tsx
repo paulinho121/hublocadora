@@ -430,9 +430,21 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                     </div>
                                                 )}
 
-                                                <div className="text-[9px] font-bold text-zinc-700 uppercase tracking-widest">
-                                                    Token de Coleta: <span className="text-white font-black">{delivery.reverse_token}</span>
-                                                </div>
+                                                {(() => {
+                                                    const fulfillmentId = delivery.fulfilling_company_id || delivery.origin_branch_id;
+                                                    const isFulfiller = isBranchManager 
+                                                        ? delivery.origin_branch_id === branchId 
+                                                        : (fulfillmentId === tenantId || (!fulfillmentId && delivery.booking?.company_id === tenantId));
+                                                    
+                                                    if (isFulfiller) {
+                                                        return (
+                                                            <div className="text-[9px] font-bold text-zinc-700 uppercase tracking-widest">
+                                                                Token de Coleta: <span className="text-white font-black">{delivery.reverse_token}</span>
+                                                            </div>
+                                                        );
+                                                    }
+                                                    return null;
+                                                })()}
                                             </div>
                                         </div>
                                     </Card>
@@ -642,14 +654,13 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                 >
                                                                     {/* TOKEN APENAS PARA O SOLICITANTE (RENTER) */}
                                                                     {(() => {
+                                                                        const renterCompanyId = delivery.booking?.renter?.company_id || delivery.booking?.renter?.company?.id;
+                                                                        const isRenter = renterCompanyId === tenantId || delivery.booking?.renter_id === user?.id;
+                                                                        
                                                                         const fulfillmentId = delivery.fulfilling_company_id || delivery.origin_branch_id;
                                                                         const isFulfiller = isBranchManager 
                                                                             ? delivery.origin_branch_id === branchId 
-                                                                            : fulfillmentId === tenantId;
-                                                                        
-                                                                        // Só mostra o token se eu sou o locatário E NÃO sou quem está entregando
-                                                                        const renterCompanyId = delivery.booking?.renter?.company_id || delivery.booking?.renter?.company?.id;
-                                                                        const isRenter = renterCompanyId === tenantId || delivery.booking?.company_id === tenantId;
+                                                                            : (fulfillmentId === tenantId || (!fulfillmentId && delivery.booking?.company_id === tenantId));
 
                                                                         if (isRenter && !isFulfiller) {
                                                                             return (
@@ -846,14 +857,24 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                                             </div>
                                                                                         </div>
                                                                                         
-                                                                                        {delivery.reverse_token && (
-                                                                                            <div className="pt-4 border-t border-white/5 text-center">
-                                                                                                <p className="text-[8px] font-black uppercase text-zinc-600 mb-2 tracking-widest">Token de Coleta (Reversa)</p>
-                                                                                                <div className="text-3xl font-black text-white tracking-[0.3em] drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]">
-                                                                                                    {delivery.reverse_token}
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        )}
+                                                                                        {(() => {
+                                                                            const fulfillmentId = delivery.fulfilling_company_id || delivery.origin_branch_id;
+                                                                            const isFulfiller = isBranchManager 
+                                                                                ? delivery.origin_branch_id === branchId 
+                                                                                : (fulfillmentId === tenantId || (!fulfillmentId && delivery.booking?.company_id === tenantId));
+
+                                                                            if (delivery.reverse_token && isFulfiller) {
+                                                                                return (
+                                                                                    <div className="pt-4 border-t border-white/5 text-center">
+                                                                                        <p className="text-[8px] font-black uppercase text-zinc-600 mb-2 tracking-widest">Token de Coleta (Reversa)</p>
+                                                                                        <div className="text-3xl font-black text-white tracking-[0.3em] drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                                                                                            {delivery.reverse_token}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                );
+                                                                            }
+                                                                            return null;
+                                                                        })()}
                                                                                     </div>
                                                                                 )}
                                                                             </>
