@@ -64,9 +64,8 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
         // 2. Identificar se sou o dono do equipamento (Master)
         const isOwner = tenantId && d.booking?.company_id === tenantId;
 
-        // Só aparece em "A Receber" se eu sou o destinatário final (locatário ou dono acompanhando sub-locação) 
-        // e NÃO sou eu quem estou enviando o item agora
-        return (isRenter || isOwner) && !isFulfiller;
+        // Aparece em "A Receber" se eu sou o destinatário final (locatário ou dono acompanhando sub-locação)
+        return (isRenter || isOwner);
     }) || [];
 
     // Incluir transferências internas em entrada
@@ -789,8 +788,11 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                                             </Button>
                                                                                         );
                                                                                     }
+                                                                                    const isRenter = delivery.booking?.renter_id === user?.id || (tenantId && delivery.booking?.renter?.company_id === tenantId);
                                                                                     return (
-                                                                                        <p className="text-[10px] text-zinc-600 font-bold uppercase text-center py-2">Aguardando aceite do cliente...</p>
+                                                                                        <p className="text-[10px] text-zinc-600 font-bold uppercase text-center py-2">
+                                                                                            {isRenter ? 'Vá para a aba "Pedidos a Receber" para conferir' : 'Aguardando aceite do cliente...'}
+                                                                                        </p>
                                                                                     );
                                                                                 })()}
                                                                             </div>
