@@ -14,6 +14,7 @@ import { useCategories } from '@/hooks/useCategories';
 import { AIService } from '@/services/AIService';
 import { MasterCatalogSelector } from './MasterCatalogSelector';
 import { useTenant } from '@/contexts/TenantContext';
+import { useFormPersist } from '@/hooks/useFormPersist';
 
 const equipmentSchema = z.object({
   name: z.string().min(3, 'Nome deve ter pelo menos 3 caracteres'),
@@ -70,14 +71,7 @@ export function EquipmentForm({ equipment, companyId: propCompanyId, onSuccess }
   const createMutation = useCreateEquipment(companyId);
   const updateMutation = useUpdateEquipment();
   const { data: categories, isLoading: isLoadingCategories } = useCategories();
-
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors, isSubmitting },
-  } = useForm<EquipmentFormValues>({
+  const form = useForm<EquipmentFormValues>({
     resolver: zodResolver(equipmentSchema) as any,
     defaultValues: {
       name: equipment?.name || '',
@@ -92,6 +86,12 @@ export function EquipmentForm({ equipment, companyId: propCompanyId, onSuccess }
       state_uf: equipment?.state_uf || company?.address_state || '',
     },
   });
+
+  const { register, handleSubmit, setValue, watch, formState: { errors, isSubmitting } } = form;
+
+  // Persistência: salva rascunho entre trocas de aba (não aplica no modo de edição)
+  const draftKey = equipment ? `cinehub_equipment_edit_${equipment.id}` : 'cinehub_equipment_new_draft';
+  const { clearDraft } = useFormPersist(draftKey, form, []);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -177,6 +177,7 @@ export function EquipmentForm({ equipment, companyId: propCompanyId, onSuccess }
       } else {
         await createMutation.mutateAsync(payload);
       }
+      clearDraft();
       onSuccess();
     } catch (error: any) {
       console.error('Error saving equipment:', error);

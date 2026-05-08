@@ -25,6 +25,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTransfers } from '@/hooks/useTransfers';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { useFormPersist } from '@/hooks/useFormPersist';
 
 const supplementSchema = z.object({
   equipmentId: z.string().min(1, 'Selecione o equipamento'),
@@ -72,6 +73,8 @@ export function HubSupplementRequest({ onSuccess }: HubSupplementRequestProps) {
     },
   });
 
+  const { clearDraft } = useFormPersist('cinehub_supplement_request_draft', form);
+
   const deliveryMethod = form.watch('deliveryMethod');
 
   const onSubmit = async (values: SupplementFormValues) => {
@@ -107,6 +110,7 @@ export function HubSupplementRequest({ onSuccess }: HubSupplementRequestProps) {
           });
       }
 
+      clearDraft();
       setIsSuccess(true);
       setTimeout(() => {
         if (onSuccess) onSuccess();

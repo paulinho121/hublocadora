@@ -12,6 +12,7 @@ import {
   CheckCircle2,
   AlertTriangle
 } from 'lucide-react';
+import { useFormPersist } from '@/hooks/useFormPersist';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -38,7 +39,7 @@ export function FinancialSettings({ companyId, initialConfig }: { companyId: str
   const [isSaving, setIsSaving] = useState(false);
   const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
   
-  const { register, handleSubmit, formState: { errors } } = useForm<FinancialFormValues>({
+  const form = useForm<FinancialFormValues>({
     resolver: zodResolver(financialSchema),
     defaultValues: initialConfig || {
       pix_key: '',
@@ -46,6 +47,9 @@ export function FinancialSettings({ companyId, initialConfig }: { companyId: str
       bank_info: { bank: '', branch: '', account: '' }
     }
   });
+
+  const { register, handleSubmit, formState: { errors } } = form;
+  const { clearDraft } = useFormPersist(`cinehub_financial_draft_${companyId}`, form);
 
   const onSubmit = async (values: FinancialFormValues) => {
     try {
@@ -56,6 +60,7 @@ export function FinancialSettings({ companyId, initialConfig }: { companyId: str
         .eq('id', companyId);
 
       if (error) throw error;
+      clearDraft();
       setStatus({ type: 'success', message: 'Configurações salvas com sucesso!' });
       setTimeout(() => setStatus(null), 5000);
     } catch (error: any) {

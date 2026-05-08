@@ -655,16 +655,22 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
 
                                                                         return (
                                                                             <div className="space-y-6">
-                                                                                {/* TOKEN APENAS PARA QUEM RECEBE */}
-                                                                                {isReceiver && (
-                                                                                    <div className="bg-primary/5 border border-primary/10 rounded-2xl p-6 text-center space-y-4">
-                                                                                        <p className="text-[10px] font-black uppercase tracking-widest text-primary">Seu Token de Resgate</p>
-                                                                                        <div className="text-5xl font-black tracking-[0.2em] text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">
-                                                                                            {delivery.delivery_token || '----'}
+                                                                                {/* TOKEN APENAS PARA O LOCATÁRIO REAL (quem fez o pedido) */}
+                                                                                {isReceiver && (() => {
+                                                                                    const isActualRenter = 
+                                                                                        delivery.booking?.renter_id === user?.id || 
+                                                                                        (tenantId && delivery.booking?.renter?.company?.id === tenantId);
+                                                                                    if (!isActualRenter) return null;
+                                                                                    return (
+                                                                                        <div className="bg-primary/5 border border-primary/10 rounded-2xl p-6 text-center space-y-4">
+                                                                                            <p className="text-[10px] font-black uppercase tracking-widest text-primary">Seu Token de Resgate</p>
+                                                                                            <div className="text-5xl font-black tracking-[0.2em] text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                                                                                                {delivery.delivery_token || '----'}
+                                                                                            </div>
+                                                                                            <p className="text-[9px] text-zinc-600 font-bold uppercase leading-relaxed">Forneça este código ao motorista para finalizar</p>
                                                                                         </div>
-                                                                                        <p className="text-[9px] text-zinc-600 font-bold uppercase leading-relaxed">Forneça este código ao motorista para finalizar</p>
-                                                                                    </div>
-                                                                                )}
+                                                                                    );
+                                                                                })()}
 
                                                                                 {/* AÇÕES PARA QUEM ENVIA (SENDER) */}
                                                                                 {isSender && (
