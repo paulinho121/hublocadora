@@ -545,16 +545,27 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                             {/* Order Info */}
                                             <div className="flex-1 space-y-10">
                                                 <div className="flex flex-col sm:flex-row items-start justify-between gap-6">
-                                                    <div className="flex gap-6">
-                                                        <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-[32px] bg-black border border-white/5 flex items-center justify-center overflow-hidden shrink-0 shadow-2xl">
-                                                            {delivery.booking?.equipment?.images?.[0] ? (
-                                                                <img src={delivery.booking.equipment.images[0]} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
-                                                            ) : (
-                                                                <Package className="h-10 w-10 text-zinc-800" />
-                                                            )}
+                                                    <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+                                                        <div className="flex gap-4 sm:gap-6">
+                                                            <div className="h-16 w-16 sm:h-24 sm:w-24 rounded-[20px] sm:rounded-[32px] bg-black border border-white/5 flex items-center justify-center overflow-hidden shrink-0 shadow-2xl">
+                                                                {delivery.booking?.equipment?.images?.[0] ? (
+                                                                    <img src={delivery.booking.equipment.images[0]} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+                                                                ) : (
+                                                                    <Package className="h-8 w-8 sm:h-10 sm:w-10 text-zinc-800" />
+                                                                )}
+                                                            </div>
+                                                            <div className="flex flex-col sm:hidden justify-center space-y-1.5">
+                                                                <Badge variant="outline" className="text-[9px] w-fit uppercase font-black bg-white/5 text-zinc-400 border-white/10 px-2 py-0.5 tracking-widest">
+                                                                    ORD-{delivery.booking_id.slice(0, 8).toUpperCase()}
+                                                                </Badge>
+                                                                <span className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.1em] flex items-center gap-1.5">
+                                                                    <Clock className="h-3 w-3" /> {format(new Date(delivery.created_at), "dd/MM HH:mm")}
+                                                                </span>
+                                                            </div>
                                                         </div>
+
                                                         <div className="space-y-3">
-                                                            <div className="flex flex-wrap items-center gap-3">
+                                                            <div className="hidden sm:flex flex-wrap items-center gap-3">
                                                                 <Badge variant="outline" className="text-xs uppercase font-black bg-white/5 text-zinc-400 border-white/10 px-3 py-1 tracking-widest">
                                                                     ORD-{delivery.booking_id.slice(0, 8).toUpperCase()}
                                                                 </Badge>
@@ -567,26 +578,28 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                     <Clock className="h-3 w-3" /> {format(new Date(delivery.created_at), "dd/MM '·' HH:mm")}
                                                                 </span>
                                                             </div>
-                                                            <h3 className="text-xl sm:text-2xl font-bold uppercase tracking-tight text-white leading-tight">
+                                                            
+                                                            <h3 className="text-lg sm:text-2xl font-black uppercase tracking-tight text-white leading-tight">
                                                                 {delivery.booking?.equipment?.name || 'Equipamento em Trânsito'}
                                                             </h3>
-                                                            <div className="flex flex-wrap items-center gap-4">
-                                                                <div className="flex items-center gap-2 bg-zinc-900/40 px-3 py-1.5 rounded-full border border-white/5">
-                                                                    <div className="w-2 h-2 rounded-full bg-primary" />
-                                                                    <span className="text-xs font-black uppercase tracking-widest text-zinc-400">
+                                                            
+                                                            <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+                                                                <div className="flex items-center gap-1.5 sm:gap-2 bg-zinc-900/40 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-white/5">
+                                                                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-primary" />
+                                                                    <span className="text-[9px] sm:text-xs font-black uppercase tracking-widest text-zinc-400">
                                                                         {delivery.booking?.renter?.company?.name || delivery.booking?.renter?.full_name || 'Cliente'}
                                                                     </span>
                                                                 </div>
-                                                                <div className="flex items-center gap-2 bg-zinc-900/40 px-3 py-1.5 rounded-full border border-white/5">
+                                                                <div className="flex items-center gap-1.5 sm:gap-2 bg-zinc-900/40 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-white/5">
                                                                     <MapPin className="h-3 w-3 text-zinc-500" />
-                                                                    <span className="text-xs font-black uppercase tracking-widest text-zinc-400">
+                                                                    <span className="text-[9px] sm:text-xs font-black uppercase tracking-widest text-zinc-400">
                                                                         {delivery.booking?.renter?.company?.city || 'HUB Central'}
                                                                     </span>
                                                                 </div>
                                                                 {delivery.reverse_logistics_address && (
-                                                                    <div className="flex items-center gap-2 bg-emerald-500/5 px-3 py-1.5 rounded-full border border-emerald-500/10">
+                                                                    <div className="flex items-center gap-1.5 sm:gap-2 bg-emerald-500/5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-emerald-500/10">
                                                                         <Navigation className="h-3 w-3 text-emerald-500 rotate-180" />
-                                                                        <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500/80">
+                                                                        <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-emerald-500/80">
                                                                             Retorno: {delivery.reverse_logistics_address.split(',')[0]}
                                                                         </span>
                                                                     </div>
