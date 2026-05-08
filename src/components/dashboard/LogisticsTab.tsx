@@ -251,9 +251,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                 <div className="flex overflow-x-auto no-scrollbar bg-zinc-950/60 p-1.5 rounded-[20px] border border-white/5 backdrop-blur-xl max-w-full">
                     {[
                         { id: 'deliveries', label: 'Expedição' },
-                        { id: 'reverse', label: 'Fluxo de Retorno' },
-                        { id: 'transfers', label: 'Transferências' },
-                        { id: 'availability', label: 'Disponibilidade' }
+                        { id: 'reverse', label: 'Fluxo de Retorno' }
                     ].map((tab) => (
                         <button 
                             key={tab.id}
