@@ -187,7 +187,7 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
         if (!authLoading) {
             fetchData();
         }
-    }, [user, authLoading]);
+    }, [user?.id, authLoading]);
 
     // Realtime: Escuta mudanças no status da empresa atual
     // Quando o admin aprova, o usuário vê automaticamente sem precisar de reload
