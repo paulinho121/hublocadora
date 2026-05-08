@@ -775,24 +775,26 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                                     <p className="text-[11px] text-zinc-400">Verifique se todos os itens estão presentes e em ordem conforme o contrato.</p>
                                                                                 </div>
                                                                                 {(() => {
-                                                                                    if (logisticsMode === 'to_receive') {
-                                                                                        return (
-                                                                                            <Button 
-                                                                                                onClick={() => handleNextStatus(delivery)}
-                                                                                                disabled={updatingId === delivery.id}
-                                                                                                className="w-full bg-emerald-500 text-black font-black uppercase tracking-widest h-14 rounded-2xl shadow-lg"
-                                                                                            >
-                                                                                                {updatingId === delivery.id ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Conferir e Aceitar Agora'}
-                                                                                            </Button>
-                                                                                        );
-                                                                                    }
-                                                                                    const isRenter = delivery.booking?.renter_id === user?.id || (tenantId && delivery.booking?.renter?.company_id === tenantId);
-                                                                                    return (
-                                                                                        <p className="text-[10px] text-zinc-600 font-bold uppercase text-center py-2">
-                                                                                            {isRenter ? 'Vá para a aba "Pedidos a Receber" para conferir' : 'Aguardando aceite do cliente...'}
-                                                                                        </p>
-                                                                                    );
-                                                                                })()}
+                                                                                     const isRenter = delivery.booking?.renter_id === user?.id || (tenantId && delivery.booking?.renter?.company_id === tenantId);
+                                                                                     
+                                                                                     if (logisticsMode === 'to_receive' && isRenter) {
+                                                                                         return (
+                                                                                             <Button 
+                                                                                                 onClick={() => handleNextStatus(delivery)}
+                                                                                                 disabled={updatingId === delivery.id}
+                                                                                                 className="w-full bg-emerald-500 text-black font-black uppercase tracking-widest h-14 rounded-2xl shadow-lg"
+                                                                                             >
+                                                                                                 {updatingId === delivery.id ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Conferir e Aceitar Agora'}
+                                                                                             </Button>
+                                                                                         );
+                                                                                     }
+                                                                                     
+                                                                                     return (
+                                                                                         <p className="text-[10px] text-zinc-600 font-bold uppercase text-center py-2">
+                                                                                             {isRenter ? 'Confirme o recebimento na aba "Pedidos a Receber"' : 'Aguardando aceite do cliente...'}
+                                                                                         </p>
+                                                                                     );
+                                                                                 })()}
                                                                             </div>
                                                                         ) : (
                                                                             <>
