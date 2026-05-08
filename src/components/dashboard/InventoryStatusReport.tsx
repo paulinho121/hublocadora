@@ -66,66 +66,68 @@ export function InventoryStatusReport({ companyId }: InventoryStatusReportProps)
       </div>
 
       <div className="bg-zinc-950/40 border border-white/5 rounded-[32px] overflow-hidden backdrop-blur-3xl shadow-2xl">
-        <Table>
-          <TableHeader className="bg-black/40">
-            <TableRow className="border-white/5 hover:bg-transparent">
-              <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-6 px-8 text-zinc-500">Equipamento</TableHead>
-              <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-6 text-zinc-500">Status Operacional</TableHead>
-              <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-6 text-center text-zinc-500">Cronologia</TableHead>
-              <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-6 text-center text-zinc-500">Tempo de Atividade</TableHead>
-              <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-6 px-8 text-zinc-500">Observações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {logs?.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="py-32 text-center">
-                  <div className="flex flex-col items-center gap-4">
-                    <Clock className="h-10 w-10 text-zinc-800" />
-                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-700">Nenhum registro de log detectado.</p>
-                  </div>
-                </TableCell>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader className="bg-black/40">
+              <TableRow className="border-white/5 hover:bg-transparent">
+                <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-6 px-8 text-zinc-500 whitespace-nowrap">Equipamento</TableHead>
+                <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-6 text-zinc-500 whitespace-nowrap">Status Operacional</TableHead>
+                <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-6 text-center text-zinc-500 whitespace-nowrap">Cronologia</TableHead>
+                <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-6 text-center text-zinc-500 whitespace-nowrap">Tempo de Atividade</TableHead>
+                <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-6 px-8 text-zinc-500 whitespace-nowrap">Observações</TableHead>
               </TableRow>
-            ) : (
-              logs?.map((log) => (
-                <TableRow key={log.id} className="border-white/5 hover:bg-white/[0.02] transition-all duration-500 group">
-                  <TableCell className="py-6 px-8 font-black uppercase tracking-tight text-white group-hover:translate-x-1 transition-transform duration-500">
-                    {(log.equipment as any)?.name}
-                  </TableCell>
-                  <TableCell className="py-6">
-                    {getStatusBadge(log.status)}
-                  </TableCell>
-                  <TableCell className="py-6 text-center">
-                    <div className="flex flex-col items-center gap-1">
-                      <div className="flex items-center gap-1.5 text-[10px] font-black text-zinc-300 uppercase tracking-widest">
-                        <Calendar className="h-3 w-3 text-zinc-600" />
-                        {new Date(log.started_at).toLocaleDateString('pt-BR')}
-                      </div>
-                      <div className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest">
-                        {new Date(log.started_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                      </div>
+            </TableHeader>
+            <TableBody>
+              {logs?.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="py-32 text-center">
+                    <div className="flex flex-col items-center gap-4">
+                      <Clock className="h-10 w-10 text-zinc-800" />
+                      <p className="text-[10px] font-black uppercase tracking-widest text-zinc-700">Nenhum registro de log detectado.</p>
                     </div>
                   </TableCell>
-                  <TableCell className="py-6 text-center">
-                    {log.ended_at ? (
-                      <div className="flex items-center justify-center gap-2 text-emerald-500 font-black text-[10px] uppercase tracking-widest">
-                        <Clock className="h-3 w-3" />
-                        {formatDistance(new Date(log.started_at), new Date(log.ended_at), { locale: ptBR })}
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center">
-                        <Badge className="bg-primary text-black font-black uppercase tracking-widest text-[8px] animate-pulse rounded-full shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)] px-3">Ativo</Badge>
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell className="py-6 px-8 text-[10px] text-zinc-500 font-medium tracking-wide">
-                    {log.reason || 'Manutenção de Fluxo Padrão'}
-                  </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ) : (
+                logs?.map((log) => (
+                  <TableRow key={log.id} className="border-white/5 hover:bg-white/[0.02] transition-all duration-500 group">
+                    <TableCell className="py-6 px-8 font-black uppercase tracking-tight text-white group-hover:translate-x-1 transition-transform duration-500 whitespace-nowrap">
+                      {(log.equipment as any)?.name}
+                    </TableCell>
+                    <TableCell className="py-6">
+                      {getStatusBadge(log.status)}
+                    </TableCell>
+                    <TableCell className="py-6 text-center whitespace-nowrap">
+                      <div className="flex flex-col items-center gap-1">
+                        <div className="flex items-center gap-1.5 text-[10px] font-black text-zinc-300 uppercase tracking-widest">
+                          <Calendar className="h-3 w-3 text-zinc-600" />
+                          {new Date(log.started_at).toLocaleDateString('pt-BR')}
+                        </div>
+                        <div className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest">
+                          {new Date(log.started_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-6 text-center whitespace-nowrap">
+                      {log.ended_at ? (
+                        <div className="flex items-center justify-center gap-2 text-emerald-500 font-black text-[10px] uppercase tracking-widest">
+                          <Clock className="h-3 w-3" />
+                          {formatDistance(new Date(log.started_at), new Date(log.ended_at), { locale: ptBR })}
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center">
+                          <Badge className="bg-primary text-black font-black uppercase tracking-widest text-[8px] animate-pulse rounded-full shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)] px-3">Ativo</Badge>
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell className="py-6 px-8 text-[10px] text-zinc-500 font-medium tracking-wide min-w-[200px]">
+                      {log.reason || 'Manutenção de Fluxo Padrão'}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   );

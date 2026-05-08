@@ -249,7 +249,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                     <p className="text-zinc-500 font-bold uppercase tracking-[0.3em] text-xs">Hub de Operações em Tempo Real</p>
                 </div>
 
-                <div className="flex bg-zinc-950/60 p-1.5 rounded-[20px] border border-white/5 backdrop-blur-xl">
+                <div className="flex overflow-x-auto no-scrollbar bg-zinc-950/60 p-1.5 rounded-[20px] border border-white/5 backdrop-blur-xl max-w-full">
                     {[
                         { id: 'deliveries', label: 'Expedição' },
                         { id: 'reverse', label: 'Fluxo de Retorno' },
@@ -260,7 +260,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                             key={tab.id}
                             onClick={() => setActiveSubTab(tab.id as any)}
                             className={cn(
-                                "px-8 py-2.5 rounded-[14px] text-xs font-black uppercase tracking-widest transition-all duration-500",
+                                "px-6 md:px-8 py-2.5 rounded-[14px] text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-500 whitespace-nowrap",
                                 activeSubTab === tab.id 
                                     ? "bg-zinc-800 text-white shadow-2xl shadow-black/50" 
                                     : "text-zinc-600 hover:text-zinc-400"
@@ -273,11 +273,11 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
             </header>
 
             {activeSubTab === 'deliveries' && (
-                <div className="flex gap-4 bg-zinc-900/20 p-2 rounded-[22px] w-fit border border-white/5 shadow-2xl backdrop-blur-md">
+                <div className="flex overflow-x-auto no-scrollbar gap-4 bg-zinc-900/20 p-2 rounded-[22px] w-full md:w-fit border border-white/5 shadow-2xl backdrop-blur-md">
                     <button
                         onClick={() => setLogisticsMode('to_send')}
                         className={cn(
-                            "px-8 py-3 rounded-[16px] text-[10px] font-black uppercase tracking-widest transition-all duration-500",
+                            "px-6 md:px-8 py-3 rounded-[16px] text-[10px] font-black uppercase tracking-widest transition-all duration-500 whitespace-nowrap",
                             logisticsMode === 'to_send' 
                                 ? "bg-white text-black shadow-xl shadow-white/10" 
                                 : "text-zinc-500 hover:text-zinc-300"
@@ -291,7 +291,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                     <button
                         onClick={() => setLogisticsMode('to_receive')}
                         className={cn(
-                            "px-8 py-3 rounded-[16px] text-[10px] font-black uppercase tracking-widest transition-all duration-500",
+                            "px-6 md:px-8 py-3 rounded-[16px] text-[10px] font-black uppercase tracking-widest transition-all duration-500 whitespace-nowrap",
                             logisticsMode === 'to_receive' 
                                 ? "bg-emerald-500 text-black shadow-xl shadow-emerald-500/20" 
                                 : "text-zinc-500 hover:text-zinc-300"
@@ -598,10 +598,10 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                         </div>
                                                     </div>
                                                     
-                                                        <div className="text-right flex flex-col items-end gap-3 shrink-0">
+                                                        <div className="flex flex-col items-start md:items-end gap-3 shrink-0">
                                                             <div className="space-y-1">
-                                                                <span className="text-xs font-black uppercase text-zinc-700 tracking-[0.4em] block">Status Logístico</span>
-                                                                <div className="bg-zinc-900/80 backdrop-blur-md text-zinc-300 font-bold uppercase text-[10px] py-1.5 px-4 rounded-full border border-white/5 shadow-2xl tracking-[0.2em] inline-block">
+                                                                <span className="text-[10px] font-black uppercase text-zinc-700 tracking-[0.4em] block">Status Logístico</span>
+                                                                <div className="bg-zinc-900/80 backdrop-blur-md text-zinc-300 font-bold uppercase text-[9px] py-1.5 px-4 rounded-full border border-white/5 shadow-2xl tracking-[0.2em] inline-block">
                                                                     {getStatusLabel(delivery.status)}
                                                                 </div>
                                                             </div>
@@ -618,10 +618,10 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                             )}
 
                                                             <div className="flex items-center gap-2 bg-black/40 px-3 py-1 rounded-full border border-white/5">
-                                                            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Volume:</span>
-                                                            <span className="text-xs font-bold text-white">{delivery.booking?.quantity || 1} UN</span>
+                                                                <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Volume:</span>
+                                                                <span className="text-[10px] font-bold text-white">{delivery.booking?.quantity || 1} UN</span>
+                                                            </div>
                                                         </div>
-                                                    </div>
                                                 </div>
 
                                                 <div className="relative pt-6">
