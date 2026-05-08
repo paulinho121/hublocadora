@@ -18,11 +18,13 @@ interface InventoryCardProps {
   onAssign?: (item: Equipment) => void;
 }
 
-export function InventoryCard({ item, onEdit, onDelete, onAssign }: InventoryCardProps) {
+export function InventoryCard({ item, onEdit, onDelete, tenantId, onAssign }: InventoryCardProps) {
     const { isBranchManager } = useTenant();
   const navigate = useNavigate();
   const updateMutation = useUpdateEquipment();
   const [loading, setLoading] = useState(false);
+
+  const brand = (item.features as any)?.brand || (item as any).brand;
 
   const toggleExternalRental = async () => {
     try {
@@ -61,7 +63,6 @@ export function InventoryCard({ item, onEdit, onDelete, onAssign }: InventoryCar
   };
 
   const imageUrl = item.images && item.images.length > 0 ? item.images[0] : null;
-  const brand = (item.features as any)?.brand;
 
   return (
     <Card className="group relative overflow-hidden bg-zinc-950/40 border-zinc-800/50 hover:border-primary/30 transition-all duration-300">
