@@ -210,7 +210,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
         return actions[status];
     };
 
-    const [activeSubTab, setActiveSubTab] = useState<'deliveries' | 'transfers' | 'availability'>('deliveries');
+    const [activeSubTab, setActiveSubTab] = useState<'deliveries' | 'reverse' | 'transfers' | 'availability'>('deliveries');
 
     if (isLoading) {
         return (

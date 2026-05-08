@@ -6,6 +6,7 @@ export function useDeliveries(options?: {
     tenantId?: string; 
     branchId?: string;
     status?: string;
+    bookingId?: string;
 }) {
     return useQuery({
         queryKey: ['deliveries', options],
@@ -28,6 +29,9 @@ export function useDeliveries(options?: {
 
             // 2. A visibilidade é controlada automaticamente pelo RLS do banco de dados.
             // Não precisamos de filtros manuais complexos aqui que podem quebrar a query.
+            if (options?.bookingId) {
+                query = query.eq('booking_id', options.bookingId);
+            }
             if (options?.status) {
                 query = query.eq('status', options.status);
             }
@@ -50,13 +54,15 @@ export function useUpdateDeliveryStatus() {
             status, 
             serial_number, 
             driver_name, 
-            driver_phone 
+            driver_phone,
+            origin_branch_id
         }: { 
             id: string; 
             status: string; 
             serial_number?: string;
             driver_name?: string;
             driver_phone?: string;
+            origin_branch_id?: string | null;
         }) => {
             const { error } = await supabase
                 .from('deliveries')
@@ -65,6 +71,7 @@ export function useUpdateDeliveryStatus() {
                     ...(serial_number && { serial_number }),
                     ...(driver_name && { driver_name }),
                     ...(driver_phone && { driver_phone }),
+                    ...(origin_branch_id !== undefined && { origin_branch_id }),
                     updated_at: new Date().toISOString()
                 })
                 .eq('id', id);

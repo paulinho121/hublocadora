@@ -9,7 +9,7 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Clock, History, Calendar } from 'lucide-react';
+import { Clock, History, Calendar, Loader2 } from 'lucide-react';
 import { formatDistance } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
