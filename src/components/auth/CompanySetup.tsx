@@ -12,6 +12,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
+const FORM_CACHE_KEY = 'cinehub_company_setup_draft';
+
 const companySchema = z.object({
   name: z.string().min(3, 'O nome da empresa deve ter pelo menos 3 caracteres'),
   document: z.string().min(14, 'Documento inválido (mínimo 11 dígitos)'),
@@ -29,6 +31,15 @@ type CompanyFormValues = z.infer<typeof companySchema>;
 export function CompanySetup({ ownerId }: { ownerId: string }) {
   const queryClient = useQueryClient();
   const [isLoadingCep, setIsLoadingCep] = useState(false);
+
+  // Restaurar rascunho salvo no localStorage
+  const savedDraft = (() => {
+    try {
+      const raw = localStorage.getItem(FORM_CACHE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch { return {}; }
+  })();
+
   const { 
     register, 
     handleSubmit, 
@@ -37,7 +48,16 @@ export function CompanySetup({ ownerId }: { ownerId: string }) {
     formState: { errors, isSubmitting } 
   } = useForm<CompanyFormValues>({
     resolver: zodResolver(companySchema),
+    defaultValues: savedDraft,
   });
+
+  // Auto-save: salva no localStorage a cada mudança de campo
+  const watchedValues = watch();
+  useEffect(() => {
+    try {
+      localStorage.setItem(FORM_CACHE_KEY, JSON.stringify(watchedValues));
+    } catch {}
+  }, [watchedValues]);
 
   const cep = watch('address_zip');
 
@@ -146,6 +166,7 @@ export function CompanySetup({ ownerId }: { ownerId: string }) {
       
       setSubmittedName(values.name);
       setIsSuccess(true);
+      localStorage.removeItem(FORM_CACHE_KEY); // Limpa o rascunho após envio bem-sucedido
       queryClient.invalidateQueries({ queryKey: ['company', ownerId] });
     } catch (error: any) {
       console.error('Erro ao configurar empresa:', error);
