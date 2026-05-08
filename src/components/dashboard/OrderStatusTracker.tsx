@@ -114,8 +114,8 @@ export function OrderStatusTracker({ status }: OrderStatusTrackerProps) {
               </motion.div>
 
               {/* High-End Labeling */}
-              <div className="absolute -bottom-10 sm:-bottom-12 whitespace-nowrap text-center">
-                <p className={`text-[7px] sm:text-[9px] font-bold uppercase tracking-[0.2em] transition-all duration-500 ${
+              <div className="absolute -bottom-10 sm:-bottom-12 left-1/2 -translate-x-1/2 w-[60px] sm:w-[80px] text-center flex flex-col items-center">
+                <p className={`text-[6.5px] sm:text-[9px] font-black uppercase tracking-[0.05em] sm:tracking-[0.2em] transition-all duration-500 leading-tight ${
                   isCurrent ? 'text-emerald-400' : isCompleted ? 'text-zinc-400' : 'text-zinc-800'
                 }`}>
                   {step.label}
@@ -123,7 +123,7 @@ export function OrderStatusTracker({ status }: OrderStatusTrackerProps) {
                 {isCurrent && (
                    <motion.div 
                      layoutId="current-indicator"
-                     className="h-[2px] w-full bg-emerald-500/40 blur-[1px] rounded-full mt-2 mx-auto"
+                     className="h-[2px] w-[80%] bg-emerald-500/40 blur-[1px] rounded-full mt-1.5"
                      animate={{ opacity: [0.2, 0.6, 0.2] }}
                      transition={{ repeat: Infinity, duration: 2 }}
                    />
