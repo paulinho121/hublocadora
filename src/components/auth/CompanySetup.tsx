@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Loader2, Building2, MapPin, FileDigit, Briefcase, Search, AlertCircle } from 'lucide-react';
+import { Loader2, Building2, MapPin, FileDigit, Briefcase, Search, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -94,6 +94,8 @@ export function CompanySetup({ ownerId }: { ownerId: string }) {
   }, [cep, setValue]);
 
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [submittedName, setSubmittedName] = useState('');
 
   const onSubmit = async (values: CompanyFormValues) => {
     setSubmitError(null);
@@ -142,12 +144,47 @@ export function CompanySetup({ ownerId }: { ownerId: string }) {
         throw new Error(companyError.message || 'Erro ao cadastrar empresa. Verifique as políticas RLS.');
       }
       
+      setSubmittedName(values.name);
+      setIsSuccess(true);
       queryClient.invalidateQueries({ queryKey: ['company', ownerId] });
     } catch (error: any) {
       console.error('Erro ao configurar empresa:', error);
       setSubmitError(error.message || 'Ocorreu um erro inesperado');
     }
   };
+
+  if (isSuccess) {
+    return (
+      <div className="max-w-2xl mx-auto p-10 bg-card border rounded-2xl shadow-xl text-center animate-in fade-in zoom-in-95 duration-500">
+        <div className="relative w-24 h-24 mx-auto mb-6">
+          <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-2xl animate-pulse" />
+          <div className="relative w-24 h-24 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
+            <CheckCircle2 className="w-12 h-12 text-emerald-500" />
+          </div>
+        </div>
+
+        <h2 className="text-3xl font-black tracking-tighter uppercase mb-2">
+          Cadastro Recebido!
+        </h2>
+        <p className="text-muted-foreground text-base mb-2">
+          Recebemos os dados de <span className="font-bold text-foreground">{submittedName}</span>.
+        </p>
+        <p className="text-muted-foreground text-sm max-w-sm mx-auto leading-relaxed">
+          Nossa equipe vai analisar as informações e sua locadora será liberada em instantes. Você receberá acesso completo assim que for aprovado.
+        </p>
+
+        <div className="mt-8 p-5 bg-amber-500/5 border border-amber-500/20 rounded-2xl flex items-center gap-4 text-left">
+          <div className="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+            <Clock className="h-5 w-5 text-amber-500" />
+          </div>
+          <div>
+            <p className="text-sm font-black uppercase tracking-wide text-amber-500">Análise em andamento</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Tempo estimado: menos de 5 minutos. Esta página será atualizada automaticamente.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto p-8 bg-card border rounded-2xl shadow-xl transition-all hover:shadow-2xl">
