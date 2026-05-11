@@ -48,21 +48,20 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
         // 2. Empresa Fulfiller (Sub-locadora ou Master): Vê o que ela mesma deve enviar
         if (tenantId && d.fulfilling_company_id === tenantId) return true;
         
-        // 3. Master: Se não houver fulfiller definido mas a empresa dona é a sua, ela envia por padrão
-        if (tenantId && !fulfillmentId && d.booking?.company_id === tenantId) return true;
+        // 3. Master / Dono do Pedido: Vê o que ele mesmo envia OU o que ele terceirizou (para acompanhamento)
+        if (tenantId && d.booking?.company_id === tenantId) return true;
         
         return false;
     });
 
     const toReceiveDeliveries = deliveries?.filter((d: any) => {
         // 1. Identificar se sou o locatário (quem deve receber o item)
-        // Verificamos se o usuário é o renter_id direto OU se pertence à empresa que fez a locação
         const renterCompanyId = d.booking?.renter?.company_id || d.booking?.renter?.company?.id;
         const isRenter = d.booking?.renter_id === user?.id || (tenantId && renterCompanyId === tenantId);
         
-        // Só aparece em "A Receber" se eu for o locatário E o item estiver em trânsito ou já entregue (aguardando minha conferência)
-        // Isso evita que o dono da empresa veja todos os pedidos da rede como "A Receber"
-        return isRenter && (d.status === 'shipped' || d.status === 'delivered');
+        // 2. Aparece em "A Receber" se eu for o locatário e o pedido estiver ativo (não cancelado ou finalizado)
+        // Antes estava restrito a 'shipped' ou 'delivered', mas o locatário quer saber se o item está sendo preparado.
+        return isRenter && d.status !== 'confirmed' && d.status !== 'cancelled';
     }) || [];
 
     // Incluir transferências internas em entrada
@@ -599,6 +598,25 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                         {delivery.booking?.renter?.company?.name || delivery.booking?.renter?.full_name || 'Cliente'}
                                                                     </span>
                                                                 </div>
+
+                                                                {/* Local de Origem / Fulfiller Label */}
+                                                                {(() => {
+                                                                    const fulfillmentId = delivery.fulfilling_company_id || delivery.origin_branch_id;
+                                                                    const isOutsourced = tenantId && fulfillmentId !== tenantId && delivery.booking?.company_id === tenantId;
+                                                                    
+                                                                    if (isOutsourced) {
+                                                                        return (
+                                                                            <div className="flex items-center gap-1.5 sm:gap-2 bg-amber-500/10 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-amber-500/20">
+                                                                                <Truck className="h-2 w-2 sm:h-3 sm:w-3 text-amber-500" />
+                                                                                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-amber-500">
+                                                                                    Terceirizado: {delivery.fulfilling_company?.name || 'Parceiro Hub'}
+                                                                                </span>
+                                                                            </div>
+                                                                        );
+                                                                    }
+                                                                    return null;
+                                                                })()}
+
                                                                 <div className="flex items-center gap-1.5 sm:gap-2 bg-zinc-900/40 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-white/5">
                                                                     <MapPin className="h-3 w-3 text-zinc-500" />
                                                                     <span className="text-[9px] sm:text-xs font-black uppercase tracking-widest text-zinc-400">
@@ -674,9 +692,27 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                     {(() => {
                                                                         const isSender = logisticsMode === 'to_send';
                                                                         const isReceiver = logisticsMode === 'to_receive';
+                                                                        
+                                                                        const fulfillmentId = delivery.fulfilling_company_id || delivery.origin_branch_id;
+                                                                        const isFulfiller = isBranchManager 
+                                                                            ? delivery.origin_branch_id === branchId 
+                                                                            : (fulfillmentId === tenantId || (!fulfillmentId && delivery.booking?.company_id === tenantId));
 
                                                                         return (
                                                                             <div className="space-y-6">
+                                                                                {/* Se eu não for o fulfiller nem o recebedor, eu só acompanho */}
+                                                                                {!isFulfiller && isSender && (
+                                                                                    <div className="bg-zinc-900/50 border border-white/5 rounded-2xl p-6 text-center space-y-4">
+                                                                                        <div className="h-12 w-12 rounded-2xl bg-zinc-800 flex items-center justify-center mx-auto">
+                                                                                            <Eye className="h-6 w-6 text-zinc-600" />
+                                                                                        </div>
+                                                                                        <div className="space-y-1">
+                                                                                            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Modo Acompanhamento</p>
+                                                                                            <p className="text-[11px] text-zinc-500 leading-relaxed">Este pedido está sendo processado por uma unidade parceira.</p>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                )}
+
                                                                                 {/* TOKEN APENAS PARA O SOLICITANTE REAL (User ID que criou a reserva) */}
                                                                                 {isReceiver && (() => {
                                                                                     const isActualRenter = delivery.booking?.renter_id === user?.id;
@@ -694,8 +730,8 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                                     );
                                                                                 })()}
 
-                                                                                {/* AÇÕES PARA QUEM ENVIA (SENDER) */}
-                                                                                {isSender && (
+                                                                                {/* AÇÕES PARA QUEM ENVIA (SENDER) - Apenas se eu for o encarregado */}
+                                                                                {isSender && isFulfiller && (
                                                                                     <div className="space-y-6">
                                                                                         {/* Sub-locadora precisa ACEITAR o pedido antes de separar */}
                                                                                         {delivery.subrental_status === 'pending' && delivery.booking?.company_id !== tenantId ? (
