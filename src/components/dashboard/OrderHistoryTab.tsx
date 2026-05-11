@@ -42,6 +42,8 @@ export function OrderHistoryTab() {
 
   const allBookings = [...(bookingsReceived || []), ...(bookingsRequested || [])]
     .filter(b => ['completed', 'cancelled', 'rejected'].includes(b.status))
+    // Remover duplicados (caso o usuário seja locador e locatário ao mesmo tempo)
+    .filter((v, i, a) => a.findIndex(t => t.id === v.id) === i)
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   const filteredBookings = allBookings.filter(booking => {
@@ -50,10 +52,18 @@ export function OrderHistoryTab() {
       booking.renter?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       booking.renter?.company?.name?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesStatus = filterStatus === 'all' || booking.status === filterStatus;
+    if (filterStatus === 'all') return matchesSearch;
+    if (filterStatus === 'completed') return matchesSearch && booking.status === 'completed';
+    if (filterStatus === 'cancelled') return matchesSearch && (booking.status === 'cancelled' || booking.status === 'rejected');
     
-    return matchesSearch && matchesStatus;
+    return matchesSearch;
   });
+
+  const getDelivery = (booking: any) => {
+    const delivery = booking.delivery || booking.deliveries;
+    if (!delivery) return null;
+    return Array.isArray(delivery) ? delivery[0] : delivery;
+  };
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
@@ -62,8 +72,8 @@ export function OrderHistoryTab() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed': return <CheckCircle2 className="h-3 w-3" />;
-      case 'cancelled': return <XCircle className="h-3 w-3" />;
-      case 'rejected': return <AlertCircle className="h-3 w-3" />;
+      case 'cancelled': 
+      case 'rejected': return <XCircle className="h-3 w-3" />;
       default: return null;
     }
   };
@@ -71,7 +81,7 @@ export function OrderHistoryTab() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
-      case 'cancelled': return 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20';
+      case 'cancelled': 
       case 'rejected': return 'bg-red-500/10 text-red-500 border-red-500/20';
       default: return 'bg-zinc-500/10 text-zinc-500';
     }
@@ -137,8 +147,10 @@ export function OrderHistoryTab() {
       ) : (
         <div className="grid grid-cols-1 gap-4">
           {filteredBookings.map((booking: any) => {
+            const d = getDelivery(booking);
             const isRequested = booking.renter_id === user?.id;
-            const isFulfiller = booking.delivery?.fulfilling_company_id === tenantId;
+            const fulfillmentId = d?.fulfilling_company_id || d?.origin_branch_id;
+            const isFulfiller = fulfillmentId === tenantId;
             const isOwner = booking.company_id === tenantId;
             
             return (
@@ -185,7 +197,7 @@ export function OrderHistoryTab() {
                         {(() => {
                           let amount = booking.total_amount;
                           if (isFulfiller && !isOwner) amount = amount * 0.5;
-                          else if (isOwner && booking.delivery?.fulfilling_company_id && booking.delivery?.fulfilling_company_id !== tenantId) amount = amount * 0.5;
+                          else if (isOwner && fulfillmentId && fulfillmentId !== tenantId) amount = amount * 0.5;
                           return formatCurrency(amount);
                         })()}
                       </div>
