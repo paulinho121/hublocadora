@@ -163,6 +163,18 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                 serial_number: serialNumbers[delivery.id],
                 origin_branch_id: selectedBranchId || delivery.origin_branch_id
             });
+            
+            // Se o status final da entrega foi atingido, marcamos o pedido como concluído
+            // para que ele apareça no Histórico.
+            if (nextStatus === 'confirmed' && delivery.booking_id) {
+                const { error: bookingError } = await supabase
+                    .from('bookings')
+                    .update({ status: 'completed' })
+                    .eq('id', delivery.booking_id);
+                
+                if (bookingError) console.error('Erro ao finalizar pedido:', bookingError);
+            }
+            
             console.log("Logística atualizada com sucesso!");
         } catch (error: any) {
             console.error('Erro na logística:', error);
