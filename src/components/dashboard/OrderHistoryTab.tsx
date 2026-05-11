@@ -11,7 +11,8 @@ import {
   ArrowDownLeft,
   XCircle,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from 'lucide-react';
 import { useBookings } from '@/hooks/useBookings';
 import { useTenant } from '@/contexts/TenantContext';
@@ -23,18 +24,21 @@ import { Badge } from '@/components/ui/badge';
 
 export function OrderHistoryTab() {
   const { user } = useAuth();
-  const { tenantId, company } = useTenant();
+  const { tenantId, company, branchId, isBranchManager } = useTenant();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'completed' | 'cancelled' | 'rejected'>('all');
 
   const { data: bookingsReceived, isLoading: isLoadingReceived } = useBookings({
     companyId: tenantId || undefined,
+    branchId: isBranchManager ? branchId : undefined,
     includeEquipmentSubrental: true,
   });
 
   const { data: bookingsRequested, isLoading: isLoadingRequested } = useBookings({
     renterId: user?.id
   });
+
+  const isLoading = isLoadingReceived || isLoadingRequested;
 
   const allBookings = [...(bookingsReceived || []), ...(bookingsRequested || [])]
     .filter(b => ['completed', 'cancelled', 'rejected'].includes(b.status))
@@ -117,7 +121,12 @@ export function OrderHistoryTab() {
         </div>
       </header>
 
-      {filteredBookings.length === 0 ? (
+      {isLoading ? (
+        <div className="py-20 flex flex-col items-center justify-center">
+          <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+          <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs">Carregando Histórico...</p>
+        </div>
+      ) : filteredBookings.length === 0 ? (
         <div className="py-20 text-center border-2 border-dashed border-zinc-900 rounded-3xl">
           <History className="h-12 w-12 text-zinc-800 mx-auto mb-4" />
           <h3 className="text-xl font-black text-zinc-700 uppercase tracking-tighter">Nenhum registro encontrado</h3>
