@@ -29,7 +29,7 @@ import { useQuery } from '@tanstack/react-query';
 export default function EquipmentDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { data: equipment, isLoading } = useEquipment(id || '');
+  const { data: equipment, isLoading, error } = useEquipment(id || '');
   const [activeImage, setActiveImage] = useState(0);
   
   // Controle de datas para checagem de disponibilidade
@@ -89,7 +89,26 @@ export default function EquipmentDetails() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[80vh] gap-4">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="text-zinc-500 font-medium animate-pulse">Carregando especificações técnicas...</p>
+        <p className="text-zinc-500 font-black uppercase tracking-widest text-[10px] animate-pulse">Sincronizando com o Banco...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto py-20 text-center space-y-6">
+        <div className="h-20 w-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/20">
+           <Info className="h-10 w-10 text-red-500" />
+        </div>
+        <h2 className="text-2xl font-black uppercase tracking-tighter">Erro de Conexão</h2>
+        <p className="text-zinc-500 max-w-md mx-auto">Não conseguimos carregar as especificações deste item. Verifique sua conexão ou se a regra de segurança RLS foi aplicada no Supabase.</p>
+        <div className="flex justify-center gap-4">
+           <Button onClick={() => window.location.reload()} variant="outline" className="rounded-xl uppercase font-black text-xs">Tentar Novamente</Button>
+           <Button onClick={() => navigate('/')} className="rounded-xl uppercase font-black text-xs">Ir para Marketplace</Button>
+        </div>
+        <pre className="mt-8 p-4 bg-zinc-900 rounded-xl text-[10px] text-zinc-500 overflow-auto text-left max-w-lg mx-auto">
+           {JSON.stringify(error, null, 2)}
+        </pre>
       </div>
     );
   }
