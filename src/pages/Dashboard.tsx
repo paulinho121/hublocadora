@@ -47,8 +47,10 @@ import { BranchesTab } from '@/components/dashboard/BranchesTab';
 import { PrivacySettings } from '@/components/dashboard/PrivacySettings';
 import { AuditTab } from '@/components/dashboard/AuditTab';
 
-type TabType = 'overview' | 'inventory' | 'bookings' | 'logistics' | 'network' | 'settings' | 'audit';
-const VALID_TABS: TabType[] = ['overview', 'inventory', 'bookings', 'logistics', 'network', 'settings', 'audit'];
+import { OrderHistoryTab } from '@/components/dashboard/OrderHistoryTab';
+
+type TabType = 'overview' | 'inventory' | 'bookings' | 'logistics' | 'network' | 'settings' | 'audit' | 'history';
+const VALID_TABS: TabType[] = ['overview', 'inventory', 'bookings', 'logistics', 'network', 'settings', 'audit', 'history'];
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -742,6 +744,10 @@ export default function Dashboard() {
 
             {activeTab === 'audit' && (
               <AuditTab />
+            )}
+
+            {activeTab === 'history' && (
+              <OrderHistoryTab />
             )}
 
            {activeTab === 'settings' && (

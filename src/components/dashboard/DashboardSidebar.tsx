@@ -32,6 +32,7 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
     { id: 'inventory', label: 'Inventário', icon: Package },
     { id: 'bookings', label: 'Reservas', icon: CalendarDays },
     { id: 'logistics', label: 'Logística', icon: Truck },
+    { id: 'history', label: 'Histórico', icon: History },
     ...(isAdmin ? [
       { id: 'network', label: 'Minha Rede', icon: Globe },
       { id: 'audit', label: 'Auditoria', icon: History }
