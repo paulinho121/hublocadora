@@ -30,7 +30,7 @@ export class EquipmentService {
             .from('equipments')
             .select(`
                 *,
-                company:companies(*),
+                company:companies!equipments_company_id_fkey(*),
                 stock:equipment_stock(
                     *,
                     branch:branches(*)
