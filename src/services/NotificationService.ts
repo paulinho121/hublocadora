@@ -22,6 +22,7 @@ export class NotificationService {
 
         if (error) throw error;
         return data as Notification[];
+    }
 
     static async markAsRead(id: string) {
         const { error } = await supabase
