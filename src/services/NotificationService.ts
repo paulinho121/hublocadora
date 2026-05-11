@@ -22,5 +22,23 @@ export class NotificationService {
 
         if (error) throw error;
         return data as Notification[];
+
+    static async markAsRead(id: string) {
+        const { error } = await supabase
+            .from('notifications')
+            .update({ read: true })
+            .eq('id', id);
+
+        if (error) throw error;
+    }
+
+    static async markAllAsRead(userId: string) {
+        const { error } = await supabase
+            .from('notifications')
+            .update({ read: true })
+            .eq('user_id', userId)
+            .eq('read', false);
+
+        if (error) throw error;
     }
 }

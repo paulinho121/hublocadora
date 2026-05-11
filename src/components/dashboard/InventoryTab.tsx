@@ -9,7 +9,8 @@ import {
   Search, 
   Package, 
   CheckCircle2, 
-  AlertCircle 
+  AlertCircle,
+  ChevronDown
 } from 'lucide-react';
 import { Select } from '@/components/ui/select';
 import { AssignEquipmentModal } from './AssignEquipmentModal';
@@ -31,6 +32,12 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
   const [assigningItem, setAssigningItem] = useState<Equipment | null>(null);
   const { isBranchManager, branchId } = useTenant();
 
+  // Buscar lista completa apenas para extrair as categorias (evita o bug de sumir opções no filtro)
+  const { data: allEquipments } = useEquipments({
+    companyId: tenantId || undefined,
+    branchId: isBranchManager ? branchId : undefined
+  });
+
   const { data: equipments, isLoading: isLoadingEquipments } = useEquipments({
     companyId: tenantId || undefined,
     branchId: isBranchManager ? branchId : undefined,
@@ -46,9 +53,10 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
   const isLoading = isLoadingEquipments || isLoadingBookings;
 
   const uniqueCategories = useMemo(() => {
-    if (!equipments) return [];
-    return Array.from(new Set(equipments.map(e => e.category)));
-  }, [equipments]);
+    if (!allEquipments) return [];
+    const cats = allEquipments.map(e => e.category).filter(Boolean);
+    return Array.from(new Set(cats)).sort();
+  }, [allEquipments]);
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
@@ -71,17 +79,20 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
                 />
              </div>
              
-             <div className="md:col-span-4">
+             <div className="md:col-span-4 relative">
                 <Select 
                   value={categoryFilter} 
                   onChange={(e: any) => setCategoryFilter(e.target.value)}
-                  className="h-11 bg-zinc-900/50 border-zinc-800/80 rounded-xl focus:ring-primary/20 appearance-none"
+                  className="h-11 bg-zinc-900/50 border-zinc-800/80 rounded-xl focus:ring-primary/20 appearance-none pr-10 cursor-pointer"
                 >
-                  <option value="all">Todas Categorias</option>
+                  <option value="all" className="bg-zinc-900">Todas Categorias</option>
                   {uniqueCategories.map(cat => (
-                     <option key={cat} value={cat}>{cat}</option>
+                     <option key={cat} value={cat} className="bg-zinc-900">{cat}</option>
                   ))}
                 </Select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500">
+                  <ChevronDown className="h-4 w-4" />
+                </div>
              </div>
           </div>
         </div>
