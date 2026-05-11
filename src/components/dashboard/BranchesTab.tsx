@@ -43,7 +43,7 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
                 state,
                 phone,
                 document,
-                status: 'active'
+                status: 'invited'
             });
             setIsCreating(false);
             setName('');

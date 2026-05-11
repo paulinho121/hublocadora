@@ -55,17 +55,12 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
     });
 
     const toReceiveDeliveries = deliveries?.filter((d: any) => {
-        const fulfillmentId = d.fulfilling_company_id || d.origin_branch_id;
-        const isFulfiller = isBranchManager ? d.origin_branch_id === branchId : (tenantId && d.fulfilling_company_id === tenantId);
-        
-        // 1. Identificar se sou o locatário (por ID de usuário ou Empresa)
+        // 1. Identificar se sou o locatário (quem deve receber o item)
         const isRenter = d.booking?.renter_id === user?.id || (tenantId && d.booking?.renter?.company_id === tenantId);
         
-        // 2. Identificar se sou o dono do equipamento (Master)
-        const isOwner = tenantId && d.booking?.company_id === tenantId;
-
-        // Aparece em "A Receber" se eu sou o destinatário final (locatário ou dono acompanhando sub-locação)
-        return (isRenter || isOwner);
+        // Só aparece em "A Receber" se eu for o locatário E o item estiver em trânsito ou já entregue (aguardando minha conferência)
+        // Isso evita que o dono da empresa veja todos os pedidos da rede como "A Receber"
+        return isRenter && (d.status === 'shipped' || d.status === 'delivered');
     }) || [];
 
     // Incluir transferências internas em entrada
@@ -668,12 +663,12 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
 
                                                                         return (
                                                                             <div className="space-y-6">
-                                                                                {/* TOKEN APENAS PARA O LOCATÁRIO REAL (quem fez o pedido) */}
+                                                                                {/* TOKEN APENAS PARA O SOLICITANTE REAL (User ID que criou a reserva) */}
                                                                                 {isReceiver && (() => {
-                                                                                    const isActualRenter = 
-                                                                                        delivery.booking?.renter_id === user?.id || 
-                                                                                        (tenantId && delivery.booking?.renter?.company?.id === tenantId);
+                                                                                    const isActualRenter = delivery.booking?.renter_id === user?.id;
+                                                                                    
                                                                                     if (!isActualRenter) return null;
+                                                                                    
                                                                                     return (
                                                                                         <div className="bg-primary/5 border border-primary/10 rounded-2xl p-6 text-center space-y-4">
                                                                                             <p className="text-[10px] font-black uppercase tracking-widest text-primary">Seu Token de Resgate</p>

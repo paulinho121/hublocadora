@@ -46,6 +46,52 @@ RETURNS boolean AS $$
     SELECT EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin');
 $$ LANGUAGE sql SECURITY DEFINER SET search_path = public;
 
+-- RPC: Get branch details by invite token (Publicly accessible helper)
+CREATE OR REPLACE FUNCTION public.get_branch_by_token(p_token text)
+RETURNS json AS $$
+DECLARE
+    v_branch record;
+BEGIN
+    SELECT id, name, company_id, manager_email INTO v_branch 
+    FROM public.branches 
+    WHERE invite_token = p_token AND status = 'invited';
+    
+    IF NOT FOUND THEN
+        RETURN NULL;
+    END IF;
+
+    RETURN row_to_json(v_branch);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- RPC: Accept branch invite and link user to company
+CREATE OR REPLACE FUNCTION public.accept_branch_invite(p_token text)
+RETURNS boolean AS $$
+DECLARE
+    v_branch record;
+BEGIN
+    -- Find branch by token
+    SELECT * INTO v_branch FROM public.branches WHERE invite_token = p_token AND status = 'invited';
+    
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Convite inválido ou já utilizado.';
+    END IF;
+
+    -- Update the newly created profile to belong to the company
+    UPDATE public.profiles
+    SET company_id = v_branch.company_id,
+        role = 'rental_house'
+    WHERE id = auth.uid();
+
+    -- Set branch status to active
+    UPDATE public.branches
+    SET status = 'active'
+    WHERE id = v_branch.id;
+
+    RETURN true;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
 -- Check access to a delivery based on booking ID
 CREATE OR REPLACE FUNCTION public.check_delivery_access(b_id uuid)
 RETURNS boolean AS $$
@@ -117,6 +163,7 @@ CREATE TABLE IF NOT EXISTS public.companies (
     address_city text,
     address_state text,
     address_zip text,
+    parent_company_id uuid REFERENCES public.companies(id), -- Link to Super User/Master Company
     created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -145,6 +192,9 @@ CREATE TABLE IF NOT EXISTS public.categories (
     icon text,
     created_at timestamptz DEFAULT now()
 );
+
+-- Ensure icon column exists if table was created in an older version
+ALTER TABLE public.categories ADD COLUMN IF NOT EXISTS icon text;
 
 -- Equipments (Inventory)
 CREATE TABLE IF NOT EXISTS public.equipments (
@@ -304,9 +354,11 @@ CREATE TABLE IF NOT EXISTS public.logistics_tracking (
     created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- ==============================================================================
 -- 4. ROW LEVEL SECURITY (RLS) & POLICIES
 -- ==============================================================================
 
+-- Enable RLS on all tables
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.companies ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.branches ENABLE ROW LEVEL SECURITY;
@@ -322,18 +374,48 @@ ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.logistics_tracking ENABLE ROW LEVEL SECURITY;
 
--- UNIVERSAL POLICIES (V12 Logic)
+-- 1. PROFILES POLICIES
+CREATE POLICY "Profiles_Select" ON public.profiles
+    FOR SELECT TO authenticated
+    USING (
+        id = auth.uid() 
+        OR company_id = public.get_my_company_id()
+        OR public.check_is_admin()
+    );
 
--- Profiles
-CREATE POLICY "Profiles_Universal_Read" ON public.profiles FOR SELECT TO authenticated USING (true);
-CREATE POLICY "Profiles_Update_Self" ON public.profiles FOR UPDATE TO authenticated USING (id = auth.uid());
+CREATE POLICY "Profiles_Update_Self" ON public.profiles
+    FOR UPDATE TO authenticated
+    USING (id = auth.uid())
+    WITH CHECK (
+        id = auth.uid() 
+        AND (
+            -- Bloqueia alteração de cargo ou empresa pelo próprio usuário para evitar fraude
+            (role = (SELECT role FROM public.profiles WHERE id = auth.uid()))
+            AND (company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid()))
+        )
+    );
 
--- Companies
-CREATE POLICY "Companies_Universal_Read" ON public.companies FOR SELECT TO authenticated USING (true);
-CREATE POLICY "Companies_Admin_Manage" ON public.companies FOR ALL TO authenticated USING (public.check_is_admin());
+-- 2. COMPANIES POLICIES
+CREATE POLICY "Companies_Select" ON public.companies
+    FOR SELECT TO authenticated
+    USING (
+        owner_id = auth.uid() 
+        OR id = public.get_my_company_id()
+        OR parent_company_id = public.get_my_company_id()
+        OR public.check_is_admin()
+    );
 
--- Branches
-CREATE POLICY "Branches_Network_Access" ON public.branches
+CREATE POLICY "Companies_Update" ON public.companies
+    FOR UPDATE TO authenticated
+    USING (owner_id = auth.uid() OR public.check_is_admin())
+    WITH CHECK (
+        -- Bloqueia alteração do vínculo de rede para evitar roubo de tenant
+        (parent_company_id = (SELECT parent_company_id FROM public.companies WHERE id = companies.id))
+        OR public.check_is_admin()
+    );
+
+-- 3. BRANCHES POLICIES
+CREATE POLICY "Branches_Access" ON public.branches
     FOR ALL TO authenticated
     USING (
         company_id = public.get_my_company_id() 
@@ -341,39 +423,51 @@ CREATE POLICY "Branches_Network_Access" ON public.branches
         OR public.check_is_admin()
     );
 
--- Equipments
-CREATE POLICY "Equipments_Universal_Read" ON public.equipments FOR SELECT TO authenticated USING (true);
-CREATE POLICY "Equipments_Company_Manage" ON public.equipments FOR ALL TO authenticated USING (company_id = public.get_my_company_id() OR public.check_is_admin());
-
--- Equipment Stock
-CREATE POLICY "Stock_Network_Access" ON public.equipment_stock
-    FOR ALL TO authenticated
+-- 4. EQUIPMENTS POLICIES
+CREATE POLICY "Equipments_Select" ON public.equipments
+    FOR SELECT TO authenticated
     USING (
-        EXISTS (
-            SELECT 1 FROM public.branches b 
-            WHERE b.id = equipment_stock.branch_id 
-            AND b.company_id = public.get_my_company_id()
+        company_id = public.get_my_company_id()
+        OR EXISTS (
+            SELECT 1 FROM public.companies 
+            WHERE id = equipments.company_id AND parent_company_id = public.get_my_company_id()
         )
         OR public.check_is_admin()
     );
 
--- Bookings
-CREATE POLICY "Bookings_Network_Access" ON public.bookings
+CREATE POLICY "Equipments_Modify" ON public.equipments
     FOR ALL TO authenticated
+    USING (company_id = public.get_my_company_id() OR public.check_is_admin());
+
+-- 5. BOOKINGS POLICIES
+CREATE POLICY "Bookings_Select" ON public.bookings
+    FOR SELECT TO authenticated
     USING (
-        renter_id = auth.uid() 
-        OR company_id = public.get_my_company_id()
-        OR subrental_company_id = public.get_my_company_id()
+        company_id = public.get_my_company_id()
+        OR renter_id = auth.uid()
+        OR public.check_delivery_access(id)
         OR public.check_is_admin()
     );
 
--- Deliveries
-CREATE POLICY "Deliveries_Network_Access" ON public.deliveries
-    FOR ALL TO authenticated
+CREATE POLICY "Bookings_Insert" ON public.bookings
+    FOR INSERT TO authenticated
+    WITH CHECK (auth.uid() = renter_id OR public.check_is_admin());
+
+-- 6. DELIVERIES POLICIES
+CREATE POLICY "Deliveries_Select" ON public.deliveries
+    FOR SELECT TO authenticated
     USING (
         fulfilling_company_id = public.get_my_company_id()
         OR origin_branch_id = public.get_my_branch_id()
         OR EXISTS (SELECT 1 FROM public.bookings b WHERE b.id = deliveries.booking_id AND (b.renter_id = auth.uid() OR b.company_id = public.get_my_company_id()))
+        OR public.check_is_admin()
+    );
+
+CREATE POLICY "Deliveries_Update" ON public.deliveries
+    FOR UPDATE TO authenticated
+    USING (
+        fulfilling_company_id = public.get_my_company_id()
+        OR origin_branch_id = public.get_my_branch_id()
         OR public.check_is_admin()
     );
 
@@ -389,6 +483,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Dropping existing triggers to avoid "already exists" errors
+DROP TRIGGER IF EXISTS tr_profiles_updated_at ON public.profiles;
+DROP TRIGGER IF EXISTS tr_branches_updated_at ON public.branches;
+DROP TRIGGER IF EXISTS tr_deliveries_updated_at ON public.deliveries;
+
 CREATE TRIGGER tr_profiles_updated_at BEFORE UPDATE ON public.profiles FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 CREATE TRIGGER tr_branches_updated_at BEFORE UPDATE ON public.branches FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 CREATE TRIGGER tr_deliveries_updated_at BEFORE UPDATE ON public.deliveries FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
@@ -397,23 +496,41 @@ CREATE TRIGGER tr_deliveries_updated_at BEFORE UPDATE ON public.deliveries FOR E
 -- ==============================================================================
 DO $$ 
 BEGIN
+  -- Create publication if not exists
   IF NOT EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime') THEN
     CREATE PUBLICATION supabase_realtime;
   END IF;
-END $$;
 
-ALTER PUBLICATION supabase_realtime ADD TABLE public.deliveries;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.internal_transfers;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.bookings;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
+  -- Add tables only if they are not already members
+  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'deliveries') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.deliveries;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'internal_transfers') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.internal_transfers;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'bookings') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.bookings;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'notifications') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
+  END IF;
+END $$;
 
 -- 7. INITIAL DATA (CATEGORIES)
 -- ==============================================================================
-INSERT INTO public.categories (name, slug, icon) VALUES 
-('Câmeras', 'cameras', 'Camera'),
-('Lentes', 'lentes', 'Focus'),
-('Iluminação', 'iluminacao', 'Sun'),
-('Áudio', 'audio', 'Mic'),
-('Acessórios', 'acessorios', 'Settings'),
-('Grip', 'grip', 'Anchor')
-ON CONFLICT (slug) DO NOTHING;
+INSERT INTO public.categories (name, slug, icon)
+SELECT * FROM (VALUES 
+    ('Câmeras', 'cameras', 'Camera'),
+    ('Lentes', 'lentes', 'Focus'),
+    ('Iluminação', 'iluminacao', 'Sun'),
+    ('Áudio', 'audio', 'Mic'),
+    ('Acessórios', 'acessorios', 'Settings'),
+    ('Grip', 'grip', 'Anchor')
+) AS t(name, slug, icon)
+WHERE NOT EXISTS (
+    SELECT 1 FROM public.categories 
+    WHERE name = t.name OR slug = t.slug
+);
