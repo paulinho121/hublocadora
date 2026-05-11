@@ -228,6 +228,9 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
         
         const isSender = tenantId && delivery.booking?.company_id === tenantId;
         const isRenter = tenantId && (delivery.booking?.renter?.company_id === tenantId || delivery.booking?.renter_id === user?.id);
+        const isMaster = user?.role === 'admin'; // Or another check for master admin
+
+        const canSeeToken = isRenter || isMaster;
 
         return (
             <div className="h-full bg-zinc-950/80 rounded-[32px] p-8 sm:p-10 border border-white/5 flex flex-col justify-between gap-10 backdrop-blur-3xl relative overflow-hidden shadow-2xl min-h-[440px]">
@@ -266,24 +269,64 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                 </div>
 
                 <div className="space-y-4 relative z-10">
+                    {/* Token Visibility for Renter / Master */}
+                    {canSeeToken && (delivery.status === 'shipped' || delivery.status === 'ready') && (
+                        <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl text-center mb-4">
+                            <p className="text-[10px] font-black uppercase text-primary tracking-[0.2em] mb-1">Token de Segurança</p>
+                            <div className="text-2xl font-black text-white tracking-[0.3em]">{delivery.delivery_token || '----'}</div>
+                            <p className="text-[9px] text-zinc-500 font-medium mt-1">Forneça este código ao motorista para confirmar o recebimento.</p>
+                        </div>
+                    )}
+
                     {isFulfiller ? (
-                        <Button 
-                            onClick={() => handleNextStatus(delivery)}
-                            disabled={updatingId === delivery.id}
-                            className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-black uppercase text-xs tracking-widest h-16 rounded-2xl shadow-[0_20px_40px_rgba(16,185,129,0.2)] transition-all duration-500 group/btn"
-                        >
-                            {updatingId === delivery.id ? (
-                                <Loader2 className="h-5 w-5 animate-spin" />
-                            ) : (
-                                <div className="flex items-center gap-3">
-                                    ACOMPANHAR FLUXO <ChevronRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
+                        <div className="space-y-4">
+                            {/* Token Input for Fulfiller during Delivery Confirmation */}
+                            {delivery.status === 'shipped' && (
+                                <div className="space-y-2">
+                                    <p className="text-[10px] font-black uppercase text-zinc-600 tracking-[0.2em]">Validar Token do Cliente</p>
+                                    <Input 
+                                        placeholder="0000"
+                                        maxLength={4}
+                                        value={tokenInputs[delivery.id] || ''}
+                                        onChange={(e) => setTokenInputs(prev => ({ ...prev, [delivery.id]: e.target.value }))}
+                                        className="h-14 bg-black border-zinc-800 text-center text-xl font-black tracking-[0.5em] rounded-2xl focus:ring-primary/50"
+                                    />
                                 </div>
                             )}
-                        </Button>
+
+                            {/* Serial Number Input during Separation */}
+                            {delivery.status === 'picking' && (
+                                <div className="space-y-2">
+                                    <p className="text-[10px] font-black uppercase text-zinc-600 tracking-[0.2em]">Vincular Serial</p>
+                                    <Input 
+                                        placeholder="Número de série do item..."
+                                        value={serialNumbers[delivery.id] || ''}
+                                        onChange={(e) => setSerialNumbers(prev => ({ ...prev, [delivery.id]: e.target.value }))}
+                                        className="h-14 bg-black border-zinc-800 text-sm font-bold rounded-2xl"
+                                    />
+                                </div>
+                            )}
+
+                            <Button 
+                                onClick={() => handleNextStatus(delivery)}
+                                disabled={updatingId === delivery.id || (delivery.status === 'shipped' && (tokenInputs[delivery.id]?.length || 0) < 4)}
+                                className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-black uppercase text-xs tracking-widest h-16 rounded-2xl shadow-[0_20px_40px_rgba(16,185,129,0.2)] transition-all duration-500 group/btn"
+                            >
+                                {updatingId === delivery.id ? (
+                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                ) : (
+                                    <div className="flex items-center gap-3">
+                                        {getNextActionLabel(delivery.status)} <ChevronRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
+                                    </div>
+                                )}
+                            </Button>
+                        </div>
                     ) : (
                         <div className="p-6 bg-zinc-900/40 rounded-2xl border border-white/5 text-center">
-                            <p className="text-[10px] font-black uppercase text-zinc-600 tracking-widest mb-1">Acesso Restrito</p>
-                            <p className="text-[11px] text-zinc-500 font-medium">Apenas a unidade responsável pode transitar este status.</p>
+                            <p className="text-[10px] font-black uppercase text-zinc-600 tracking-widest mb-1">Status: {getStatusLabel(delivery.status)}</p>
+                            <p className="text-[11px] text-zinc-500 font-medium">
+                                {isRenter ? 'Acompanhe o progresso do seu pedido acima.' : 'Apenas a unidade responsável pode transitar este status.'}
+                            </p>
                         </div>
                     )}
                 </div>

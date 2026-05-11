@@ -248,6 +248,7 @@ CREATE TABLE IF NOT EXISTS public.deliveries (
     driver_phone text,
     status text DEFAULT 'pending',
     CONSTRAINT deliveries_status_check CHECK (status IN ('pending', 'picking', 'ready', 'shipped', 'delivered', 'confirmed', 'cancelled')),
+    delivery_token text DEFAULT lpad(floor(random() * 10000)::text, 4, '0'),
     current_lat numeric,
     current_lng numeric,
     estimated_arrival timestamp with time zone,
