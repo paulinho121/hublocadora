@@ -9,6 +9,9 @@ import { useNavigate } from "react-router-dom";
 import { useUpdateEquipment } from "@/hooks/useEquipments";
 import { useState } from "react";
 import { useTenant } from "@/contexts/TenantContext";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { Booking } from "@/types/database";
 
 interface InventoryCardProps {
   item: Equipment;
@@ -16,9 +19,10 @@ interface InventoryCardProps {
   onDelete: (id: string) => void;
   tenantId?: string;
   onAssign?: (item: Equipment) => void;
+  activeBooking?: any;
 }
 
-export function InventoryCard({ item, onEdit, onDelete, tenantId, onAssign }: InventoryCardProps) {
+export function InventoryCard({ item, onEdit, onDelete, tenantId, onAssign, activeBooking }: InventoryCardProps) {
     const { isBranchManager } = useTenant();
   const navigate = useNavigate();
   const updateMutation = useUpdateEquipment();
@@ -110,6 +114,25 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId, onAssign }: In
             {item.name}
           </h3>
         </div>
+
+        {activeBooking && (
+          <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl animate-in slide-in-from-top-1 duration-300">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+              <p className="text-[10px] font-black uppercase text-amber-500 tracking-widest">Em Locação Ativa</p>
+            </div>
+            <div className="space-y-1.5">
+              <p className="text-[11px] font-bold text-zinc-100 truncate">
+                <span className="text-zinc-500 uppercase text-[9px] mr-1">Cliente:</span>
+                {activeBooking.renter?.company?.name || activeBooking.renter?.full_name}
+              </p>
+              <p className="text-[11px] font-bold text-zinc-100">
+                <span className="text-zinc-500 uppercase text-[9px] mr-1">Retorno:</span>
+                {format(new Date(activeBooking.end_date), "dd/MM/yyyy", { locale: ptBR })}
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="flex flex-col gap-4 mt-auto">
           <div className="flex items-center justify-between gap-4">

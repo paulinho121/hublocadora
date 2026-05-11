@@ -13,7 +13,8 @@ import {
 } from 'lucide-react';
 import { Select } from '@/components/ui/select';
 import { AssignEquipmentModal } from './AssignEquipmentModal';
-import { Equipment } from '@/types/database';
+import { Equipment, Booking } from '@/types/database';
+import { useBookings } from '@/hooks/useBookings';
 
 import { useTenant } from '@/contexts/TenantContext';
 
@@ -30,12 +31,19 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
   const [assigningItem, setAssigningItem] = useState<Equipment | null>(null);
   const { isBranchManager, branchId } = useTenant();
 
-  const { data: equipments, isLoading } = useEquipments({
+  const { data: equipments, isLoading: isLoadingEquipments } = useEquipments({
     companyId: tenantId || undefined,
     branchId: isBranchManager ? branchId : undefined,
     category: categoryFilter === 'all' ? undefined : categoryFilter,
     searchQuery: searchQuery || undefined
   });
+
+  const { data: activeBookings, isLoading: isLoadingBookings } = useBookings({
+    companyId: tenantId || undefined,
+    status: 'active'
+  });
+
+  const isLoading = isLoadingEquipments || isLoadingBookings;
 
   const uniqueCategories = useMemo(() => {
     if (!equipments) return [];
@@ -124,6 +132,7 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
               onDelete={onDelete} 
               onAssign={(item) => setAssigningItem(item)}
               tenantId={tenantId}
+              activeBooking={activeBookings?.find(b => b.equipment_id === item.id)}
             />
           ))}
         </div>
