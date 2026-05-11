@@ -28,7 +28,7 @@ O banco utiliza **Row Level Security (RLS)** para garantir isolamento multi-tena
 
 ## 📝 Histórico Recente
 - **V12 (Network Unlock)**: Liberação total para filiais gerenciarem pedidos.
-- **FIX_DELIVERY_STATUS_CONSTRAINT**: Adicionado status `confirmed` ao fluxo de logística.
+- **V13 (FIX_DELIVERY_STATUS_CONSTRAINT)**: Adicionado status `confirmed` ao fluxo de logística. ✅ Consolidado no Master.
 
 ---
-*Atualizado em: 2026-05-11*
+*Atualizado em: 2026-05-11 (Fase 2 Concluída)*

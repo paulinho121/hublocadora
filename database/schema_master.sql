@@ -1,7 +1,7 @@
 -- ==============================================================================
 -- CINEHUB MASTER SCHEMA: CONSOLIDATED DATABASE DEFINITION
--- VERSION: 2.0 (Post-V12 Network Unlock)
--- DATE: 2026-05-11
+-- VERSION: 2.1 (Post-V13 Delivery Fix)
+-- DATE: 2026-05-11 (Phase 2 Consolidated)
 -- ==============================================================================
 
 -- 1. EXTENSIONS
@@ -246,12 +246,13 @@ CREATE TABLE IF NOT EXISTS public.deliveries (
     origin_branch_id uuid REFERENCES public.branches(id),
     driver_name text,
     driver_phone text,
-    status text CHECK (status IN ('pending', 'picking', 'ready', 'shipped', 'delivered', 'confirmed', 'cancelled')) DEFAULT 'pending',
+    status text DEFAULT 'pending',
+    CONSTRAINT deliveries_status_check CHECK (status IN ('pending', 'picking', 'ready', 'shipped', 'delivered', 'confirmed', 'cancelled')),
     current_lat numeric,
     current_lng numeric,
     estimated_arrival timestamp with time zone,
     -- Reverse Logistics
-    reverse_logistics_status text CHECK (reverse_logistics_status IN ('not_started', 'requested', 'collecting', 'in_transit', 'returned', 'cancelled')) DEFAULT 'not_started',
+    reverse_logistics_status text CHECK (reverse_logistics_status IN ('not_started', 'requested', 'collecting', 'in_transit', 'returned', 'completed', 'cancelled')) DEFAULT 'not_started',
     reverse_logistics_address text,
     reverse_logistics_branch_id uuid REFERENCES public.branches(id),
     reverse_driver_name text,

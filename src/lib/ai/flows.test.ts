@@ -14,7 +14,10 @@ vi.mock('../genkit', () => ({
       text: 'Mocked output',
       output: {
         status: 'ok',
-        recommendation: 'Everything is fine'
+        suggestion: 'Mocked suggestion',
+        recommendedItems: ['Item 1', 'Item 2'],
+        justification: 'Mocked justification',
+        recommendation: 'Mocked recommendation'
       }
     }),
   }
