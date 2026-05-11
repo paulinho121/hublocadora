@@ -375,6 +375,7 @@ ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.logistics_tracking ENABLE ROW LEVEL SECURITY;
 
 -- 1. PROFILES POLICIES
+DROP POLICY IF EXISTS "Profiles_Select" ON public.profiles;
 CREATE POLICY "Profiles_Select" ON public.profiles
     FOR SELECT TO authenticated
     USING (
@@ -383,6 +384,7 @@ CREATE POLICY "Profiles_Select" ON public.profiles
         OR public.check_is_admin()
     );
 
+DROP POLICY IF EXISTS "Profiles_Update_Self" ON public.profiles;
 CREATE POLICY "Profiles_Update_Self" ON public.profiles
     FOR UPDATE TO authenticated
     USING (id = auth.uid())
@@ -396,15 +398,18 @@ CREATE POLICY "Profiles_Update_Self" ON public.profiles
     );
 
 -- 2. COMPANIES POLICIES
+DROP POLICY IF EXISTS "Companies_Select" ON public.companies;
 CREATE POLICY "Companies_Select" ON public.companies
     FOR SELECT TO authenticated
     USING (
-        owner_id = auth.uid() 
+        status = 'active' -- Qualquer um vê empresas ativas
+        OR owner_id = auth.uid() 
         OR id = public.get_my_company_id()
         OR parent_company_id = public.get_my_company_id()
         OR public.check_is_admin()
     );
 
+DROP POLICY IF EXISTS "Companies_Update" ON public.companies;
 CREATE POLICY "Companies_Update" ON public.companies
     FOR UPDATE TO authenticated
     USING (owner_id = auth.uid() OR public.check_is_admin())
@@ -415,6 +420,7 @@ CREATE POLICY "Companies_Update" ON public.companies
     );
 
 -- 3. BRANCHES POLICIES
+DROP POLICY IF EXISTS "Branches_Access" ON public.branches;
 CREATE POLICY "Branches_Access" ON public.branches
     FOR ALL TO authenticated
     USING (
@@ -424,10 +430,12 @@ CREATE POLICY "Branches_Access" ON public.branches
     );
 
 -- 4. EQUIPMENTS POLICIES
+DROP POLICY IF EXISTS "Equipments_Select" ON public.equipments;
 CREATE POLICY "Equipments_Select" ON public.equipments
     FOR SELECT TO authenticated
     USING (
-        company_id = public.get_my_company_id()
+        status != 'unavailable' -- Visível para o Marketplace
+        OR company_id = public.get_my_company_id()
         OR EXISTS (
             SELECT 1 FROM public.companies 
             WHERE id = equipments.company_id AND parent_company_id = public.get_my_company_id()
@@ -435,11 +443,13 @@ CREATE POLICY "Equipments_Select" ON public.equipments
         OR public.check_is_admin()
     );
 
+DROP POLICY IF EXISTS "Equipments_Modify" ON public.equipments;
 CREATE POLICY "Equipments_Modify" ON public.equipments
     FOR ALL TO authenticated
     USING (company_id = public.get_my_company_id() OR public.check_is_admin());
 
 -- 5. BOOKINGS POLICIES
+DROP POLICY IF EXISTS "Bookings_Select" ON public.bookings;
 CREATE POLICY "Bookings_Select" ON public.bookings
     FOR SELECT TO authenticated
     USING (
@@ -449,11 +459,13 @@ CREATE POLICY "Bookings_Select" ON public.bookings
         OR public.check_is_admin()
     );
 
+DROP POLICY IF EXISTS "Bookings_Insert" ON public.bookings;
 CREATE POLICY "Bookings_Insert" ON public.bookings
     FOR INSERT TO authenticated
     WITH CHECK (auth.uid() = renter_id OR public.check_is_admin());
 
 -- 6. DELIVERIES POLICIES
+DROP POLICY IF EXISTS "Deliveries_Select" ON public.deliveries;
 CREATE POLICY "Deliveries_Select" ON public.deliveries
     FOR SELECT TO authenticated
     USING (
@@ -463,6 +475,7 @@ CREATE POLICY "Deliveries_Select" ON public.deliveries
         OR public.check_is_admin()
     );
 
+DROP POLICY IF EXISTS "Deliveries_Update" ON public.deliveries;
 CREATE POLICY "Deliveries_Update" ON public.deliveries
     FOR UPDATE TO authenticated
     USING (
