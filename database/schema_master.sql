@@ -1,7 +1,7 @@
 -- ==============================================================================
 -- CINEHUB MASTER SCHEMA: CONSOLIDATED DATABASE DEFINITION
--- VERSION: 2.1 (Post-V13 Delivery Fix)
--- DATE: 2026-05-11 (Phase 2 Consolidated)
+-- VERSION: 2.2 (Security Hardening & Multi-Tenant Fix)
+-- DATE: 2026-05-11 (Phase 2 - Logistics Restoration)
 -- ==============================================================================
 
 -- 1. EXTENSIONS
@@ -142,7 +142,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     email text NOT NULL,
     full_name text,
     role text CHECK (role IN ('client', 'rental_house', 'production_company', 'admin')) DEFAULT 'client',
-    company_id uuid, -- Linked company (for owners/employees)
+    company_id uuid CONSTRAINT profiles_company_id_fkey REFERENCES public.companies(id), -- Linked company (for owners/employees)
     created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -456,6 +456,7 @@ CREATE POLICY "Bookings_Select" ON public.bookings
     USING (
         company_id = public.get_my_company_id()
         OR renter_id = auth.uid()
+        OR EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = bookings.renter_id AND p.company_id = public.get_my_company_id())
         OR public.check_delivery_access(id)
         OR public.check_is_admin()
     );
@@ -472,7 +473,16 @@ CREATE POLICY "Deliveries_Select" ON public.deliveries
     USING (
         fulfilling_company_id = public.get_my_company_id()
         OR origin_branch_id = public.get_my_branch_id()
-        OR EXISTS (SELECT 1 FROM public.bookings b WHERE b.id = deliveries.booking_id AND (b.renter_id = auth.uid() OR b.company_id = public.get_my_company_id()))
+        OR EXISTS (
+            SELECT 1 FROM public.bookings b 
+            LEFT JOIN public.profiles p ON b.renter_id = p.id
+            WHERE b.id = deliveries.booking_id 
+            AND (
+                b.renter_id = auth.uid() 
+                OR b.company_id = public.get_my_company_id()
+                OR p.company_id = public.get_my_company_id()
+            )
+        )
         OR public.check_is_admin()
     );
 
@@ -482,6 +492,52 @@ CREATE POLICY "Deliveries_Update" ON public.deliveries
     USING (
         fulfilling_company_id = public.get_my_company_id()
         OR origin_branch_id = public.get_my_branch_id()
+        OR public.check_is_admin()
+    );
+
+-- 7. EQUIPMENT STOCK POLICIES
+DROP POLICY IF EXISTS "Equipment_Stock_Access" ON public.equipment_stock;
+CREATE POLICY "Equipment_Stock_Access" ON public.equipment_stock
+    FOR ALL TO authenticated
+    USING (
+        EXISTS (SELECT 1 FROM public.branches b WHERE b.id = branch_id AND (b.company_id = public.get_my_company_id() OR b.manager_email = auth.jwt() ->> 'email'))
+        OR public.check_is_admin()
+    );
+
+-- 8. INTERNAL TRANSFERS POLICIES
+DROP POLICY IF EXISTS "Internal_Transfers_Access" ON public.internal_transfers;
+CREATE POLICY "Internal_Transfers_Access" ON public.internal_transfers
+    FOR ALL TO authenticated
+    USING (
+        company_id = public.get_my_company_id()
+        OR EXISTS (SELECT 1 FROM public.branches b WHERE (b.id = source_branch_id OR b.id = requester_branch_id) AND b.manager_email = auth.jwt() ->> 'email')
+        OR public.check_is_admin()
+    );
+
+-- 9. PAYMENTS POLICIES
+DROP POLICY IF EXISTS "Payments_Access" ON public.payments;
+CREATE POLICY "Payments_Access" ON public.payments
+    FOR SELECT TO authenticated
+    USING (
+        tenant_id = public.get_my_company_id()
+        OR EXISTS (SELECT 1 FROM public.bookings b WHERE b.id = booking_id AND (b.renter_id = auth.uid() OR EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = b.renter_id AND p.company_id = public.get_my_company_id())))
+        OR public.check_is_admin()
+    );
+
+-- 10. NOTIFICATIONS POLICIES
+DROP POLICY IF EXISTS "Notifications_Owner" ON public.notifications;
+CREATE POLICY "Notifications_Owner" ON public.notifications
+    FOR ALL TO authenticated
+    USING (user_id = auth.uid() OR public.check_is_admin());
+
+-- 11. LOGISTICS TRACKING POLICIES
+DROP POLICY IF EXISTS "Logistics_Tracking_Access" ON public.logistics_tracking;
+CREATE POLICY "Logistics_Tracking_Access" ON public.logistics_tracking
+    FOR ALL TO authenticated
+    USING (
+        EXISTS (SELECT 1 FROM public.bookings b WHERE b.id = booking_id AND (b.company_id = public.get_my_company_id() OR b.renter_id = auth.uid() OR EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = b.renter_id AND p.company_id = public.get_my_company_id())))
+        OR checkout_inspector_id = auth.uid()
+        OR checkin_inspector_id = auth.uid()
         OR public.check_is_admin()
     );
 

@@ -56,7 +56,9 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
 
     const toReceiveDeliveries = deliveries?.filter((d: any) => {
         // 1. Identificar se sou o locatário (quem deve receber o item)
-        const isRenter = d.booking?.renter_id === user?.id || (tenantId && d.booking?.renter?.company_id === tenantId);
+        // Verificamos se o usuário é o renter_id direto OU se pertence à empresa que fez a locação
+        const renterCompanyId = d.booking?.renter?.company_id || d.booking?.renter?.company?.id;
+        const isRenter = d.booking?.renter_id === user?.id || (tenantId && renterCompanyId === tenantId);
         
         // Só aparece em "A Receber" se eu for o locatário E o item estiver em trânsito ou já entregue (aguardando minha conferência)
         // Isso evita que o dono da empresa veja todos os pedidos da rede como "A Receber"
