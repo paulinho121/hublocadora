@@ -10,7 +10,8 @@ import {
   User,
   Globe,
   History,
-  Activity
+  Activity,
+  Heart
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -33,6 +34,7 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
     { id: 'bookings', label: 'Reservas', icon: CalendarDays },
     { id: 'logistics', label: 'Logística', icon: Truck },
     { id: 'history', label: 'Histórico', icon: History },
+    { id: 'favorites', label: 'Favoritos', icon: Heart },
     ...(isAdmin ? [
       { id: 'network', label: 'Minha Rede', icon: Globe },
       { id: 'audit', label: 'Auditoria', icon: History }

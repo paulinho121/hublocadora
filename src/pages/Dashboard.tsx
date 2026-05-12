@@ -15,7 +15,8 @@ import {
   MapPin,
   Truck,
   ArrowDownLeft,
-  ArrowUpRight
+  ArrowUpRight,
+  Heart
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -23,6 +24,8 @@ import { ptBR } from 'date-fns/locale';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBookings, useUpdateBookingStatus } from '@/hooks/useBookings';
 import { useEquipments, useDeleteEquipment } from '@/hooks/useEquipments';
+import { useFavorites } from '@/hooks/useFavorites';
+import { EquipmentCard } from '@/components/marketplace/EquipmentCard';
 import { useTenant } from '@/contexts/TenantContext';
 
 import { Button } from '@/components/ui/button';
@@ -49,8 +52,8 @@ import { AuditTab } from '@/components/dashboard/AuditTab';
 
 import { OrderHistoryTab } from '@/components/dashboard/OrderHistoryTab';
 
-type TabType = 'overview' | 'inventory' | 'bookings' | 'logistics' | 'network' | 'settings' | 'audit' | 'history';
-const VALID_TABS: TabType[] = ['overview', 'inventory', 'bookings', 'logistics', 'network', 'settings', 'audit', 'history'];
+type TabType = 'overview' | 'inventory' | 'bookings' | 'logistics' | 'network' | 'settings' | 'audit' | 'history' | 'favorites';
+const VALID_TABS: TabType[] = ['overview', 'inventory', 'bookings', 'logistics', 'network', 'settings', 'audit', 'history', 'favorites'];
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -750,7 +753,21 @@ export default function Dashboard() {
               <OrderHistoryTab />
             )}
 
-           {activeTab === 'settings' && (
+            {activeTab === 'favorites' && (
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <header className="mb-10">
+                   <h2 className="text-4xl font-black tracking-tighter uppercase mb-2">Favoritos</h2>
+                   <p className="text-zinc-500 font-medium">Itens que você salvou para acesso rápido.</p>
+                </header>
+                
+                <FavoritesTabContent onSelect={(eq) => {
+                  setEditingEquipment(eq); // Opcional: mostrar detalhes ou abrir modal de reserva
+                  // Para este protótipo, podemos redirecionar ou abrir um modal
+                }} />
+              </div>
+            )}
+
+            {activeTab === 'settings' && (
              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <header className="mb-10">
                    <h2 className="text-4xl font-black tracking-tighter uppercase mb-2">Ajustes</h2>
@@ -825,6 +842,50 @@ export default function Dashboard() {
 
 
 
+    </div>
+  );
+}
+
+// ─── Favorites Tab Content ──────────────────────────────────────────────
+function FavoritesTabContent({ onSelect }: { onSelect: (eq: any) => void }) {
+  const { favoriteIds, isLoading: isLoadingIds } = useFavorites();
+  const { data: favoriteEquipments, isLoading: isLoadingEquipments } = useEquipments({
+    ids: favoriteIds && favoriteIds.length > 0 ? favoriteIds : ['__none__'] // Evita buscar tudo se vazio
+  });
+
+  if (isLoadingIds || isLoadingEquipments) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-zinc-500 font-black uppercase text-[10px] tracking-widest">Sincronizando Favoritos...</p>
+      </div>
+    );
+  }
+
+  if (!favoriteIds || favoriteIds.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <div className="h-20 w-20 rounded-3xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-6">
+          <Heart className="h-8 w-8 text-zinc-700" />
+        </div>
+        <h3 className="text-xl font-black uppercase tracking-tighter mb-2">Lista Vazia</h3>
+        <p className="text-zinc-500 max-w-xs mb-8">Você ainda não salvou nenhum equipamento como favorito.</p>
+        <Button variant="outline" className="rounded-xl border-zinc-800" asChild>
+           <a href="/">Explorar Marketplace</a>
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {favoriteEquipments?.map((item) => (
+        <EquipmentCard 
+          key={item.id} 
+          item={item} 
+          onClick={() => onSelect(item)} 
+        />
+      ))}
     </div>
   );
 }

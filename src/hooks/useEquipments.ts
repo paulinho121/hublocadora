@@ -16,6 +16,7 @@ export function useEquipments(options?: {
     branchId?: string | null;
     category?: string;
     searchQuery?: string;
+    ids?: string[];
 }) {
     return useQuery({
         queryKey: ['equipments', options],
@@ -88,6 +89,10 @@ export function useEquipments(options?: {
 
             if (options?.searchQuery) {
                 query = query.ilike('name', `%${options.searchQuery}%`);
+            }
+            
+            if (options?.ids && options.ids.length > 0) {
+                query = query.in('id', options.ids);
             }
 
             query = query.order('created_at', { ascending: false });
