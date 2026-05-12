@@ -329,6 +329,15 @@ CREATE TABLE IF NOT EXISTS public.reviews (
     created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- Favorites (Wishlist)
+CREATE TABLE IF NOT EXISTS public.favorites (
+    id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+    equipment_id uuid REFERENCES public.equipments(id) ON DELETE CASCADE NOT NULL,
+    created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    UNIQUE(user_id, equipment_id)
+);
+
 -- Notifications
 CREATE TABLE IF NOT EXISTS public.notifications (
     id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -375,6 +384,7 @@ ALTER TABLE public.network_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.logistics_tracking ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.favorites ENABLE ROW LEVEL SECURITY;
 
 -- 1. PROFILES POLICIES
 DROP POLICY IF EXISTS "Profiles_Select" ON public.profiles;
@@ -541,6 +551,13 @@ CREATE POLICY "Logistics_Tracking_Access" ON public.logistics_tracking
         OR checkin_inspector_id = auth.uid()
         OR public.check_is_admin()
     );
+
+-- 12. FAVORITES POLICIES
+DROP POLICY IF EXISTS "Favorites_Owner_All" ON public.favorites;
+CREATE POLICY "Favorites_Owner_All" ON public.favorites
+    FOR ALL TO authenticated
+    USING (user_id = auth.uid())
+    WITH CHECK (user_id = auth.uid());
 
 -- 5. TRIGGERS & AUTOMATION
 -- ==============================================================================

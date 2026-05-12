@@ -10,6 +10,7 @@ import { BrandMarquee } from '@/components/home/BrandMarquee';
 import { QuickBookingModal } from '@/components/marketplace/QuickBookingModal';
 import { Equipment } from '@/types/database';
 import { motion, AnimatePresence } from 'motion/react';
+import { FavoriteButton } from '@/components/marketplace/FavoriteButton';
 
 // ─── Equipment Card with auto-rotating image carousel ───────────────────────
 function EquipmentCard({ item, onClick }: { item: Equipment; onClick: () => void }) {
@@ -70,9 +71,14 @@ function EquipmentCard({ item, onClick }: { item: Equipment; onClick: () => void
           </Badge>
         </div>
         
+        {/* Favorites button overlay */}
+        <div className="absolute top-4 right-4 z-10">
+          <FavoriteButton equipmentId={item.id} />
+        </div>
+        
         {/* Location badge overlay */}
         {item.state_uf && (
-          <div className="absolute top-4 right-4 z-10">
+          <div className="absolute bottom-4 right-4 z-10">
             <Badge className="bg-zinc-950/60 text-zinc-400 border-white/5 uppercase font-black tracking-widest text-[9px] backdrop-blur-md px-2 py-1 rounded-md border">
               <MapPin className="w-2.5 h-2.5 mr-1" />
               {item.state_uf}
