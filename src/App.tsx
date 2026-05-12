@@ -12,6 +12,7 @@ import { TenantProvider } from '@/contexts/TenantContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AdminRoute } from '@/components/auth/AdminRoute';
 import { queryClient } from '@/lib/react-query';
+import { Toaster } from 'sonner';
 
 // Pages — eager (pequenas, carregam sempre)
 import Marketplace from '@/pages/Marketplace';
@@ -235,6 +236,7 @@ export default function App() {
           <Router>
             <MainLayout />
           </Router>
+          <Toaster position="bottom-right" richColors theme="dark" />
         </TenantProvider>
       </AuthProvider>
     </QueryClientProvider>
