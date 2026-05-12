@@ -145,12 +145,30 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
             return;
         }
 
-        // Safety check for delivery token if moving to 'delivered'
-        if (delivery.status === 'shipped' && nextStatus === 'delivered') {
+        // Validação de Token de Segurança via RPC
+        if (delivery.status === 'ready' && nextStatus === 'shipped') {
             const enteredToken = tokenInputs[delivery.id] || '';
-            if (enteredToken !== delivery.delivery_token) {
-                alert('Token de segurança inválido! Solicite o código de 4 dígitos ao cliente.');
+            setUpdatingId(delivery.id);
+            try {
+                const { data: isValid, error: tokenError } = await supabase.rpc('verify_delivery_token', {
+                    p_delivery_id: delivery.id,
+                    p_token: enteredToken
+                });
+
+                if (tokenError) throw tokenError;
+                if (!isValid) {
+                    alert('Token de segurança inválido! Solicite o código ao motorista/cliente.');
+                    return;
+                }
+                
+                queryClient.invalidateQueries({ queryKey: ['deliveries'] });
+                console.log("Coleta confirmada via token!");
                 return;
+            } catch (err: any) {
+                alert(`Erro na validação: ${err.message}`);
+                return;
+            } finally {
+                setUpdatingId(null);
             }
         }
 
@@ -209,11 +227,11 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
 
     const getNextActionLabel = (status: string) => {
         const actions: any = {
-            'pending': 'Confirmar Pedido',
+            'pending': 'Confirmar Recebimento',
             'picking': 'Finalizar Separação',
-            'ready': 'Despachar Equipamento',
-            'shipped': 'Confirmar Entrega',
-            'delivered': 'Conferir e Aceitar Equipamento'
+            'ready': 'Confirmar Coleta (Token)',
+            'shipped': 'Finalizar Entrega',
+            'delivered': 'Conferir e Aceitar'
         };
         return actions[status];
     };
@@ -280,10 +298,10 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
 
                     {isFulfiller ? (
                         <div className="space-y-4">
-                            {/* Token Input for Fulfiller during Delivery Confirmation */}
-                            {delivery.status === 'shipped' && (
+                            {/* Token Input for Fulfiller during Collection Confirmation */}
+                            {delivery.status === 'ready' && (
                                 <div className="space-y-2">
-                                    <p className="text-[10px] font-black uppercase text-zinc-600 tracking-[0.2em]">Validar Token do Cliente</p>
+                                    <p className="text-[10px] font-black uppercase text-zinc-600 tracking-[0.2em]">Validar Token de Coleta</p>
                                     <Input 
                                         placeholder="0000"
                                         maxLength={4}
@@ -571,8 +589,11 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                         <span className="text-xs font-black uppercase tracking-[0.1em] text-emerald-500">{getStatusLabel(delivery.status)}</span>
                                                                     </div>
                                                                 </div>
-                                                                <div className="text-[10px] font-black text-zinc-700 uppercase tracking-widest">
-                                                                    Volume: <span className="text-zinc-400 ml-1">1 UN</span>
+                                                                <div className="text-[10px] font-black text-zinc-700 uppercase tracking-widest flex items-center gap-4">
+                                                                    <span>Volume: <span className="text-zinc-400 ml-1">{delivery.quantity || 1} UN</span></span>
+                                                                    {delivery.fulfillment_type === 'subrental' && (
+                                                                        <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-[8px] font-black uppercase">Sub-locação</Badge>
+                                                                    )}
                                                                 </div>
                                                             </div>
 

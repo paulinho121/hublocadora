@@ -110,17 +110,24 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
--- RPC: Verify delivery token (Used by fulfilling company to confirm delivery)
-CREATE OR REPLACE FUNCTION public.verify_delivery_token(p_booking_id uuid, p_token text)
+-- RPC: Verify delivery token (Nuclear Security: Only fulfiller or admin can verify)
+DROP FUNCTION IF EXISTS public.verify_delivery_token(uuid, text);
+CREATE OR REPLACE FUNCTION public.verify_delivery_token(p_delivery_id uuid, p_token text)
 RETURNS boolean AS $$
-DECLARE
-    v_delivery_id uuid;
 BEGIN
-    SELECT id INTO v_delivery_id FROM public.deliveries WHERE booking_id = p_booking_id;
-    
-    -- Check if token matches
-    IF EXISTS (SELECT 1 FROM public.delivery_secrets WHERE delivery_id = v_delivery_id AND token = p_token) THEN
-        UPDATE public.deliveries SET status = 'delivered' WHERE id = v_delivery_id;
+    -- Check if token matches AND the caller is the assigned fulfiller (or admin)
+    IF EXISTS (
+        SELECT 1 FROM public.delivery_secrets s
+        JOIN public.deliveries d ON s.delivery_id = d.id
+        WHERE s.delivery_id = p_delivery_id 
+        AND s.token = p_token
+        AND (
+            d.fulfilling_company_id = public.get_my_company_id() 
+            OR d.origin_branch_id = public.get_my_branch_id()
+            OR public.check_is_admin()
+        )
+    ) THEN
+        UPDATE public.deliveries SET status = 'shipped' WHERE id = p_delivery_id;
         RETURN true;
     END IF;
 
@@ -148,6 +155,91 @@ BEGIN
     SELECT 1 FROM public.bookings 
     WHERE id = b_id AND renter_id = auth.uid()
   );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Function: Calculate Booking Total (Server-side Source of Truth)
+CREATE OR REPLACE FUNCTION public.calculate_booking_total()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_daily_rate numeric;
+    v_days integer;
+BEGIN
+    -- 1. Buscar a diária real do equipamento no banco (ignora o que vem do frontend)
+    SELECT daily_rate INTO v_daily_rate FROM public.equipments WHERE id = NEW.equipment_id;
+    
+    IF v_daily_rate IS NULL THEN
+        RAISE EXCEPTION 'Equipamento não encontrado para cálculo de preço.';
+    END IF;
+
+    -- 2. Calcular número de dias (mínimo 1 dia)
+    v_days := GREATEST(NEW.end_date - NEW.start_date, 1);
+    
+    -- 3. Definir o valor real
+    NEW.total_amount := v_daily_rate * v_days;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- RPC: Orchestrate fulfillment across multiple sources
+CREATE OR REPLACE FUNCTION public.orchestrate_fulfillment(p_booking_id uuid)
+RETURNS void AS $$
+DECLARE
+    v_total_needed integer;
+    v_master_id uuid;
+    v_primary_vendor_id uuid;
+    v_current_stock integer;
+    v_needed_remaining integer;
+    v_other_vendor record;
+    v_delivery_id uuid;
+BEGIN
+    -- 1. Info da reserva
+    SELECT b.quantity, e.master_catalog_id, b.company_id 
+    INTO v_total_needed, v_master_id, v_primary_vendor_id
+    FROM public.bookings b
+    JOIN public.equipments e ON b.equipment_id = e.id
+    WHERE b.id = p_booking_id;
+
+    -- 2. Verificar estoque do vendedor principal
+    SELECT stock_quantity INTO v_current_stock 
+    FROM public.equipments 
+    WHERE id = (SELECT equipment_id FROM public.bookings WHERE id = p_booking_id);
+
+    -- 3. Criar Fulfillment Primário (O que o dono tem disponível)
+    IF v_current_stock > 0 THEN
+        INSERT INTO public.deliveries (booking_id, fulfilling_company_id, quantity, fulfillment_type, status)
+        VALUES (p_booking_id, v_primary_vendor_id, LEAST(v_current_stock, v_total_needed), 'primary', 'pending')
+        RETURNING id INTO v_delivery_id;
+        
+        -- Gerar token de coleta
+        INSERT INTO public.delivery_secrets (delivery_id, token, type) VALUES (v_delivery_id, lpad(floor(random() * 10000)::text, 4, '0'), 'collection');
+    END IF;
+
+    v_needed_remaining := v_total_needed - LEAST(v_current_stock, v_total_needed);
+
+    -- 4. Se ainda falta, buscar em outros parceiros do mesmo item no HUB
+    IF v_needed_remaining > 0 THEN
+        FOR v_other_vendor IN 
+            SELECT company_id, stock_quantity 
+            FROM public.equipments 
+            WHERE master_catalog_id = v_master_id 
+            AND company_id != v_primary_vendor_id
+            AND stock_quantity > 0
+            ORDER BY stock_quantity DESC
+        LOOP
+            EXIT WHEN v_needed_remaining <= 0;
+            
+            INSERT INTO public.deliveries (booking_id, fulfilling_company_id, quantity, fulfillment_type, subrental_status, status)
+            VALUES (p_booking_id, v_other_vendor.company_id, LEAST(v_needed_remaining, v_other_vendor.stock_quantity), 'subrental', 'pending', 'pending')
+            RETURNING id INTO v_delivery_id;
+
+            -- Gerar token de coleta para o parceiro
+            INSERT INTO public.delivery_secrets (delivery_id, token, type) VALUES (v_delivery_id, lpad(floor(random() * 10000)::text, 4, '0'), 'collection');
+            
+            v_needed_remaining := v_needed_remaining - v_other_vendor.stock_quantity;
+        END LOOP;
+    END IF;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
@@ -259,9 +351,11 @@ CREATE TABLE IF NOT EXISTS public.bookings (
 -- Deliveries (Real-time Logistics)
 CREATE TABLE IF NOT EXISTS public.deliveries (
     id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
-    booking_id uuid REFERENCES public.bookings(id) NOT NULL UNIQUE,
+    booking_id uuid REFERENCES public.bookings(id) NOT NULL, -- Removido UNIQUE para suportar N origens
     fulfilling_company_id uuid REFERENCES public.companies(id),
     origin_branch_id uuid REFERENCES public.branches(id),
+    quantity integer DEFAULT 1, -- Quantidade vinda desta origem específica
+    fulfillment_type text DEFAULT 'primary', -- 'primary' ou 'subrental'
     driver_name text,
     driver_phone text,
     status text DEFAULT 'pending',
@@ -382,11 +476,12 @@ CREATE TABLE IF NOT EXISTS public.logistics_tracking (
     created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Delivery Secrets (Only visible to Renter)
+-- Delivery Secrets (One per fulfillment task)
 CREATE TABLE IF NOT EXISTS public.delivery_secrets (
     id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
     delivery_id uuid REFERENCES public.deliveries(id) ON DELETE CASCADE NOT NULL UNIQUE,
     token text NOT NULL DEFAULT lpad(floor(random() * 10000)::text, 4, '0'),
+    type text DEFAULT 'collection', -- 'collection' (Coleta na Locadora) ou 'delivery' (Entrega ao Cliente)
     created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -618,6 +713,44 @@ DROP TRIGGER IF EXISTS tr_deliveries_updated_at ON public.deliveries;
 CREATE TRIGGER tr_profiles_updated_at BEFORE UPDATE ON public.profiles FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 CREATE TRIGGER tr_branches_updated_at BEFORE UPDATE ON public.branches FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 CREATE TRIGGER tr_deliveries_updated_at BEFORE UPDATE ON public.deliveries FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+
+-- Function: Handle Inventory on Booking Status Change
+CREATE OR REPLACE FUNCTION public.handle_booking_inventory_sync()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Se o pedido foi cancelado, podemos querer disparar um alerta ou log (o estoque no HUB é virtual/calculado, mas se houver estoque físico em branches, aqui seria o lugar de devolver)
+    IF NEW.status = 'cancelled' AND OLD.status != 'cancelled' THEN
+        -- Lógica de restauração de estoque físico se necessário
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger: Price Protection (Prevents price tampering from frontend)
+DROP TRIGGER IF EXISTS trg_calculate_booking_total ON public.bookings;
+CREATE TRIGGER trg_calculate_booking_total
+    BEFORE INSERT ON public.bookings
+    FOR EACH ROW
+    EXECUTE FUNCTION public.calculate_booking_total();
+
+-- Function: Auto-orchestrate on approval
+CREATE OR REPLACE FUNCTION public.handle_booking_approval()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.status = 'approved' AND OLD.status != 'approved' THEN
+        PERFORM public.orchestrate_fulfillment(NEW.id);
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger: On Booking Approved
+DROP TRIGGER IF EXISTS trg_on_booking_approved ON public.bookings;
+CREATE TRIGGER trg_on_booking_approved
+    AFTER UPDATE ON public.bookings
+    FOR EACH ROW
+    WHEN (NEW.status = 'approved' AND OLD.status != 'approved')
+    EXECUTE FUNCTION public.handle_booking_approval();
 
 -- 6. REALTIME PUBLICATION
 -- ==============================================================================

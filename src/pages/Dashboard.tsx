@@ -334,25 +334,8 @@ export default function Dashboard() {
         origin_branch_id: (status === 'approved' && isBranch) ? fulfillId : undefined
       });
 
-      // Cria o registro de logística quando o pedido é aprovado
-      if (status === 'approved') {
-        const token = Math.floor(1000 + Math.random() * 9000).toString();
-        
-        const { error: deliveryError } = await supabase
-          .from('deliveries')
-          .upsert({
-            booking_id: id,
-            status: 'pending',
-            delivery_token: token,
-            fulfilling_company_id: isExternal ? fulfillId : (isBranch ? null : finalFulfillId),
-            origin_branch_id: isBranch ? fulfillId : null,
-            subrental_status: isExternal ? 'pending' : null,
-          }, { onConflict: 'booking_id', ignoreDuplicates: true });
-
-        if (deliveryError) {
-          console.error('Erro ao criar registro de logística:', deliveryError);
-        }
-      }
+      // Nota: A criação de registros de logística (deliveries) agora é feita 
+      // automaticamente pelo gatilho 'trg_on_booking_approved' no banco de dados.
       
       // Invalida queries para atualizar a UI
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
