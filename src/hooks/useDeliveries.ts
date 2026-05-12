@@ -26,7 +26,8 @@ export function useDeliveries(options?: {
                             company:companies!profiles_company_id_fkey(id, name, address_city)
                         )
                     ),
-                    fulfilling_company:companies!deliveries_fulfilling_company_id_fkey(name)
+                    fulfilling_company:companies!deliveries_fulfilling_company_id_fkey(name),
+                    delivery_secrets(token)
                 `);
 
             // 2. A visibilidade é controlada automaticamente pelo RLS do banco de dados.

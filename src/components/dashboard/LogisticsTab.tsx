@@ -246,9 +246,11 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
         
         const isSender = tenantId && delivery.booking?.company_id === tenantId;
         const isRenter = tenantId && (delivery.booking?.renter?.company_id === tenantId || delivery.booking?.renter_id === user?.id);
-        const isMaster = user?.role === 'admin'; // Or another check for master admin
+        const isMaster = user?.role === 'admin'; 
 
-        const canSeeToken = isRenter || isMaster;
+        // O token SÓ aparece para o Locatário (quem recebe). 
+        // Nunca para quem está enviando (Fulfiller).
+        const canSeeToken = isRenter && !isFulfiller;
 
         return (
             <div className="h-full bg-zinc-950/80 rounded-[32px] p-8 sm:p-10 border border-white/5 flex flex-col justify-between gap-10 backdrop-blur-3xl relative overflow-hidden shadow-2xl min-h-[440px]">
@@ -291,7 +293,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                     {canSeeToken && (delivery.status === 'shipped' || delivery.status === 'ready') && (
                         <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl text-center mb-4">
                             <p className="text-[10px] font-black uppercase text-primary tracking-[0.2em] mb-1">Token de Segurança</p>
-                            <div className="text-2xl font-black text-white tracking-[0.3em]">{delivery.delivery_token || '----'}</div>
+                            <div className="text-2xl font-black text-white tracking-[0.3em]">{delivery.delivery_secrets?.[0]?.token || '----'}</div>
                             <p className="text-[9px] text-zinc-500 font-medium mt-1">Forneça este código ao motorista para confirmar o recebimento.</p>
                         </div>
                     )}
