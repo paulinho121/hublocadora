@@ -48,8 +48,9 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
         // 2. Empresa Fulfiller (Sub-locadora ou Master): Vê o que ela mesma deve enviar
         if (tenantId && d.fulfilling_company_id === tenantId) return true;
         
-        // 3. Master / Dono do Pedido: Vê o que ele mesmo envia OU o que ele terceirizou (para acompanhamento)
-        if (tenantId && d.booking?.company_id === tenantId) return true;
+        // 3. Master / Dono da Página: Vê o que ele mesmo deve enviar (Exclui se ele for quem está alugando para evitar duplicidade)
+        const isRenter = d.booking?.renter_id === user?.id || (tenantId && d.booking?.renter?.company_id === tenantId);
+        if (tenantId && d.booking?.company_id === tenantId && !isRenter) return true;
         
         return false;
     });
@@ -248,9 +249,8 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
         const isRenter = tenantId && (delivery.booking?.renter?.company_id === tenantId || delivery.booking?.renter_id === user?.id);
         const isMaster = user?.role === 'admin'; 
 
-        // O token SÓ aparece para o Locatário (quem recebe). 
-        // Nunca para quem está enviando (Fulfiller).
-        const canSeeToken = isRenter && !isFulfiller;
+        // O token SÓ aparece se o usuário for o locatário E estiver na aba "A RECEBER".
+        const canSeeToken = isRenter && logisticsMode === 'to_receive';
 
         return (
             <div className="h-full bg-zinc-950/80 rounded-[32px] p-8 sm:p-10 border border-white/5 flex flex-col justify-between gap-10 backdrop-blur-3xl relative overflow-hidden shadow-2xl min-h-[440px]">

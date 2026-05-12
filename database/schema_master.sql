@@ -689,7 +689,11 @@ CREATE POLICY "Delivery_Secrets_Renter" ON public.delivery_secrets
             SELECT 1 FROM public.deliveries d
             JOIN public.bookings b ON d.booking_id = b.id
             WHERE d.id = delivery_secrets.delivery_id 
-            AND (b.renter_id = auth.uid() OR public.check_is_admin())
+            AND (
+                b.renter_id = auth.uid() 
+                OR b.company_id = public.get_my_company_id()
+                OR public.check_is_admin()
+            )
         )
     );
 
