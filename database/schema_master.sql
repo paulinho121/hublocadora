@@ -110,6 +110,24 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
+-- RPC: Verify delivery token (Used by fulfilling company to confirm delivery)
+CREATE OR REPLACE FUNCTION public.verify_delivery_token(p_booking_id uuid, p_token text)
+RETURNS boolean AS $$
+DECLARE
+    v_delivery_id uuid;
+BEGIN
+    SELECT id INTO v_delivery_id FROM public.deliveries WHERE booking_id = p_booking_id;
+    
+    -- Check if token matches
+    IF EXISTS (SELECT 1 FROM public.delivery_secrets WHERE delivery_id = v_delivery_id AND token = p_token) THEN
+        UPDATE public.deliveries SET status = 'delivered' WHERE id = v_delivery_id;
+        RETURN true;
+    END IF;
+
+    RETURN false;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
 -- Check if current user owns the company that made the booking
 CREATE OR REPLACE FUNCTION public.check_booking_ownership(b_id uuid)
 RETURNS boolean AS $$
@@ -248,7 +266,6 @@ CREATE TABLE IF NOT EXISTS public.deliveries (
     driver_phone text,
     status text DEFAULT 'pending',
     CONSTRAINT deliveries_status_check CHECK (status IN ('pending', 'picking', 'ready', 'shipped', 'delivered', 'confirmed', 'cancelled')),
-    delivery_token text DEFAULT lpad(floor(random() * 10000)::text, 4, '0'),
     current_lat numeric,
     current_lng numeric,
     estimated_arrival timestamp with time zone,
@@ -365,6 +382,14 @@ CREATE TABLE IF NOT EXISTS public.logistics_tracking (
     created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- Delivery Secrets (Only visible to Renter)
+CREATE TABLE IF NOT EXISTS public.delivery_secrets (
+    id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+    delivery_id uuid REFERENCES public.deliveries(id) ON DELETE CASCADE NOT NULL UNIQUE,
+    token text NOT NULL DEFAULT lpad(floor(random() * 10000)::text, 4, '0'),
+    created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
 -- ==============================================================================
 -- 4. ROW LEVEL SECURITY (RLS) & POLICIES
 -- ==============================================================================
@@ -385,6 +410,7 @@ ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.logistics_tracking ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.favorites ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.delivery_secrets ENABLE ROW LEVEL SECURITY;
 
 -- 1. PROFILES POLICIES
 DROP POLICY IF EXISTS "Profiles_Select" ON public.profiles;
@@ -558,6 +584,19 @@ CREATE POLICY "Favorites_Owner_All" ON public.favorites
     FOR ALL TO authenticated
     USING (user_id = auth.uid())
     WITH CHECK (user_id = auth.uid());
+
+-- 13. DELIVERY SECRETS POLICIES (Renter Only)
+DROP POLICY IF EXISTS "Delivery_Secrets_Renter" ON public.delivery_secrets;
+CREATE POLICY "Delivery_Secrets_Renter" ON public.delivery_secrets
+    FOR SELECT TO authenticated
+    USING (
+        EXISTS (
+            SELECT 1 FROM public.deliveries d
+            JOIN public.bookings b ON d.booking_id = b.id
+            WHERE d.id = delivery_secrets.delivery_id 
+            AND (b.renter_id = auth.uid() OR public.check_is_admin())
+        )
+    );
 
 -- 5. TRIGGERS & AUTOMATION
 -- ==============================================================================
