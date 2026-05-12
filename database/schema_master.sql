@@ -127,7 +127,7 @@ BEGIN
             OR public.check_is_admin()
         )
     ) THEN
-        UPDATE public.deliveries SET status = 'shipped' WHERE id = p_delivery_id;
+        UPDATE public.deliveries SET status = 'delivered' WHERE id = p_delivery_id;
         RETURN true;
     END IF;
 

@@ -145,8 +145,8 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
             return;
         }
 
-        // Validação de Token de Segurança via RPC
-        if (delivery.status === 'ready' && nextStatus === 'shipped') {
+        // Validação de Token de Segurança na ENTREGA (shipped -> delivered)
+        if (delivery.status === 'shipped' && nextStatus === 'delivered') {
             const enteredToken = tokenInputs[delivery.id] || '';
             setUpdatingId(delivery.id);
             try {
@@ -157,12 +157,12 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
 
                 if (tokenError) throw tokenError;
                 if (!isValid) {
-                    alert('Token de segurança inválido! Solicite o código ao motorista/cliente.');
+                    alert('Token de segurança inválido! Solicite o código ao cliente no ato da entrega.');
                     return;
                 }
                 
                 queryClient.invalidateQueries({ queryKey: ['deliveries'] });
-                console.log("Coleta confirmada via token!");
+                console.log("Entrega confirmada via token!");
                 return;
             } catch (err: any) {
                 alert(`Erro na validação: ${err.message}`);
@@ -229,8 +229,8 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
         const actions: any = {
             'pending': 'Confirmar Recebimento',
             'picking': 'Finalizar Separação',
-            'ready': 'Confirmar Coleta (Token)',
-            'shipped': 'Finalizar Entrega',
+            'ready': 'Despachar Equipamento',
+            'shipped': 'Confirmar Entrega (Token)',
             'delivered': 'Conferir e Aceitar'
         };
         return actions[status];
@@ -300,10 +300,10 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
 
                     {isFulfiller ? (
                         <div className="space-y-4">
-                            {/* Token Input for Fulfiller during Collection Confirmation */}
-                            {delivery.status === 'ready' && (
+                            {/* Token Input for Fulfiller during Delivery Confirmation */}
+                            {delivery.status === 'shipped' && (
                                 <div className="space-y-2">
-                                    <p className="text-[10px] font-black uppercase text-zinc-600 tracking-[0.2em]">Validar Token de Coleta</p>
+                                    <p className="text-[10px] font-black uppercase text-zinc-600 tracking-[0.2em]">Validar Token de Entrega</p>
                                     <Input 
                                         placeholder="0000"
                                         maxLength={4}
