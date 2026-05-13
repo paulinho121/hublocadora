@@ -246,12 +246,12 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
             ? delivery.origin_branch_id === branchId 
             : (fulfillmentId === tenantId || (!fulfillmentId && delivery.booking?.company_id === tenantId));
         
-        const isSender = tenantId && delivery.booking?.company_id === tenantId;
         const isRenter = tenantId && (delivery.booking?.renter?.company_id === tenantId || delivery.booking?.renter_id === user?.id);
         const isMaster = user?.role === 'admin'; 
 
         // O token SÓ aparece se o usuário for o locatário E estiver na aba "A RECEBER".
-        const canSeeToken = isRenter && logisticsMode === 'to_receive';
+        // O Master também pode ver o token para fins de supervisão.
+        const canSeeToken = (isRenter && logisticsMode === 'to_receive') || isMaster;
 
         return (
             <div className="h-full bg-zinc-950/80 rounded-[32px] p-8 sm:p-10 border border-white/5 flex flex-col justify-between gap-10 backdrop-blur-3xl relative overflow-hidden shadow-2xl min-h-[440px]">
@@ -299,7 +299,8 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                         </div>
                     )}
 
-                    {isFulfiller || (isRenter && delivery.status === 'delivered') ? (
+                    {/* Ações operacionais: Apenas para Fulfiller ou Locatário (na etapa final) e NUNCA para Master Observador */}
+                    {(isFulfiller || (isRenter && delivery.status === 'delivered')) && !isMaster ? (
                         <div className="space-y-4">
                             {/* Token Input for Fulfiller during Delivery Confirmation */}
                             {delivery.status === 'shipped' && isFulfiller && (
@@ -350,7 +351,9 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                         <div className="p-6 bg-zinc-900/40 rounded-2xl border border-white/5 text-center">
                             <p className="text-[10px] font-black uppercase text-zinc-600 tracking-widest mb-1">Status: {getStatusLabel(delivery.status)}</p>
                             <p className="text-[11px] text-zinc-500 font-medium leading-relaxed">
-                                {isRenter ? 'O locador está preparando seu equipamento. O token de segurança aparecerá aqui em breve.' : 'Apenas a unidade responsável pode transitar este status.'}
+                                {isMaster ? 'Modo Observador: Acompanhando performance de malha.' : 
+                                 isRenter ? 'O locador está preparando seu equipamento. O token de segurança aparecerá aqui em breve.' : 
+                                 'Apenas a unidade responsável pode transitar este status.'}
                             </p>
                         </div>
                     )}

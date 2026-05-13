@@ -186,60 +186,27 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 CREATE OR REPLACE FUNCTION public.orchestrate_fulfillment(p_booking_id uuid)
 RETURNS void AS $$
 DECLARE
-    v_total_needed integer;
-    v_master_id uuid;
-    v_primary_vendor_id uuid;
-    v_current_stock integer;
-    v_needed_remaining integer;
-    v_other_vendor record;
+    v_booking_record record;
     v_delivery_id uuid;
 BEGIN
-    -- 1. Info da reserva
-    SELECT b.quantity, e.master_catalog_id, b.company_id 
-    INTO v_total_needed, v_master_id, v_primary_vendor_id
+    -- 1. Buscar dados da reserva
+    SELECT b.id, b.quantity, b.company_id, b.equipment_id 
+    INTO v_booking_record
     FROM public.bookings b
-    JOIN public.equipments e ON b.equipment_id = e.id
     WHERE b.id = p_booking_id;
 
-    -- 2. Verificar estoque do vendedor principal
-    SELECT stock_quantity INTO v_current_stock 
-    FROM public.equipments 
-    WHERE id = (SELECT equipment_id FROM public.bookings WHERE id = p_booking_id);
+    -- 2. Criar a Entrega Principal (Fulfillment Primário)
+    -- Por enquanto, simplificamos criando uma entrega para a empresa dona do item.
+    -- Futuramente, a lógica de sub-locação cross-tenant pode ser expandida aqui.
+    
+    INSERT INTO public.deliveries (booking_id, fulfilling_company_id, quantity, fulfillment_type, status)
+    VALUES (v_booking_record.id, v_booking_record.company_id, v_booking_record.quantity, 'primary', 'pending')
+    RETURNING id INTO v_delivery_id;
+    
+    -- 3. Gerar token de segurança automático para esta entrega
+    INSERT INTO public.delivery_secrets (delivery_id, token, type) 
+    VALUES (v_delivery_id, lpad(floor(random() * 10000)::text, 4, '0'), 'collection');
 
-    -- 3. Criar Fulfillment Primário (O que o dono tem disponível)
-    IF v_current_stock > 0 THEN
-        INSERT INTO public.deliveries (booking_id, fulfilling_company_id, quantity, fulfillment_type, status)
-        VALUES (p_booking_id, v_primary_vendor_id, LEAST(v_current_stock, v_total_needed), 'primary', 'pending')
-        RETURNING id INTO v_delivery_id;
-        
-        -- Gerar token de coleta
-        INSERT INTO public.delivery_secrets (delivery_id, token, type) VALUES (v_delivery_id, lpad(floor(random() * 10000)::text, 4, '0'), 'collection');
-    END IF;
-
-    v_needed_remaining := v_total_needed - LEAST(v_current_stock, v_total_needed);
-
-    -- 4. Se ainda falta, buscar em outros parceiros do mesmo item no HUB
-    IF v_needed_remaining > 0 THEN
-        FOR v_other_vendor IN 
-            SELECT company_id, stock_quantity 
-            FROM public.equipments 
-            WHERE master_catalog_id = v_master_id 
-            AND company_id != v_primary_vendor_id
-            AND stock_quantity > 0
-            ORDER BY stock_quantity DESC
-        LOOP
-            EXIT WHEN v_needed_remaining <= 0;
-            
-            INSERT INTO public.deliveries (booking_id, fulfilling_company_id, quantity, fulfillment_type, subrental_status, status)
-            VALUES (p_booking_id, v_other_vendor.company_id, LEAST(v_needed_remaining, v_other_vendor.stock_quantity), 'subrental', 'pending', 'pending')
-            RETURNING id INTO v_delivery_id;
-
-            -- Gerar token de coleta para o parceiro
-            INSERT INTO public.delivery_secrets (delivery_id, token, type) VALUES (v_delivery_id, lpad(floor(random() * 10000)::text, 4, '0'), 'collection');
-            
-            v_needed_remaining := v_needed_remaining - v_other_vendor.stock_quantity;
-        END LOOP;
-    END IF;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
@@ -343,6 +310,7 @@ CREATE TABLE IF NOT EXISTS public.bookings (
     start_date date NOT NULL,
     end_date date NOT NULL,
     total_amount numeric NOT NULL,
+    quantity integer DEFAULT 1,
     status text CHECK (status IN ('pending', 'approved', 'rejected', 'active', 'completed', 'cancelled')) DEFAULT 'pending',
     notes text,
     created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
