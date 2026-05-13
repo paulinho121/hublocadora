@@ -40,8 +40,6 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
 
     // Lógica de separação dos pedidos
     const toSendDeliveries = deliveries?.filter((d: any) => {
-        // 0. Visão Master: Vê tudo que está saindo no sistema
-        if (user?.role === 'admin') return true;
 
         const fulfillmentId = d.fulfilling_company_id || d.origin_branch_id;
         
@@ -59,8 +57,6 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
     });
 
     const toReceiveDeliveries = deliveries?.filter((d: any) => {
-        // 0. Visão Master: Vê tudo que está sendo recebido no sistema
-        if (user?.role === 'admin') return true;
 
         // 1. Identificar se sou o locatário (quem deve receber o item)
         const renterCompanyId = d.booking?.renter?.company_id || d.booking?.renter?.company?.id;
