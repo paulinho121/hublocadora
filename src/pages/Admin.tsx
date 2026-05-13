@@ -10,13 +10,14 @@ import {
   BarChart3, Building2, Package, 
   CheckCircle2, Search, ArrowUpRight, Ban, FileSignature, XCircle,
   Truck, MapPin, Navigation, Clock, TrendingUp, Zap, Target, Activity,
-  Globe, ZapOff, ArrowDownRight, Layers
+  Globe, ZapOff, ArrowDownRight, Layers, Eye, Gauge
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, Cell, PieChart, Pie, Legend
 } from 'recharts';
+import { cn } from '@/lib/utils';
 
 type TabType = 'overview' | 'companies' | 'inventory' | 'bookings';
 
@@ -68,6 +69,20 @@ export default function Admin() {
   });
 
   // Mutations
+  const approveBooking = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status: 'approved' })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
+      alert('Pedido aprovado e orquestração logística disparada.');
+    }
+  });
+
   const updateCompanyStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string, status: 'approved' | 'rejected' | 'pending' | 'active' | 'suspended' }) => {
       setUpdatingCompanyId(id);
@@ -558,6 +573,54 @@ export default function Admin() {
                     </Card>
                  </div>
 
+                 {/* EYE OF OBSERVATION - LOGISTICS PERFORMANCE */}
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <Card className="col-span-1 md:col-span-2 bg-zinc-950 border-zinc-900 rounded-[32px] overflow-hidden">
+                       <CardHeader className="p-8 border-b border-zinc-900/50">
+                          <CardTitle className="text-xs font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                             <Eye className="h-4 w-4 text-primary" /> Olho de Observação: Performance de Malha
+                          </CardTitle>
+                       </CardHeader>
+                       <CardContent className="p-8">
+                          <div className="space-y-6">
+                             {[
+                                { stage: 'Separação (Picking)', time: '42 min', target: '30 min', efficiency: 75 },
+                                { stage: 'Despacho (Ready)', time: '18 min', target: '20 min', efficiency: 100 },
+                                { stage: 'Em Trânsito (Shipping)', time: '2.4 h', target: '3.0 h', efficiency: 92 },
+                                { stage: 'Entrega (Token Check)', time: '5 min', target: '10 min', efficiency: 100 }
+                             ].map((perf, i) => (
+                                <div key={i} className="space-y-2">
+                                   <div className="flex justify-between items-end">
+                                      <span className="text-[10px] font-black uppercase text-zinc-400 tracking-widest">{perf.stage}</span>
+                                      <div className="text-right">
+                                         <span className="text-sm font-black text-white mr-3">{perf.time}</span>
+                                         <span className="text-[9px] font-bold text-zinc-600">META: {perf.target}</span>
+                                      </div>
+                                   </div>
+                                   <div className="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden">
+                                      <div 
+                                        className={cn("h-full transition-all duration-1000", perf.efficiency >= 100 ? "bg-emerald-500" : perf.efficiency >= 80 ? "bg-primary" : "bg-amber-500")} 
+                                        style={{ width: `${perf.efficiency}%` }} 
+                                      />
+                                   </div>
+                                </div>
+                             ))}
+                          </div>
+                       </CardContent>
+                    </Card>
+
+                    <Card className="bg-primary/5 border-primary/20 rounded-[32px] p-8 flex flex-col justify-center text-center space-y-4">
+                       <div className="h-16 w-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto">
+                          <Gauge className="h-8 w-8 text-primary" />
+                       </div>
+                       <div>
+                          <h4 className="text-3xl font-black tracking-tighter">98.2%</h4>
+                          <p className="text-[10px] font-black uppercase text-primary tracking-widest">SLA de Entrega Global</p>
+                       </div>
+                       <p className="text-[11px] text-zinc-500 font-medium italic">"Operação otimizada. Nível de serviço acima da média de mercado."</p>
+                    </Card>
+                 </div>
+
                  <div className="bg-zinc-950/50 border border-zinc-900 rounded-[32px] overflow-hidden">
                     <div className="p-8 border-b border-zinc-900 flex justify-between items-center">
                        <h2 className="text-xl font-black uppercase tracking-tight flex items-center gap-3">
@@ -610,7 +673,16 @@ export default function Admin() {
                                       <td className="p-6 text-right text-white font-black text-base">
                                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(booking.total_amount)}
                                       </td>
-                                      <td className="p-6 text-right">
+                                      <td className="p-6 text-right flex items-center justify-end gap-2">
+                                         {booking.status === 'pending' && (
+                                            <Button 
+                                              size="sm"
+                                              onClick={() => approveBooking.mutate(booking.id)}
+                                              className="bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase text-[10px] tracking-widest h-8 px-4 rounded-lg shadow-lg shadow-emerald-900/20"
+                                            >
+                                              Aprovar
+                                            </Button>
+                                         )}
                                          <Button 
                                           variant="ghost" 
                                           size="sm" 
@@ -645,7 +717,6 @@ export default function Admin() {
                      </button>
                   </div>
                   <div className="p-10 overflow-y-auto custom-scrollbar space-y-8 text-zinc-400 text-sm leading-relaxed">
-                     {/* Contract Content Here - Same logic as before but better spaced */}
                      <p>Pelo presente instrumento, a locadora <strong className="text-white">{selectedBookingContract.company?.name}</strong> firma contrato de sub-locação com o hub Moving Master para o item <strong className="text-white">{selectedBookingContract.equipment?.name}</strong>.</p>
                      <div className="grid grid-cols-2 gap-8 bg-zinc-900/30 p-8 rounded-3xl border border-zinc-800/50">
                         <div>

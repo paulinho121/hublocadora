@@ -40,6 +40,9 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
 
     // Lógica de separação dos pedidos
     const toSendDeliveries = deliveries?.filter((d: any) => {
+        // 0. Visão Master: Vê tudo que está saindo no sistema
+        if (user?.role === 'admin') return true;
+
         const fulfillmentId = d.fulfilling_company_id || d.origin_branch_id;
         
         // 1. Gerente de Filial: Vê o que sai da sua unidade
@@ -56,12 +59,14 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
     });
 
     const toReceiveDeliveries = deliveries?.filter((d: any) => {
+        // 0. Visão Master: Vê tudo que está sendo recebido no sistema
+        if (user?.role === 'admin') return true;
+
         // 1. Identificar se sou o locatário (quem deve receber o item)
         const renterCompanyId = d.booking?.renter?.company_id || d.booking?.renter?.company?.id;
         const isRenter = d.booking?.renter_id === user?.id || (tenantId && renterCompanyId === tenantId);
         
         // 2. Aparece em "A Receber" se eu for o locatário e o pedido estiver ativo (não cancelado ou finalizado)
-        // Antes estava restrito a 'shipped' ou 'delivered', mas o locatário quer saber se o item está sendo preparado.
         return isRenter && d.status !== 'confirmed' && d.status !== 'cancelled';
     }) || [];
 
@@ -298,10 +303,10 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                         </div>
                     )}
 
-                    {isFulfiller ? (
+                    {isFulfiller || (isRenter && delivery.status === 'delivered') ? (
                         <div className="space-y-4">
                             {/* Token Input for Fulfiller during Delivery Confirmation */}
-                            {delivery.status === 'shipped' && (
+                            {delivery.status === 'shipped' && isFulfiller && (
                                 <div className="space-y-2">
                                     <p className="text-[10px] font-black uppercase text-zinc-600 tracking-[0.2em]">Validar Token de Entrega</p>
                                     <Input 
@@ -315,7 +320,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                             )}
 
                             {/* Serial Number Input during Separation */}
-                            {delivery.status === 'picking' && (
+                            {delivery.status === 'picking' && isFulfiller && (
                                 <div className="space-y-2">
                                     <p className="text-[10px] font-black uppercase text-zinc-600 tracking-[0.2em]">Vincular Serial</p>
                                     <Input 
@@ -329,14 +334,18 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
 
                             <Button 
                                 onClick={() => handleNextStatus(delivery)}
-                                disabled={updatingId === delivery.id || (delivery.status === 'shipped' && (tokenInputs[delivery.id]?.length || 0) < 4)}
-                                className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-black uppercase text-xs tracking-widest h-16 rounded-2xl shadow-[0_20px_40px_rgba(16,185,129,0.2)] transition-all duration-500 group/btn"
+                                disabled={updatingId === delivery.id || (isFulfiller && delivery.status === 'shipped' && (tokenInputs[delivery.id]?.length || 0) < 4)}
+                                className={cn(
+                                    "w-full font-black uppercase text-xs tracking-widest h-16 rounded-2xl shadow-xl transition-all duration-500 group/btn",
+                                    isRenter && delivery.status === 'delivered' ? "bg-primary text-white hover:bg-primary/90" : "bg-emerald-500 hover:bg-emerald-400 text-black shadow-emerald-500/20"
+                                )}
                             >
                                 {updatingId === delivery.id ? (
                                     <Loader2 className="h-5 w-5 animate-spin" />
                                 ) : (
                                     <div className="flex items-center gap-3">
-                                        {getNextActionLabel(delivery.status)} <ChevronRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
+                                        {isRenter && delivery.status === 'delivered' ? 'Confirmar e Aceitar Item' : getNextActionLabel(delivery.status)} 
+                                        <ChevronRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
                                     </div>
                                 )}
                             </Button>
@@ -344,8 +353,8 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                     ) : (
                         <div className="p-6 bg-zinc-900/40 rounded-2xl border border-white/5 text-center">
                             <p className="text-[10px] font-black uppercase text-zinc-600 tracking-widest mb-1">Status: {getStatusLabel(delivery.status)}</p>
-                            <p className="text-[11px] text-zinc-500 font-medium">
-                                {isRenter ? 'Acompanhe o progresso do seu pedido acima.' : 'Apenas a unidade responsável pode transitar este status.'}
+                            <p className="text-[11px] text-zinc-500 font-medium leading-relaxed">
+                                {isRenter ? 'O locador está preparando seu equipamento. O token de segurança aparecerá aqui em breve.' : 'Apenas a unidade responsável pode transitar este status.'}
                             </p>
                         </div>
                     )}
