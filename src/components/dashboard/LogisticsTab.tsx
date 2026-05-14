@@ -75,8 +75,9 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
             ? d.origin_branch_id === branchId 
             : (tenantId && d.fulfilling_company_id === tenantId) || (tenantId && d.booking?.company_id === tenantId && !isRenter);
 
-        // Se este pedido já está na minha aba "A Enviar", não deve aparecer em "A Receber"
-        if (isFulfiller) return false;
+        // Se este pedido já está na minha aba "A Enviar" (seja por ser fulfiller, master ou branch manager), NUNCA deve aparecer em "A Receber"
+        const alreadyInSendTab = toSendDeliveries?.some(sendItem => sendItem.id === d.id);
+        if (isFulfiller || alreadyInSendTab) return false;
 
         // 3. Aparece em "A Receber" se eu for o locatário e o pedido estiver ativo
         return isRenter && d.status !== 'confirmed' && d.status !== 'cancelled';
