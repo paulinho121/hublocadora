@@ -75,5 +75,10 @@
     "typescript": "~5.8.2",
     "vite": "^6.2.0",
     "vitest": "^4.1.4"
+  },
+  "overrides": {
+    "@opentelemetry/sdk-node": "^0.218.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.75.0",
+    "@tootallnate/once": "^3.0.1"
   }
 }
