@@ -37,32 +37,48 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
     const [tokenInputs, setTokenInputs] = useState<Record<string, string>>({});
     const [logisticsMode, setLogisticsMode] = useState<'to_send' | 'to_receive'>('to_send');
     const { transfers } = useTransfers();
+    const isMaster = user?.role === 'admin';
 
     // Lógica de separação dos pedidos
     const toSendDeliveries = deliveries?.filter((d: any) => {
+        // 1. Master/Admin: Vê tudo em "A Enviar" para observar a malha, mas não age
+        if (isMaster) return d.status !== 'confirmed' && d.status !== 'cancelled';
 
         const fulfillmentId = d.fulfilling_company_id || d.origin_branch_id;
         
-        // 1. Gerente de Filial: Vê o que sai da sua unidade
-        if (isBranchManager) return d.origin_branch_id === branchId;
+        // 2. Gerente de Filial: Vê o que sai da sua unidade
+        if (isBranchManager) return d.origin_branch_id === branchId && d.status !== 'confirmed' && d.status !== 'cancelled';
         
-        // 2. Empresa Fulfiller (Sub-locadora ou Master): Vê o que ela mesma deve enviar
-        if (tenantId && d.fulfilling_company_id === tenantId) return true;
+        // 3. Empresa Fulfiller (Sub-locadora ou Dono do Equipamento): Vê o que ela mesma deve enviar
+        if (tenantId && d.fulfilling_company_id === tenantId) return d.status !== 'confirmed' && d.status !== 'cancelled';
         
-        // 3. Master / Dono da Página: Vê o que ele mesmo deve enviar (Exclui se ele for quem está alugando para evitar duplicidade)
-        const isRenter = d.booking?.renter_id === user?.id || (tenantId && d.booking?.renter?.company_id === tenantId);
-        if (tenantId && d.booking?.company_id === tenantId && !isRenter) return true;
+        // 4. Dono do Equipamento (se não for explicitamente o fulfiller ainda, mas o pedido é para ele)
+        const renterCompanyId = d.booking?.renter?.company_id || d.booking?.renter?.company?.id;
+        const isRenter = d.booking?.renter_id === user?.id || (tenantId && renterCompanyId === tenantId);
+        
+        if (tenantId && d.booking?.company_id === tenantId && !isRenter) return d.status !== 'confirmed' && d.status !== 'cancelled';
         
         return false;
     });
 
     const toReceiveDeliveries = deliveries?.filter((d: any) => {
+        // Master não duplica visualização em "A Receber", observa toda a malha por "A Enviar"
+        if (isMaster) return false;
 
         // 1. Identificar se sou o locatário (quem deve receber o item)
         const renterCompanyId = d.booking?.renter?.company_id || d.booking?.renter?.company?.id;
         const isRenter = d.booking?.renter_id === user?.id || (tenantId && renterCompanyId === tenantId);
         
-        // 2. Aparece em "A Receber" se eu for o locatário e o pedido estiver ativo (não cancelado ou finalizado)
+        // 2. Identificar se sou o Fulfiller (evitar duplicação)
+        const fulfillmentId = d.fulfilling_company_id || d.origin_branch_id;
+        const isFulfiller = isBranchManager 
+            ? d.origin_branch_id === branchId 
+            : (tenantId && d.fulfilling_company_id === tenantId) || (tenantId && d.booking?.company_id === tenantId && !isRenter);
+
+        // Se este pedido já está na minha aba "A Enviar", não deve aparecer em "A Receber"
+        if (isFulfiller) return false;
+
+        // 3. Aparece em "A Receber" se eu for o locatário e o pedido estiver ativo
         return isRenter && d.status !== 'confirmed' && d.status !== 'cancelled';
     }) || [];
 
@@ -249,9 +265,9 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
         const isRenter = tenantId && (delivery.booking?.renter?.company_id === tenantId || delivery.booking?.renter_id === user?.id);
         const isMaster = user?.role === 'admin'; 
 
-        // O token SÓ aparece se o usuário for o locatário E estiver na aba "A RECEBER".
-        // O Master também pode ver o token para fins de supervisão.
-        const canSeeToken = (isRenter && logisticsMode === 'to_receive') || isMaster;
+        // O token SÓ aparece se o usuário for o locatário (locador solicitante) E estiver na aba "A RECEBER".
+        // A conta Master NÃO deve ver o token (somente gerado/visível para o locatário).
+        const canSeeToken = isRenter && logisticsMode === 'to_receive' && !isMaster;
 
         return (
             <div className="h-full bg-zinc-950/80 rounded-[32px] p-8 sm:p-10 border border-white/5 flex flex-col justify-between gap-10 backdrop-blur-3xl relative overflow-hidden shadow-2xl min-h-[440px]">
