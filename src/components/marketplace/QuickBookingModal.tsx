@@ -89,8 +89,9 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                 equipment_id: equipment.id,
                 company_id: equipment.company_id,
                 renter_id: user.id, 
-                start_date: parseISO(startDate).toISOString(),
-                end_date: parseISO(endDate).toISOString(),
+                // Enviar como 'YYYY-MM-DD' puro (tipo date no banco), não como ISO timestamp
+                start_date: startDate,
+                end_date: endDate,
                 total_amount: equipment.daily_rate * totalDays * quantity,
                 status: 'pending',
                 quantity,
@@ -105,9 +106,10 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                 onClose();
                 setIsSuccess(false);
             }, 3000);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Erro ao reservar:', error);
-            alert('Não foi possível processar a reserva agora.');
+            const msg = error?.message || 'Erro desconhecido. Tente novamente.';
+            alert(`Não foi possível processar a reserva agora.\n\n${msg}`);
         }
     };
 
