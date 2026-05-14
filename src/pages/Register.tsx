@@ -28,22 +28,31 @@ export default function Register() {
             return;
         }
 
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
             email,
             password,
         });
 
         if (error) {
-            if (error.message.includes('already registered') || error.message.includes('already exists')) {
+            if (error.message.includes('already registered') || error.message.includes('already exists') || error.message.toLowerCase().includes('user already')) {
                 setError('Este e-mail já está cadastrado em nossa base.');
             } else {
                 setError(error.message);
             }
             setLoading(false);
-        } else {
-            setSuccessMessage('Conta criada com sucesso! Por favor, confirme seu e-mail para ativar sua conta.');
+            return;
+        } 
+        
+        // Proteção Anti-Enumeração do Supabase:
+        // Quando um usuário já existe, o Supabase retorna 'success' mas não cria uma nova identidade.
+        if (data?.user && data.user.identities && data.user.identities.length === 0) {
+            setError('Este e-mail já está cadastrado em nossa base.');
             setLoading(false);
+            return;
         }
+
+        setSuccessMessage('Conta criada com sucesso! Por favor, confirme seu e-mail para ativar sua conta.');
+        setLoading(false);
     };
 
     const handleResetPassword = async () => {
