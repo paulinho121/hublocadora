@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Camera, Loader2 } from 'lucide-react';
+import { Camera, Loader2, Eye, EyeOff } from 'lucide-react';
 
 export default function Register() {
     const navigate = useNavigate();
@@ -15,6 +15,8 @@ export default function Register() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -123,25 +125,39 @@ export default function Register() {
                                 required
                             />
                         </div>
-                        <div className="space-y-1.5">
+                        <div className="space-y-1.5 relative">
                             <Input
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 placeholder="Crie uma senha de acesso"
-                                className="h-12 bg-zinc-900/50 border-zinc-800 focus:border-primary/50 transition-all font-medium"
+                                className="h-12 bg-zinc-900/50 border-zinc-800 focus:border-primary/50 transition-all font-medium pr-10"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
                             />
+                            <button
+                                type="button"
+                                className="absolute right-3 top-[50%] -translate-y-[50%] text-zinc-500 hover:text-zinc-300 focus:outline-none"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
                         </div>
-                        <div className="space-y-1.5">
+                        <div className="space-y-1.5 relative">
                             <Input
-                                type="password"
+                                type={showConfirmPassword ? "text" : "password"}
                                 placeholder="Confirme sua senha"
-                                className="h-12 bg-zinc-900/50 border-zinc-800 focus:border-primary/50 transition-all font-medium"
+                                className="h-12 bg-zinc-900/50 border-zinc-800 focus:border-primary/50 transition-all font-medium pr-10"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 required
                             />
+                            <button
+                                type="button"
+                                className="absolute right-3 top-[50%] -translate-y-[50%] text-zinc-500 hover:text-zinc-300 focus:outline-none"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            >
+                                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
                         </div>
                         {error && (
                             <div className="space-y-2 mt-2">

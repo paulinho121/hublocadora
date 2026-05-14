@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Camera, Loader2, Sparkles } from 'lucide-react';
+import { Camera, Loader2, Sparkles, Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
     const navigate = useNavigate();
@@ -14,6 +14,7 @@ export default function Login() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [message, setMessage] = useState<string | null>(null);
+    const [showPassword, setShowPassword] = useState(false);
 
     const from = location.state?.from?.pathname || '/dashboard';
 
@@ -142,14 +143,23 @@ export default function Login() {
                                     Esqueci a senha
                                 </Button>
                             </div>
-                            <Input
-                                type="password"
-                                placeholder="Sua senha secreta"
-                                className="h-12 bg-zinc-900/50 border-zinc-800 focus:border-primary/50 transition-all"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
+                            <div className="relative">
+                                <Input
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder="Sua senha secreta"
+                                    className="h-12 bg-zinc-900/50 border-zinc-800 focus:border-primary/50 transition-all pr-10"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    className="absolute right-3 top-[50%] -translate-y-[50%] text-zinc-500 hover:text-zinc-300 focus:outline-none"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                >
+                                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                </button>
+                            </div>
                         </div>
                         {message && <p className="text-xs text-green-400 font-bold uppercase tracking-widest text-center mt-2">{message}</p>}
                         {error && <p className="text-xs text-red-400 font-bold uppercase tracking-widest text-center mt-2">{error}</p>}
