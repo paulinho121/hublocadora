@@ -22,6 +22,7 @@ import EquipmentDetails from '@/pages/EquipmentDetails';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import TermsOfUse from '@/pages/TermsOfUse';
 import NotFound from '@/pages/NotFound';
+import ResetPassword from '@/pages/ResetPassword';
 
 // Pages — lazy (pesadas, só carregam quando o usuário navega até elas)
 const Dashboard = lazy(() => import('@/pages/Dashboard'));
@@ -176,7 +177,7 @@ function BottomNav() {
 
 function MainLayout() {
   const location = useLocation();
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname.startsWith('/invite/');
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname.startsWith('/invite/') || location.pathname === '/reset-password';
 
   return (
     <div className="min-h-screen bg-background font-sans antialiased flex flex-col relative overflow-x-hidden">
@@ -192,6 +193,7 @@ function MainLayout() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/invite/:token" element={<AcceptInvite />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsOfUse />} />
             <Route
