@@ -17,12 +17,25 @@ export default function ResetPassword() {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     useEffect(() => {
-        // Verifica se existe uma sessão ativa (o Supabase cria temporariamente ao clicar no link do email)
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            if (!session) {
-                setError("Link de recuperação inválido ou expirado. Solicite novamente.");
+        // O Supabase extrai o token da URL e cria a sessão em background.
+        // Se a URL não tiver o token (hash) e não houver sessão após 1 segundo, avisamos.
+        const timer = setTimeout(async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session && !window.location.hash.includes('access_token')) {
+                setError("Sessão não encontrada. Se o link expirou, solicite novamente.");
+            }
+        }, 1000);
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+            if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
+                setError(null); // Remove o erro se o Supabase confirmar a sessão
             }
         });
+
+        return () => {
+            clearTimeout(timer);
+            subscription.unsubscribe();
+        };
     }, []);
 
     const handleUpdatePassword = async (e: React.FormEvent) => {
@@ -97,7 +110,7 @@ export default function ResetPassword() {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
-                                    disabled={loading || !!error?.includes('expirado')}
+                                    disabled={loading}
                                 />
                                 <button
                                     type="button"
@@ -116,7 +129,7 @@ export default function ResetPassword() {
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                     required
-                                    disabled={loading || !!error?.includes('expirado')}
+                                    disabled={loading}
                                 />
                                 <button
                                     type="button"
@@ -136,7 +149,7 @@ export default function ResetPassword() {
                             <Button
                                 className="w-full h-12 bg-primary hover:bg-primary/90 font-black uppercase tracking-tighter text-lg mt-6 shadow-lg shadow-primary/20"
                                 type="submit"
-                                disabled={loading || !!error?.includes('expirado')}
+                                disabled={loading}
                             >
                                 {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
                                 {loading ? 'Salvando...' : 'Salvar Nova Senha'}
