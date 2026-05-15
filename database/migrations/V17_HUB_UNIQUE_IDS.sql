@@ -38,7 +38,7 @@ BEGIN
     NEW.hub_id := new_id;
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, extensions;
 
 
 -- Generates a collision-safe hub_id for branches (BRN-XXXXXXXX)
@@ -56,7 +56,7 @@ BEGIN
     NEW.hub_id := new_id;
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, extensions;
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
