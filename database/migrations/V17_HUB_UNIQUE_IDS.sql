@@ -1,15 +1,11 @@
 -- =============================================================================
 -- V17: Unique Human-Readable IDs for Users and Branches
---
--- Generates:
---   profiles → hub_id  (format: USR-XXXXXXXX)  e.g. USR-4F9A2C31
---   branches → hub_id  (format: BRN-XXXXXXXX)  e.g. BRN-8E1D7F05
---
--- Both are:
---   - Globally unique (enforced by UNIQUE constraint)
---   - Auto-generated on INSERT via triggers
---   - Collision-safe (retry loop on conflict)
 -- =============================================================================
+
+-- 0. Ensure required extensions
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+-- ─────────────────────────────────────────────────────────────────────────────
 
 
 -- ─────────────────────────────────────────────────────────────────────────────

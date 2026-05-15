@@ -7,6 +7,7 @@
 -- 1. EXTENSIONS
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pg_net";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- 2. CORE FUNCTIONS (SECURITY DEFINER)
 -- ==============================================================================
