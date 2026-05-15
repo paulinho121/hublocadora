@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Camera, Loader2, Sparkles, Eye, EyeOff } from 'lucide-react';
+import { Camera, Loader2, Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
     const navigate = useNavigate();
@@ -76,29 +76,6 @@ export default function Login() {
         setLoading(false);
     };
 
-    const handleMagicLink = async () => {
-        if (!email) {
-            setError("Digite seu e-mail acima para receber o Link Mágico");
-            return;
-        }
-        setLoading(true);
-        setError(null);
-        setMessage(null);
-        
-        const { error } = await supabase.auth.signInWithOtp({
-            email,
-            options: {
-              emailRedirectTo: window.location.origin + '/dashboard',
-            }
-        });
-        
-        if (error) {
-            setError(error.message);
-        } else {
-            setMessage("Link Mágico enviado! Verifique sua caixa de entrada.");
-        }
-        setLoading(false);
-    };
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-zinc-950 p-4 relative overflow-hidden">
@@ -170,22 +147,7 @@ export default function Login() {
                                 {loading ? 'Sincronizando...' : 'Entrar no Hub'}
                             </Button>
 
-                            <div className="relative flex items-center py-2 shrink-0">
-                                <div className="flex-grow border-t border-zinc-800"></div>
-                                <span className="flex-shrink-0 mx-4 text-zinc-500 text-xs uppercase font-bold tracking-widest">ou</span>
-                                <div className="flex-grow border-t border-zinc-800"></div>
                             </div>
-
-                            <Button 
-                                type="button" 
-                                variant="outline" 
-                                className="w-full h-12 border-primary/20 bg-primary/5 hover:bg-primary/20 text-primary font-bold uppercase tracking-wider transition-colors" 
-                                onClick={handleMagicLink} 
-                                disabled={loading}
-                            >
-                                <Sparkles className="mr-2 h-4 w-4" />
-                                Receber Link Mágico
-                            </Button>
 
                             <Button 
                                 type="button" 
