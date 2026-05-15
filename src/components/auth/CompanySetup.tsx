@@ -15,8 +15,10 @@ import { Textarea } from '@/components/ui/textarea';
 const FORM_CACHE_KEY = 'cinehub_company_setup_draft';
 
 const companySchema = z.object({
+  full_name: z.string().min(3, 'Seu nome completo deve ter pelo menos 3 caracteres'),
   name: z.string().min(3, 'O nome da empresa deve ter pelo menos 3 caracteres'),
-  document: z.string().min(14, 'Documento inválido (mínimo 11 dígitos)'),
+  document: z.string().min(14, 'Documento inválido'),
+  phone: z.string().min(10, 'Telefone inválido'),
   description: z.string().optional(),
   address_street: z.string().min(1, 'Logradouro é obrigatório'),
   address_number: z.string().min(1, 'Número é obrigatório'),
@@ -31,6 +33,7 @@ type CompanyFormValues = z.infer<typeof companySchema>;
 export function CompanySetup({ ownerId }: { ownerId: string }) {
   const queryClient = useQueryClient();
   const [isLoadingCep, setIsLoadingCep] = useState(false);
+  const [isLoadingCnpj, setIsLoadingCnpj] = useState(false);
 
   // Restaurar rascunho salvo no localStorage
   const savedDraft = (() => {
@@ -60,6 +63,7 @@ export function CompanySetup({ ownerId }: { ownerId: string }) {
   }, [watchedValues]);
 
   const cep = watch('address_zip');
+  const document = watch('document');
 
   // Máscaras Profissionais
   const maskDocument = (value: string) => {
@@ -80,6 +84,21 @@ export function CompanySetup({ ownerId }: { ownerId: string }) {
     }
   };
 
+  const maskPhone = (value: string) => {
+    const val = value.replace(/\D/g, '');
+    if (val.length <= 10) {
+      return val
+        .replace(/(\d{2})(\d)/, '($1) $2')
+        .replace(/(\d{4})(\d)/, '$1-$2')
+        .replace(/(-\d{4})\d+?$/, '$1');
+    } else {
+      return val
+        .replace(/(\d{2})(\d)/, '($1) $2')
+        .replace(/(\d{5})(\d)/, '$1-$2')
+        .replace(/(-\d{4})\d+?$/, '$1');
+    }
+  };
+
   const maskCep = (value: string) => {
     return value
       .replace(/\D/g, '')
@@ -87,6 +106,42 @@ export function CompanySetup({ ownerId }: { ownerId: string }) {
       .replace(/(-\d{3})\d+?$/, '$1');
   };
 
+  // Busca de CNPJ Automática
+  useEffect(() => {
+    const fetchCnpj = async () => {
+      const cleanCnpj = document?.replace(/\D/g, '');
+      if (cleanCnpj?.length === 14) {
+        try {
+          setIsLoadingCnpj(true);
+          const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cleanCnpj}`);
+          if (!response.ok) return;
+          
+          const data = await response.json();
+          
+          if (data.razao_social || data.nome_fantasia) {
+            setValue('name', data.nome_fantasia || data.razao_social, { shouldValidate: true });
+            setValue('address_zip', data.cep, { shouldValidate: true });
+            setValue('address_street', data.logradouro, { shouldValidate: true });
+            setValue('address_number', data.numero, { shouldValidate: true });
+            setValue('address_neighborhood', data.bairro, { shouldValidate: true });
+            setValue('address_city', data.municipio, { shouldValidate: true });
+            setValue('address_state', data.uf, { shouldValidate: true });
+            if (data.ddd_telefone_1) {
+              setValue('phone', maskPhone(data.ddd_telefone_1), { shouldValidate: true });
+            }
+          }
+        } catch (error) {
+          console.error('Erro ao buscar CNPJ:', error);
+        } finally {
+          setIsLoadingCnpj(false);
+        }
+      }
+    };
+
+    fetchCnpj();
+  }, [document, setValue]);
+
+  // Busca de CEP Automática
   useEffect(() => {
     const fetchAddress = async () => {
       const cleanCep = cep?.replace(/\D/g, '');
@@ -121,52 +176,51 @@ export function CompanySetup({ ownerId }: { ownerId: string }) {
     setSubmitError(null);
     
     try {
-      // 1. Garantir que o perfil existe ou atualizá-lo (Upsert)
+      // 1. Atualizar Perfil do Usuário
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert({ 
           id: ownerId, 
           email: (await supabase.auth.getUser()).data.user?.email || '',
-          full_name: values.name,
+          full_name: values.full_name,
+          phone: values.phone,
           updated_at: new Date().toISOString()
         });
 
-      if (profileError) {
-        console.error('Erro ao salvar perfil:', profileError);
-        throw new Error('Não foi possível salvar seu perfil de usuário. Verifique as permissões de banco de dados.');
-      }
+      if (profileError) throw new Error('Erro ao salvar seu perfil de usuário.');
 
-      // 1.5 Pre-flight check: CNPJ/CPF duplicado
+      // 1.5 Verificar duplicidade
       const { data: existingDoc } = await supabase
         .from('companies')
         .select('id')
         .eq('document', values.document)
         .maybeSingle();
 
-      if (existingDoc) {
-        throw new Error('Fraude evitada: Este CPF/CNPJ já está registrado em outra conta CineHub.');
-      }
+      if (existingDoc) throw new Error('Este CPF/CNPJ já está registrado em outra conta CineHub.');
 
       // 2. Inserir a empresa
       const { error: companyError } = await supabase
         .from('companies')
         .insert([{ 
-          ...values, 
+          name: values.name,
+          document: values.document,
+          description: values.description,
+          address_street: values.address_street,
+          address_number: values.address_number,
+          address_neighborhood: values.address_neighborhood,
+          address_city: values.address_city,
+          address_state: values.address_state,
+          address_zip: values.address_zip,
+          phone: values.phone,
           owner_id: ownerId, 
           status: 'pending' 
         }]);
 
-      if (companyError) {
-        console.error('Erro ao salvar empresa:', companyError);
-        if (companyError.code === '42703') { // Coluna inexistente
-           throw new Error('Erro técnico: A coluna "status" está faltando na tabela "companies". Execute o script SQL de correção.');
-        }
-        throw new Error(companyError.message || 'Erro ao cadastrar empresa. Verifique as políticas RLS.');
-      }
+      if (companyError) throw new Error(companyError.message);
       
       setSubmittedName(values.name);
       setIsSuccess(true);
-      localStorage.removeItem(FORM_CACHE_KEY); // Limpa o rascunho após envio bem-sucedido
+      localStorage.removeItem(FORM_CACHE_KEY);
       queryClient.invalidateQueries({ queryKey: ['company', ownerId] });
     } catch (error: any) {
       console.error('Erro ao configurar empresa:', error);
@@ -191,7 +245,7 @@ export function CompanySetup({ ownerId }: { ownerId: string }) {
           Recebemos os dados de <span className="font-bold text-foreground">{submittedName}</span>.
         </p>
         <p className="text-muted-foreground text-sm max-w-sm mx-auto leading-relaxed">
-          Nossa equipe vai analisar as informações e sua locadora será liberada em instantes. Você receberá acesso completo assim que for aprovado.
+          Nossa equipe vai analisar as informações e sua locadora será liberada em instantes.
         </p>
 
         <div className="mt-8 p-5 bg-amber-500/5 border border-amber-500/20 rounded-2xl flex items-center gap-4 text-left">
@@ -200,7 +254,7 @@ export function CompanySetup({ ownerId }: { ownerId: string }) {
           </div>
           <div>
             <p className="text-sm font-black uppercase tracking-wide text-amber-500">Análise em andamento</p>
-            <p className="text-xs text-muted-foreground mt-0.5">Tempo estimado: menos de 5 minutos. Esta página será atualizada automaticamente.</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Tempo estimado: menos de 5 minutos.</p>
           </div>
         </div>
       </div>
@@ -214,51 +268,80 @@ export function CompanySetup({ ownerId }: { ownerId: string }) {
           <div className="p-2 bg-primary/10 rounded-lg">
             <Building2 className="w-6 h-6 text-primary" />
           </div>
-          <h2 className="text-2xl font-bold tracking-tight">Configure sua Locadora</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Finalize seu Cadastro</h2>
         </div>
-        <p className="text-muted-foreground">Otimize suas operações preenchendo as informações oficiais da sua empresa.</p>
+        <p className="text-muted-foreground">Preencha os dados obrigatórios para habilitar seu acesso.</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Dados do Usuário */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label className="flex items-center gap-2">
-              <Briefcase className="w-4 h-4 text-muted-foreground" />
-              Nome da Empresa
-            </Label>
+            <Label>Seu Nome Completo *</Label>
             <Input 
-              {...register('name')} 
-              placeholder="Cine Locações LTDA"
-              className="bg-muted/30 focus-visible:ring-offset-0 focus-visible:ring-primary h-11"
+              {...register('full_name')} 
+              placeholder="Ex: João Silva"
+              className="bg-muted/30 h-11"
             />
-            {errors.name && <p className="text-xs text-red-500 font-medium">{errors.name.message}</p>}
+            {errors.full_name && <p className="text-xs text-red-500 font-medium">{errors.full_name.message}</p>}
           </div>
           <div className="space-y-2">
-            <Label className="flex items-center gap-2">
-              <FileDigit className="w-4 h-4 text-muted-foreground" />
-              CPF ou CNPJ
-            </Label>
+            <Label>Telefone / WhatsApp *</Label>
             <Input 
-              {...register('document')} 
-              placeholder="00.000.000/0001-00"
-              className="bg-muted/30 focus-visible:ring-offset-0 h-11"
+              {...register('phone')} 
+              placeholder="(11) 99999-9999"
+              className="bg-muted/30 h-11"
               onChange={(e) => {
-                const masked = maskDocument(e.target.value);
+                const masked = maskPhone(e.target.value);
                 e.target.value = masked;
-                setValue('document', masked);
+                setValue('phone', masked);
               }}
             />
-            {errors.document && <p className="text-xs text-red-500 font-medium">{errors.document.message}</p>}
+            {errors.phone && <p className="text-xs text-red-500 font-medium">{errors.phone.message}</p>}
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label>Descrição Profissional (Opcional)</Label>
-          <Textarea 
-            {...register('description')} 
-            placeholder="Destaque os diferenciais da sua locadora, especialidades etc..."
-            className="min-h-[100px] bg-muted/30 resize-none"
-          />
+        <div className="pt-4 border-t border-dashed">
+          <div className="flex items-center gap-2 mb-4">
+            <Briefcase className="w-4 h-4 text-primary" />
+            <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Dados da Empresa</h3>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label>CPF ou CNPJ *</Label>
+              <div className="relative">
+                <Input 
+                  {...register('document')} 
+                  placeholder="00.000.000/0001-00"
+                  className="bg-muted/30 h-11 pr-10"
+                  onChange={(e) => {
+                    const masked = maskDocument(e.target.value);
+                    e.target.value = masked;
+                    setValue('document', masked);
+                  }}
+                />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  {isLoadingCnpj ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                  ) : (
+                    <Search className="w-4 h-4 text-muted-foreground/50" />
+                  )}
+                </div>
+              </div>
+              {errors.document && <p className="text-xs text-red-500 font-medium">{errors.document.message}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Nome da Empresa / Fantasia *</Label>
+              <Input 
+                {...register('name')} 
+                placeholder="Ex: Cine Locações"
+                className="bg-muted/30 h-11"
+              />
+              {errors.name && <p className="text-xs text-red-500 font-medium">{errors.name.message}</p>}
+            </div>
+          </div>
         </div>
 
         <div className="pt-4 border-t border-dashed">
@@ -269,7 +352,7 @@ export function CompanySetup({ ownerId }: { ownerId: string }) {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div className="md:col-span-1 space-y-2">
-              <Label>CEP</Label>
+              <Label>CEP *</Label>
               <div className="relative">
                 <Input 
                   {...register('address_zip')} 
@@ -290,53 +373,46 @@ export function CompanySetup({ ownerId }: { ownerId: string }) {
                   )}
                 </div>
               </div>
+              {errors.address_zip && <p className="text-xs text-red-500 font-medium">{errors.address_zip.message}</p>}
             </div>
             <div className="md:col-span-2 space-y-2">
-              <Label>Rua / Logradouro</Label>
+              <Label>Rua / Logradouro *</Label>
               <Input {...register('address_street')} className="bg-muted/30 h-11" />
+              {errors.address_street && <p className="text-xs text-red-500 font-medium">{errors.address_street.message}</p>}
             </div>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
             <div className="space-y-2">
-              <Label>Número</Label>
+              <Label>Número *</Label>
               <Input {...register('address_number')} className="bg-muted/30 h-11" />
+              {errors.address_number && <p className="text-xs text-red-500 font-medium">{errors.address_number.message}</p>}
             </div>
             <div className="md:col-span-2 space-y-2">
-              <Label>Bairro</Label>
+              <Label>Bairro *</Label>
               <Input {...register('address_neighborhood')} className="bg-muted/30 h-11" />
             </div>
             <div className="space-y-2">
-              <Label>UF</Label>
+              <Label>UF *</Label>
               <Input {...register('address_state')} maxLength={2} placeholder="SP" className="bg-muted/30 h-11 uppercase" />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label>Cidade</Label>
+            <Label>Cidade *</Label>
             <Input {...register('address_city')} className="bg-muted/30 h-11" />
           </div>
         </div>
 
         {submitError && (
-          <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center gap-3 text-destructive text-sm animate-in fade-in slide-in-from-top-1">
+          <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center gap-3 text-destructive text-sm">
             <AlertCircle className="w-5 h-5 shrink-0" />
-            <div className="flex-1">
-              <p className="font-semibold">Erro de Permissão (Banco de Dados)</p>
-              <p className="opacity-90">{submitError === 'permission denied for table companies' ? 'O banco de dados não permite a criação de empresas. Configure as políticas RLS.' : submitError}</p>
-            </div>
+            <p>{submitError}</p>
           </div>
         )}
 
-        <Button type="submit" className="w-full h-12 text-lg font-semibold shadow-lg hover:shadow-primary/20 transition-all" disabled={isSubmitting}>
-          {isSubmitting ? (
-            <>
-              <Loader2 className="animate-spin mr-2" />
-              Finalizando...
-            </>
-          ) : (
-            'Finalizar Configuração'
-          )}
+        <Button type="submit" className="w-full h-12 text-lg font-semibold" disabled={isSubmitting}>
+          {isSubmitting ? <Loader2 className="animate-spin mr-2" /> : 'Finalizar Cadastro'}
         </Button>
       </form>
     </div>
