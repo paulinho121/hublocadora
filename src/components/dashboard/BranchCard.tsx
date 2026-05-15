@@ -12,10 +12,11 @@ interface BranchCardProps {
     branch: Branch;
     onManageStock: () => void;
     onCopyInvite: (token: string, id: string) => void;
+    onEdit: () => void;
     isCopied: boolean;
 }
 
-export function BranchCard({ branch, onManageStock, onCopyInvite, isCopied }: BranchCardProps) {
+export function BranchCard({ branch, onManageStock, onCopyInvite, onEdit, isCopied }: BranchCardProps) {
     const [isExpanded, setIsExpanded] = useState(false);
     const { stock, isLoading } = useBranchStock(branch.id);
 
@@ -133,18 +134,25 @@ export function BranchCard({ branch, onManageStock, onCopyInvite, isCopied }: Br
                     )}
                 </AnimatePresence>
 
-                <div className="grid grid-cols-2 gap-3 mt-6" onClick={(e) => e.stopPropagation()}>
+                <div className="flex gap-3 mt-6" onClick={(e) => e.stopPropagation()}>
                     <Button 
                         variant="outline" 
                         onClick={() => onCopyInvite(branch.invite_token, branch.id)} 
-                        className="h-10 text-[9px] uppercase font-black tracking-widest rounded-xl border-zinc-800 bg-zinc-900/50"
+                        className="h-10 text-[9px] uppercase font-black tracking-widest rounded-xl border-zinc-800 bg-zinc-900/50 flex-1"
                     >
                         {isCopied ? <Check className="h-3 w-3 mr-2 text-emerald-500" /> : <Copy className="h-3 w-3 mr-2" />}
                         Convite
                     </Button>
                     <Button 
+                        variant="outline"
+                        onClick={onEdit}
+                        className="h-10 text-[9px] uppercase font-black tracking-widest rounded-xl border-zinc-800 bg-zinc-900/50 flex-1"
+                    >
+                        Editar
+                    </Button>
+                    <Button 
                         onClick={onManageStock}
-                        className="h-10 bg-zinc-100 text-black text-[9px] uppercase font-black tracking-widest rounded-xl"
+                        className="h-10 bg-zinc-100 text-black text-[9px] uppercase font-black tracking-widest rounded-xl flex-1"
                     >
                         <Globe className="h-3 w-3 mr-2" /> Gerenciar
                     </Button>

@@ -34,9 +34,27 @@ export function useBranches() {
         }
     });
 
+    const updateBranch = useMutation({
+        mutationFn: async ({ id, ...updates }: { id: string } & Partial<Branch>) => {
+            const { data, error } = await supabase
+                .from('branches')
+                .update(updates)
+                .eq('id', id)
+                .select()
+                .single();
+            
+            if (error) throw error;
+            return data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['branches'] });
+        }
+    });
+
     return {
         branches,
         isLoading,
-        createBranch
+        createBranch,
+        updateBranch
     };
 }

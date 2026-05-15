@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 export function BranchesTab({ tenantId }: { tenantId: string }) {
-    const { branches, isLoading, createBranch } = useBranches();
+    const { branches, isLoading, createBranch, updateBranch } = useBranches();
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [isCreating, setIsCreating] = useState(false);
     const [name, setName] = useState('');
@@ -23,18 +23,43 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
     const [document, setDocument] = useState('');
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
+    const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
     const [isStockModalOpen, setIsStockModalOpen] = useState(false);
 
-    const handleCreate = async (e: React.FormEvent) => {
+    const handleEdit = (branch: Branch) => {
+        setEditingBranch(branch);
+        setName(branch.name);
+        setEmail(branch.manager_email || '');
+        setCity(branch.city || '');
+        setAddress(branch.address || '');
+        setState(branch.state || '');
+        setPhone(branch.phone || '');
+        setDocument(branch.document || '');
+        setIsCreating(true);
+    };
+
+    const resetForm = () => {
+        setIsCreating(false);
+        setEditingBranch(null);
+        setName('');
+        setEmail('');
+        setCity('');
+        setAddress('');
+        setState('');
+        setPhone('');
+        setDocument('');
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         
         if (!tenantId) {
-            alert('Erro: ID da empresa não encontrado. Verifique se seu perfil está vinculado a uma empresa.');
+            alert('Erro: ID da empresa não encontrado.');
             return;
         }
 
         try {
-            await createBranch.mutateAsync({
+            const branchData = {
                 company_id: tenantId,
                 name,
                 manager_email: email,
@@ -43,19 +68,24 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
                 state,
                 phone,
                 document,
-                status: 'invited'
-            });
-            setIsCreating(false);
-            setName('');
-            setEmail('');
-            setCity('');
-            setAddress('');
-            setState('');
-            setPhone('');
-            setDocument('');
+            };
+
+            if (editingBranch) {
+                await updateBranch.mutateAsync({
+                    id: editingBranch.id,
+                    ...branchData
+                });
+            } else {
+                await createBranch.mutateAsync({
+                    ...branchData,
+                    status: 'invited'
+                });
+            }
+            
+            resetForm();
         } catch (error: any) {
-            console.error('Erro ao cadastrar sub-locadora:', error);
-            alert('Erro ao cadastrar: ' + (error.message || 'Verifique se você executou o script SQL no painel do Supabase.'));
+            console.error('Erro ao salvar sub-locadora:', error);
+            alert('Erro ao salvar: ' + (error.message || 'Erro desconhecido'));
         }
     };
 
@@ -100,7 +130,10 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
                     </div>
 
                     <Button 
-                        onClick={() => setIsCreating(true)}
+                        onClick={() => {
+                            resetForm();
+                            setIsCreating(true);
+                        }}
                         className="bg-primary hover:bg-primary/90 text-black font-black uppercase tracking-widest rounded-xl h-12 px-6 shadow-[0_0_20px_rgba(var(--primary),0.3)]"
                     >
                         <Plus className="h-4 w-4 mr-2 stroke-[3]" />
@@ -119,7 +152,7 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
                         className="bg-zinc-950 border border-zinc-900 rounded-3xl p-8 shadow-2xl relative overflow-hidden"
                     >
                          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-emerald-500" />
-                         <form onSubmit={handleCreate} className="space-y-6">
+                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Nome da Unidade</label>
@@ -202,13 +235,13 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
                             </div>
 
                             <div className="flex justify-end gap-3 pt-4">
-                                <Button type="button" variant="ghost" onClick={() => setIsCreating(false)} className="text-zinc-500 hover:text-white">Cancelar</Button>
+                                <Button type="button" variant="ghost" onClick={resetForm} className="text-zinc-500 hover:text-white">Cancelar</Button>
                                 <Button 
                                     type="submit" 
-                                    disabled={createBranch.isPending}
+                                    disabled={createBranch.isPending || updateBranch.isPending}
                                     className="bg-zinc-100 text-black font-black uppercase tracking-widest px-8 h-12 rounded-xl"
                                 >
-                                    {createBranch.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Salvar Unidade'}
+                                    {createBranch.isPending || updateBranch.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : editingBranch ? 'Atualizar Unidade' : 'Salvar Unidade'}
                                 </Button>
                             </div>
                         </form>
@@ -224,6 +257,7 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
                             branch={branch}
                             isCopied={copiedId === branch.id}
                             onCopyInvite={copyInviteLink}
+                            onEdit={() => handleEdit(branch)}
                             onManageStock={() => {
                                 setSelectedBranch(branch);
                                 setIsStockModalOpen(true);
@@ -279,6 +313,14 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
+                                            <Button 
+                                                variant="ghost" 
+                                                size="sm" 
+                                                onClick={() => handleEdit(branch)}
+                                                className="h-9 w-9 rounded-xl border border-zinc-900 hover:bg-zinc-900"
+                                            >
+                                                <ExternalLink className="h-4 w-4 text-zinc-500" />
+                                            </Button>
                                             <Button 
                                                 variant="ghost" 
                                                 size="sm" 
