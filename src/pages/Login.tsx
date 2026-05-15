@@ -146,7 +146,10 @@ export default function Login() {
                                 {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
                                 {loading ? 'Sincronizando...' : 'Entrar no Hub'}
                             </Button>
-
+                            <div className="relative flex items-center py-2 shrink-0">
+                                <div className="flex-grow border-t border-zinc-800"></div>
+                                <span className="flex-shrink-0 mx-4 text-zinc-500 text-xs uppercase font-bold tracking-widest">ou</span>
+                                <div className="flex-grow border-t border-zinc-800"></div>
                             </div>
 
                             <Button 
