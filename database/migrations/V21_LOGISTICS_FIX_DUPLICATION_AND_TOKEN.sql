@@ -91,7 +91,7 @@ BEGIN
         INSERT INTO public.delivery_secrets (delivery_id, token, type) 
         VALUES (r.id, v_new_token, 'collection')
         ON CONFLICT DO NOTHING;
-    END FOR;
+    END LOOP;
 END;
 $$;
 
