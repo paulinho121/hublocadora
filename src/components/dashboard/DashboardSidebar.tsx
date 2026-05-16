@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTenant } from "@/contexts/TenantContext";
 import { NotificationCenter } from "./NotificationCenter";
+import { motion } from "motion/react";
 
 interface SidebarProps {
   activeTab: string;
