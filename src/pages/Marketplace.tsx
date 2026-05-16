@@ -52,12 +52,14 @@ export default function Marketplace() {
     const consolidated = new Map<string, Equipment>();
     
     rawEquipments.forEach(item => {
+      // Segurança: Se o item não tiver nome, ignora para não quebrar o sistema
+      if (!item.name) return;
+
       const key = item.name.trim().toUpperCase();
       if (consolidated.has(key)) {
         const existing = consolidated.get(key)!;
         existing.stock_quantity = (existing.stock_quantity || 0) + (item.stock_quantity || 0);
       } else {
-        // Clona para não mutar o cache do react-query
         consolidated.set(key, { ...item });
       }
     });
@@ -227,7 +229,7 @@ export default function Marketplace() {
                 }}
                 className={`relative flex items-center gap-2.5 px-6 py-3 rounded-full text-[11px] font-black uppercase tracking-[0.18em] transition-all duration-300 border backdrop-blur-md overflow-hidden group
                   ${selectedCategory === cat.value
-                    ? `bg-primary/20 border-primary/40 text-primary scale-105 shadow-[0_0_20px_rgba(var(--primary-rgb),0.2)]`
+                    ? `bg-primary/20 border-primary/40 text-primary scale-105 shadow-lg shadow-primary/20`
                     : `bg-zinc-900/40 border-white/8 text-zinc-400 hover:text-white hover:border-white/20 hover:bg-zinc-800/60 hover:scale-105`
                   }`}
               >
