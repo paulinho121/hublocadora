@@ -376,21 +376,58 @@ export default function Marketplace() {
                 </div>
               ))}
             </div>
+          ) : (
+            <>
+              {displayedEquipments.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-24 text-center">
+                  <div className="h-20 w-20 rounded-3xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-6">
+                    <Package className="h-8 w-8 text-zinc-700" />
+                  </div>
+                  <h3 className="text-xl font-black uppercase tracking-tighter mb-2">Nenhum item encontrado</h3>
+                  <p className="text-zinc-500 max-w-xs mb-8">Tente ajustar seus filtros ou busca para encontrar o que precisa.</p>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setSearch('');
+                      setSelectedCategory(undefined);
+                      setSelectedBrand(undefined);
+                      setSelectedSubCategory(undefined);
+                    }}
+                    className="rounded-xl h-10 px-6 border-zinc-800 text-zinc-400"
+                  >
+                    Limpar Tudo
+                  </Button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {displayedEquipments.map((item) => (
+                    <EquipmentCard 
+                      key={item.id} 
+                      item={item} 
+                      onClick={() => {
+                        setSelectedEquipment(item);
+                        setIsModalOpen(true);
+                      }} 
+                    />
+                  ))}
+                </div>
+              )}
 
-            {isDefaultView && equipments && equipments.length > 8 && (
-              <div className="mt-20 w-full flex justify-center">
-                <Button 
-                  variant="outline" 
-                  size="lg" 
-                  onClick={() => setShowAll(true)} 
-                  className="rounded-2xl border-white/5 bg-zinc-950/50 text-zinc-400 hover:text-white hover:bg-zinc-900 border-2 px-12 h-16 font-black tracking-widest uppercase text-xs transition-all hover:scale-105 active:scale-95 shadow-2xl"
-                >
-                  Ver Catálogo Completo
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
+              {isDefaultView && equipments && equipments.length > 8 && !showAll && (
+                <div className="mt-20 w-full flex justify-center">
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    onClick={() => setShowAll(true)} 
+                    className="rounded-2xl border-white/5 bg-zinc-950/50 text-zinc-400 hover:text-white hover:bg-zinc-900 border-2 px-12 h-16 font-black tracking-widest uppercase text-xs transition-all hover:scale-105 active:scale-95 shadow-2xl"
+                  >
+                    Ver Catálogo Completo
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       {/* Featured Banners */}
