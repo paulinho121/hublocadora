@@ -308,37 +308,8 @@ export default function Marketplace() {
       </div>
 
       {/* Results section wrapper */}
-      <div className="w-full max-w-7xl mx-auto px-6">
-
-      <div id="results-section" className="w-full mb-20 scroll-mt-24">
-        <div className="flex items-center justify-between mb-10">
-          <div className="flex flex-col gap-1">
-            <h3 className="text-2xl md:text-3xl font-display font-black tracking-tighter uppercase">
-              {selectedCategory ? `Resultados em ${categories.find(c => c.value === selectedCategory)?.name}` : 'Equipamentos em Destaque'}
-            </h3>
-            <div className="h-1 w-12 bg-primary rounded-full" />
-          </div>
-          {selectedCategory && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => {
-                setSelectedCategory(undefined);
-                setSelectedBrand(undefined);
-                setSelectedSubCategory(undefined);
-              }} 
-              className="text-zinc-500 hover:text-white uppercase font-black tracking-widest text-[10px]"
-            >
-              Limpar Filtros
-            </Button>
-          )}
-        </div>
-        
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-32 gap-6">
-            <div className="relative">
-              <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse" />
-        <div id="results-section" className="w-full max-w-7xl mt-12 mb-20">
+      <div className="w-full max-w-7xl mx-auto px-6 mb-20">
+        <div id="results-section" className="w-full scroll-mt-24">
           <div className="flex items-center justify-between mb-10">
             <div className="flex flex-col gap-1">
               <h3 className="text-2xl md:text-3xl font-display font-black tracking-tighter uppercase">
@@ -431,7 +402,7 @@ export default function Marketplace() {
       </div>
 
       {/* Featured Banners */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 w-full mb-24 items-stretch">
+      <div className="w-full max-w-7xl mx-auto px-6 mb-24 grid grid-cols-1 lg:grid-cols-2 gap-10">
         <div className="relative overflow-hidden rounded-[40px] bg-zinc-950/40 border border-white/5 p-12 min-h-[380px] flex flex-col justify-between group cursor-pointer hover:border-primary/20 transition-all duration-500 shadow-2xl">
           <div className="z-10 max-w-[240px]">
             <div className="inline-block px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[9px] font-black uppercase tracking-widest mb-6">Cinema Ready</div>
