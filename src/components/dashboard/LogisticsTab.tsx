@@ -222,6 +222,27 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
         }
     };
 
+    const handleDeleteBooking = async (bookingId: string) => {
+        if (!window.confirm('TEM CERTEZA? Isso excluirá o pedido e todas as entregas associadas permanentemente.')) return;
+        
+        setUpdatingId(`del-${bookingId}`);
+        try {
+            const { error } = await supabase.rpc('admin_delete_booking', {
+                p_booking_id: bookingId
+            });
+
+            if (error) throw error;
+            
+            queryClient.invalidateQueries({ queryKey: ['deliveries'] });
+            alert('Pedido excluído com sucesso!');
+        } catch (error: any) {
+            console.error('Erro ao excluir:', error);
+            alert(`Erro ao excluir: ${error.message}`);
+        } finally {
+            setUpdatingId(null);
+        }
+    };
+
     const confirmBranchSelection = async () => {
         if (!selectedBranchId) {
             alert('Por favor, selecione uma unidade de origem.');
@@ -364,15 +385,22 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                 )}
                             </Button>
                         </div>
-                    ) : (
-                        <div className="p-6 bg-zinc-900/40 rounded-2xl border border-white/5 text-center">
-                            <p className="text-[10px] font-black uppercase text-zinc-600 tracking-widest mb-1">Status: {getStatusLabel(delivery.status)}</p>
-                            <p className="text-[11px] text-zinc-500 font-medium leading-relaxed">
-                                {isMaster ? 'Modo Observador: Acompanhando performance de malha.' : 
-                                 isRenter ? 'O locador está preparando seu equipamento. O token de segurança aparecerá aqui em breve.' : 
-                                 'Apenas a unidade responsável pode transitar este status.'}
-                            </p>
-                        </div>
+                    )}
+
+                    {/* Botão de Exclusão Destrutiva para Super Usuários (Admins) */}
+                    {isMaster && (
+                        <Button 
+                            variant="ghost"
+                            onClick={() => handleDeleteBooking(delivery.booking_id)}
+                            disabled={updatingId === `del-${delivery.booking_id}`}
+                            className="w-full text-[10px] font-black uppercase tracking-widest text-red-500/40 hover:text-red-500 hover:bg-red-500/10 h-12 rounded-xl mt-4 border border-dashed border-red-500/10"
+                        >
+                            {updatingId === `del-${delivery.booking_id}` ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                                "Excluir Pedido (Master Only)"
+                            )}
+                        </Button>
                     )}
                 </div>
                 
