@@ -385,6 +385,15 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                 )}
                             </Button>
                         </div>
+                    ) : (
+                        <div className="p-6 bg-zinc-900/40 rounded-2xl border border-white/5 text-center">
+                            <p className="text-[10px] font-black uppercase text-zinc-600 tracking-widest mb-1">Status: {getStatusLabel(delivery.status)}</p>
+                            <p className="text-[11px] text-zinc-500 font-medium leading-relaxed">
+                                {isMaster ? 'Modo Observador: Acompanhando performance de malha.' : 
+                                 isRenter ? 'O locador está preparando seu equipamento. O token de segurança aparecerá aqui em breve.' : 
+                                 'Apenas a unidade responsável pode transitar este status.'}
+                            </p>
+                        </div>
                     )}
 
                     {/* Botão de Exclusão Destrutiva para Super Usuários (Admins) */}
