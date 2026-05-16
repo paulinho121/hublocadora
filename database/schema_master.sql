@@ -189,24 +189,49 @@ RETURNS void AS $$
 DECLARE
     v_booking_record record;
     v_delivery_id uuid;
+    v_token text;
 BEGIN
-    -- 1. Buscar dados da reserva
+    -- 1. Verificar se já existe uma entrega para este booking (EVITA DUPLICAÇÃO)
+    IF EXISTS (SELECT 1 FROM public.deliveries WHERE booking_id = p_booking_id) THEN
+        RETURN;
+    END IF;
+
+    -- 2. Buscar dados da reserva
     SELECT b.id, b.quantity, b.company_id, b.equipment_id 
     INTO v_booking_record
     FROM public.bookings b
     WHERE b.id = p_booking_id;
 
-    -- 2. Criar a Entrega Principal (Fulfillment Primário)
-    -- Por enquanto, simplificamos criando uma entrega para a empresa dona do item.
-    -- Futuramente, a lógica de sub-locação cross-tenant pode ser expandida aqui.
-    
-    INSERT INTO public.deliveries (booking_id, fulfilling_company_id, quantity, fulfillment_type, status)
-    VALUES (v_booking_record.id, v_booking_record.company_id, v_booking_record.quantity, 'primary', 'pending')
+    IF v_booking_record.id IS NULL THEN
+        RETURN;
+    END IF;
+
+    -- 3. Gerar o Token de 4 dígitos
+    v_token := lpad(floor(random() * 10000)::text, 4, '0');
+
+    -- 4. Criar a Entrega Principal
+    INSERT INTO public.deliveries (
+        booking_id, 
+        fulfilling_company_id, 
+        quantity, 
+        fulfillment_type, 
+        status,
+        delivery_token
+    )
+    VALUES (
+        v_booking_record.id, 
+        v_booking_record.company_id, 
+        v_booking_record.quantity, 
+        'primary', 
+        'pending',
+        v_token
+    )
     RETURNING id INTO v_delivery_id;
     
-    -- 3. Gerar token de segurança automático para esta entrega
+    -- 5. Salvar na tabela de segredos (para compatibilidade com a função de verificação RPC)
     INSERT INTO public.delivery_secrets (delivery_id, token, type) 
-    VALUES (v_delivery_id, lpad(floor(random() * 10000)::text, 4, '0'), 'collection');
+    VALUES (v_delivery_id, v_token, 'collection')
+    ON CONFLICT (delivery_id) DO UPDATE SET token = v_token;
 
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
@@ -339,6 +364,7 @@ CREATE TABLE IF NOT EXISTS public.deliveries (
     reverse_driver_name text,
     reverse_driver_phone text,
     reverse_token text,
+    delivery_token text,
     created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -657,11 +683,13 @@ CREATE POLICY "Delivery_Secrets_Renter" ON public.delivery_secrets
         EXISTS (
             SELECT 1 FROM public.deliveries d
             JOIN public.bookings b ON d.booking_id = b.id
+            LEFT JOIN public.profiles p ON b.renter_id = p.id
             WHERE d.id = delivery_secrets.delivery_id 
             AND (
-                b.renter_id = auth.uid() 
-                OR b.company_id = public.get_my_company_id()
-                OR public.check_is_admin()
+                b.renter_id = auth.uid() -- O próprio locatário
+                OR b.company_id = public.get_my_company_id() -- O dono do equipamento (Fulfiller)
+                OR p.company_id = public.get_my_company_id() -- Alguém da empresa que alugou
+                OR public.check_is_admin() -- Admin master
             )
         )
     );
