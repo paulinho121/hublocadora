@@ -470,7 +470,6 @@ export default function Marketplace() {
           </div>
         </div>
       </div>
-      </div>{/* end results wrapper */}
 
       <QuickBookingModal 
         equipment={selectedEquipment} 
