@@ -853,9 +853,12 @@ function FavoritesTabContent({ onSelect }: { onSelect: (eq: any) => void }) {
         </div>
         <h3 className="text-xl font-black uppercase tracking-tighter mb-2">Lista Vazia</h3>
         <p className="text-zinc-500 max-w-xs mb-8">Você ainda não salvou nenhum equipamento como favorito.</p>
-        <Button variant="outline" className="rounded-xl border-zinc-800" asChild>
-           <a href="/">Explorar Marketplace</a>
-        </Button>
+        <a
+          href="/"
+          className="inline-flex items-center justify-center rounded-xl border border-zinc-800 h-10 px-6 text-sm font-black uppercase tracking-widest transition-colors hover:bg-zinc-900 hover:text-zinc-100 text-zinc-300"
+        >
+          Explorar Marketplace
+        </a>
       </div>
     );
   }

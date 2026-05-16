@@ -13,6 +13,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AdminRoute } from '@/components/auth/AdminRoute';
 import { queryClient } from '@/lib/react-query';
 import { Toaster } from 'sonner';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 
 // Pages — eager (pequenas, carregam sempre)
 import Marketplace from '@/pages/Marketplace';
@@ -183,7 +184,8 @@ function MainLayout() {
     <div className="min-h-screen bg-background font-sans antialiased flex flex-col relative overflow-x-hidden">
       <ProfessionalBackground />
       {!isAuthPage && <Navbar />}
-      <main className="flex-1 pb-20 md:pb-0">
+      <ErrorBoundary>
+        <main className="flex-1 pb-20 md:pb-0">
         <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<Marketplace />} />
@@ -217,6 +219,7 @@ function MainLayout() {
           </Routes>
         </Suspense>
       </main>
+      </ErrorBoundary>
       {!isAuthPage && <Footer />}
       {!isAuthPage && <BottomNav />}
       {/* <AIAssistant /> */}
