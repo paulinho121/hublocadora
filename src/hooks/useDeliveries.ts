@@ -81,7 +81,30 @@ export function useUpdateDeliveryStatus() {
 
             if (error) throw error;
         },
-        onSuccess: () => {
+        // ─── LÓGICA DE FLUIDEZ (OPTIMISTIC UPDATE) ──────────────────────────
+        onMutate: async (newDelivery) => {
+            // Cancela buscas em andamento para não sobrescrever nosso update otimista
+            await queryClient.cancelQueries({ queryKey: ['deliveries'] });
+
+            // Snapshot do valor anterior para rollback em caso de erro
+            const previousDeliveries = queryClient.getQueryData(['deliveries']);
+
+            // Atualiza o cache instantaneamente
+            queryClient.setQueryData(['deliveries'], (old: any[] | undefined) => {
+                if (!old) return [];
+                return old.map(d => d.id === newDelivery.id ? { ...d, ...newDelivery } : d);
+            });
+
+            return { previousDeliveries };
+        },
+        onError: (err, newDelivery, context) => {
+            // Se der erro, volta para o estado anterior (Rollback)
+            if (context?.previousDeliveries) {
+                queryClient.setQueryData(['deliveries'], context.previousDeliveries);
+            }
+        },
+        onSettled: () => {
+            // Sincroniza com o servidor após a mutação terminar
             queryClient.invalidateQueries({ queryKey: ['deliveries'] });
             queryClient.invalidateQueries({ queryKey: ['bookings'] });
         },

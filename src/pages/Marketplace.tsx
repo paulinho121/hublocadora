@@ -5,7 +5,21 @@ import { Card, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { MapPin, ChevronRight, Camera, Loader2, Package, Search, Sparkles, MousePointer2 } from 'lucide-react';
+import { 
+  MapPin, 
+  ChevronRight, 
+  Video, 
+  Loader2, 
+  Package, 
+  Search, 
+  Sparkles, 
+  Aperture, 
+  Zap, 
+  Mic2, 
+  Navigation, 
+  Layers,
+  BoxSelect
+} from 'lucide-react';
 import { BrandMarquee } from '@/components/home/BrandMarquee';
 import { QuickBookingModal } from '@/components/marketplace/QuickBookingModal';
 import { Equipment } from '@/types/database';
@@ -17,13 +31,17 @@ export default function Marketplace() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>();
+  const [selectedBrand, setSelectedBrand] = useState<string | undefined>();
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string | undefined>();
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showAll, setShowAll] = useState(false);
   
   const { data: rawEquipments, isLoading } = useEquipments({
     searchQuery: search,
-    category: selectedCategory
+    category: selectedCategory,
+    brand: selectedBrand,
+    subCategory: selectedSubCategory
   });
 
   // ─── Consolidação "Pote Principal" ────────────────────────────────────────
@@ -60,14 +78,58 @@ export default function Marketplace() {
   };
 
   const categories = [
-    { name: 'Drones', color: 'bg-blue-500/5 hover:bg-blue-500/10', border: 'border-blue-500/20', text: 'text-blue-400', value: 'drones' },
-    { name: 'Áudio', color: 'bg-purple-500/5 hover:bg-purple-500/10', border: 'border-purple-500/20', text: 'text-purple-400', value: 'audio' },
-    { name: 'Estúdios', color: 'bg-orange-500/5 hover:bg-orange-500/10', border: 'border-orange-500/20', text: 'text-orange-400', value: 'estudio' },
-    { name: 'Veículos', color: 'bg-zinc-500/5 hover:bg-zinc-500/10', border: 'border-zinc-500/20', text: 'text-zinc-400', value: 'veiculos' },
-    { name: 'Telões & LED', color: 'bg-yellow-500/5 hover:bg-yellow-500/10', border: 'border-yellow-500/20', text: 'text-yellow-400', value: 'led' },
-    { name: 'Seguros', color: 'bg-emerald-500/5 hover:bg-emerald-500/10', border: 'border-emerald-500/20', text: 'text-emerald-400', value: 'seguros' },
-    { name: 'Equipe', color: 'bg-pink-500/5 hover:bg-pink-500/10', border: 'border-pink-500/20', text: 'text-pink-400', value: 'equipe' },
+    { 
+      name: 'Câmeras', 
+      value: 'cameras', 
+      icon: <Video className="w-3.5 h-3.5" />,
+      types: ['Cinema', 'Mirrorless', 'Action', 'Broadcasting'],
+      brands: ['ARRI', 'RED', 'Sony', 'Canon', 'Blackmagic']
+    },
+    { 
+      name: 'Lentes', 
+      value: 'lentes', 
+      icon: <Aperture className="w-3.5 h-3.5" />,
+      types: ['Prime', 'Zoom', 'Anamórfica', 'Macro'],
+      brands: ['Zeiss', 'Cooke', 'Angénieux', 'Leica', 'Fujinon']
+    },
+    { 
+      name: 'Modificadores', 
+      value: 'modificadores', 
+      icon: <BoxSelect className="w-3.5 h-3.5" />,
+      types: ['Softbox', 'Octabank', 'Lantern', 'Grid', 'Flag'],
+      brands: ['Chimera', 'DoPchoice', 'Aputure', 'Nanlite']
+    },
+    { 
+      name: 'Iluminação', 
+      value: 'iluminacao', 
+      icon: <Zap className="w-3.5 h-3.5" />,
+      types: ['LED Panel', 'COB', 'Fresnel', 'Tubo LED'],
+      brands: ['Arri', 'Aputure', 'Nanlite', 'Astera']
+    },
+    { 
+      name: 'Drones', 
+      value: 'drones', 
+      icon: <Navigation className="w-3.5 h-3.5" />,
+      types: ['Cinematic', 'FPV', 'Enterprise'],
+      brands: ['DJI', 'Freefly', 'Autel']
+    },
+    { 
+      name: 'Áudio', 
+      value: 'audio', 
+      icon: <Mic2 className="w-3.5 h-3.5" />,
+      types: ['Gravadores', 'Microfones', 'Wireless', 'Monitoração'],
+      brands: ['Sennheiser', 'Sound Devices', 'Zaxcom', 'Rode']
+    },
+    { 
+      name: 'Grip', 
+      value: 'grip', 
+      icon: <Layers className="w-3.5 h-3.5" />,
+      types: ['Tripés', 'Sliders', 'Dollies', 'Gruas'],
+      brands: ['Matthews', 'Kupo', 'Avenger', 'Sachtler']
+    },
   ];
+
+  const activeCategory = categories.find(c => c.value === selectedCategory);
 
   return (
     <div className="flex flex-col items-center pb-8 w-full">
@@ -152,20 +214,91 @@ export default function Marketplace() {
                 initial={{ opacity: 0, scale: 0.85 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.5 + idx * 0.05 }}
-                onClick={() => setSelectedCategory(selectedCategory === cat.value ? undefined : cat.value)}
-                className={`relative flex items-center gap-2 px-5 py-2.5 rounded-full text-[11px] font-black uppercase tracking-[0.18em] transition-all duration-300 border backdrop-blur-md overflow-hidden group
+                onClick={() => {
+                  if (selectedCategory === cat.value) {
+                    setSelectedCategory(undefined);
+                    setSelectedBrand(undefined);
+                    setSelectedSubCategory(undefined);
+                  } else {
+                    setSelectedCategory(cat.value);
+                    setSelectedBrand(undefined);
+                    setSelectedSubCategory(undefined);
+                  }
+                }}
+                className={`relative flex items-center gap-2.5 px-6 py-3 rounded-full text-[11px] font-black uppercase tracking-[0.18em] transition-all duration-300 border backdrop-blur-md overflow-hidden group
                   ${selectedCategory === cat.value
-                    ? `${cat.color} ${cat.border} ${cat.text} scale-105 shadow-lg`
-                    : `bg-zinc-900/40 border-white/8 text-zinc-400 hover:${cat.text} hover:border-white/20 hover:bg-zinc-800/60 hover:scale-105`
+                    ? `bg-primary/20 border-primary/40 text-primary scale-105 shadow-[0_0_20px_rgba(var(--primary-rgb),0.2)]`
+                    : `bg-zinc-900/40 border-white/8 text-zinc-400 hover:text-white hover:border-white/20 hover:bg-zinc-800/60 hover:scale-105`
                   }`}
               >
                 {selectedCategory === cat.value && (
-                  <span className={`absolute inset-0 opacity-10 ${cat.color} animate-pulse`} />
+                  <span className={`absolute inset-0 opacity-10 bg-primary animate-pulse`} />
                 )}
-                <span className="relative z-10">{cat.name}</span>
+                <span className="relative z-10 flex items-center gap-2">
+                  {cat.icon}
+                  {cat.name}
+                </span>
               </motion.button>
             ))}
           </motion.div>
+
+          {/* ── Interactive Sub-filters (Brands & Types) ── */}
+          <AnimatePresence>
+            {activeCategory && (
+              <motion.div
+                initial={{ opacity: 0, height: 0, y: -10 }}
+                animate={{ opacity: 1, height: 'auto', y: 0 }}
+                exit={{ opacity: 0, height: 0, y: -10 }}
+                className="w-full max-w-4xl mt-8 pt-6 border-t border-white/5 overflow-hidden"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
+                  {/* Sub-categories / Types */}
+                  <div className="space-y-4">
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 mb-2">Filtrar por Tipo</p>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => setSelectedSubCategory(undefined)}
+                        className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${!selectedSubCategory ? 'bg-white/10 text-white border border-white/20' : 'bg-transparent text-zinc-600 border border-transparent hover:text-zinc-400'}`}
+                      >
+                        Todos
+                      </button>
+                      {activeCategory.types.map(type => (
+                        <button
+                          key={type}
+                          onClick={() => setSelectedSubCategory(selectedSubCategory === type ? undefined : type)}
+                          className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${selectedSubCategory === type ? 'bg-primary/20 text-primary border border-primary/30' : 'bg-white/5 text-zinc-400 border border-white/5 hover:border-white/10 hover:text-white'}`}
+                        >
+                          {type}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Brands */}
+                  <div className="space-y-4">
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 mb-2">Filtrar por Marca</p>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => setSelectedBrand(undefined)}
+                        className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${!selectedBrand ? 'bg-white/10 text-white border border-white/20' : 'bg-transparent text-zinc-600 border border-transparent hover:text-zinc-400'}`}
+                      >
+                        Todas
+                      </button>
+                      {activeCategory.brands.map(brand => (
+                        <button
+                          key={brand}
+                          onClick={() => setSelectedBrand(selectedBrand === brand ? undefined : brand)}
+                          className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${selectedBrand === brand ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30' : 'bg-white/5 text-zinc-400 border border-white/5 hover:border-white/10 hover:text-white'}`}
+                        >
+                          {brand}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
 
         {/* Divider glow line */}
@@ -186,7 +319,16 @@ export default function Marketplace() {
             <div className="h-1 w-12 bg-primary rounded-full" />
           </div>
           {selectedCategory && (
-            <Button variant="ghost" size="sm" onClick={() => setSelectedCategory(undefined)} className="text-zinc-500 hover:text-white uppercase font-black tracking-widest text-[10px]">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => {
+                setSelectedCategory(undefined);
+                setSelectedBrand(undefined);
+                setSelectedSubCategory(undefined);
+              }} 
+              className="text-zinc-500 hover:text-white uppercase font-black tracking-widest text-[10px]"
+            >
               Limpar Filtros
             </Button>
           )}
@@ -196,31 +338,42 @@ export default function Marketplace() {
           <div className="flex flex-col items-center justify-center py-32 gap-6">
             <div className="relative">
               <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse" />
-              <Loader2 className="h-12 w-12 animate-spin text-primary relative" />
+        <div id="results-section" className="w-full max-w-7xl mt-12 mb-20">
+          <div className="flex items-center justify-between mb-10">
+            <div className="flex flex-col gap-1">
+              <h3 className="text-2xl md:text-3xl font-display font-black tracking-tighter uppercase">
+                {selectedCategory ? `Resultados em ${categories.find(c => c.value === selectedCategory)?.name}` : 'Equipamentos em Destaque'}
+              </h3>
+              <div className="h-1 w-12 bg-primary rounded-full" />
             </div>
-            <p className="text-zinc-500 animate-pulse font-black uppercase tracking-[0.2em] text-[10px]">Sincronizando com o Hub...</p>
+            {selectedCategory && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => {
+                  setSelectedCategory(undefined);
+                  setSelectedBrand(undefined);
+                  setSelectedSubCategory(undefined);
+                }} 
+                className="text-zinc-500 hover:text-white uppercase font-black tracking-widest text-[10px]"
+              >
+                Limpar Filtros
+              </Button>
+            )}
           </div>
-        ) : equipments?.length === 0 ? (
-          <div className="text-center py-24 bg-zinc-950/20 rounded-[40px] border-2 border-dashed border-white/5 backdrop-blur-sm">
-            <Package className="h-16 w-16 mx-auto text-zinc-800 mb-6" />
-            <h4 className="text-xl font-black uppercase tracking-tighter">Início de Produção</h4>
-            <p className="text-muted-foreground mt-2 max-w-xs mx-auto">Nenhum item encontrado nesta categoria ainda.</p>
-            <Button variant="link" onClick={() => { setSearch(''); setSelectedCategory(undefined); }} className="mt-6 text-primary font-black uppercase tracking-widest text-[10px]">
-              Ver todos os equipamentos
-            </Button>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 w-full">
-              {displayedEquipments?.map((item) => (
-                <EquipmentCard
-                  key={item.id}
-                  item={item}
-                  onClick={() => {
-                    setSelectedEquipment(item);
-                    setIsModalOpen(true);
-                  }}
-                />
+          
+          {isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="h-[380px] rounded-[2.5rem] bg-zinc-900/40 border border-white/5 animate-pulse overflow-hidden relative">
+                   <div className="h-48 bg-zinc-800/50" />
+                   <div className="p-6 space-y-4">
+                      <div className="h-4 w-3/4 bg-zinc-800/50 rounded-full" />
+                      <div className="h-3 w-1/2 bg-zinc-800/30 rounded-full" />
+                      <div className="mt-8 h-12 w-full bg-zinc-800/20 rounded-2xl" />
+                   </div>
+                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+                </div>
               ))}
             </div>
 

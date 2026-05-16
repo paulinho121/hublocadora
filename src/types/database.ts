@@ -49,6 +49,8 @@ export interface Equipment {
     company_id: string; 
     subrental_company_id?: string | null; // Sub-locadora externa que gerencia este item
     name: string;
+    brand?: string | null;
+    sub_category?: string | null;
     category: string; 
     description: string;
     daily_rate: number;

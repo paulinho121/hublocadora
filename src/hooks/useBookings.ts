@@ -118,8 +118,25 @@ export function useUpdateBookingStatus() {
 
             if (error) throw error;
         },
-        onSuccess: () => {
+        onMutate: async (newBooking) => {
+            await queryClient.cancelQueries({ queryKey: ['bookings'] });
+            const previousBookings = queryClient.getQueryData(['bookings']);
+
+            queryClient.setQueryData(['bookings'], (old: any[] | undefined) => {
+                if (!old) return [];
+                return old.map(b => b.id === newBooking.id ? { ...b, ...newBooking } : b);
+            });
+
+            return { previousBookings };
+        },
+        onError: (err, newBooking, context) => {
+            if (context?.previousBookings) {
+                queryClient.setQueryData(['bookings'], context.previousBookings);
+            }
+        },
+        onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ['bookings'] });
+            queryClient.invalidateQueries({ queryKey: ['deliveries'] });
         },
     });
 }

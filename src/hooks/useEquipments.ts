@@ -15,6 +15,8 @@ export function useEquipments(options?: {
     companyId?: string;
     branchId?: string | null;
     category?: string;
+    subCategory?: string;
+    brand?: string;
     searchQuery?: string;
     ids?: string[];
 }) {
@@ -41,6 +43,8 @@ export function useEquipments(options?: {
                     .in('id', equipmentIds);
                     
                  if (options?.category) query = query.eq('category', options.category);
+                 if (options?.subCategory) query = query.eq('sub_category', options.subCategory);
+                 if (options?.brand) query = query.eq('brand', options.brand);
                  if (options?.searchQuery) query = query.ilike('name', `%${options.searchQuery}%`);
                  
                  const { data, error } = await query.order('created_at', { ascending: false });
@@ -85,6 +89,14 @@ export function useEquipments(options?: {
 
             if (options?.category) {
                 query = query.eq('category', options.category);
+            }
+
+            if (options?.subCategory) {
+                query = query.eq('sub_category', options.subCategory);
+            }
+
+            if (options?.brand) {
+                query = query.eq('brand', options.brand);
             }
 
             if (options?.searchQuery) {

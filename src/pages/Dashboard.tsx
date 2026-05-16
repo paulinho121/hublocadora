@@ -428,9 +428,18 @@ export default function Dashboard() {
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-4 pb-28 md:pb-10 md:p-10 custom-scrollbar">
            
-           {/* Tab Rendering */}
-           {activeTab === 'overview' && (
-             <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+           {/* Tab Rendering com Transição Fluida */}
+           <AnimatePresence mode="wait">
+             <motion.div
+               key={activeTab}
+               initial={{ opacity: 0, y: 10, scale: 0.98 }}
+               animate={{ opacity: 1, y: 0, scale: 1 }}
+               exit={{ opacity: 0, y: -10, scale: 0.98 }}
+               transition={{ duration: 0.2, ease: "easeOut" }}
+               className="h-full"
+             >
+               {activeTab === 'overview' && (
+                 <div className="space-y-10">
                 <header>
                    <h2 className="text-4xl font-black tracking-tighter uppercase mb-2">Visão Geral</h2>
                    <p className="text-zinc-500 font-medium">O pulso financeiro e operacional da sua locadora hoje.</p>
@@ -764,10 +773,12 @@ export default function Dashboard() {
                       initialConfig={(company as any).financial_config} 
                     />
                     <PrivacySettings />
-                  </div>
+                   </div>
                 )}
-             </div>
-           )}
+              </div>
+            )}
+            </motion.div>
+           </AnimatePresence>
 
         </div>
       </main>
