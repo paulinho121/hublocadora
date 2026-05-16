@@ -244,63 +244,7 @@ export default function Marketplace() {
             ))}
           </motion.div>
 
-          {/* ── Interactive Sub-filters (Brands & Types) ── */}
-          <AnimatePresence>
-            {activeCategory && (
-              <motion.div
-                initial={{ opacity: 0, height: 0, y: -10 }}
-                animate={{ opacity: 1, height: 'auto', y: 0 }}
-                exit={{ opacity: 0, height: 0, y: -10 }}
-                className="w-full max-w-4xl mt-8 pt-6 border-t border-white/5 overflow-hidden"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
-                  {/* Sub-categories / Types */}
-                  <div className="space-y-4">
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 mb-2">Filtrar por Tipo</p>
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        onClick={() => setSelectedSubCategory(undefined)}
-                        className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${!selectedSubCategory ? 'bg-white/10 text-white border border-white/20' : 'bg-transparent text-zinc-600 border border-transparent hover:text-zinc-400'}`}
-                      >
-                        Todos
-                      </button>
-                      {activeCategory.types.map(type => (
-                        <button
-                          key={type}
-                          onClick={() => setSelectedSubCategory(selectedSubCategory === type ? undefined : type)}
-                          className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${selectedSubCategory === type ? 'bg-primary/20 text-primary border border-primary/30' : 'bg-white/5 text-zinc-400 border border-white/5 hover:border-white/10 hover:text-white'}`}
-                        >
-                          {type}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Brands */}
-                  <div className="space-y-4">
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 mb-2">Filtrar por Marca</p>
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        onClick={() => setSelectedBrand(undefined)}
-                        className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${!selectedBrand ? 'bg-white/10 text-white border border-white/20' : 'bg-transparent text-zinc-600 border border-transparent hover:text-zinc-400'}`}
-                      >
-                        Todas
-                      </button>
-                      {activeCategory.brands.map(brand => (
-                        <button
-                          key={brand}
-                          onClick={() => setSelectedBrand(selectedBrand === brand ? undefined : brand)}
-                          className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${selectedBrand === brand ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30' : 'bg-white/5 text-zinc-400 border border-white/5 hover:border-white/10 hover:text-white'}`}
-                        >
-                          {brand}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* ── Interactive Sub-filters (Removidos a pedido do usuário) ── */}
         </motion.div>
 
         {/* Divider glow line */}
