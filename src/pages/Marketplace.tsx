@@ -82,49 +82,49 @@ export default function Marketplace() {
   const categories = [
     { 
       name: 'Câmeras', 
-      value: 'cameras', 
+      value: 'Câmeras', 
       icon: <Video className="w-3.5 h-3.5" />,
       types: ['Cinema', 'Mirrorless', 'Action', 'Broadcasting'],
       brands: ['ARRI', 'RED', 'Sony', 'Canon', 'Blackmagic']
     },
     { 
       name: 'Lentes', 
-      value: 'lentes', 
+      value: 'Lentes', 
       icon: <Aperture className="w-3.5 h-3.5" />,
       types: ['Prime', 'Zoom', 'Anamórfica', 'Macro'],
       brands: ['Zeiss', 'Cooke', 'Angénieux', 'Leica', 'Fujinon']
     },
     { 
       name: 'Modificadores', 
-      value: 'modificadores', 
+      value: 'Modificadores', 
       icon: <BoxSelect className="w-3.5 h-3.5" />,
       types: ['Softbox', 'Octabank', 'Lantern', 'Grid', 'Flag'],
       brands: ['Chimera', 'DoPchoice', 'Aputure', 'Nanlite']
     },
     { 
       name: 'Iluminação', 
-      value: 'iluminacao', 
+      value: 'Iluminação', 
       icon: <Zap className="w-3.5 h-3.5" />,
       types: ['LED Panel', 'COB', 'Fresnel', 'Tubo LED'],
       brands: ['Arri', 'Aputure', 'Nanlite', 'Astera']
     },
     { 
       name: 'Drones', 
-      value: 'drones', 
+      value: 'Drones', 
       icon: <Navigation className="w-3.5 h-3.5" />,
       types: ['Cinematic', 'FPV', 'Enterprise'],
       brands: ['DJI', 'Freefly', 'Autel']
     },
     { 
       name: 'Áudio', 
-      value: 'audio', 
+      value: 'Áudio', 
       icon: <Mic2 className="w-3.5 h-3.5" />,
       types: ['Gravadores', 'Microfones', 'Wireless', 'Monitoração'],
       brands: ['Sennheiser', 'Sound Devices', 'Zaxcom', 'Rode']
     },
     { 
       name: 'Grip', 
-      value: 'grip', 
+      value: 'Grip', 
       icon: <Layers className="w-3.5 h-3.5" />,
       types: ['Tripés', 'Sliders', 'Dollies', 'Gruas'],
       brands: ['Matthews', 'Kupo', 'Avenger', 'Sachtler']
