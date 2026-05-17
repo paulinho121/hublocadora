@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Package, 
@@ -32,6 +33,7 @@ interface QuickBookingModalProps {
 }
 
 export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingModalProps) {
+    const navigate = useNavigate();
     const { tenantId, company } = useTenant();
     const { user } = useAuth();
     const createBooking = useCreateBooking();
@@ -80,6 +82,63 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
     }, [occupiedDates, equipment, startDate, endDate, quantity]);
 
     if (!equipment) return null;
+
+    if (!user) {
+        return (
+            <Dialog isOpen={isOpen} onClose={onClose}>
+                <div className="w-full max-w-md bg-zinc-950 border border-zinc-800 p-8 rounded-3xl relative overflow-hidden text-center mx-auto shadow-2xl">
+                    {/* Background glow */}
+                    <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
+                    
+                    <div className="relative z-10 flex flex-col items-center gap-6 py-6">
+                        <div className="relative h-40 w-full bg-zinc-900/50 rounded-2xl flex items-center justify-center overflow-hidden border border-zinc-800 shadow-inner">
+                            {equipment.images?.[0] ? (
+                                <img 
+                                    src={equipment.images[0]} 
+                                    className="max-h-32 object-contain mix-blend-screen opacity-90 p-4" 
+                                    alt={equipment.name}
+                                />
+                            ) : (
+                                <Package className="w-12 h-12 text-zinc-700" />
+                            )}
+                        </div>
+
+                        <div className="space-y-2">
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Excelente Escolha</span>
+                            <h3 className="text-xl font-display font-black text-white tracking-tight uppercase leading-tight">
+                                {equipment.name}
+                            </h3>
+                            <p className="text-zinc-500 text-xs leading-relaxed max-w-xs mx-auto">
+                                Para solicitar a reserva deste equipamento com seguro co-participativo, crie sua conta gratuitamente ou faça login no CineHub.
+                            </p>
+                        </div>
+
+                        <div className="flex flex-col gap-3 w-full mt-4">
+                            <Button 
+                                className="h-14 bg-primary hover:bg-primary/90 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5 active:translate-y-0"
+                                onClick={() => {
+                                    onClose();
+                                    navigate('/register');
+                                }}
+                            >
+                                Criar Conta / Cadastrar-se
+                            </Button>
+                            <Button 
+                                variant="outline"
+                                className="h-14 border-zinc-800 hover:bg-zinc-900 text-zinc-300 hover:text-white rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all"
+                                onClick={() => {
+                                    onClose();
+                                    navigate('/login');
+                                }}
+                            >
+                                Já tenho conta / Entrar
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            </Dialog>
+        );
+    }
 
     const handleReserve = async () => {
         if (!user?.id || !isAvailable) return;
