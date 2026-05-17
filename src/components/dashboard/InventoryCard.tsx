@@ -28,6 +28,8 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId, onAssign, acti
   const updateMutation = useUpdateEquipment();
   const [loading, setLoading] = useState(false);
 
+  const isRentedNow = !!activeBooking || item.status === 'rented';
+
   const brand = (item.features as any)?.brand || (item as any).brand;
 
   const toggleExternalRental = async () => {
@@ -91,9 +93,9 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId, onAssign, acti
         
         <Badge 
           variant="outline" 
-          className={`absolute top-3 right-3 text-[10px] uppercase font-black px-2 py-1 backdrop-blur-md ${getStatusColor(item.status)}`}
+          className={`absolute top-3 right-3 text-[10px] uppercase font-black px-2 py-1 backdrop-blur-md ${getStatusColor(isRentedNow ? 'rented' : item.status)}`}
         >
-          {getStatusLabel(item.status)}
+          {getStatusLabel(isRentedNow ? 'rented' : item.status)}
         </Badge>
       </div>
 

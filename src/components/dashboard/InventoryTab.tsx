@@ -45,10 +45,13 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
     searchQuery: searchQuery || undefined
   });
 
-  const { data: activeBookings, isLoading: isLoadingBookings } = useBookings({
-    companyId: tenantId || undefined,
-    status: 'active'
+  const { data: allBookings, isLoading: isLoadingBookings } = useBookings({
+    companyId: tenantId || undefined
   });
+
+  const activeBookings = useMemo(() => {
+    return allBookings?.filter(b => b.status === 'approved' || b.status === 'active') || [];
+  }, [allBookings]);
 
   const isLoading = isLoadingEquipments || isLoadingBookings;
 
@@ -57,6 +60,27 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
     const cats = allEquipments.map(e => e.category).filter(Boolean);
     return Array.from(new Set(cats)).sort();
   }, [allEquipments]);
+
+  const computedStats = useMemo(() => {
+    if (!equipments) return { available: 0, rented: 0, maintenance: 0 };
+    
+    let available = 0;
+    let rented = 0;
+    let maintenance = 0;
+    
+    equipments.forEach(item => {
+      const isRented = item.status === 'rented' || activeBookings?.some(b => b.equipment_id === item.id);
+      if (isRented) {
+        rented++;
+      } else if (item.status === 'maintenance') {
+        maintenance++;
+      } else if (item.status === 'available') {
+        available++;
+      }
+    });
+    
+    return { available, rented, maintenance };
+  }, [equipments, activeBookings]);
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
@@ -158,7 +182,7 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
               </div>
               <div>
                  <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest leading-none mb-1">Disponíveis</p>
-                 <p className="font-bold text-sm tracking-tighter">{equipments.filter(e => e.status === 'available').length} itens</p>
+                 <p className="font-bold text-sm tracking-tighter">{computedStats.available} itens</p>
               </div>
            </div>
            
@@ -168,7 +192,7 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
               </div>
               <div>
                  <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest leading-none mb-1">Locados</p>
-                 <p className="font-bold text-sm tracking-tighter">{equipments.filter(e => e.status === 'rented').length} itens</p>
+                 <p className="font-bold text-sm tracking-tighter">{computedStats.rented} itens</p>
               </div>
            </div>
 
@@ -178,11 +202,11 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
               </div>
               <div>
                  <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest leading-none mb-1">Manutenção</p>
-                 <p className="font-bold text-sm tracking-tighter">{equipments.filter(e => e.status === 'maintenance').length} itens</p>
+                 <p className="font-bold text-sm tracking-tighter">{computedStats.maintenance} itens</p>
               </div>
            </div>
         </div>
-      )}
+      )/* Stats footer finish */}
 
       <AssignEquipmentModal 
         equipment={assigningItem}
