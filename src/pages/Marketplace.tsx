@@ -349,29 +349,9 @@ export default function Marketplace() {
         </div>
       </div>
 
-      {/* Featured Banners */}
+      {/* Featured Banners - Ocultado temporariamente a pedido do usuário */}
+      {/* 
       <div className="w-full max-w-7xl mx-auto px-6 mb-24 flex justify-center">
-        {/* Ocultado temporariamente a pedido do usuário: Câmeras & Lentes
-        <div className="relative overflow-hidden rounded-[40px] bg-zinc-950/40 border border-white/5 p-12 min-h-[380px] flex flex-col justify-between group cursor-pointer hover:border-primary/20 transition-all duration-500 shadow-2xl">
-          <div className="z-10 max-w-[240px]">
-            <div className="inline-block px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[9px] font-black uppercase tracking-widest mb-6">Cinema Ready</div>
-            <h2 className="text-5xl font-display font-black text-white tracking-tighter uppercase mb-6 leading-[0.85]">Câmeras & Lentes</h2>
-            <p className="text-zinc-500 mb-8 font-medium leading-relaxed">O melhor do cinema mundial no seu set com suporte técnico especializado.</p>
-            <Button className="w-fit bg-primary hover:bg-primary/80 text-white border-none rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-10 shadow-xl shadow-primary/20 transition-all hover:-translate-y-1">
-              Explorar <ChevronRight className="ml-2 h-4 w-4"/>
-            </Button>
-          </div>
-          <div className="absolute right-[-5%] bottom-[-5%] w-[60%] h-full pointer-events-none opacity-40 group-hover:opacity-60 group-hover:scale-110 transition-all duration-1000">
-             <img 
-              src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=800&auto=format&fit=crop" 
-              alt="Câmera"
-              className="w-full h-full object-contain mix-blend-screen" 
-              referrerPolicy="no-referrer"
-            />
-          </div>
-        </div>
-        */}
-        
         <div className="relative overflow-hidden rounded-[40px] bg-zinc-950/40 border border-white/5 p-12 min-h-[380px] w-full max-w-4xl flex flex-col justify-between group cursor-pointer hover:border-emerald-500/20 transition-all duration-500 shadow-2xl">
           <div className="z-10 max-w-[280px]">
             <div className="inline-block px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-black uppercase tracking-widest mb-6">Pro Lighting</div>
@@ -391,6 +371,7 @@ export default function Marketplace() {
           </div>
         </div>
       </div>
+      */}
 
       <QuickBookingModal 
         equipment={selectedEquipment} 

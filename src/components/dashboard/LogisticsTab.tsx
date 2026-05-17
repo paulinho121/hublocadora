@@ -284,7 +284,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
             ? delivery.origin_branch_id === branchId 
             : (fulfillmentId === tenantId || (!fulfillmentId && delivery.booking?.company_id === tenantId));
         
-        const isRenter = tenantId && (delivery.booking?.renter?.company_id === tenantId || delivery.booking?.renter_id === user?.id);
+        const isRenter = delivery.booking?.renter_id === user?.id || (tenantId && delivery.booking?.renter?.company_id === tenantId);
         const isMaster = user?.role === 'admin'; 
 
         // O token SÓ aparece se o usuário for o locatário (locador solicitante) E estiver na aba "A RECEBER".
@@ -332,7 +332,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                     {canSeeToken && (delivery.status === 'shipped' || delivery.status === 'ready') && (
                         <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl text-center mb-4">
                             <p className="text-[10px] font-black uppercase text-primary tracking-[0.2em] mb-1">Token de Segurança</p>
-                            <div className="text-2xl font-black text-white tracking-[0.3em]">{delivery.delivery_secrets?.[0]?.token || '----'}</div>
+                            <div className="text-2xl font-black text-white tracking-[0.3em]">{delivery.delivery_token || delivery.delivery_secrets?.[0]?.token || '----'}</div>
                             <p className="text-[9px] text-zinc-500 font-medium mt-1">Forneça este código ao motorista para confirmar o recebimento.</p>
                         </div>
                     )}
