@@ -18,7 +18,8 @@ import {
   Mic2, 
   Navigation, 
   Layers,
-  BoxSelect
+  BoxSelect,
+  Wrench
 } from 'lucide-react';
 import { BrandMarquee } from '@/components/home/BrandMarquee';
 import { QuickBookingModal } from '@/components/marketplace/QuickBookingModal';
@@ -88,6 +89,7 @@ export default function Marketplace() {
       types: ['Cinema', 'Mirrorless', 'Action', 'Broadcasting'],
       brands: ['ARRI', 'RED', 'Sony', 'Canon', 'Blackmagic']
     },
+    */
     { 
       name: 'Lentes', 
       value: 'Lentes', 
@@ -95,7 +97,6 @@ export default function Marketplace() {
       types: ['Prime', 'Zoom', 'Anamórfica', 'Macro'],
       brands: ['Zeiss', 'Cooke', 'Angénieux', 'Leica', 'Fujinon']
     },
-    */
     { 
       name: 'Modificadores', 
       value: 'Modificadores', 
@@ -125,11 +126,18 @@ export default function Marketplace() {
       brands: ['Sennheiser', 'Sound Devices', 'Zaxcom', 'Rode']
     },
     { 
-      name: 'Grip', 
-      value: 'Grip', 
+      name: 'Tripés', 
+      value: 'Tripés', 
       icon: <Layers className="w-3.5 h-3.5" />,
       types: ['Tripés', 'Sliders', 'Dollies', 'Gruas'],
       brands: ['Matthews', 'Kupo', 'Avenger', 'Sachtler']
+    },
+    { 
+      name: 'Acessórios', 
+      value: 'Acessórios', 
+      icon: <Wrench className="w-3.5 h-3.5" />,
+      types: ['Cabos', 'Baterias', 'Cartões de Memória', 'Filtros', 'Monitores'],
+      brands: ['Teradek', 'SmallHD', 'SanDisk', 'REVOLT', 'Anton Bauer']
     },
   ];
 
