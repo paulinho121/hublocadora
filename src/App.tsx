@@ -127,51 +127,71 @@ function BottomNav() {
       { id: 'settings', label: 'Ajustes', icon: Settings },
     ];
     return (
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-t border-border/40 px-2 py-2 pb-8 flex items-center justify-around shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
-        {tabs.map(({ id, label, icon: Icon }) => (
-          <button
-            key={id}
-            onClick={() => navigate(`/dashboard?tab=${id}`, { replace: true })}
-            className={`flex flex-col items-center gap-1 transition-all px-2 ${currentTab === id ? 'text-primary' : 'text-muted-foreground'}`}
-          >
-            <Icon className="w-5 h-5" />
-            <span className="text-xs font-bold uppercase tracking-tighter">{label}</span>
-          </button>
-        ))}
-      </nav>
+      <div className="md:hidden fixed bottom-4 left-3 right-3 z-50 flex justify-center pointer-events-none">
+        <nav className="pointer-events-auto flex items-center justify-between w-full max-w-lg bg-zinc-950/80 backdrop-blur-xl border border-zinc-800/80 px-2 py-2 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.8)] relative">
+          {tabs.map(({ id, label, icon: Icon }) => {
+            const isActive = currentTab === id;
+            return (
+              <button
+                key={id}
+                onClick={() => navigate(`/dashboard?tab=${id}`, { replace: true })}
+                className={`flex items-center justify-center transition-all duration-300 relative rounded-xl ${
+                  isActive 
+                    ? 'bg-primary text-white px-3.5 py-2.5 shadow-lg shadow-primary/20 scale-105 font-black uppercase text-[10px] tracking-wider' 
+                    : 'text-zinc-500 hover:text-zinc-300 p-2.5'
+                }`}
+              >
+                <Icon className={`w-4 h-4 shrink-0 transition-transform ${isActive ? 'scale-110 mr-1.5' : 'scale-100'}`} />
+                {isActive && (
+                  <span className="text-[10px] font-black uppercase tracking-wider whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-300">
+                    {label}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
     );
   }
 
+  // Non-dashboard pages (e.g. Marketplace, details)
+  const navItems = [
+    { to: '/', label: 'Market', icon: ShoppingBag },
+    { to: '/dashboard', label: 'Locadora', icon: LayoutDashboard },
+    ...(profile?.role === 'admin' ? [{ to: '/admin', label: 'Admin', icon: Settings }] : []),
+  ];
+
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-t border-border/40 px-6 py-3 pb-8 flex items-center justify-between shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
-      <NavLink 
-        to="/" 
-        className={({isActive}) => `flex flex-col items-center gap-1 transition-all ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
-      >
-        <ShoppingBag className="w-6 h-6" />
-        <span className="text-xs font-bold uppercase tracking-tighter">Market</span>
-      </NavLink>
-      <NavLink 
-        to="/dashboard" 
-        className={({isActive}) => `flex flex-col items-center gap-1 transition-all ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
-      >
-        <LayoutDashboard className="w-6 h-6" />
-        <span className="text-xs font-bold uppercase tracking-tighter">Locadora</span>
-      </NavLink>
-      {profile?.role === 'admin' && (
-        <NavLink 
-          to="/admin" 
-          className={({isActive}) => `flex flex-col items-center gap-1 transition-all ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
-        >
-          <Settings className="w-6 h-6" />
-          <span className="text-xs font-bold uppercase tracking-tighter">Admin</span>
-        </NavLink>
-      )}
-      <button className="flex flex-col items-center gap-1 text-muted-foreground">
-        <User className="w-6 h-6" />
-        <span className="text-xs font-bold uppercase tracking-tighter">Perfil</span>
-      </button>
-    </nav>
+    <div className="md:hidden fixed bottom-4 left-3 right-3 z-50 flex justify-center pointer-events-none">
+      <nav className="pointer-events-auto flex items-center justify-around w-full max-w-sm bg-zinc-950/80 backdrop-blur-xl border border-zinc-800/80 px-3 py-2 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.8)]">
+        {navItems.map(({ to, label, icon: Icon }) => {
+          const isActive = location.pathname === to;
+          return (
+            <NavLink
+              key={to}
+              to={to}
+              className={`flex items-center justify-center transition-all duration-300 rounded-xl ${
+                isActive 
+                  ? 'bg-primary text-white px-4 py-2.5 shadow-lg shadow-primary/20 scale-105 font-black uppercase text-[10px] tracking-wider' 
+                  : 'text-zinc-500 hover:text-zinc-300 p-2.5'
+              }`}
+            >
+              <Icon className={`w-4.5 h-4.5 shrink-0 transition-transform ${isActive ? 'scale-110 mr-1.5' : 'scale-100'}`} />
+              {isActive && (
+                <span className="text-[10px] font-black uppercase tracking-wider whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-300">
+                  {label}
+                </span>
+              )}
+            </NavLink>
+          );
+        })}
+        
+        <button className="flex items-center justify-center text-zinc-500 hover:text-zinc-300 p-2.5 transition-all duration-300">
+          <User className="w-4.5 h-4.5" />
+        </button>
+      </nav>
+    </div>
   );
 }
 

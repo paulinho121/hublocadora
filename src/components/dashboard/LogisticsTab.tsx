@@ -466,7 +466,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                 "px-6 md:px-8 py-2.5 rounded-[14px] text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-500 whitespace-nowrap",
                                 activeSubTab === tab.id 
                                     ? "bg-zinc-800 text-white shadow-2xl shadow-black/50" 
-                                    : "text-zinc-600 hover:text-zinc-400"
+                                    : "text-zinc-400 hover:text-zinc-200"
                             )}
                         >
                             {tab.label}
@@ -483,11 +483,11 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                 "flex-1 md:flex-none px-6 md:px-10 py-3.5 rounded-[18px] text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-700 whitespace-nowrap",
                                 logisticsMode === 'to_send' 
                                     ? "bg-zinc-800 text-white shadow-xl" 
-                                    : "text-zinc-600 hover:text-zinc-400"
+                                    : "text-zinc-400 hover:text-zinc-200"
                             )}
                         >
                             <div className="flex items-center justify-center gap-3">
-                                <ShoppingBag className={cn("h-4 w-4", logisticsMode === 'to_send' ? "text-emerald-500" : "text-zinc-700")} />
+                                <ShoppingBag className={cn("h-4 w-4", logisticsMode === 'to_send' ? "text-emerald-500" : "text-zinc-500")} />
                                 A ENVIAR ({toSendDeliveries?.length || 0})
                             </div>
                         </button>
@@ -497,11 +497,11 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                 "flex-1 md:flex-none px-6 md:px-10 py-3.5 rounded-[18px] text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-700 whitespace-nowrap",
                                 logisticsMode === 'to_receive' 
                                     ? "bg-zinc-800 text-white shadow-xl" 
-                                    : "text-zinc-600 hover:text-zinc-400"
+                                    : "text-zinc-400 hover:text-zinc-200"
                             )}
                         >
                             <div className="flex items-center justify-center gap-3">
-                                <Truck className={cn("h-4 w-4", logisticsMode === 'to_receive' ? "text-emerald-500" : "text-zinc-700")} />
+                                <Truck className={cn("h-4 w-4", logisticsMode === 'to_receive' ? "text-emerald-500" : "text-zinc-500")} />
                                 A RECEBER ({toReceiveCount})
                             </div>
                         </button>
