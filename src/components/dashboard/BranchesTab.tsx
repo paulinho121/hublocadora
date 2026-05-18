@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, LayoutGrid, List, MapPin, Package, Phone, Building2, ExternalLink, Copy, CheckCircle2, Loader2 } from 'lucide-react';
+import { Plus, LayoutGrid, List, MapPin, Package, Phone, Building2, ExternalLink, Copy, CheckCircle2, Loader2, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useBranches } from '@/hooks/useBranches';
@@ -9,6 +9,7 @@ import { BranchCard } from './BranchCard';
 import { Branch } from '@/types/database';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { NetworkReportModal } from './NetworkReportModal';
 
 export function BranchesTab({ tenantId }: { tenantId: string }) {
     const { branches, isLoading, createBranch, updateBranch } = useBranches();
@@ -25,6 +26,7 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
     const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
     const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
     const [isStockModalOpen, setIsStockModalOpen] = useState(false);
+    const [isReportOpen, setIsReportOpen] = useState(false);
 
     const handleEdit = (branch: Branch) => {
         setEditingBranch(branch);
@@ -128,6 +130,14 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
                             <List className="w-4 h-4" /> Lista
                         </button>
                     </div>
+
+                    <Button 
+                        onClick={() => setIsReportOpen(true)}
+                        className="bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-white font-black uppercase tracking-widest rounded-xl h-12 px-6 transition-all"
+                    >
+                        <FileText className="h-4 w-4 mr-2 text-primary" />
+                        Relatório da Rede
+                    </Button>
 
                     <Button 
                         onClick={() => {
@@ -358,6 +368,13 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
                     }}
                 />
             )}
+
+            <NetworkReportModal 
+                isOpen={isReportOpen}
+                onClose={() => setIsReportOpen(false)}
+                branches={branches || []}
+                tenantId={tenantId}
+            />
         </div>
     );
 }
