@@ -542,8 +542,8 @@ CREATE POLICY "Companies_Update" ON public.companies
     FOR UPDATE TO authenticated
     USING (owner_id = auth.uid() OR public.check_is_admin())
     WITH CHECK (
-        -- Bloqueia alteração do vínculo de rede para evitar roubo de tenant
-        (parent_company_id = (SELECT parent_company_id FROM public.companies WHERE id = companies.id))
+        -- Bloqueia alteração do vínculo de rede para evitar roubo de tenant (corrigido com alias 'c' para evitar subquery com múltiplas linhas)
+        (parent_company_id = (SELECT c.parent_company_id FROM public.companies c WHERE c.id = companies.id))
         OR public.check_is_admin()
     );
 
