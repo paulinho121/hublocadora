@@ -234,7 +234,7 @@ export default function EquipmentDetails() {
                 <span className="text-zinc-500">•</span>
                 <div className="flex items-center gap-1 text-zinc-300 text-[10px] font-black uppercase tracking-wider bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-xl">
                   <MapPin className="w-3 h-3 text-primary" />
-                  <span>{equipment.company?.address_city || 'Fortaleza'} - {equipment.company?.address_state || 'CE'}</span>
+                  <span>{equipment.location_base || equipment.company?.address_city || 'Fortaleza'} - {equipment.state_uf || equipment.company?.address_state || 'CE'}</span>
                 </div>
               </div>
               <h1 className="text-2xl sm:text-3xl md:text-5xl font-black uppercase tracking-tighter leading-tight md:leading-none mb-4">
