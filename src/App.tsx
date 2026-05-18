@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, NavLink } from 'react-router-dom';
 import { lazy, Suspense, useEffect } from 'react';
-import { LogOut, LayoutDashboard, Settings, ShoppingBag, User, BarChart3, Package, CalendarDays, Truck, History } from 'lucide-react';
+import { LogOut, LayoutDashboard, Settings, ShoppingBag, User, BarChart3, Package, CalendarDays, Truck, History, FileText } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -123,7 +123,7 @@ function BottomNav() {
       { id: 'inventory', label: 'Inventário', icon: Package },
       { id: 'bookings', label: 'Pedidos', icon: CalendarDays },
       { id: 'logistics', label: 'Logística', icon: Truck },
-      { id: 'history', label: 'Histórico', icon: History },
+      { id: 'reports', label: 'Relatórios', icon: FileText },
       { id: 'settings', label: 'Ajustes', icon: Settings },
     ];
     return (
