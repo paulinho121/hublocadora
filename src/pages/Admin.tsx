@@ -19,6 +19,8 @@ import {
 } from 'recharts';
 import { cn } from '@/lib/utils';
 
+import { Dialog } from '@/components/ui/dialog';
+
 type TabType = 'overview' | 'companies' | 'inventory' | 'bookings';
 
 export default function Admin() {
@@ -29,6 +31,7 @@ export default function Admin() {
   const [selectedBookingContract, setSelectedBookingContract] = useState<any | null>(null);
   const [selectedLogisticsBooking, setSelectedLogisticsBooking] = useState<any | null>(null);
   const [updatingCompanyId, setUpdatingCompanyId] = useState<string | null>(null);
+  const [selectedCompanyForDetail, setSelectedCompanyForDetail] = useState<any | null>(null);
 
   // Fetch Companies
   const { data: companies, isLoading: companiesLoading, error } = useQuery({
@@ -123,6 +126,19 @@ export default function Admin() {
     },
     onSettled: () => setUpdatingCompanyId(null)
   });
+
+  const handleToggleBlock = async () => {
+    if (!selectedCompanyForDetail) return;
+    const isSuspended = selectedCompanyForDetail.status === 'suspended';
+    const newStatus = isSuspended ? 'approved' : 'suspended';
+    
+    try {
+      await updateCompanyStatus.mutateAsync({ id: selectedCompanyForDetail.id, status: newStatus });
+      setSelectedCompanyForDetail(prev => prev ? { ...prev, status: newStatus } : null);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   if (authLoading) {
     return (
@@ -537,7 +553,7 @@ export default function Admin() {
                                       {updatingCompanyId === company.id ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Validar KYC'}
                                    </Button>
                                 )}
-                                <Button variant="outline" className="flex-1 md:flex-none h-11 px-4 border-zinc-800 text-zinc-400 hover:bg-zinc-900 rounded-xl">
+                                <Button variant="outline" onClick={() => setSelectedCompanyForDetail(company)} className="flex-1 md:flex-none h-11 px-4 border-zinc-800 text-zinc-400 hover:bg-zinc-900 rounded-xl">
                                    <ArrowUpRight className="h-4 w-4" />
                                 </Button>
                              </div>
@@ -808,7 +824,123 @@ export default function Admin() {
                   </div>
               </div>
            </div>
+         )}
+
+      <Dialog
+        isOpen={!!selectedCompanyForDetail}
+        onClose={() => setSelectedCompanyForDetail(null)}
+        title="Gestão de Corporação & Usuário"
+      >
+        {selectedCompanyForDetail && (
+          <div className="space-y-6 pt-4">
+             {/* Header Card */}
+             <div className="p-6 bg-zinc-900/40 border border-zinc-800 rounded-2xl flex items-center gap-4 relative overflow-hidden">
+                <div className="h-16 w-16 bg-zinc-800 rounded-xl flex items-center justify-center font-black text-zinc-400 text-2xl border border-zinc-700">
+                   {selectedCompanyForDetail.name.charAt(0)}
+                </div>
+                <div>
+                   <h3 className="text-xl font-black uppercase tracking-tight text-white">{selectedCompanyForDetail.name}</h3>
+                   <div className="flex items-center gap-2 mt-1">
+                      <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">{selectedCompanyForDetail.document}</span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
+                      <Badge className={`${
+                        selectedCompanyForDetail.status === 'suspended' 
+                          ? 'bg-red-500/10 text-red-500' 
+                          : 'bg-emerald-500/10 text-emerald-500'
+                      } text-[8px] font-black uppercase px-2 py-0.5 border-none`}>
+                         {selectedCompanyForDetail.status === 'suspended' ? 'SUSPENSO / BLOQUEADO' : 'OPERANDO / ATIVO'}
+                      </Badge>
+                   </div>
+                </div>
+             </div>
+
+             {/* Info Grid */}
+             <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-zinc-900/20 border border-zinc-800/40 rounded-xl">
+                   <p className="text-[9px] text-zinc-500 font-black uppercase mb-1">Proprietário (Owner)</p>
+                   <p className="text-xs font-bold text-zinc-200">{selectedCompanyForDetail.owner?.full_name || 'N/A'}</p>
+                </div>
+                <div className="p-4 bg-zinc-900/20 border border-zinc-800/40 rounded-xl">
+                   <p className="text-[9px] text-zinc-500 font-black uppercase mb-1">E-mail de Acesso</p>
+                   <p className="text-xs font-bold text-zinc-200 truncate">{selectedCompanyForDetail.owner?.email || 'N/A'}</p>
+                </div>
+                <div className="p-4 bg-zinc-900/20 border border-zinc-800/40 rounded-xl">
+                   <p className="text-[9px] text-zinc-500 font-black uppercase mb-1">Data de Onboarding</p>
+                   <p className="text-xs font-bold text-zinc-200">
+                      {new Date(selectedCompanyForDetail.owner?.updated_at || selectedCompanyForDetail.created_at).toLocaleDateString('pt-BR')}
+                   </p>
+                </div>
+                <div className="p-4 bg-zinc-900/20 border border-zinc-800/40 rounded-xl">
+                   <p className="text-[9px] text-zinc-500 font-black uppercase mb-1">ID do Inquilino</p>
+                   <p className="text-[10px] font-mono text-zinc-400 truncate">{selectedCompanyForDetail.id}</p>
+                </div>
+             </div>
+
+             {/* Network Stats */}
+             <div className="p-5 bg-zinc-950 border border-zinc-900 rounded-2xl flex items-center justify-around text-center">
+                <div>
+                   <p className="text-[9px] text-zinc-500 font-black uppercase mb-1">Itens no Catálogo</p>
+                   <p className="text-base font-black text-white">24</p>
+                </div>
+                <div className="w-px h-8 bg-zinc-900" />
+                <div>
+                   <p className="text-[9px] text-zinc-500 font-black uppercase mb-1">Score da Rede</p>
+                   <p className="text-base font-black text-emerald-500">4.9 ★</p>
+                </div>
+                <div className="w-px h-8 bg-zinc-900" />
+                <div>
+                   <p className="text-[9px] text-zinc-500 font-black uppercase mb-1">Status de KYC</p>
+                   <p className="text-[10px] font-black text-emerald-500 uppercase bg-emerald-500/10 px-2 py-0.5 rounded">Verificado</p>
+                </div>
+             </div>
+
+             {/* Block & Misuse Warning Panel */}
+             <div className="p-6 bg-red-500/5 border border-red-500/10 rounded-2xl space-y-4">
+                <div className="flex items-start gap-3">
+                   <AlertTriangle className="h-5 w-5 text-red-500 shrink-0 mt-0.5 animate-pulse" />
+                   <div>
+                      <h4 className="text-xs font-black uppercase tracking-wider text-red-500">Aviso de Moderação de Conta</h4>
+                      <p className="text-[11px] text-zinc-500 leading-relaxed font-medium mt-1">
+                         A suspensão impede que este parceiro anuncie equipamentos no catálogo público do marketplace. Todas as locações ativas continuam operantes, porém novos pedidos e transferências internas serão bloqueados.
+                      </p>
+                   </div>
+                </div>
+
+                <div className="pt-2">
+                   {selectedCompanyForDetail.status === 'suspended' ? (
+                      <Button
+                         onClick={handleToggleBlock}
+                         disabled={updatingCompanyId === selectedCompanyForDetail.id}
+                         className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase text-[10px] tracking-widest h-12 rounded-xl flex items-center justify-center gap-2"
+                      >
+                         {updatingCompanyId === selectedCompanyForDetail.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                         ) : (
+                            <>
+                               <ShieldCheck className="h-4 w-4" /> Desbloquear & Reativar Unidade
+                            </>
+                         )}
+                      </Button>
+                   ) : (
+                      <Button
+                         onClick={handleToggleBlock}
+                         disabled={updatingCompanyId === selectedCompanyForDetail.id}
+                         className="w-full bg-red-600 hover:bg-red-500 text-white font-black uppercase text-[10px] tracking-widest h-12 rounded-xl flex items-center justify-center gap-2"
+                      >
+                         {updatingCompanyId === selectedCompanyForDetail.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                         ) : (
+                            <>
+                               <Ban className="h-4 w-4" /> Suspender & Bloquear Locadora
+                            </>
+                         )}
+                      </Button>
+                   )}
+                </div>
+             </div>
+          </div>
         )}
+      </Dialog>
     </div>
   );
 }
