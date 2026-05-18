@@ -182,7 +182,11 @@ export function CompanyProfileSettings() {
                     placeholder="Ou cole a URL direta de uma imagem..."
                     value={logoUrl}
                     onChange={(e) => setLogoUrl(e.target.value)}
-                    className="h-10 pl-9 pr-4 bg-zinc-950/70 border-zinc-900 focus:border-zinc-800 rounded-xl text-[10px] text-zinc-400 font-medium"
+                    readOnly={logoUrl.includes('supabase.co')}
+                    className={`h-10 pl-9 pr-4 bg-zinc-950/70 border-zinc-900 focus:border-zinc-800 rounded-xl text-[10px] text-zinc-400 font-medium ${
+                      logoUrl.includes('supabase.co') ? 'opacity-50 cursor-not-allowed bg-zinc-900/30' : ''
+                    }`}
+                    title={logoUrl.includes('supabase.co') ? "Links de imagens enviadas por upload não podem ser modificados para evitar quebras." : ""}
                   />
                 </div>
               </div>
