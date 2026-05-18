@@ -855,7 +855,7 @@ export default function Admin() {
              </div>
 
              {/* Info Grid */}
-             <div className="grid grid-cols-2 gap-4">
+             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="p-4 bg-zinc-900/20 border border-zinc-800/40 rounded-xl">
                    <p className="text-[9px] text-zinc-500 font-black uppercase mb-1">Proprietário (Owner)</p>
                    <p className="text-xs font-bold text-zinc-200">{selectedCompanyForDetail.owner?.full_name || 'N/A'}</p>
