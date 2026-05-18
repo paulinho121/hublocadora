@@ -122,8 +122,8 @@ export function EquipmentCard({ item, onClick }: EquipmentCardProps) {
           </Button>
         </div>
 
-        {/* Ver Detalhes Button on Hover - match Inventory Card style */}
-        <div className="mt-2 pt-2 border-t border-zinc-900 hidden group-hover:block animate-in fade-in slide-in-from-top-2 duration-300">
+        {/* Ver Detalhes Button - always visible on mobile, hover-only on desktop */}
+        <div className="mt-2 pt-2 border-t border-zinc-900 block md:hidden md:group-hover:block animate-in fade-in slide-in-from-top-2 duration-300">
            <Button
             variant="outline"
             size="sm"
