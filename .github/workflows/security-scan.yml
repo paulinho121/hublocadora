@@ -24,17 +24,12 @@ jobs:
   static-analysis:
     name: Semgrep (Static Analysis)
     runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
     steps:
       - uses: actions/checkout@v4
       - name: Semgrep Scan
-        uses: returntocorp/semgrep-action@v1
-        with:
-          config: >-
-            p/javascript
-            p/react
-            p/typescript
-            p/security-audit
-            p/secrets
+        run: semgrep scan --config=p/javascript --config=p/react --config=p/typescript --config=p/security-audit --error .
 
   dependency-audit:
     name: NPM Audit (Dependency Check)
