@@ -412,7 +412,13 @@ export default function Dashboard() {
         {/* Top Header Section (Mobile Visible) */}
         <header className="h-20 border-b border-zinc-900 flex items-center justify-between px-6 md:px-10 shrink-0">
            <div className="flex items-center gap-3 md:hidden">
-              <Package className="h-6 w-6 text-primary" />
+              {company?.logo_url ? (
+                 <div className="h-8 w-8 rounded-lg overflow-hidden border border-zinc-800 flex items-center justify-center shrink-0">
+                    <img src={company.logo_url} alt="" className="h-full w-full object-cover" />
+                 </div>
+              ) : (
+                 <Package className="h-6 w-6 text-primary shrink-0" />
+              )}
               <span className="font-black uppercase tracking-tighter text-lg">{isBranchManager ? branch?.name : company?.name}</span>
            </div>
            
