@@ -12,7 +12,8 @@ import {
   ShieldCheck,
   Calendar as CalendarIcon,
   AlertCircle,
-  FileSignature
+  FileSignature,
+  Info
 } from 'lucide-react';
 import { 
   Dialog 
@@ -207,9 +208,22 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                 )}
                                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
                                 <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6">
-                                    <Badge className={`${isAvailable ? 'bg-emerald-500/20 text-emerald-500 border-emerald-500/20' : 'bg-red-500/20 text-red-500 border-red-500/20'} mb-2 uppercase font-black tracking-widest text-[9px] sm:text-[10px]`}>
-                                        {isAvailable ? `${equipment.stock_quantity || 0} Disponíveis no HUB` : 'Limite de Estoque Atingido'}
-                                    </Badge>
+                                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                        <Badge className={`${isAvailable ? 'bg-emerald-500/20 text-emerald-500 border-emerald-500/20' : 'bg-red-500/20 text-red-500 border-red-500/20'} uppercase font-black tracking-widest text-[9px] sm:text-[10px]`}>
+                                            {isAvailable ? `${equipment.stock_quantity || 0} Disponíveis no HUB` : 'Limite de Estoque Atingido'}
+                                        </Badge>
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onClose();
+                                                navigate(`/equipment/${equipment.id}`);
+                                            }}
+                                            className="text-[9px] uppercase font-black text-zinc-400 hover:text-white transition-colors tracking-widest bg-zinc-900/80 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/5 flex items-center gap-1 cursor-pointer"
+                                        >
+                                            <Info className="w-2.5 h-2.5 text-primary" /> Ver Detalhes
+                                        </button>
+                                    </div>
                                     <h2 className="text-xl sm:text-3xl font-black tracking-tighter text-white uppercase leading-none truncate">
                                         {equipment.name}
                                     </h2>

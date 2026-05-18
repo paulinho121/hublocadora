@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Camera, ChevronRight } from 'lucide-react';
+import { MapPin, Camera, ChevronRight, Info } from 'lucide-react';
 import { Equipment } from '@/types/database';
 import { FavoriteButton } from './FavoriteButton';
 
@@ -12,6 +13,7 @@ interface EquipmentCardProps {
 }
 
 export function EquipmentCard({ item, onClick }: EquipmentCardProps) {
+  const navigate = useNavigate();
   const images = item.images ?? [];
   const hasMultiple = images.length > 1;
   const [activeIdx, setActiveIdx] = useState(0);
@@ -28,13 +30,20 @@ export function EquipmentCard({ item, onClick }: EquipmentCardProps) {
   const isAvailable = (item.stock_quantity || 0) > 0;
   const dailyRate = item.daily_rate;
 
+  const handleViewDetails = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/equipment/${item.id}`);
+  };
+
   return (
     <Card
-      onClick={onClick}
-      className="group overflow-hidden clay-card transition-all duration-500 cursor-pointer flex flex-col h-full"
+      className="group overflow-hidden clay-card transition-all duration-500 flex flex-col h-full"
     >
       {/* ── Image area ── */}
-      <div className="relative w-full h-48 overflow-hidden bg-zinc-900/50 shrink-0">
+      <div
+        onClick={handleViewDetails}
+        className="relative w-full h-48 overflow-hidden bg-zinc-900/50 shrink-0 cursor-pointer"
+      >
         {images.length > 0 ? (
           images.map((src, i) => (
             <img
@@ -71,7 +80,7 @@ export function EquipmentCard({ item, onClick }: EquipmentCardProps) {
         </div>
 
         {/* Favorites button overlay */}
-        <div className="absolute top-4 right-4 z-10">
+        <div className="absolute top-4 right-4 z-10" onClick={(e) => e.stopPropagation()}>
           <FavoriteButton equipmentId={item.id} />
         </div>
         
@@ -88,11 +97,20 @@ export function EquipmentCard({ item, onClick }: EquipmentCardProps) {
 
       {/* ── Card body ── */}
       <div className="flex flex-col flex-1 p-5 gap-4">
-        <h4 className="text-xs font-black leading-relaxed uppercase tracking-widest group-hover:text-primary transition-colors line-clamp-2 min-h-[2.5rem]">
+        <h4
+          onClick={handleViewDetails}
+          className="text-xs font-black leading-relaxed uppercase tracking-widest group-hover:text-primary transition-colors line-clamp-2 min-h-[2.5rem] cursor-pointer"
+        >
           {item.name}
         </h4>
 
-        <div className="mt-auto flex items-center justify-between bg-white/5 p-4 rounded-2xl border border-white/5 group-hover:bg-primary/5 transition-colors">
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            onClick();
+          }}
+          className="mt-auto flex items-center justify-between bg-white/5 p-4 rounded-2xl border border-white/5 group-hover:bg-primary/5 transition-colors cursor-pointer"
+        >
           <div className="flex flex-col">
             <span className="text-[9px] uppercase text-zinc-500 font-black tracking-[0.2em] mb-1">Diária</span>
             <div className="text-lg font-display font-black text-white tracking-tighter">
@@ -102,6 +120,18 @@ export function EquipmentCard({ item, onClick }: EquipmentCardProps) {
           <Button size="icon" className="h-10 w-10 clay-button-primary transition-all text-white group-hover:-translate-y-0.5">
             <ChevronRight className="h-4 w-4" />
           </Button>
+        </div>
+
+        {/* Ver Detalhes Button on Hover - match Inventory Card style */}
+        <div className="mt-2 pt-2 border-t border-zinc-900 hidden group-hover:block animate-in fade-in slide-in-from-top-2 duration-300">
+           <Button
+            variant="outline"
+            size="sm"
+            className="w-full text-[10px] uppercase font-bold h-8 gap-1.5 border-zinc-800 hover:bg-zinc-900"
+            onClick={handleViewDetails}
+           >
+             <Info className="h-3 w-3" /> Ver Detalhes
+           </Button>
         </div>
       </div>
     </Card>
