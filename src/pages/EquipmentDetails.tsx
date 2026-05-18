@@ -227,10 +227,10 @@ export default function EquipmentDetails() {
                   <span>{equipment.company?.address_city || 'Fortaleza'} - {equipment.company?.address_state || 'CE'}</span>
                 </div>
               </div>
-              <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none mb-4">
+              <h1 className="text-2xl sm:text-3xl md:text-5xl font-black uppercase tracking-tighter leading-tight md:leading-none mb-4">
                 {equipment.name}
               </h1>
-              <p className="text-zinc-400 text-lg leading-relaxed font-medium">
+              <p className="text-zinc-400 text-sm md:text-lg leading-relaxed font-medium">
                 {equipment.description}
               </p>
             </div>
