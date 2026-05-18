@@ -52,6 +52,7 @@ import { AuditTab } from '@/components/dashboard/AuditTab';
 
 import { OrderHistoryTab } from '@/components/dashboard/OrderHistoryTab';
 import { ReportsTab } from '@/components/dashboard/ReportsTab';
+import { CompanyProfileSettings } from '@/components/dashboard/CompanyProfileSettings';
 
 type TabType = 'overview' | 'inventory' | 'bookings' | 'logistics' | 'reports' | 'network' | 'settings' | 'audit' | 'history' | 'favorites';
 const VALID_TABS: TabType[] = ['overview', 'inventory', 'bookings', 'logistics', 'reports', 'network', 'settings', 'audit', 'history', 'favorites'];
@@ -773,6 +774,7 @@ export default function Dashboard() {
                 
                 {company && (
                   <div className="space-y-12">
+                    <CompanyProfileSettings />
                     <FinancialSettings 
                       companyId={company.id} 
                       initialConfig={(company as any).financial_config} 

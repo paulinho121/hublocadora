@@ -16,7 +16,8 @@ import {
   Loader2,
   Camera,
   Truck,
-  Hash
+  Hash,
+  Building2
 } from 'lucide-react';
 import { useState } from 'react';
 import { useEquipmentAvailability } from '@/hooks/useAvailability';
@@ -217,13 +218,22 @@ export default function EquipmentDetails() {
           {/* Informações e Booking */}
           <div className="flex flex-col">
             <div className="mb-8">
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex flex-wrap items-center gap-2 mb-4">
                 <span className={`px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest ${conditionColors[equipment.condition as keyof typeof conditionColors] || 'bg-zinc-800 text-zinc-400'}`}>
                   {conditionLabels[equipment.condition as keyof typeof conditionLabels] || 'N/A'}
                 </span>
                 <span className="text-zinc-500">•</span>
-                <div className="flex items-center gap-1 text-zinc-400 text-xs">
-                  <MapPin className="w-3 h-3" />
+                <div className="flex items-center gap-1.5 text-zinc-300 text-[10px] font-black uppercase tracking-wider bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-xl">
+                  {equipment.company?.logo_url ? (
+                    <img src={equipment.company.logo_url} alt="" className="w-4.5 h-4.5 rounded-md object-cover shrink-0" />
+                  ) : (
+                    <Building2 className="w-3 h-3 text-primary shrink-0" />
+                  )}
+                  <span>{equipment.company?.name || 'Matriz'}</span>
+                </div>
+                <span className="text-zinc-500">•</span>
+                <div className="flex items-center gap-1 text-zinc-300 text-[10px] font-black uppercase tracking-wider bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-xl">
+                  <MapPin className="w-3 h-3 text-primary" />
                   <span>{equipment.company?.address_city || 'Fortaleza'} - {equipment.company?.address_state || 'CE'}</span>
                 </div>
               </div>

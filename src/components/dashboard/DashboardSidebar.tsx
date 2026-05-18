@@ -30,7 +30,7 @@ interface SidebarProps {
 
 export function DashboardSidebar({ activeTab, onTabChange, companyName }: SidebarProps) {
   const { user, signOut } = useAuth();
-  const { isAdmin } = useTenant();
+  const { isAdmin, company } = useTenant();
   
   // Persist sidebar state in localStorage for a seamless user experience
   const [isCollapsed, setIsCollapsed] = useState(() => {
@@ -80,8 +80,12 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
       {/* Brand / Company Header */}
       <div className={cn("pb-10 transition-all duration-300", isCollapsed ? "p-4 pt-8" : "p-8 pb-10")}>
         <div className={cn("flex items-center group cursor-default", isCollapsed ? "justify-center" : "gap-3")}>
-          <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center shadow-[0_0_20px_rgba(225,29,72,0.3)] group-hover:scale-110 transition-transform shrink-0">
-             <Activity className="h-5 w-5 text-white" />
+          <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center shadow-[0_0_20px_rgba(225,29,72,0.3)] group-hover:scale-110 transition-transform shrink-0 overflow-hidden">
+             {company?.logo_url ? (
+               <img src={company.logo_url} alt="Logo" className="h-full w-full object-cover" />
+             ) : (
+               <Activity className="h-5 w-5 text-white" />
+             )}
           </div>
           {!isCollapsed && (
             <div className="min-w-0 flex-1 animate-in fade-in duration-300">
