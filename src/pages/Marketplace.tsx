@@ -37,6 +37,7 @@ export default function Marketplace() {
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showAll, setShowAll] = useState(false);
+  const [shuffledDefaultItems, setShuffledDefaultItems] = useState<Equipment[]>([]);
   
   const { data: rawEquipments, isLoading } = useEquipments({
     searchQuery: search,
@@ -68,8 +69,22 @@ export default function Marketplace() {
     return Array.from(consolidated.values());
   })();
 
+  // Randomiza e muda de lugar os equipamentos em destaque a cada atualização do acervo
+  useEffect(() => {
+    if (equipments.length > 0) {
+      const shuffled = [...equipments];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      setShuffledDefaultItems(shuffled.slice(0, 8));
+    }
+  }, [rawEquipments]);
+
   const isDefaultView = !search && !selectedCategory && !showAll;
-  const displayedEquipments = isDefaultView ? equipments.slice(0, 8) : equipments;
+  const displayedEquipments = isDefaultView 
+    ? (shuffledDefaultItems.length > 0 ? shuffledDefaultItems : equipments.slice(0, 8)) 
+    : equipments;
 
   const handleSearch = () => {
     if (equipments && equipments.length === 1) {
