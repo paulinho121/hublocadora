@@ -50,7 +50,7 @@ export default function Admin() {
   const { data: equipments, isLoading: equipmentsLoading } = useQuery({
     queryKey: ['admin-equipments'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('equipments').select('id, name, status, daily_rate, category');
+      const { data, error } = await supabase.from('equipments').select('id, name, status, daily_rate, category, company_id');
       if (error) throw error;
       return data;
     },
@@ -535,7 +535,7 @@ export default function Admin() {
                              <div className="flex items-center gap-8 px-8 border-x border-zinc-900/50 hidden lg:flex">
                                 <div className="text-center">
                                    <p className="text-[9px] text-zinc-600 font-black uppercase mb-1">Items</p>
-                                   <p className="text-sm font-black">24</p>
+                                   <p className="text-sm font-black">{equipments?.filter((e: any) => e.company_id === company.id).length || 0}</p>
                                 </div>
                                 <div className="text-center">
                                    <p className="text-[9px] text-zinc-600 font-black uppercase mb-1">Rating</p>
@@ -880,7 +880,7 @@ export default function Admin() {
              <div className="p-5 bg-zinc-950 border border-zinc-900 rounded-2xl flex items-center justify-around text-center">
                 <div>
                    <p className="text-[9px] text-zinc-500 font-black uppercase mb-1">Itens no Catálogo</p>
-                   <p className="text-base font-black text-white">24</p>
+                   <p className="text-base font-black text-white">{equipments?.filter((e: any) => e.company_id === selectedCompanyForDetail.id).length || 0}</p>
                 </div>
                 <div className="w-px h-8 bg-zinc-900" />
                 <div>
