@@ -1,40 +1,52 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
-import { 
-  Loader2, AlertTriangle, ShieldCheck, 
-  BarChart3, Building2, Package, 
-  CheckCircle2, Search, ArrowUpRight, Ban, FileSignature, XCircle,
-  Truck, MapPin, Navigation, Clock, TrendingUp, Zap, Target, Activity,
-  Globe, ZapOff, ArrowDownRight, Layers, Eye, Gauge
+import {
+  Loader2, AlertTriangle, ShieldCheck,
+  Building2, Package,
+  Search, ArrowUpRight, Ban,
+  Truck, Clock, TrendingUp, Zap, Activity,
+  Globe, Users, CheckCircle2, XCircle, AlertCircle,
+  Target, BarChart3
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { 
+import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar, Cell, PieChart, Pie, Legend
+  BarChart, Bar, Cell, PieChart, Pie
 } from 'recharts';
-import { cn } from '@/lib/utils';
 
 import { Dialog } from '@/components/ui/dialog';
 
-type TabType = 'overview' | 'companies' | 'inventory' | 'bookings';
+type TabType = 'overview' | 'companies' | 'bookings' | 'users';
+type DateRange = '7d' | '30d' | '90d' | 'all';
+
+const BRL = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(v);
+const BRL2 = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+
+const ROLE_LABELS: Record<string, string> = {
+  admin: 'Admin',
+  rental_house: 'Locadora',
+  production_company: 'Produtora',
+  client: 'Cliente',
+};
 
 export default function Admin() {
   const { profile, loading: authLoading } = useAuth();
   const queryClient = useQueryClient();
+
   const [activeTab, setActiveTab] = useState<TabType>('overview');
+  const [dateRange, setDateRange] = useState<DateRange>('30d');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedBookingContract, setSelectedBookingContract] = useState<any | null>(null);
+  const [userSearch, setUserSearch] = useState('');
+  const [selectedCompanyForDetail, setSelectedCompanyForDetail] = useState<any | null>(null);
   const [selectedLogisticsBooking, setSelectedLogisticsBooking] = useState<any | null>(null);
   const [updatingCompanyId, setUpdatingCompanyId] = useState<string | null>(null);
-  const [selectedCompanyForDetail, setSelectedCompanyForDetail] = useState<any | null>(null);
 
-  // Fetch Companies
-  const { data: companies, isLoading: companiesLoading, error } = useQuery({
+  const { data: companies, isLoading: companiesLoading } = useQuery({
     queryKey: ['admin-companies'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -43,102 +55,73 @@ export default function Admin() {
       if (error) throw error;
       return data;
     },
-    enabled: !!profile && profile.role === 'admin'
+    enabled: !!profile && profile.role === 'admin',
   });
 
-  // Fetch Global Equipments
-  const { data: equipments, isLoading: equipmentsLoading } = useQuery({
+  const { data: equipments } = useQuery({
     queryKey: ['admin-equipments'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('equipments').select('id, name, status, daily_rate, category, company_id');
+      const { data, error } = await supabase
+        .from('equipments')
+        .select('id, name, status, daily_rate, category, company_id');
       if (error) throw error;
       return data;
     },
-    enabled: !!profile && profile.role === 'admin'
+    enabled: !!profile && profile.role === 'admin',
   });
 
-  // Fetch Global Bookings
   const { data: bookings, isLoading: bookingsLoading } = useQuery({
     queryKey: ['admin-bookings'],
     queryFn: async () => {
       const { data, error } = await supabase
-         .from('bookings')
-         .select('*, equipment:equipments(name), company:companies(name)')
-         .order('created_at', { ascending: false });
+        .from('bookings')
+        .select('*, equipment:equipments(name), company:companies(name)')
+        .order('created_at', { ascending: false });
       if (error) throw error;
       return data;
     },
-    enabled: !!profile && profile.role === 'admin'
+    enabled: !!profile && profile.role === 'admin',
   });
 
-  // Mutations
+  const { data: profiles, isLoading: profilesLoading } = useQuery({
+    queryKey: ['admin-profiles'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*, company:companies(name)')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!profile && profile.role === 'admin',
+  });
+
   const approveBooking = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('bookings')
-        .update({ status: 'approved' })
-        .eq('id', id);
+      const { error } = await supabase.from('bookings').update({ status: 'approved' }).eq('id', id);
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
-      alert('Pedido aprovado e orquestração logística disparada.');
-    }
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-bookings'] }),
   });
 
   const updateCompanyStatus = useMutation({
-    mutationFn: async ({ id, status }: { id: string, status: 'approved' | 'rejected' | 'pending' | 'active' | 'suspended' }) => {
+    mutationFn: async ({ id, status }: { id: string; status: 'approved' | 'suspended' }) => {
       setUpdatingCompanyId(id);
-      
-      if (status === 'approved' || status === 'active') {
-        let rpcSuccess = false;
+      if (status === 'approved') {
         try {
           const { error: rpcError, data: rpcData } = await supabase.rpc('approve_company', { p_company_id: id });
-          if (!rpcError && rpcData && !String(rpcData).startsWith('ERRO')) {
-            rpcSuccess = true;
-          }
-        } catch (e) {}
-        
-        if (!rpcSuccess) {
-          const { error: updateError, data: updateData } = await supabase
-            .from('companies')
-            .update({ status: 'approved' })
-            .eq('id', id)
-            .select('id, status');
-          
-          if (updateError) throw updateError;
-        }
-        return { success: true };
-      } else {
-        const dbStatus = (status === 'rejected' || status === 'suspended') ? 'suspended' : status;
-        const { error, data } = await supabase
-          .from('companies')
-          .update({ status: dbStatus })
-          .eq('id', id)
-          .select();
+          if (!rpcError && rpcData && !String(rpcData).startsWith('ERRO')) return;
+        } catch (_) {}
+        const { error } = await supabase.from('companies').update({ status: 'approved' }).eq('id', id);
         if (error) throw error;
-        return data;
+      } else {
+        const { error } = await supabase.from('companies').update({ status: 'suspended' }).eq('id', id);
+        if (error) throw error;
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-companies'] });
-      alert('Status atualizado com sucesso no ecossistema.');
-    },
-    onSettled: () => setUpdatingCompanyId(null)
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-companies'] }),
+    onSettled: () => setUpdatingCompanyId(null),
   });
-
-  const handleToggleBlock = async () => {
-    if (!selectedCompanyForDetail) return;
-    const isSuspended = selectedCompanyForDetail.status === 'suspended';
-    const newStatus = isSuspended ? 'approved' : 'suspended';
-    
-    try {
-      await updateCompanyStatus.mutateAsync({ id: selectedCompanyForDetail.id, status: newStatus });
-      setSelectedCompanyForDetail(prev => prev ? { ...prev, status: newStatus } : null);
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   if (authLoading) {
     return (
@@ -148,799 +131,746 @@ export default function Admin() {
     );
   }
 
-  if (profile?.role !== 'admin') {
-    return <Navigate to="/" replace />;
-  }
+  if (profile?.role !== 'admin') return <Navigate to="/" replace />;
 
-  // --- BUSINESS INTELLIGENCE CALCULATIONS ---
+  // --- DATE RANGE FILTER ---
+  const cutoffDate = useMemo(() => {
+    if (dateRange === 'all') return null;
+    const days = dateRange === '7d' ? 7 : dateRange === '30d' ? 30 : 90;
+    return new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  }, [dateRange]);
+
+  const filteredBookings = useMemo(() => {
+    if (!bookings) return [];
+    if (!cutoffDate) return bookings;
+    return bookings.filter(b => new Date(b.created_at) >= cutoffDate);
+  }, [bookings, cutoffDate]);
+
+  // --- KPI CALCULATIONS (filtered) ---
+  const totalVolume = filteredBookings.reduce((acc, b) => acc + (b.total_amount || 0), 0);
+  const hubRevenue = totalVolume * 0.15;
+  const partnerRevenue = totalVolume * 0.85;
+  const avgTicket = filteredBookings.length ? totalVolume / filteredBookings.length : 0;
+
   const pendingCompanies = companies?.filter(c => c.status === 'pending') || [];
   const activeCompanies = companies?.filter(c => c.status === 'approved' || c.status === 'active') || [];
-  
-  const totalEquipments = equipments?.length || 0;
-  const potentialGmv = equipments?.reduce((acc, eq) => acc + (eq.daily_rate || 0), 0) || 0;
+  const utilizationRate = equipments?.length
+    ? (equipments.filter(e => e.status === 'rented').length / equipments.length) * 100
+    : 0;
 
-  const totalVolume = bookings?.reduce((acc, b) => acc + (b.total_amount || 0), 0) || 0;
-  const avgTicket = bookings?.length ? totalVolume / bookings.length : 0;
-  const hubRevenue = totalVolume * 0.15; 
-  const partnerRevenue = totalVolume * 0.85; 
+  // --- URGENT ACTIONS ---
+  const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const urgentPendingBookings = (bookings || []).filter(
+    b => b.status === 'pending' && new Date(b.created_at) < yesterday
+  );
 
-  // New Metrics
-  const utilizationRate = equipments?.length ? (equipments.filter(e => e.status === 'rented').length / totalEquipments) * 100 : 0;
-  const healthScore = activeCompanies.length > 0 ? 98.4 : 0; // Simulated health score
+  // --- REAL MONTHLY REVENUE (last 6 months, all bookings) ---
+  const monthlyRevenue = useMemo(() => {
+    if (!bookings) return [];
+    const map: Record<string, { name: string; hub: number; parceiros: number; total: number }> = {};
+    bookings.forEach(b => {
+      const d = new Date(b.created_at);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const name = d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '').toUpperCase();
+      if (!map[key]) map[key] = { name, hub: 0, parceiros: 0, total: 0 };
+      map[key].total += b.total_amount || 0;
+      map[key].hub += (b.total_amount || 0) * 0.15;
+      map[key].parceiros += (b.total_amount || 0) * 0.85;
+    });
+    return Object.entries(map)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .slice(-6)
+      .map(([, v]) => v);
+  }, [bookings]);
 
-  const filteredCompanies = companies?.filter(c => 
-    c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    c.document.includes(searchTerm)
-  ) || [];
+  // --- TOP PARTNERS BY REVENUE ---
+  const topPartners = useMemo(() => {
+    if (!filteredBookings.length || !companies) return [];
+    const map: Record<string, { name: string; total: number; count: number }> = {};
+    filteredBookings.forEach(b => {
+      if (!b.company_id) return;
+      if (!map[b.company_id]) {
+        const c = companies.find((co: any) => co.id === b.company_id);
+        map[b.company_id] = { name: c?.name || '---', total: 0, count: 0 };
+      }
+      map[b.company_id].total += b.total_amount || 0;
+      map[b.company_id].count += 1;
+    });
+    return Object.values(map).sort((a, b) => b.total - a.total).slice(0, 5);
+  }, [filteredBookings, companies]);
 
-  // Chart Data
-  const revenueData = [
-    { name: 'M-3', revenue: totalVolume * 0.2, growth: '+15%' },
-    { name: 'M-2', revenue: totalVolume * 0.45, growth: '+22%' },
-    { name: 'M-1', revenue: totalVolume * 0.78, growth: '+35%' },
-    { name: 'ATUAL', revenue: totalVolume, growth: '+42%' }
-  ];
+  // --- CONVERSION METRICS ---
+  const conversion = useMemo(() => {
+    const total = filteredBookings.length || 1;
+    const count = (s: string | string[]) =>
+      filteredBookings.filter(b => (Array.isArray(s) ? s.includes(b.status) : b.status === s)).length;
+    return {
+      total: filteredBookings.length,
+      approved: count(['approved', 'active', 'completed']),
+      pending: count('pending'),
+      rejected: count('rejected'),
+      cancelled: count('cancelled'),
+      approvedPct: (count(['approved', 'active', 'completed']) / total) * 100,
+      rejectedPct: (count(['rejected', 'cancelled']) / total) * 100,
+      pendingPct: (count('pending') / total) * 100,
+    };
+  }, [filteredBookings]);
 
-  const categoryData = [
-    { name: 'Câmeras', value: equipments?.filter(e => e.category?.toLowerCase().includes('camera')).length || 15, color: '#e11d48' },
-    { name: 'Lentes', value: equipments?.filter(e => e.category?.toLowerCase().includes('lente')).length || 10, color: '#10b981' },
-    { name: 'Iluminação', value: equipments?.filter(e => e.category?.toLowerCase().includes('luz')).length || 8, color: '#f59e0b' },
-    { name: 'Outros', value: equipments?.filter(e => e.category?.toLowerCase().includes('audio')).length || 4, color: '#6366f1' },
-  ].sort((a, b) => b.value - a.value);
-
+  // --- EQUIPMENT STATUS ---
   const statusData = [
-    { name: 'Em Operação', value: equipments?.filter(e => e.status === 'rented').length || 1, color: '#10b981' },
-    { name: 'Disponível', value: equipments?.filter(e => e.status === 'available').length || 5, color: '#27272a' },
+    { name: 'Em Operação', value: equipments?.filter(e => e.status === 'rented').length || 0, color: '#10b981' },
+    { name: 'Disponível', value: equipments?.filter(e => e.status === 'available').length || 0, color: '#27272a' },
     { name: 'Manutenção', value: equipments?.filter(e => e.status === 'maintenance').length || 0, color: '#ef4444' },
   ];
 
+  // --- COMPANIES FILTER ---
+  const filteredCompanies = (companies || []).filter(c =>
+    c.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    c.document?.includes(searchTerm)
+  );
+
+  // --- USERS FILTER ---
+  const filteredProfiles = (profiles || []).filter(p =>
+    p.full_name?.toLowerCase().includes(userSearch.toLowerCase()) ||
+    p.email?.toLowerCase().includes(userSearch.toLowerCase())
+  );
+
+  const hasUrgentActions = urgentPendingBookings.length > 0 || pendingCompanies.length > 0;
+
   return (
-    <div className="min-h-screen bg-[#020202] text-white selection:bg-primary/30 font-sans">
-        {/* TOP BAR - COCKPIT STYLE */}
-        <header className="sticky top-0 z-50 bg-black/40 backdrop-blur-2xl border-b border-zinc-900/50">
-           <div className="max-w-[1600px] mx-auto px-8 py-5 flex justify-between items-center">
-              <div className="flex items-center gap-8">
-                <div>
-                  <h1 className="text-2xl font-black tracking-tight flex items-center gap-3">
-                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                      <Target className="h-5 w-5 text-white" />
-                    </div>
-                    MOVING MASTER
-                  </h1>
-                  <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.3em] mt-1 ml-11">Torre de Controle Global</p>
-                </div>
-                
-                <div className="hidden lg:flex items-center gap-6 border-l border-zinc-800 pl-8 h-10">
-                   <div className="flex flex-col">
-                      <span className="text-[9px] text-zinc-500 font-black uppercase tracking-widest">Uptime da Rede</span>
-                      <span className="text-xs font-bold text-emerald-500 flex items-center gap-1.5">
-                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> 99.9%
-                      </span>
-                   </div>
-                   <div className="flex flex-col">
-                      <span className="text-[9px] text-zinc-500 font-black uppercase tracking-widest">Latência Global</span>
-                      <span className="text-xs font-bold text-zinc-300">24ms</span>
-                   </div>
-                </div>
-              </div>
+    <div className="min-h-screen bg-[#020202] text-white font-sans">
 
-              <div className="flex items-center gap-4">
-                 <div className="flex items-center gap-3 px-4 py-2 bg-emerald-500/5 border border-emerald-500/10 rounded-full">
-                    <ShieldCheck className="h-4 w-4 text-emerald-500" />
-                    <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Master Auth Verificada</span>
-                 </div>
-                 <Button variant="ghost" className="h-10 w-10 rounded-full border border-zinc-800 p-0 text-zinc-500 hover:text-white">
-                    <Globe className="h-4 w-4" />
-                 </Button>
-              </div>
-           </div>
-        </header>
-
-        <main className="max-w-[1600px] mx-auto p-8 space-y-8 animate-in fade-in duration-1000">
-           
-           {/* QUICK STATS - CLAYMORPHISM */}
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-              {[
-                { label: 'GMV Global', value: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(totalVolume), sub: '+12.5% MoM', icon: TrendingUp, color: 'text-emerald-500' },
-                { label: 'Unidades Ativas', value: activeCompanies.length, sub: 'Fulfillment Ativo', icon: Building2, color: 'text-primary' },
-                { label: 'Frota Conectada', value: totalEquipments, sub: 'Itens em Rede', icon: Package, color: 'text-zinc-400' },
-                { label: 'Taxa de Utilização', value: `${utilizationRate.toFixed(1)}%`, sub: 'Set Capacity', icon: Activity, color: 'text-blue-500' },
-                { label: 'Platform Health', value: `${healthScore}%`, sub: 'No Downtime', icon: Zap, color: 'text-yellow-500' }
-              ].map((stat, i) => (
-                <div key={i} className="clay-card p-6 flex flex-col justify-between min-h-[140px] group">
-                   <div className="flex justify-between items-start">
-                      <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{stat.label}</p>
-                      <stat.icon className={`h-4 w-4 ${stat.color} opacity-40 group-hover:opacity-100 transition-opacity`} />
-                   </div>
-                   <div>
-                      <h3 className="text-3xl font-black tracking-tighter mb-1">{stat.value}</h3>
-                      <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest flex items-center gap-1">
-                        {stat.sub.includes('+') && <ArrowUpRight className="h-2 w-2 text-emerald-500" />}
-                        {stat.sub}
-                      </p>
-                   </div>
+      {/* TOPBAR */}
+      <header className="sticky top-0 z-50 bg-black/50 backdrop-blur-2xl border-b border-zinc-900/50">
+        <div className="max-w-[1600px] mx-auto px-6 lg:px-10 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-6">
+            <div>
+              <h1 className="text-xl font-black tracking-tight flex items-center gap-2.5">
+                <div className="w-7 h-7 bg-primary rounded-lg flex items-center justify-center">
+                  <Target className="h-4 w-4 text-white" />
                 </div>
+                GESTÃO HUB
+              </h1>
+              <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-[0.3em] mt-0.5 ml-9">Torre de Controle</p>
+            </div>
+            <div className="hidden lg:flex items-center gap-4 border-l border-zinc-800 pl-6">
+              <div className="flex items-center gap-1.5 text-xs text-emerald-500 font-bold">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Online
+              </div>
+              <span className="text-[10px] text-zinc-600 font-bold uppercase">{activeCompanies.length} parceiros ativos</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* Date range filter */}
+            <div className="flex bg-zinc-900 border border-zinc-800 rounded-xl p-1 gap-1">
+              {(['7d', '30d', '90d', 'all'] as DateRange[]).map(r => (
+                <button
+                  key={r}
+                  onClick={() => setDateRange(r)}
+                  className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${dateRange === r ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'}`}
+                >
+                  {r === 'all' ? 'Tudo' : r}
+                </button>
               ))}
-           </div>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/5 border border-emerald-500/10 rounded-full">
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+              <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Admin Verificado</span>
+            </div>
+          </div>
+        </div>
+      </header>
 
-           {/* NAVIGATION & ACTION BAR */}
-           <div className="flex flex-col md:flex-row justify-between items-end gap-6 border-b border-zinc-900/50 pb-2">
-              <div className="flex gap-10">
-                {[
-                  { id: 'overview', label: 'Dashboard', icon: Layers },
-                  { id: 'companies', label: 'Ecosistema', icon: Building2 },
-                  { id: 'bookings', label: 'Logística & Fluxo', icon: Truck },
-                ].map((tab) => (
-                  <button 
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id as TabType)}
-                    className={`pb-4 flex items-center gap-2.5 font-black uppercase text-[11px] tracking-[0.2em] transition-all relative ${activeTab === tab.id ? 'text-primary' : 'text-zinc-600 hover:text-zinc-400'}`}
-                  >
-                    <tab.icon className={`h-4 w-4 ${activeTab === tab.id ? 'animate-pulse' : ''}`} />
-                    {tab.label}
-                    {activeTab === tab.id && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_rgba(225,29,72,0.5)]" />}
-                    {tab.id === 'companies' && pendingCompanies.length > 0 && (
-                      <span className="absolute -top-1 -right-4 bg-primary text-white text-[8px] px-1.5 py-0.5 rounded-full ring-4 ring-black">
-                        {pendingCompanies.length}
-                      </span>
-                    )}
-                  </button>
-                ))}
+      <main className="max-w-[1600px] mx-auto p-6 lg:p-10 space-y-8">
+
+        {/* URGENT ACTIONS PANEL */}
+        {hasUrgentActions && (
+          <div className="bg-amber-500/5 border border-amber-500/20 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-in fade-in">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5 animate-pulse" />
+              <div>
+                <p className="text-xs font-black uppercase text-amber-500 tracking-widest">Ações Necessárias Agora</p>
+                <div className="flex flex-wrap gap-4 mt-1">
+                  {urgentPendingBookings.length > 0 && (
+                    <span className="text-[11px] text-zinc-400 font-bold">
+                      {urgentPendingBookings.length} pedido{urgentPendingBookings.length > 1 ? 's' : ''} pendente{urgentPendingBookings.length > 1 ? 's' : ''} há mais de 24h
+                    </span>
+                  )}
+                  {pendingCompanies.length > 0 && (
+                    <span className="text-[11px] text-zinc-400 font-bold">
+                      {pendingCompanies.length} empresa{pendingCompanies.length > 1 ? 's' : ''} aguardando KYC
+                    </span>
+                  )}
+                </div>
               </div>
-
-              <div className="flex items-center gap-3 bg-zinc-900/30 p-1.5 rounded-2xl border border-zinc-800/50 mb-2">
-                 <Button size="sm" variant="ghost" className="text-[10px] font-black uppercase tracking-widest h-8 text-zinc-500 hover:text-white">Relatórios</Button>
-                 <Button size="sm" className="text-[10px] font-black uppercase tracking-widest h-8 bg-zinc-800 hover:bg-zinc-700 text-white border-zinc-700 rounded-xl px-4">Exportar BI</Button>
-              </div>
-           </div>
-
-           {/* CONTENT AREA */}
-           {activeTab === 'overview' && (
-              <div className="grid grid-cols-12 gap-8 animate-in slide-in-from-bottom-8 duration-700">
-                 
-                 {/* MAIN ANALYTICS - GMV GROWTH */}
-                 <Card className="col-span-12 lg:col-span-8 bg-zinc-950 border-zinc-900/50 rounded-[40px] overflow-hidden">
-                    <CardHeader className="p-10 pb-0 flex flex-row items-center justify-between">
-                       <div>
-                          <CardTitle className="text-2xl font-black tracking-tighter uppercase mb-1">Tração de Receita Hub</CardTitle>
-                          <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest">Volume Bruto de Mercadorias (GMV) - Projeção 90 dias</p>
-                       </div>
-                       <div className="flex gap-3">
-                          <Badge className="bg-emerald-500/10 text-emerald-500 border-none text-[10px] uppercase font-black px-3 py-1">Em Alta</Badge>
-                       </div>
-                    </CardHeader>
-                    <CardContent className="p-10 h-[450px]">
-                       <ResponsiveContainer width="100%" height="100%">
-                          <AreaChart data={revenueData}>
-                             <defs>
-                                <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                                   <stop offset="5%" stopColor="#e11d48" stopOpacity={0.2}/>
-                                   <stop offset="95%" stopColor="#e11d48" stopOpacity={0}/>
-                                </linearGradient>
-                             </defs>
-                             <CartesianGrid strokeDasharray="3 3" stroke="#18181b" vertical={false} />
-                             <XAxis 
-                                dataKey="name" 
-                                stroke="#52525b" 
-                                fontSize={11} 
-                                fontWeight="black" 
-                                axisLine={false} 
-                                tickLine={false}
-                                tick={{ dy: 10 }}
-                             />
-                             <YAxis hide />
-                             <Tooltip 
-                                cursor={{ stroke: '#e11d48', strokeWidth: 1, strokeDasharray: '5 5' }}
-                                contentStyle={{ backgroundColor: '#020202', border: '1px solid #27272a', borderRadius: '16px', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.5)' }}
-                                itemStyle={{ color: '#e11d48', fontWeight: '900', textTransform: 'uppercase', fontSize: '12px' }}
-                                labelStyle={{ fontWeight: '900', color: '#52525b', marginBottom: '4px' }}
-                             />
-                             <Area 
-                                type="monotone" 
-                                dataKey="revenue" 
-                                stroke="#e11d48" 
-                                strokeWidth={5} 
-                                fillOpacity={1} 
-                                fill="url(#colorRev)" 
-                                animationDuration={2000}
-                             />
-                          </AreaChart>
-                       </ResponsiveContainer>
-                    </CardContent>
-                 </Card>
-
-                 {/* DECISION CENTER - RIGHT PANEL */}
-                 <div className="col-span-12 lg:col-span-4 space-y-8">
-                    {/* Insights Preditivos */}
-                    <Card className="bg-primary/5 border-primary/20 rounded-[32px] overflow-hidden relative group">
-                       <div className="absolute top-0 right-0 p-4 opacity-10">
-                          <Zap className="h-24 w-24 text-primary" />
-                       </div>
-                       <CardContent className="p-8 relative z-10">
-                          <div className="flex items-center gap-3 mb-6">
-                             <div className="p-2 bg-primary/20 rounded-xl">
-                                <Activity className="h-5 w-5 text-primary" />
-                             </div>
-                             <h4 className="text-xs font-black text-primary uppercase tracking-[0.2em]">Strategy Intelligence</h4>
-                          </div>
-                          
-                          <div className="space-y-6">
-                             <div>
-                                <p className="text-lg font-black tracking-tight leading-tight mb-2">Aumentar oferta de <span className="text-primary">Lentes</span> para capturar R$ 15k adicionais.</p>
-                                <div className="w-full bg-zinc-900 h-1 rounded-full overflow-hidden">
-                                   <div className="bg-primary w-[72%] h-full animate-pulse" />
-                                </div>
-                             </div>
-                             <p className="text-[11px] text-zinc-500 font-medium leading-relaxed">
-                                Baseado na demanda latente das últimas 48h, detectamos um déficit de 12% em iluminação LED. Recomendamos incentivar o onboarding de locadoras especializadas.
-                             </p>
-                             <Button className="w-full bg-primary hover:bg-primary/90 text-white font-black uppercase text-[10px] tracking-widest h-12 rounded-2xl group-hover:scale-[1.02] transition-transform">
-                                Executar Ação Sugerida
-                             </Button>
-                          </div>
-                       </CardContent>
-                    </Card>
-
-                    {/* Market Mix Bar Chart */}
-                    <Card className="bg-zinc-950 border-zinc-900 rounded-[32px] overflow-hidden">
-                       <CardHeader className="p-8 pb-0">
-                          <CardTitle className="text-xs font-black text-zinc-500 uppercase tracking-widest">Market Share por Categoria</CardTitle>
-                       </CardHeader>
-                       <CardContent className="p-8 pt-4 h-[250px]">
-                          <ResponsiveContainer width="100%" height="100%">
-                             <BarChart data={categoryData} layout="vertical">
-                                <XAxis type="number" hide />
-                                <YAxis dataKey="name" type="category" stroke="#a1a1aa" fontSize={10} fontWeight="black" axisLine={false} tickLine={false} width={80} />
-                                <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a' }} />
-                                <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={24}>
-                                   {categoryData.map((entry, index) => (
-                                      <Cell key={`cell-${index}`} fill={entry.color} opacity={0.8} />
-                                   ))}
-                                </Bar>
-                             </BarChart>
-                          </ResponsiveContainer>
-                       </CardContent>
-                    </Card>
-                 </div>
-
-                 {/* SECOND ROW - OPERATIONAL STATUS */}
-                 <div className="col-span-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {/* Status Pie */}
-                    <Card className="bg-zinc-950 border-zinc-900 rounded-[32px] p-8 flex flex-col items-center justify-center min-h-[300px]">
-                       <div className="w-full h-[200px] relative">
-                          <ResponsiveContainer width="100%" height="100%">
-                             <PieChart>
-                                <Pie
-                                   data={statusData}
-                                   innerRadius={65}
-                                   outerRadius={85}
-                                   paddingAngle={8}
-                                   dataKey="value"
-                                >
-                                   {statusData.map((entry, index) => (
-                                      <Cell key={`cell-${index}`} fill={entry.color} />
-                                   ))}
-                                </Pie>
-                                <Tooltip contentStyle={{ display: 'none' }} />
-                             </PieChart>
-                          </ResponsiveContainer>
-                          <div className="absolute inset-0 flex flex-col items-center justify-center">
-                             <span className="text-[10px] uppercase font-black text-zinc-600">Global</span>
-                             <span className="text-3xl font-black tracking-tighter">{totalEquipments}</span>
-                          </div>
-                       </div>
-                       <div className="flex gap-6 mt-4">
-                          {statusData.map((s, i) => (
-                            <div key={i} className="flex items-center gap-2">
-                               <div className="w-2 h-2 rounded-full" style={{ backgroundColor: s.color }} />
-                               <span className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">{s.name}</span>
-                            </div>
-                          ))}
-                       </div>
-                    </Card>
-
-                    {/* Operational Health */}
-                    <Card className="col-span-2 bg-zinc-950 border-zinc-900 rounded-[32px] p-8 flex flex-col justify-between">
-                       <div>
-                          <div className="flex justify-between items-start mb-8">
-                             <div>
-                                <h3 className="text-xl font-black uppercase tracking-tighter">Eficiência de Repasse</h3>
-                                <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest">Média de pagamento D+1 após entrega</p>
-                             </div>
-                             <Badge className="bg-emerald-500/10 text-emerald-500 border-none text-[10px] font-black uppercase">Excelente</Badge>
-                          </div>
-                          
-                          <div className="space-y-8">
-                             {[
-                                { label: 'Liquidação de Pagamentos', value: '96.2%', color: 'bg-emerald-500' },
-                                { label: 'Satisfação dos Parceiros', value: '4.9/5.0', color: 'bg-primary' },
-                                { label: 'Retenção de Locadoras', value: '100%', color: 'bg-blue-500' }
-                             ].map((metric, i) => (
-                                <div key={i} className="space-y-2">
-                                   <div className="flex justify-between items-end">
-                                      <span className="text-[11px] font-black uppercase text-zinc-400 tracking-widest">{metric.label}</span>
-                                      <span className="text-sm font-black">{metric.value}</span>
-                                   </div>
-                                   <div className="w-full bg-zinc-900/50 h-2 rounded-full overflow-hidden">
-                                      <div className={`h-full ${metric.color}`} style={{ width: metric.value.includes('/') ? '98%' : metric.value }} />
-                                   </div>
-                                </div>
-                             ))}
-                          </div>
-                       </div>
-                    </Card>
-                 </div>
-
-              </div>
-           )}
-
-           {/* ECOSSISTEMA (COMPANIES) - REDESIGNED */}
-           {activeTab === 'companies' && (
-              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                 <div className="flex flex-col md:flex-row gap-6 justify-between items-center">
-                    <div className="relative w-full max-w-xl group">
-                       <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600 group-focus-within:text-primary transition-colors" />
-                       <input 
-                        type="text" 
-                        placeholder="Pesquisar Corporação ou CNPJ..." 
-                        className="w-full bg-zinc-950/50 border border-zinc-900 rounded-[20px] py-4 pl-14 pr-6 text-sm font-bold uppercase tracking-widest text-white focus:outline-none focus:border-primary/50 transition-all placeholder:text-zinc-700"
-                        value={searchTerm}
-                        onChange={e => setSearchTerm(e.target.value)}
-                       />
-                    </div>
-                    <div className="flex gap-4">
-                       <Button variant="outline" className="rounded-2xl border-zinc-800 h-12 px-6 font-black uppercase text-[10px] tracking-widest">Filtros Avançados</Button>
-                       <Button className="rounded-2xl bg-primary hover:bg-primary/90 h-12 px-8 font-black uppercase text-[10px] tracking-widest">Novo Parceiro</Button>
-                    </div>
-                 </div>
-
-                 <div className="grid grid-cols-1 gap-4">
-                    {companiesLoading ? (
-                       <div className="py-20 text-center"><Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" /></div>
-                    ) : filteredCompanies.length === 0 ? (
-                       <div className="py-40 text-center">
-                          <XCircle className="h-12 w-12 text-zinc-800 mx-auto mb-4" />
-                          <p className="text-zinc-600 font-black uppercase tracking-widest">Nenhuma corporação detectada no radar.</p>
-                       </div>
-                    ) : (
-                       filteredCompanies.map(company => (
-                          <div key={company.id} className="group bg-zinc-950 border border-zinc-900 hover:border-zinc-700 rounded-[28px] p-6 transition-all flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
-                             {/* Decorative Background Element */}
-                             <div className="absolute -left-4 top-0 bottom-0 w-1 bg-zinc-900 group-hover:bg-primary transition-colors" />
-                             
-                             <div className="flex items-center gap-6 flex-1">
-                                <div className="h-14 w-14 bg-zinc-900 rounded-2xl flex items-center justify-center font-black text-zinc-600 text-xl border border-zinc-800 group-hover:border-primary/30 transition-all">
-                                   {company.name.charAt(0)}
-                                </div>
-                                <div>
-                                   <div className="flex items-center gap-3 mb-1">
-                                      <h3 className="text-lg font-black uppercase tracking-tight group-hover:text-primary transition-colors">{company.name}</h3>
-                                      <Badge className={`${
-                                        company.status === 'approved' || company.status === 'active' ? 'bg-emerald-500/10 text-emerald-500' :
-                                        company.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500' : 'bg-destructive/10 text-destructive'
-                                      } text-[8px] font-black uppercase px-2 py-0.5 border-none`}>
-                                         {company.status === 'approved' ? 'Operando' : company.status}
-                                      </Badge>
-                                   </div>
-                                   <div className="flex flex-wrap items-center gap-y-1 gap-x-6">
-                                      <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">{company.document}</p>
-                                      <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Owner: <span className="text-zinc-400">{company.owner?.full_name}</span></p>
-                                      <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest flex items-center gap-1.5">
-                                         <Clock className="h-3 w-3" /> {new Date(company.owner?.updated_at || company.created_at).toLocaleDateString('pt-BR')}
-                                      </p>
-                                   </div>
-                                </div>
-                             </div>
-
-                             <div className="flex items-center gap-8 px-8 border-x border-zinc-900/50 hidden lg:flex">
-                                <div className="text-center">
-                                   <p className="text-[9px] text-zinc-600 font-black uppercase mb-1">Items</p>
-                                   <p className="text-sm font-black">{equipments?.filter((e: any) => e.company_id === company.id).length || 0}</p>
-                                </div>
-                                <div className="text-center">
-                                   <p className="text-[9px] text-zinc-600 font-black uppercase mb-1">Rating</p>
-                                   <p className="text-sm font-black text-emerald-500">4.9</p>
-                                </div>
-                             </div>
-
-                             <div className="flex gap-2 w-full md:w-auto">
-                                {company.status === 'pending' && (
-                                   <Button 
-                                      onClick={() => updateCompanyStatus.mutate({ id: company.id, status: 'approved' })} 
-                                      disabled={updatingCompanyId === company.id}
-                                      className="flex-1 md:flex-none h-11 px-8 bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase text-[10px] tracking-widest rounded-xl shadow-lg shadow-emerald-900/20"
-                                   >
-                                      {updatingCompanyId === company.id ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Validar KYC'}
-                                   </Button>
-                                )}
-                                <Button variant="outline" onClick={() => setSelectedCompanyForDetail(company)} className="flex-1 md:flex-none h-11 px-4 border-zinc-800 text-zinc-400 hover:bg-zinc-900 rounded-xl">
-                                   <ArrowUpRight className="h-4 w-4" />
-                                </Button>
-                             </div>
-                          </div>
-                       ))
-                    )}
-                 </div>
-              </div>
-           )}
-
-           {/* OPERAÇÕES (BOOKINGS) - FINANCIAL VIEW */}
-           {activeTab === 'bookings' && (
-              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                 
-                 {/* Hub Financial Cockpit */}
-                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <Card className="bg-zinc-950 border-zinc-900 p-8 rounded-[32px]">
-                       <p className="text-[10px] text-zinc-500 font-black uppercase tracking-[0.2em] mb-4">Volume Total</p>
-                       <h4 className="text-3xl font-black tracking-tighter">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalVolume)}</h4>
-                    </Card>
-                    <Card className="bg-zinc-950 border-zinc-900 p-8 rounded-[32px]">
-                       <p className="text-[10px] text-zinc-600 font-black uppercase tracking-[0.2em] mb-4 flex justify-between">Payout <span className="text-zinc-500">85%</span></p>
-                       <h4 className="text-2xl font-black tracking-tighter text-zinc-400">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(partnerRevenue)}</h4>
-                    </Card>
-                    <Card className="bg-primary/5 border-primary/20 p-8 rounded-[32px] relative overflow-hidden">
-                       <div className="absolute top-0 right-0 p-2 opacity-10"><Target className="h-12 w-12 text-primary" /></div>
-                       <p className="text-[10px] text-primary font-black uppercase tracking-[0.2em] mb-4 flex justify-between">Net Revenue <span className="bg-primary text-white px-1.5 py-0.5 rounded text-[8px]">15%</span></p>
-                       <h4 className="text-3xl font-black tracking-tighter text-primary">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(hubRevenue)}</h4>
-                    </Card>
-                    <Card className="bg-zinc-950 border-zinc-900 p-8 rounded-[32px]">
-                       <p className="text-[10px] text-zinc-600 font-black uppercase tracking-[0.2em] mb-4">Ticket Médio</p>
-                       <h4 className="text-2xl font-black tracking-tighter text-white">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(avgTicket)}</h4>
-                    </Card>
-                 </div>
-
-                 {/* EYE OF OBSERVATION - LOGISTICS PERFORMANCE */}
-                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <Card className="col-span-1 md:col-span-2 bg-zinc-950 border-zinc-900 rounded-[32px] overflow-hidden">
-                       <CardHeader className="p-8 border-b border-zinc-900/50">
-                          <CardTitle className="text-xs font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
-                             <Eye className="h-4 w-4 text-primary" /> Olho de Observação: Performance de Malha
-                          </CardTitle>
-                       </CardHeader>
-                       <CardContent className="p-8">
-                          <div className="space-y-6">
-                             {[
-                                { stage: 'Separação (Picking)', time: '42 min', target: '30 min', efficiency: 75 },
-                                { stage: 'Despacho (Ready)', time: '18 min', target: '20 min', efficiency: 100 },
-                                { stage: 'Em Trânsito (Shipping)', time: '2.4 h', target: '3.0 h', efficiency: 92 },
-                                { stage: 'Entrega (Token Check)', time: '5 min', target: '10 min', efficiency: 100 }
-                             ].map((perf, i) => (
-                                <div key={i} className="space-y-2">
-                                   <div className="flex justify-between items-end">
-                                      <span className="text-[10px] font-black uppercase text-zinc-400 tracking-widest">{perf.stage}</span>
-                                      <div className="text-right">
-                                         <span className="text-sm font-black text-white mr-3">{perf.time}</span>
-                                         <span className="text-[9px] font-bold text-zinc-600">META: {perf.target}</span>
-                                      </div>
-                                   </div>
-                                   <div className="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden">
-                                      <div 
-                                        className={cn("h-full transition-all duration-1000", perf.efficiency >= 100 ? "bg-emerald-500" : perf.efficiency >= 80 ? "bg-primary" : "bg-amber-500")} 
-                                        style={{ width: `${perf.efficiency}%` }} 
-                                      />
-                                   </div>
-                                </div>
-                             ))}
-                          </div>
-                       </CardContent>
-                    </Card>
-
-                    <Card className="bg-primary/5 border-primary/20 rounded-[32px] p-8 flex flex-col justify-center text-center space-y-4">
-                       <div className="h-16 w-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto">
-                          <Gauge className="h-8 w-8 text-primary" />
-                       </div>
-                       <div>
-                          <h4 className="text-3xl font-black tracking-tighter">98.2%</h4>
-                          <p className="text-[10px] font-black uppercase text-primary tracking-widest">SLA de Entrega Global</p>
-                       </div>
-                       <p className="text-[11px] text-zinc-500 font-medium italic">"Operação otimizada. Nível de serviço acima da média de mercado."</p>
-                    </Card>
-                 </div>
-
-                 <div className="bg-zinc-950/50 border border-zinc-900 rounded-[32px] overflow-hidden">
-                    <div className="p-8 border-b border-zinc-900 flex justify-between items-center">
-                       <h2 className="text-xl font-black uppercase tracking-tight flex items-center gap-3">
-                          <Activity className="h-5 w-5 text-primary" /> Fluxo Operacional de Receita
-                       </h2>
-                       <Button variant="ghost" className="text-xs font-black uppercase tracking-widest text-zinc-500">Livro Caixa Completo</Button>
-                    </div>
-                    
-                    <div className="overflow-x-auto">
-                       <table className="w-full text-left">
-                          <thead className="bg-zinc-900/30">
-                             <tr>
-                                <th className="p-6 text-[10px] font-black uppercase text-zinc-500 tracking-widest">Transação</th>
-                                <th className="p-6 text-[10px] font-black uppercase text-zinc-500 tracking-widest">Status</th>
-                                <th className="p-6 text-[10px] font-black uppercase text-zinc-500 tracking-widest">Parceiro</th>
-                                <th className="p-6 text-[10px] font-black uppercase text-zinc-500 tracking-widest text-right">Repasse (85%)</th>
-                                <th className="p-6 text-[10px] font-black uppercase text-zinc-500 tracking-widest text-right">Master (15%)</th>
-                                <th className="p-6 text-[10px] font-black uppercase text-zinc-500 tracking-widest text-right">Total</th>
-                                <th className="p-6"></th>
-                             </tr>
-                          </thead>
-                          <tbody className="divide-y divide-zinc-900">
-                             {bookingsLoading ? (
-                                <tr><td colSpan={7} className="p-20 text-center"><Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" /></td></tr>
-                             ) : bookings?.length === 0 ? (
-                                <tr><td colSpan={7} className="p-20 text-center text-zinc-600 font-black uppercase tracking-widest">Sem operações no período.</td></tr>
-                             ) : (
-                                bookings?.map(booking => (
-                                   <tr key={booking.id} className="hover:bg-white/[0.02] transition-colors group">
-                                      <td className="p-6">
-                                         <p className="text-sm font-black tracking-tighter">REQ-{booking.id.split('-')[0].toUpperCase()}</p>
-                                         <p className="text-[10px] text-zinc-500 font-medium">{new Date(booking.created_at).toLocaleDateString('pt-BR')}</p>
-                                      </td>
-                                      <td className="p-6">
-                                         <Badge className={`${
-                                           booking.status === 'approved' ? 'bg-emerald-500/10 text-emerald-500' :
-                                           booking.status === 'pending' ? 'bg-amber-500/10 text-amber-500' : 'bg-primary/10 text-primary'
-                                         } text-[8px] font-black uppercase border-none px-2`}>{booking.status}</Badge>
-                                      </td>
-                                      <td className="p-6">
-                                         <p className="text-sm font-bold text-zinc-300">{booking.company?.name || '---'}</p>
-                                         <p className="text-[10px] text-zinc-500 font-medium truncate max-w-[120px]">{booking.equipment?.name}</p>
-                                      </td>
-                                      <td className="p-6 text-right text-zinc-400 font-bold text-sm">
-                                         {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(booking.total_amount * 0.85)}
-                                      </td>
-                                      <td className="p-6 text-right text-emerald-500 font-black text-sm">
-                                         {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(booking.total_amount * 0.15)}
-                                      </td>
-                                      <td className="p-6 text-right text-white font-black text-base">
-                                         {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(booking.total_amount)}
-                                      </td>
-                                      <td className="p-6 text-right flex items-center justify-end gap-2">
-                                         {booking.status === 'pending' && (
-                                            <Button 
-                                              size="sm"
-                                              onClick={() => approveBooking.mutate(booking.id)}
-                                              className="bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase text-[10px] tracking-widest h-8 px-4 rounded-lg shadow-lg shadow-emerald-900/20"
-                                            >
-                                              Aprovar
-                                            </Button>
-                                         )}
-                                         <Button 
-                                          variant="ghost" 
-                                          size="sm" 
-                                          className="h-8 w-8 rounded-full p-0 text-zinc-600 hover:text-white hover:bg-zinc-800"
-                                          onClick={() => setSelectedLogisticsBooking(booking)}
-                                         >
-                                            <Navigation className="h-4 w-4" />
-                                         </Button>
-                                      </td>
-                                   </tr>
-                                ))
-                             )}
-                          </tbody>
-                       </table>
-                    </div>
-                 </div>
-              </div>
-           )}
-
-        </main>
-
-        {/* MODAL OVERLAYS (Keep the existing functionality but style with glassmorphism) */}
-        {selectedBookingContract && (
-           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xl animate-in fade-in duration-300">
-              <div className="bg-zinc-950 border border-zinc-800/50 w-full max-w-2xl rounded-[40px] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-                  <div className="p-8 border-b border-zinc-900 flex items-center justify-between">
-                     <h2 className="text-xl font-black uppercase tracking-widest text-primary flex items-center gap-3">
-                        <FileSignature className="h-5 w-5" /> Termo de Locação
-                     </h2>
-                     <button onClick={() => setSelectedBookingContract(null)} className="p-3 hover:bg-zinc-900 rounded-2xl transition-colors">
-                        <XCircle className="h-6 w-6 text-zinc-600" />
-                     </button>
-                  </div>
-                  <div className="p-10 overflow-y-auto custom-scrollbar space-y-8 text-zinc-400 text-sm leading-relaxed">
-                     <p>Pelo presente instrumento, a locadora <strong className="text-white">{selectedBookingContract.company?.name}</strong> firma contrato de sub-locação com o hub Moving Master para o item <strong className="text-white">{selectedBookingContract.equipment?.name}</strong>.</p>
-                     <div className="grid grid-cols-2 gap-8 bg-zinc-900/30 p-8 rounded-3xl border border-zinc-800/50">
-                        <div>
-                           <p className="text-[10px] text-zinc-600 font-black uppercase mb-1">Repasse Locadora</p>
-                           <p className="text-lg font-black text-white">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(selectedBookingContract.total_amount * 0.85)}</p>
-                        </div>
-                        <div>
-                           <p className="text-[10px] text-primary font-black uppercase mb-1">Taxa Moving</p>
-                           <p className="text-lg font-black text-primary">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(selectedBookingContract.total_amount * 0.15)}</p>
-                        </div>
-                     </div>
-                  </div>
-                  <div className="p-8 border-t border-zinc-900 flex justify-end gap-4 bg-zinc-950/50">
-                     <Button variant="ghost" onClick={() => setSelectedBookingContract(null)} className="font-black uppercase text-[10px] tracking-widest h-12 px-8">Fechar</Button>
-                     <Button className="bg-primary hover:bg-primary/90 text-white font-black uppercase text-[10px] tracking-widest h-12 px-10 rounded-2xl">Exportar PDF</Button>
-                  </div>
-              </div>
-           </div>
+            </div>
+            <div className="flex gap-2">
+              {pendingCompanies.length > 0 && (
+                <Button size="sm" onClick={() => setActiveTab('companies')} className="bg-amber-500 hover:bg-amber-400 text-black font-black uppercase text-[9px] tracking-widest rounded-lg h-8 px-4">
+                  Ver Empresas
+                </Button>
+              )}
+              {urgentPendingBookings.length > 0 && (
+                <Button size="sm" onClick={() => setActiveTab('bookings')} className="bg-zinc-800 hover:bg-zinc-700 text-white font-black uppercase text-[9px] tracking-widest rounded-lg h-8 px-4">
+                  Ver Pedidos
+                </Button>
+              )}
+            </div>
+          </div>
         )}
 
-        {selectedLogisticsBooking && (
-           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-3xl animate-in fade-in">
-              <div className="bg-zinc-950 border border-zinc-800/50 w-full max-w-4xl rounded-[40px] overflow-hidden shadow-2xl grid grid-cols-1 md:grid-cols-2">
-                  <div className="p-10 border-r border-zinc-900 space-y-8">
-                     <div className="flex items-center gap-4 mb-8">
-                        <div className="h-14 w-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center">
-                           <Navigation className="h-6 w-6 text-emerald-500" />
-                        </div>
-                        <div>
-                           <h2 className="text-xl font-black uppercase tracking-tight">Dispatcher Master</h2>
-                           <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-[0.2em] flex items-center gap-2">
-                             Algoritmo Ativo <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                           </p>
-                        </div>
-                     </div>
-                     
-                     <div className="space-y-6">
-                        <div className="p-6 bg-zinc-900/30 rounded-3xl border border-zinc-800/50 relative">
-                           <div className="absolute left-9 top-14 bottom-14 w-0.5 bg-dashed border-l border-zinc-700" />
-                           <div className="flex gap-4 items-start mb-10">
-                              <MapPin className="h-5 w-5 text-emerald-500 mt-1" />
-                              <div>
-                                 <p className="text-[9px] text-zinc-500 font-black uppercase">Origem</p>
-                                 <p className="text-sm font-black text-white">{selectedLogisticsBooking.company?.name}</p>
-                              </div>
-                           </div>
-                           <div className="flex gap-4 items-start">
-                              <MapPin className="h-5 w-5 text-primary mt-1" />
-                              <div>
-                                 <p className="text-[9px] text-zinc-500 font-black uppercase">Destino</p>
-                                 <p className="text-sm font-black text-white">SET DE FILMAGEM (ID: {selectedLogisticsBooking.id.split('-')[1]})</p>
-                              </div>
-                           </div>
-                        </div>
-                        <div className="p-6 bg-zinc-950 border border-zinc-900 rounded-3xl flex items-center justify-between">
-                           <div>
-                              <p className="text-[9px] text-zinc-500 font-black uppercase">Ativo em Trânsito</p>
-                              <p className="text-sm font-bold text-white">{selectedLogisticsBooking.equipment?.name}</p>
-                           </div>
-                           <Badge className="bg-primary/10 text-primary border-none text-[8px] font-black uppercase px-2 py-1">Prioridade</Badge>
-                        </div>
-                     </div>
-                  </div>
-                  
-                  <div className="p-10 bg-zinc-900/20 flex flex-col justify-between">
-                     <div className="space-y-4">
-                        <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-6">Cotação de Operadores Logísticos</p>
-                        {[
-                           { name: 'Frota Própria', price: 'D+0', sub: 'Rede Interna', color: 'text-emerald-500', recommended: true },
-                           { name: 'Lalamove', price: 'R$ 48,90', sub: 'Van Média', color: 'text-orange-500' },
-                           { name: 'Uber Flash', price: 'R$ 32,10', sub: 'Moto Rápida', color: 'text-white' }
-                        ].map((op, i) => (
-                           <div key={i} className={`p-5 rounded-2xl border ${op.recommended ? 'border-emerald-500/50 bg-emerald-500/5' : 'border-zinc-800 hover:border-zinc-700'} cursor-pointer transition-all group`}>
-                              <div className="flex justify-between items-center">
-                                 <div>
-                                    <h5 className={`text-sm font-black uppercase ${op.color}`}>{op.name} {op.recommended && <Badge className="bg-emerald-500 text-black text-[7px] font-black uppercase ml-2 px-1">Top</Badge>}</h5>
-                                    <p className="text-[10px] text-zinc-500 font-bold">{op.sub}</p>
-                                 </div>
-                                 <p className="text-lg font-black tracking-tighter">{op.price}</p>
-                              </div>
-                           </div>
-                        ))}
-                     </div>
-                     
-                     <div className="flex gap-4 mt-10">
-                        <Button variant="ghost" onClick={() => setSelectedLogisticsBooking(null)} className="flex-1 font-black uppercase text-[10px] tracking-widest h-14 rounded-2xl">Abortar</Button>
-                        <Button className="flex-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase text-[10px] tracking-widest h-14 px-10 rounded-2xl shadow-xl shadow-emerald-950/20">Despachar Agora</Button>
-                     </div>
-                  </div>
+        {/* KPI CARDS */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { label: 'GMV do Período', value: BRL(totalVolume), sub: `${filteredBookings.length} transações`, icon: TrendingUp, color: 'text-emerald-500' },
+            { label: 'Receita HUB (15%)', value: BRL(hubRevenue), sub: 'Taxa da plataforma', icon: Target, color: 'text-primary', highlight: true },
+            { label: 'Repasse Parceiros', value: BRL(partnerRevenue), sub: '85% do volume', icon: Building2, color: 'text-zinc-400' },
+            { label: 'Ticket Médio', value: BRL2(avgTicket), sub: 'Por locação', icon: BarChart3, color: 'text-blue-400' },
+          ].map((kpi, i) => (
+            <div key={i} className={`rounded-2xl p-6 border flex flex-col justify-between min-h-[120px] ${kpi.highlight ? 'bg-primary/5 border-primary/20' : 'bg-zinc-950 border-zinc-900'}`}>
+              <div className="flex justify-between items-start mb-3">
+                <p className={`text-[9px] font-black uppercase tracking-widest ${kpi.highlight ? 'text-primary' : 'text-zinc-500'}`}>{kpi.label}</p>
+                <kpi.icon className={`h-4 w-4 ${kpi.color} opacity-60`} />
               </div>
-           </div>
-         )}
+              <div>
+                <h3 className={`text-2xl font-black tracking-tighter ${kpi.highlight ? 'text-primary' : 'text-white'}`}>{kpi.value}</h3>
+                <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mt-1">{kpi.sub}</p>
+              </div>
+            </div>
+          ))}
+        </div>
 
-      <Dialog
-        isOpen={!!selectedCompanyForDetail}
-        onClose={() => setSelectedCompanyForDetail(null)}
-        title="Gestão de Corporação & Usuário"
-      >
-        {selectedCompanyForDetail && (
-          <div className="space-y-6 pt-4">
-             {/* Header Card */}
-             <div className="p-6 bg-zinc-900/40 border border-zinc-800 rounded-2xl flex items-center gap-4 relative overflow-hidden">
-                <div className="h-16 w-16 bg-zinc-800 rounded-xl flex items-center justify-center font-black text-zinc-400 text-2xl border border-zinc-700">
-                   {selectedCompanyForDetail.name.charAt(0)}
-                </div>
-                <div>
-                   <h3 className="text-xl font-black uppercase tracking-tight text-white">{selectedCompanyForDetail.name}</h3>
-                   <div className="flex items-center gap-2 mt-1">
-                      <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">{selectedCompanyForDetail.document}</span>
-                      <span className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
-                      <Badge className={`${
-                        selectedCompanyForDetail.status === 'suspended' 
-                          ? 'bg-red-500/10 text-red-500' 
-                          : 'bg-emerald-500/10 text-emerald-500'
-                      } text-[8px] font-black uppercase px-2 py-0.5 border-none`}>
-                         {selectedCompanyForDetail.status === 'suspended' ? 'SUSPENSO / BLOQUEADO' : 'OPERANDO / ATIVO'}
-                      </Badge>
-                   </div>
-                </div>
-             </div>
+        {/* SECONDARY KPI ROW */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { label: 'Empresas Ativas', value: activeCompanies.length, icon: Building2, color: 'text-emerald-500' },
+            { label: 'Frota Conectada', value: equipments?.length || 0, icon: Package, color: 'text-zinc-300' },
+            { label: 'Utilização', value: `${utilizationRate.toFixed(1)}%`, icon: Activity, color: 'text-blue-400' },
+            { label: 'Usuários Cadastrados', value: profiles?.length || 0, icon: Users, color: 'text-purple-400' },
+          ].map((s, i) => (
+            <div key={i} className="bg-zinc-950 border border-zinc-900 rounded-2xl p-5 flex items-center gap-4">
+              <div className="p-2.5 bg-zinc-900 rounded-xl">
+                <s.icon className={`h-5 w-5 ${s.color}`} />
+              </div>
+              <div>
+                <p className="text-[9px] font-black uppercase text-zinc-500 tracking-widest">{s.label}</p>
+                <h4 className="text-xl font-black tracking-tight">{s.value}</h4>
+              </div>
+            </div>
+          ))}
+        </div>
 
-             {/* Info Grid */}
-             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-4 bg-zinc-900/20 border border-zinc-800/40 rounded-xl">
-                   <p className="text-[9px] text-zinc-500 font-black uppercase mb-1">Proprietário (Owner)</p>
-                   <p className="text-xs font-bold text-zinc-200">{selectedCompanyForDetail.owner?.full_name || 'N/A'}</p>
-                </div>
-                <div className="p-4 bg-zinc-900/20 border border-zinc-800/40 rounded-xl">
-                   <p className="text-[9px] text-zinc-500 font-black uppercase mb-1">E-mail de Acesso</p>
-                   <p className="text-xs font-bold text-zinc-200 truncate">{selectedCompanyForDetail.owner?.email || 'N/A'}</p>
-                </div>
-                <div className="p-4 bg-zinc-900/20 border border-zinc-800/40 rounded-xl">
-                   <p className="text-[9px] text-zinc-500 font-black uppercase mb-1">Data de Onboarding</p>
-                   <p className="text-xs font-bold text-zinc-200">
-                      {new Date(selectedCompanyForDetail.owner?.updated_at || selectedCompanyForDetail.created_at).toLocaleDateString('pt-BR')}
-                   </p>
-                </div>
-                <div className="p-4 bg-zinc-900/20 border border-zinc-800/40 rounded-xl">
-                   <p className="text-[9px] text-zinc-500 font-black uppercase mb-1">ID do Inquilino</p>
-                   <p className="text-[10px] font-mono text-zinc-400 truncate">{selectedCompanyForDetail.id}</p>
-                </div>
-             </div>
+        {/* TABS */}
+        <div className="flex gap-8 border-b border-zinc-900/50 pb-0">
+          {([
+            { id: 'overview', label: 'Dashboard', icon: BarChart3 },
+            { id: 'companies', label: 'Ecossistema', icon: Building2, badge: pendingCompanies.length },
+            { id: 'bookings', label: 'Fluxo de Caixa', icon: Truck, badge: urgentPendingBookings.length },
+            { id: 'users', label: 'Usuários', icon: Users },
+          ] as { id: TabType; label: string; icon: any; badge?: number }[]).map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`pb-4 flex items-center gap-2 font-black uppercase text-[10px] tracking-[0.15em] transition-all relative whitespace-nowrap ${activeTab === tab.id ? 'text-primary' : 'text-zinc-600 hover:text-zinc-400'}`}
+            >
+              <tab.icon className="h-3.5 w-3.5" />
+              {tab.label}
+              {!!tab.badge && (
+                <span className="bg-primary text-white text-[8px] px-1.5 py-0.5 rounded-full font-black ml-1">{tab.badge}</span>
+              )}
+              {activeTab === tab.id && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />}
+            </button>
+          ))}
+        </div>
 
-             {/* Network Stats */}
-             <div className="p-5 bg-zinc-950 border border-zinc-900 rounded-2xl flex items-center justify-around text-center">
-                <div>
-                   <p className="text-[9px] text-zinc-500 font-black uppercase mb-1">Itens no Catálogo</p>
-                   <p className="text-base font-black text-white">{equipments?.filter((e: any) => e.company_id === selectedCompanyForDetail.id).length || 0}</p>
-                </div>
-                <div className="w-px h-8 bg-zinc-900" />
-                <div>
-                   <p className="text-[9px] text-zinc-500 font-black uppercase mb-1">Score da Rede</p>
-                   <p className="text-base font-black text-emerald-500">4.9 ★</p>
-                </div>
-                <div className="w-px h-8 bg-zinc-900" />
-                <div>
-                   <p className="text-[9px] text-zinc-500 font-black uppercase mb-1">Status de KYC</p>
-                   <p className="text-[10px] font-black text-emerald-500 uppercase bg-emerald-500/10 px-2 py-0.5 rounded">Verificado</p>
-                </div>
-             </div>
+        {/* ===== OVERVIEW TAB ===== */}
+        {activeTab === 'overview' && (
+          <div className="grid grid-cols-12 gap-6 animate-in fade-in duration-500">
 
-             {/* Block & Misuse Warning Panel */}
-             <div className="p-6 bg-red-500/5 border border-red-500/10 rounded-2xl space-y-4">
-                <div className="flex items-start gap-3">
-                   <AlertTriangle className="h-5 w-5 text-red-500 shrink-0 mt-0.5 animate-pulse" />
-                   <div>
-                      <h4 className="text-xs font-black uppercase tracking-wider text-red-500">Aviso de Moderação de Conta</h4>
-                      <p className="text-[11px] text-zinc-500 leading-relaxed font-medium mt-1">
-                         A suspensão impede que este parceiro anuncie equipamentos no catálogo público do marketplace. Todas as locações ativas continuam operantes, porém novos pedidos e transferências internas serão bloqueados.
+            {/* REAL MONTHLY REVENUE CHART */}
+            <Card className="col-span-12 lg:col-span-8 bg-zinc-950 border-zinc-900 rounded-[32px] overflow-hidden">
+              <CardHeader className="p-8 pb-0 flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-xl font-black tracking-tighter uppercase">Receita Real por Mês</CardTitle>
+                  <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">HUB (15%) vs Parceiros (85%) — últimos 6 meses</p>
+                </div>
+                {monthlyRevenue.length === 0 && (
+                  <Badge className="bg-zinc-800 text-zinc-500 border-none text-[9px]">Sem dados</Badge>
+                )}
+              </CardHeader>
+              <CardContent className="p-8 h-[340px]">
+                {monthlyRevenue.length === 0 ? (
+                  <div className="h-full flex items-center justify-center text-zinc-700">
+                    <div className="text-center">
+                      <Package className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                      <p className="text-xs font-black uppercase tracking-widest">Nenhuma transação registrada ainda</p>
+                    </div>
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={monthlyRevenue}>
+                      <defs>
+                        <linearGradient id="colorHub" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#e11d48" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#e11d48" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="colorParceiros" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.15} />
+                          <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#18181b" vertical={false} />
+                      <XAxis dataKey="name" stroke="#52525b" fontSize={10} fontWeight="black" axisLine={false} tickLine={false} tick={{ dy: 8 }} />
+                      <YAxis hide />
+                      <Tooltip
+                        cursor={{ stroke: '#e11d48', strokeWidth: 1, strokeDasharray: '4 4' }}
+                        contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '12px' }}
+                        formatter={(value: number, name: string) => [BRL(value), name === 'hub' ? 'HUB (15%)' : 'Parceiros (85%)']}
+                        labelStyle={{ color: '#71717a', fontWeight: 900, fontSize: 10 }}
+                      />
+                      <Area type="monotone" dataKey="parceiros" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorParceiros)" />
+                      <Area type="monotone" dataKey="hub" stroke="#e11d48" strokeWidth={3} fillOpacity={1} fill="url(#colorHub)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* CONVERSION METRICS */}
+            <Card className="col-span-12 lg:col-span-4 bg-zinc-950 border-zinc-900 rounded-[32px] overflow-hidden">
+              <CardHeader className="p-8 pb-4">
+                <CardTitle className="text-xs font-black text-zinc-500 uppercase tracking-widest">Funil de Conversão</CardTitle>
+                <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest">{conversion.total} pedidos no período</p>
+              </CardHeader>
+              <CardContent className="px-8 pb-8 space-y-5">
+                {[
+                  { label: 'Aprovados / Ativos', value: conversion.approved, pct: conversion.approvedPct, color: 'bg-emerald-500' },
+                  { label: 'Pendentes', value: conversion.pending, pct: conversion.pendingPct, color: 'bg-amber-500' },
+                  { label: 'Recusados / Cancelados', value: conversion.rejected + conversion.cancelled, pct: conversion.rejectedPct, color: 'bg-red-500' },
+                ].map((m, i) => (
+                  <div key={i} className="space-y-1.5">
+                    <div className="flex justify-between items-end">
+                      <span className="text-[10px] font-black uppercase text-zinc-400 tracking-widest">{m.label}</span>
+                      <span className="text-sm font-black text-white">{m.value} <span className="text-[10px] text-zinc-600">({m.pct.toFixed(0)}%)</span></span>
+                    </div>
+                    <div className="w-full bg-zinc-900 h-2 rounded-full overflow-hidden">
+                      <div className={`h-full ${m.color} transition-all duration-700`} style={{ width: `${Math.max(m.pct, 2)}%` }} />
+                    </div>
+                  </div>
+                ))}
+
+                {/* Equipment status pie */}
+                <div className="pt-4 border-t border-zinc-900">
+                  <p className="text-[9px] font-black uppercase text-zinc-600 tracking-widest mb-4">Status da Frota</p>
+                  <div className="h-[130px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={statusData} innerRadius={40} outerRadius={56} paddingAngle={6} dataKey="value">
+                          {statusData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                        </Pie>
+                        <Tooltip contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '8px', fontSize: 10 }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="flex justify-center gap-4 mt-2">
+                    {statusData.map((s, i) => (
+                      <div key={i} className="flex items-center gap-1.5">
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: s.color }} />
+                        <span className="text-[9px] font-black uppercase text-zinc-600">{s.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* TOP PARTNERS */}
+            <Card className="col-span-12 bg-zinc-950 border-zinc-900 rounded-[32px] overflow-hidden">
+              <CardHeader className="p-8 pb-0 flex flex-row items-center justify-between">
+                <CardTitle className="text-xs font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-primary" /> Top Parceiros por Receita Gerada
+                </CardTitle>
+                <span className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest">{dateRange === 'all' ? 'Todos os tempos' : `Últimos ${dateRange}`}</span>
+              </CardHeader>
+              <CardContent className="p-8">
+                {topPartners.length === 0 ? (
+                  <div className="py-10 text-center text-zinc-700">
+                    <p className="text-xs font-black uppercase tracking-widest">Sem dados no período selecionado</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {topPartners.map((p, i) => (
+                      <div key={i} className="flex items-center gap-4">
+                        <span className="text-[10px] font-black text-zinc-600 w-4">{i + 1}</span>
+                        <div className="h-8 w-8 bg-zinc-900 rounded-xl flex items-center justify-center font-black text-zinc-400 text-xs border border-zinc-800">
+                          {p.name.charAt(0)}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="text-xs font-black uppercase tracking-tight text-zinc-200">{p.name}</span>
+                            <div className="flex items-center gap-4">
+                              <span className="text-[10px] text-zinc-500 font-bold">{p.count} pedido{p.count > 1 ? 's' : ''}</span>
+                              <span className="text-sm font-black text-white">{BRL(p.total)}</span>
+                            </div>
+                          </div>
+                          <div className="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-primary transition-all duration-700"
+                              style={{ width: `${(p.total / (topPartners[0]?.total || 1)) * 100}%` }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* ===== COMPANIES TAB ===== */}
+        {activeTab === 'companies' && (
+          <div className="space-y-6 animate-in fade-in duration-500">
+            <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+              <div className="relative w-full max-w-lg">
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600" />
+                <input
+                  type="text"
+                  placeholder="Buscar empresa ou CNPJ..."
+                  className="w-full bg-zinc-950 border border-zinc-900 rounded-2xl py-3.5 pl-12 pr-5 text-sm font-bold text-white focus:outline-none focus:border-primary/50 transition-all placeholder:text-zinc-700"
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-2 text-[10px] font-black uppercase text-zinc-500 tracking-widest">
+                <span className="bg-zinc-900 px-3 py-1.5 rounded-lg">{activeCompanies.length} ativas</span>
+                {pendingCompanies.length > 0 && (
+                  <span className="bg-amber-500/10 text-amber-500 px-3 py-1.5 rounded-lg">{pendingCompanies.length} aguardando KYC</span>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {companiesLoading ? (
+                <div className="py-20 text-center"><Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" /></div>
+              ) : filteredCompanies.length === 0 ? (
+                <div className="py-32 text-center">
+                  <XCircle className="h-10 w-10 text-zinc-800 mx-auto mb-3" />
+                  <p className="text-zinc-600 font-black uppercase tracking-widest text-xs">Nenhuma empresa encontrada.</p>
+                </div>
+              ) : filteredCompanies.map((company: any) => (
+                <div key={company.id} className="group bg-zinc-950 border border-zinc-900 hover:border-zinc-700 rounded-2xl p-5 transition-all flex flex-col md:flex-row items-center justify-between gap-4">
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="h-12 w-12 bg-zinc-900 rounded-xl flex items-center justify-center font-black text-zinc-500 text-lg border border-zinc-800 shrink-0">
+                      {company.name?.charAt(0)}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <h3 className="font-black uppercase tracking-tight group-hover:text-primary transition-colors">{company.name}</h3>
+                        <Badge className={`text-[8px] font-black uppercase border-none px-2 ${
+                          company.status === 'approved' || company.status === 'active' ? 'bg-emerald-500/10 text-emerald-500' :
+                          company.status === 'pending' ? 'bg-amber-500/10 text-amber-500' :
+                          'bg-red-500/10 text-red-500'
+                        }`}>
+                          {company.status === 'approved' ? 'Operando' : company.status === 'pending' ? 'Pendente KYC' : company.status}
+                        </Badge>
+                      </div>
+                      <div className="flex flex-wrap gap-x-4 gap-y-0.5">
+                        <p className="text-[10px] text-zinc-500 font-bold">{company.document}</p>
+                        <p className="text-[10px] text-zinc-600 font-bold">Owner: <span className="text-zinc-400">{company.owner?.full_name}</span></p>
+                        <p className="text-[10px] text-zinc-600 font-bold flex items-center gap-1">
+                          <Clock className="h-2.5 w-2.5" /> {new Date(company.created_at).toLocaleDateString('pt-BR')}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="hidden lg:flex items-center gap-6 px-6 border-x border-zinc-900">
+                    <div className="text-center">
+                      <p className="text-[9px] text-zinc-600 font-black uppercase mb-0.5">Itens</p>
+                      <p className="text-sm font-black">{equipments?.filter((e: any) => e.company_id === company.id).length || 0}</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[9px] text-zinc-600 font-black uppercase mb-0.5">Pedidos</p>
+                      <p className="text-sm font-black">{filteredBookings.filter(b => b.company_id === company.id).length}</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[9px] text-zinc-600 font-black uppercase mb-0.5">Volume</p>
+                      <p className="text-sm font-black text-emerald-400">
+                        {BRL(filteredBookings.filter(b => b.company_id === company.id).reduce((s, b) => s + (b.total_amount || 0), 0))}
                       </p>
-                   </div>
-                </div>
+                    </div>
+                  </div>
 
-                <div className="pt-2">
-                   {selectedCompanyForDetail.status === 'suspended' ? (
+                  <div className="flex gap-2 w-full md:w-auto">
+                    {company.status === 'pending' && (
                       <Button
-                         onClick={handleToggleBlock}
-                         disabled={updatingCompanyId === selectedCompanyForDetail.id}
-                         className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase text-[10px] tracking-widest h-12 rounded-xl flex items-center justify-center gap-2"
+                        onClick={() => updateCompanyStatus.mutate({ id: company.id, status: 'approved' })}
+                        disabled={updatingCompanyId === company.id}
+                        className="flex-1 md:flex-none h-10 px-6 bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase text-[9px] tracking-widest rounded-xl"
                       >
-                         {updatingCompanyId === selectedCompanyForDetail.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                         ) : (
-                            <>
-                               <ShieldCheck className="h-4 w-4" /> Desbloquear & Reativar Unidade
-                            </>
-                         )}
+                        {updatingCompanyId === company.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Aprovar KYC'}
                       </Button>
-                   ) : (
-                      <Button
-                         onClick={handleToggleBlock}
-                         disabled={updatingCompanyId === selectedCompanyForDetail.id}
-                         className="w-full bg-red-600 hover:bg-red-500 text-white font-black uppercase text-[10px] tracking-widest h-12 rounded-xl flex items-center justify-center gap-2"
-                      >
-                         {updatingCompanyId === selectedCompanyForDetail.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                         ) : (
-                            <>
-                               <Ban className="h-4 w-4" /> Suspender & Bloquear Locadora
-                            </>
-                         )}
-                      </Button>
-                   )}
+                    )}
+                    <Button
+                      variant="outline"
+                      onClick={() => setSelectedCompanyForDetail(company)}
+                      className="flex-1 md:flex-none h-10 px-4 border-zinc-800 text-zinc-400 hover:bg-zinc-900 rounded-xl"
+                    >
+                      <ArrowUpRight className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-             </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ===== BOOKINGS / FINANCIAL FLOW TAB ===== */}
+        {activeTab === 'bookings' && (
+          <div className="space-y-6 animate-in fade-in duration-500">
+
+            {/* Financial summary */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { label: 'Volume Total', value: BRL2(totalVolume), highlight: false },
+                { label: 'Repasse Parceiros (85%)', value: BRL2(partnerRevenue), highlight: false },
+                { label: 'Receita HUB (15%)', value: BRL2(hubRevenue), highlight: true },
+                { label: 'Ticket Médio', value: BRL2(avgTicket), highlight: false },
+              ].map((c, i) => (
+                <div key={i} className={`rounded-2xl p-6 border ${c.highlight ? 'bg-primary/5 border-primary/20' : 'bg-zinc-950 border-zinc-900'}`}>
+                  <p className={`text-[9px] font-black uppercase tracking-widest mb-3 ${c.highlight ? 'text-primary' : 'text-zinc-500'}`}>{c.label}</p>
+                  <h4 className={`text-xl font-black tracking-tight ${c.highlight ? 'text-primary' : 'text-white'}`}>{c.value}</h4>
+                </div>
+              ))}
+            </div>
+
+            {/* Bookings table */}
+            <div className="bg-zinc-950 border border-zinc-900 rounded-2xl overflow-hidden">
+              <div className="p-6 border-b border-zinc-900 flex justify-between items-center">
+                <h2 className="text-sm font-black uppercase tracking-tight flex items-center gap-2">
+                  <Activity className="h-4 w-4 text-primary" /> Fluxo Operacional
+                </h2>
+                <span className="text-[10px] text-zinc-500 font-bold uppercase">{filteredBookings.length} registros</span>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead className="bg-zinc-900/40">
+                    <tr>
+                      {['Transação', 'Status', 'Parceiro', 'Período', 'Repasse (85%)', 'HUB (15%)', 'Total', ''].map((h, i) => (
+                        <th key={i} className="p-5 text-[9px] font-black uppercase text-zinc-500 tracking-widest whitespace-nowrap">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-900">
+                    {bookingsLoading ? (
+                      <tr><td colSpan={8} className="p-16 text-center"><Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" /></td></tr>
+                    ) : filteredBookings.length === 0 ? (
+                      <tr><td colSpan={8} className="p-16 text-center text-zinc-600 font-black uppercase tracking-widest text-xs">Sem operações no período.</td></tr>
+                    ) : filteredBookings.map(booking => (
+                      <tr key={booking.id} className="hover:bg-white/[0.015] transition-colors">
+                        <td className="p-5">
+                          <p className="text-xs font-black tracking-tighter">REQ-{booking.id.split('-')[0].toUpperCase()}</p>
+                          <p className="text-[9px] text-zinc-500">{new Date(booking.created_at).toLocaleDateString('pt-BR')}</p>
+                        </td>
+                        <td className="p-5">
+                          <Badge className={`text-[8px] font-black uppercase border-none px-2 ${
+                            booking.status === 'approved' || booking.status === 'active' ? 'bg-emerald-500/10 text-emerald-500' :
+                            booking.status === 'completed' ? 'bg-blue-500/10 text-blue-400' :
+                            booking.status === 'pending' ? 'bg-amber-500/10 text-amber-500' :
+                            'bg-zinc-800 text-zinc-400'
+                          }`}>{booking.status}</Badge>
+                        </td>
+                        <td className="p-5">
+                          <p className="text-xs font-bold text-zinc-300">{booking.company?.name || '---'}</p>
+                          <p className="text-[9px] text-zinc-500 truncate max-w-[120px]">{booking.equipment?.name}</p>
+                        </td>
+                        <td className="p-5 text-[10px] text-zinc-500 font-bold whitespace-nowrap">
+                          {new Date(booking.start_date).toLocaleDateString('pt-BR')} → {new Date(booking.end_date).toLocaleDateString('pt-BR')}
+                        </td>
+                        <td className="p-5 text-right text-zinc-400 font-bold text-xs">{BRL2(booking.total_amount * 0.85)}</td>
+                        <td className="p-5 text-right text-emerald-400 font-black text-xs">{BRL2(booking.total_amount * 0.15)}</td>
+                        <td className="p-5 text-right text-white font-black text-sm">{BRL2(booking.total_amount)}</td>
+                        <td className="p-5 text-right">
+                          {booking.status === 'pending' && (
+                            <Button
+                              size="sm"
+                              onClick={() => approveBooking.mutate(booking.id)}
+                              disabled={approveBooking.isPending}
+                              className="bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase text-[9px] tracking-widest h-7 px-3 rounded-lg"
+                            >
+                              {approveBooking.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Aprovar'}
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ===== USERS TAB ===== */}
+        {activeTab === 'users' && (
+          <div className="space-y-6 animate-in fade-in duration-500">
+            <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+              <div className="relative w-full max-w-lg">
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600" />
+                <input
+                  type="text"
+                  placeholder="Buscar por nome ou e-mail..."
+                  className="w-full bg-zinc-950 border border-zinc-900 rounded-2xl py-3.5 pl-12 pr-5 text-sm font-bold text-white focus:outline-none focus:border-primary/50 transition-all placeholder:text-zinc-700"
+                  value={userSearch}
+                  onChange={e => setUserSearch(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-2 text-[10px] font-black uppercase tracking-widest">
+                {['admin', 'rental_house', 'production_company', 'client'].map(role => (
+                  <span key={role} className="bg-zinc-900 text-zinc-500 px-3 py-1.5 rounded-lg">
+                    {ROLE_LABELS[role]}: {profiles?.filter((p: any) => p.role === role).length || 0}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-zinc-950 border border-zinc-900 rounded-2xl overflow-hidden">
+              <table className="w-full text-left">
+                <thead className="bg-zinc-900/40">
+                  <tr>
+                    {['Usuário', 'E-mail', 'Perfil', 'Empresa', 'Cadastro'].map((h, i) => (
+                      <th key={i} className="p-5 text-[9px] font-black uppercase text-zinc-500 tracking-widest">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-900">
+                  {profilesLoading ? (
+                    <tr><td colSpan={5} className="p-16 text-center"><Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" /></td></tr>
+                  ) : filteredProfiles.length === 0 ? (
+                    <tr><td colSpan={5} className="p-16 text-center text-zinc-600 font-black uppercase tracking-widest text-xs">Nenhum usuário encontrado.</td></tr>
+                  ) : filteredProfiles.map((p: any) => (
+                    <tr key={p.id} className="hover:bg-white/[0.015] transition-colors">
+                      <td className="p-5">
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-8 bg-zinc-900 rounded-xl border border-zinc-800 flex items-center justify-center font-black text-zinc-400 text-xs">
+                            {p.full_name?.charAt(0) || '?'}
+                          </div>
+                          <p className="text-xs font-black text-zinc-200">{p.full_name || 'Sem nome'}</p>
+                        </div>
+                      </td>
+                      <td className="p-5 text-[10px] text-zinc-400 font-medium">{p.email}</td>
+                      <td className="p-5">
+                        <Badge className={`text-[8px] font-black uppercase border-none px-2 ${
+                          p.role === 'admin' ? 'bg-primary/10 text-primary' :
+                          p.role === 'rental_house' ? 'bg-blue-500/10 text-blue-400' :
+                          p.role === 'production_company' ? 'bg-purple-500/10 text-purple-400' :
+                          'bg-zinc-800 text-zinc-400'
+                        }`}>{ROLE_LABELS[p.role] || p.role}</Badge>
+                      </td>
+                      <td className="p-5 text-[10px] text-zinc-400 font-medium">{p.company?.name || '—'}</td>
+                      <td className="p-5 text-[10px] text-zinc-500 font-medium">
+                        {p.created_at ? new Date(p.created_at).toLocaleDateString('pt-BR') : '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+      </main>
+
+      {/* COMPANY DETAIL MODAL */}
+      <Dialog isOpen={!!selectedCompanyForDetail} onClose={() => setSelectedCompanyForDetail(null)} title="Gestão de Parceiro">
+        {selectedCompanyForDetail && (
+          <div className="space-y-5 pt-2">
+            <div className="p-5 bg-zinc-900/50 border border-zinc-800 rounded-2xl flex items-center gap-4">
+              <div className="h-14 w-14 bg-zinc-800 rounded-xl flex items-center justify-center font-black text-zinc-400 text-2xl border border-zinc-700">
+                {selectedCompanyForDetail.name?.charAt(0)}
+              </div>
+              <div>
+                <h3 className="text-lg font-black uppercase tracking-tight">{selectedCompanyForDetail.name}</h3>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-[10px] text-zinc-500 font-bold">{selectedCompanyForDetail.document}</span>
+                  <Badge className={`text-[8px] font-black uppercase border-none px-2 ${
+                    selectedCompanyForDetail.status === 'suspended' ? 'bg-red-500/10 text-red-500' : 'bg-emerald-500/10 text-emerald-500'
+                  }`}>
+                    {selectedCompanyForDetail.status === 'suspended' ? 'Suspenso' : 'Ativo'}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { label: 'Proprietário', value: selectedCompanyForDetail.owner?.full_name || 'N/A' },
+                { label: 'E-mail', value: selectedCompanyForDetail.owner?.email || 'N/A' },
+                { label: 'Onboarding', value: new Date(selectedCompanyForDetail.created_at).toLocaleDateString('pt-BR') },
+                { label: 'ID', value: selectedCompanyForDetail.id.slice(0, 8) + '...' },
+              ].map((item, i) => (
+                <div key={i} className="p-4 bg-zinc-900/30 border border-zinc-800/40 rounded-xl">
+                  <p className="text-[9px] text-zinc-500 font-black uppercase mb-1">{item.label}</p>
+                  <p className="text-xs font-bold text-zinc-200 truncate">{item.value}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-3 gap-3 p-4 bg-zinc-900/30 border border-zinc-800/40 rounded-xl">
+              <div className="text-center">
+                <p className="text-[9px] text-zinc-500 font-black uppercase mb-1">Itens</p>
+                <p className="font-black">{equipments?.filter((e: any) => e.company_id === selectedCompanyForDetail.id).length || 0}</p>
+              </div>
+              <div className="text-center border-x border-zinc-800">
+                <p className="text-[9px] text-zinc-500 font-black uppercase mb-1">Pedidos</p>
+                <p className="font-black">{(bookings || []).filter(b => b.company_id === selectedCompanyForDetail.id).length}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-[9px] text-zinc-500 font-black uppercase mb-1">Volume</p>
+                <p className="font-black text-emerald-400 text-sm">
+                  {BRL((bookings || []).filter(b => b.company_id === selectedCompanyForDetail.id).reduce((s, b) => s + (b.total_amount || 0), 0))}
+                </p>
+              </div>
+            </div>
+
+            <div className="p-5 bg-red-500/5 border border-red-500/10 rounded-2xl space-y-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
+                <p className="text-[11px] text-zinc-500 leading-relaxed">
+                  A suspensão impede o parceiro de anunciar equipamentos e receber novos pedidos. Operações ativas continuam até o término.
+                </p>
+              </div>
+              {selectedCompanyForDetail.status === 'suspended' ? (
+                <Button
+                  onClick={async () => {
+                    await updateCompanyStatus.mutateAsync({ id: selectedCompanyForDetail.id, status: 'approved' });
+                    setSelectedCompanyForDetail((p: any) => ({ ...p, status: 'approved' }));
+                  }}
+                  disabled={updatingCompanyId === selectedCompanyForDetail.id}
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase text-[9px] tracking-widest h-11 rounded-xl flex items-center justify-center gap-2"
+                >
+                  {updatingCompanyId === selectedCompanyForDetail.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <><CheckCircle2 className="h-3.5 w-3.5" /> Reativar Parceiro</>}
+                </Button>
+              ) : (
+                <Button
+                  onClick={async () => {
+                    await updateCompanyStatus.mutateAsync({ id: selectedCompanyForDetail.id, status: 'suspended' });
+                    setSelectedCompanyForDetail((p: any) => ({ ...p, status: 'suspended' }));
+                  }}
+                  disabled={updatingCompanyId === selectedCompanyForDetail.id}
+                  className="w-full bg-red-600 hover:bg-red-500 text-white font-black uppercase text-[9px] tracking-widest h-11 rounded-xl flex items-center justify-center gap-2"
+                >
+                  {updatingCompanyId === selectedCompanyForDetail.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <><Ban className="h-3.5 w-3.5" /> Suspender Parceiro</>}
+                </Button>
+              )}
+            </div>
           </div>
         )}
       </Dialog>
+
     </div>
   );
 }
