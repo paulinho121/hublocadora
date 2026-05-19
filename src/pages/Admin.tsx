@@ -30,8 +30,7 @@ const BRL2 = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', 
 const ROLE_LABELS: Record<string, string> = {
   admin: 'Admin',
   rental_house: 'Locadora',
-  production_company: 'Produtora',
-  client: 'Cliente',
+  branch_manager: 'Gestor de Unidade',
 };
 
 export default function Admin() {
@@ -984,7 +983,7 @@ export default function Admin() {
                 />
               </div>
               <div className="flex gap-2 text-[10px] font-black uppercase tracking-widest">
-                {['admin', 'rental_house', 'production_company', 'client'].map(role => (
+                {['admin', 'rental_house', 'branch_manager'].map(role => (
                   <span key={role} className="bg-zinc-900 text-zinc-500 px-3 py-1.5 rounded-lg">
                     {ROLE_LABELS[role]}: {profiles?.filter((p: any) => p.role === role).length || 0}
                   </span>
@@ -1036,7 +1035,7 @@ export default function Admin() {
                           <Badge className={`text-[8px] font-black uppercase border-none px-2 ${
                             p.role === 'admin' ? 'bg-primary/10 text-primary' :
                             p.role === 'rental_house' ? 'bg-blue-500/10 text-blue-400' :
-                            p.role === 'production_company' ? 'bg-purple-500/10 text-purple-400' :
+                            p.role === 'branch_manager' ? 'bg-amber-500/10 text-amber-400' :
                             'bg-zinc-800 text-zinc-400'
                           }`}>{ROLE_LABELS[p.role] || p.role}</Badge>
                         </td>

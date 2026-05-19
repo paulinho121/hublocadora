@@ -2,7 +2,7 @@ export interface Profile {
     id: string; // auth.users.id
     email: string;
     full_name: string | null;
-    role: 'client' | 'rental_house' | 'production_company' | 'admin';
+    role: 'admin' | 'rental_house' | 'branch_manager';
     company_id: string | null;
     created_at: string;
     updated_at: string;

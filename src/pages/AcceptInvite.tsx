@@ -97,6 +97,11 @@ export default function AcceptInvite() {
             return;
         }
 
+        // 4. Garantir que o role seja branch_manager
+        if (userId) {
+            await supabase.from('profiles').update({ role: 'branch_manager' }).eq('id', userId);
+        }
+
         navigate('/login', { state: { message: 'Conta ativada com sucesso! Faça login para acessar a gestão.' } });
     };
 

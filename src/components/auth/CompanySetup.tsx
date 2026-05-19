@@ -183,11 +183,12 @@ export function CompanySetup({ ownerId }: { ownerId: string }) {
       // 1. Atualizar Perfil do Usuário
       const { error: profileError } = await supabase
         .from('profiles')
-        .upsert({ 
-          id: ownerId, 
+        .upsert({
+          id: ownerId,
           email: (await supabase.auth.getUser()).data.user?.email || '',
           full_name: values.full_name,
           phone: values.phone,
+          role: 'rental_house',
           updated_at: new Date().toISOString()
         });
 

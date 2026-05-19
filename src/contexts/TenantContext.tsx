@@ -162,7 +162,7 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
                         .from('profiles')
                         .update({ 
                             company_id: currentCompany.id,
-                            role: currentBranchId ? 'rental_house' : (currentProfile.role === 'client' ? 'rental_house' : currentProfile.role)
+                            role: currentBranchId ? 'branch_manager' : 'rental_house'
                         })
                         .eq('id', user.id)
                         .then(({ error }) => {
