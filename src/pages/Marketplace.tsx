@@ -4,7 +4,7 @@ import { useEquipments } from '@/hooks/useEquipments';
 import { Card, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
+import AnimatedGlowingSearchBar from '@/components/ui/animated-glowing-search-bar';
 import { 
   MapPin, 
   ChevronRight, 
@@ -200,32 +200,14 @@ export default function Marketplace() {
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.35, duration: 0.6 }}
-            className="flex flex-col sm:flex-row w-full max-w-3xl items-stretch sm:items-center gap-3 relative group"
+            className="w-full max-w-3xl"
           >
-            <div className="absolute -inset-6 bg-primary/5 blur-3xl rounded-full opacity-40 group-focus-within:opacity-80 transition-opacity pointer-events-none" />
-
-            <div className="relative flex-1">
-              <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none z-20">
-                <Search className="h-5 w-5 text-primary" />
-              </div>
-              <Input
-                className="h-14 md:h-[60px] pl-14 pr-4 text-sm md:text-base rounded-2xl bg-zinc-900/60 border-white/10 focus:border-primary/60 focus:ring-4 focus:ring-primary/10 transition-all font-medium placeholder:text-zinc-600 relative z-10 backdrop-blur-xl shadow-[0_8px_40px_rgba(0,0,0,0.6)] border-2"
-                placeholder="Qual equipamento você precisa para seu set hoje?"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              />
-            </div>
-
-            <Button
-              className="h-14 md:h-[60px] px-10 sm:px-12 text-sm md:text-base clay-button-primary font-black uppercase tracking-[0.2em] relative z-10 overflow-hidden group/btn shrink-0"
-              onClick={handleSearch}
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                Buscar Agora <ChevronRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000" />
-            </Button>
+            <AnimatedGlowingSearchBar
+              value={search}
+              onChange={setSearch}
+              onSearch={handleSearch}
+              placeholder="Qual equipamento você precisa para seu set hoje?"
+            />
           </motion.div>
 
           {/* ── Category pill buttons ── */}
