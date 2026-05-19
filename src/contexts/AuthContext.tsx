@@ -59,6 +59,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return () => subscription.unsubscribe();
     }, []);
 
+    // Presence tracking — mantém o usuário visível no canal 'hub:online' enquanto estiver logado
+    useEffect(() => {
+        if (!user) return;
+
+        const channel = supabase.channel('hub:online', {
+            config: { presence: { key: user.id } },
+        });
+
+        channel.subscribe(async (status) => {
+            if (status === 'SUBSCRIBED') {
+                await channel.track({
+                    user_id: user.id,
+                    email: user.email,
+                    last_sign_in_at: user.last_sign_in_at ?? null,
+                });
+            }
+        });
+
+        return () => { supabase.removeChannel(channel); };
+    }, [user?.id]);
+
     const signOut = async () => {
         await supabase.auth.signOut();
         setProfile(null);

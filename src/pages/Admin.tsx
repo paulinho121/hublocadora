@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +11,7 @@ import {
   Search, ArrowUpRight, Ban,
   Truck, Clock, TrendingUp, Zap, Activity,
   Globe, Users, CheckCircle2, XCircle, AlertCircle,
-  Target, BarChart3
+  Target, BarChart3, Wifi
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -47,6 +47,30 @@ export default function Admin() {
   const [selectedCompanyForDetail, setSelectedCompanyForDetail] = useState<any | null>(null);
   const [selectedLogisticsBooking, setSelectedLogisticsBooking] = useState<any | null>(null);
   const [updatingCompanyId, setUpdatingCompanyId] = useState<string | null>(null);
+
+  // Presence — usuários online em tempo real
+  const [onlineUsers, setOnlineUsers] = useState<Record<string, { email: string; last_sign_in_at: string | null }>>({});
+
+  useEffect(() => {
+    if (!profile || profile.role !== 'admin') return;
+
+    const channel = supabase.channel('hub:online', {
+      config: { presence: { key: 'admin-observer' } },
+    });
+
+    channel
+      .on('presence', { event: 'sync' }, () => {
+        const state = channel.presenceState<{ user_id: string; email: string; last_sign_in_at: string | null }>();
+        const map: Record<string, { email: string; last_sign_in_at: string | null }> = {};
+        Object.values(state).flat().forEach((p) => {
+          if (p.user_id) map[p.user_id] = { email: p.email, last_sign_in_at: p.last_sign_in_at };
+        });
+        setOnlineUsers(map);
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [profile?.role]);
 
   const { data: companies, isLoading: companiesLoading } = useQuery({
     queryKey: ['admin-companies'],
@@ -891,6 +915,54 @@ export default function Admin() {
         {/* ===== USERS TAB ===== */}
         {activeTab === 'users' && (
           <div className="space-y-6 animate-in fade-in duration-500">
+
+            {/* Online agora */}
+            <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+                  </span>
+                  <Wifi className="h-4 w-4 text-emerald-400" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Online Agora</span>
+                </div>
+                <span className="text-[10px] font-black bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full">
+                  {Object.keys(onlineUsers).length}
+                </span>
+              </div>
+
+              {Object.keys(onlineUsers).length === 0 ? (
+                <p className="text-[10px] text-zinc-600 font-medium">Nenhum usuário online no momento.</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {Object.entries(onlineUsers).map(([uid, info]) => {
+                    const prof = profiles?.find((p: any) => p.id === uid);
+                    const name = prof?.full_name || info.email?.split('@')[0] || uid.slice(0, 8);
+                    const initial = name.charAt(0).toUpperCase();
+                    const lastLogin = info.last_sign_in_at
+                      ? new Date(info.last_sign_in_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+                      : '—';
+                    return (
+                      <div key={uid} className="flex items-center gap-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl px-3 py-2">
+                        <div className="relative">
+                          <div className="h-7 w-7 bg-emerald-500/10 border border-emerald-500/30 rounded-lg flex items-center justify-center font-black text-emerald-400 text-[10px]">
+                            {initial}
+                          </div>
+                          <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 bg-emerald-500 rounded-full border border-zinc-950" />
+                        </div>
+                        <div className="leading-none">
+                          <p className="text-[10px] font-black text-white">{name}</p>
+                          <p className="text-[9px] text-zinc-500 mt-0.5">Login: {lastLogin}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Barra de busca e filtros */}
             <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
               <div className="relative w-full max-w-lg">
                 <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600" />
@@ -911,45 +983,71 @@ export default function Admin() {
               </div>
             </div>
 
+            {/* Tabela de usuários */}
             <div className="bg-zinc-950 border border-zinc-900 rounded-2xl overflow-hidden">
               <table className="w-full text-left">
                 <thead className="bg-zinc-900/40">
                   <tr>
-                    {['Usuário', 'E-mail', 'Perfil', 'Empresa', 'Cadastro'].map((h, i) => (
+                    {['Usuário', 'E-mail', 'Perfil', 'Empresa', 'Cadastro', 'Último Login'].map((h, i) => (
                       <th key={i} className="p-5 text-[9px] font-black uppercase text-zinc-500 tracking-widest">{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-900">
                   {profilesLoading ? (
-                    <tr><td colSpan={5} className="p-16 text-center"><Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" /></td></tr>
+                    <tr><td colSpan={6} className="p-16 text-center"><Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" /></td></tr>
                   ) : filteredProfiles.length === 0 ? (
-                    <tr><td colSpan={5} className="p-16 text-center text-zinc-600 font-black uppercase tracking-widest text-xs">Nenhum usuário encontrado.</td></tr>
-                  ) : filteredProfiles.map((p: any) => (
-                    <tr key={p.id} className="hover:bg-white/[0.015] transition-colors">
-                      <td className="p-5">
-                        <div className="flex items-center gap-3">
-                          <div className="h-8 w-8 bg-zinc-900 rounded-xl border border-zinc-800 flex items-center justify-center font-black text-zinc-400 text-xs">
-                            {p.full_name?.charAt(0) || '?'}
+                    <tr><td colSpan={6} className="p-16 text-center text-zinc-600 font-black uppercase tracking-widest text-xs">Nenhum usuário encontrado.</td></tr>
+                  ) : filteredProfiles.map((p: any) => {
+                    const isOnline = !!onlineUsers[p.id];
+                    const presenceInfo = onlineUsers[p.id];
+                    const lastLogin = presenceInfo?.last_sign_in_at
+                      ? new Date(presenceInfo.last_sign_in_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })
+                      : p.updated_at
+                        ? new Date(p.updated_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })
+                        : '—';
+
+                    return (
+                      <tr key={p.id} className="hover:bg-white/[0.015] transition-colors">
+                        <td className="p-5">
+                          <div className="flex items-center gap-3">
+                            <div className="relative">
+                              <div className="h-8 w-8 bg-zinc-900 rounded-xl border border-zinc-800 flex items-center justify-center font-black text-zinc-400 text-xs">
+                                {p.full_name?.charAt(0) || '?'}
+                              </div>
+                              {isOnline && (
+                                <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 bg-emerald-500 rounded-full border-2 border-zinc-950" />
+                              )}
+                            </div>
+                            <p className="text-xs font-black text-zinc-200">{p.full_name || 'Sem nome'}</p>
                           </div>
-                          <p className="text-xs font-black text-zinc-200">{p.full_name || 'Sem nome'}</p>
-                        </div>
-                      </td>
-                      <td className="p-5 text-[10px] text-zinc-400 font-medium">{p.email}</td>
-                      <td className="p-5">
-                        <Badge className={`text-[8px] font-black uppercase border-none px-2 ${
-                          p.role === 'admin' ? 'bg-primary/10 text-primary' :
-                          p.role === 'rental_house' ? 'bg-blue-500/10 text-blue-400' :
-                          p.role === 'production_company' ? 'bg-purple-500/10 text-purple-400' :
-                          'bg-zinc-800 text-zinc-400'
-                        }`}>{ROLE_LABELS[p.role] || p.role}</Badge>
-                      </td>
-                      <td className="p-5 text-[10px] text-zinc-400 font-medium">{p.company?.name || '—'}</td>
-                      <td className="p-5 text-[10px] text-zinc-500 font-medium">
-                        {p.created_at ? new Date(p.created_at).toLocaleDateString('pt-BR') : '—'}
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="p-5 text-[10px] text-zinc-400 font-medium">{p.email}</td>
+                        <td className="p-5">
+                          <Badge className={`text-[8px] font-black uppercase border-none px-2 ${
+                            p.role === 'admin' ? 'bg-primary/10 text-primary' :
+                            p.role === 'rental_house' ? 'bg-blue-500/10 text-blue-400' :
+                            p.role === 'production_company' ? 'bg-purple-500/10 text-purple-400' :
+                            'bg-zinc-800 text-zinc-400'
+                          }`}>{ROLE_LABELS[p.role] || p.role}</Badge>
+                        </td>
+                        <td className="p-5 text-[10px] text-zinc-400 font-medium">{p.company?.name || '—'}</td>
+                        <td className="p-5 text-[10px] text-zinc-500 font-medium">
+                          {p.created_at ? new Date(p.created_at).toLocaleDateString('pt-BR') : '—'}
+                        </td>
+                        <td className="p-5">
+                          {isOnline ? (
+                            <span className="flex items-center gap-1.5 text-[10px] font-black text-emerald-400">
+                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                              Online agora
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-zinc-500 font-medium">{lastLogin}</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
