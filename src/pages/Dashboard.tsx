@@ -18,7 +18,11 @@ import {
   ArrowUpRight,
   Heart,
   Pencil,
-  Trash2
+  Trash2,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  Zap,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -56,9 +60,29 @@ import { OrderHistoryTab } from '@/components/dashboard/OrderHistoryTab';
 import { ReportsTab } from '@/components/dashboard/ReportsTab';
 import { CompanyProfileSettings } from '@/components/dashboard/CompanyProfileSettings';
 import { EditBookingModal } from '@/components/dashboard/EditBookingModal';
+import { MobileBottomNav } from '@/components/dashboard/MobileBottomNav';
 
 type TabType = 'overview' | 'inventory' | 'bookings' | 'logistics' | 'reports' | 'network' | 'settings' | 'audit' | 'history' | 'favorites';
 const VALID_TABS: TabType[] = ['overview', 'inventory', 'bookings', 'logistics', 'reports', 'network', 'settings', 'audit', 'history', 'favorites'];
+
+const STATUS_MAP: Record<string, { label: string; icon: React.ElementType; className: string }> = {
+  pending:   { label: 'Pendente',  icon: Clock,         className: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
+  approved:  { label: 'Aprovado',  icon: CheckCircle2,  className: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
+  active:    { label: 'Ativo',     icon: Zap,           className: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
+  completed: { label: 'Concluído', icon: CheckCircle2,  className: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20' },
+  cancelled: { label: 'Cancelado', icon: XCircle,       className: 'bg-red-500/10 text-red-400 border-red-500/20' },
+};
+
+function BookingStatusBadge({ status, size = 'sm' }: { status: string; size?: 'xs' | 'sm' }) {
+  const s = STATUS_MAP[status] ?? { label: status, icon: Clock, className: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20' };
+  const Icon = s.icon;
+  return (
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[9px] font-black uppercase tracking-wider ${s.className}`}>
+      <Icon className="h-2.5 w-2.5 shrink-0" />
+      {s.label}
+    </span>
+  );
+}
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -132,11 +156,13 @@ export default function Dashboard() {
       }, (payload) => {
         console.log('Nova Reserva Recebida Real-Time:', payload);
         
-        // 1. Toca o "Plim" corporativo (iFood Bell)
-        try {
-           const audio = new Audio('https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3?filename=success-1-6297.mp3'); 
-           audio.play().catch(e => console.log('Audio autoplay blocked', e));
-        } catch(e) {}
+        // 1. Toca o "Plim" corporativo (iFood Bell) — respeitando preferência do usuário
+        if (localStorage.getItem('notification-sound') !== 'false') {
+          try {
+             const audio = new Audio('https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3?filename=success-1-6297.mp3');
+             audio.play().catch(e => console.log('Audio autoplay blocked', e));
+          } catch(e) {}
+        }
         
         // 2. Avisa React Query para atualizar tela na hora
         queryClient.invalidateQueries({ queryKey: ['bookings'] });
@@ -169,10 +195,12 @@ export default function Dashboard() {
         ) {
           console.log('Novo Pedido Atribuído para Sublocação:', payload);
           
-          try {
-             const audio = new Audio('https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3?filename=success-1-6297.mp3'); 
-             audio.play().catch(e => console.log('Audio autoplay blocked', e));
-          } catch(e) {}
+          if (localStorage.getItem('notification-sound') !== 'false') {
+            try {
+               const audio = new Audio('https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3?filename=success-1-6297.mp3');
+               audio.play().catch(e => console.log('Audio autoplay blocked', e));
+            } catch(e) {}
+          }
 
           queryClient.invalidateQueries({ queryKey: ['bookings'] });
           queryClient.invalidateQueries({ queryKey: ['deliveries'] });
@@ -409,14 +437,20 @@ export default function Dashboard() {
       </AnimatePresence>
 
       {/* Desktop Sidebar */}
-      <DashboardSidebar 
-        activeTab={activeTab} 
-        onTabChange={(tab) => setActiveTab(tab)} 
-        companyName={isBranchManager ? branch?.name : company?.name} 
+      <DashboardSidebar
+        activeTab={activeTab}
+        onTabChange={(tab) => setActiveTab(tab)}
+        companyName={isBranchManager ? branch?.name : company?.name}
+      />
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav
+        activeTab={activeTab}
+        onTabChange={(tab) => setActiveTab(tab)}
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0">
+      <main className="flex-1 flex flex-col min-w-0 pb-[72px] md:pb-0">
         {/* Top Header Section (Mobile Visible) */}
         <header className="h-20 border-b border-zinc-900 flex items-center justify-between px-6 md:px-10 shrink-0">
            <div className="flex items-center gap-3 md:hidden">
@@ -458,67 +492,67 @@ export default function Dashboard() {
                  <div className="space-y-10">
                 <header>
                    <h2 className="text-4xl font-black tracking-tighter uppercase mb-2">Visão Geral</h2>
-                   <p className="text-zinc-500 font-medium">O pulso financeiro e operacional da sua locadora hoje.</p>
+                   <p className="text-zinc-400 font-medium">O pulso financeiro e operacional da sua locadora hoje.</p>
                 </header>
 
                 {/* Stats Grid */}
                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
                     <Card className="clay-card">
                        <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
-                          <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-[0.2em]">Ganhos Líquidos</CardTitle>
+                          <CardTitle className="text-xs uppercase font-black text-zinc-400 tracking-[0.2em]">Ganhos Líquidos</CardTitle>
                           <TrendingUp className="h-4 w-4 text-emerald-500" />
                        </CardHeader>
                        <CardContent className="p-6 pt-0">
                           <div className="text-2xl font-black tracking-tighter text-zinc-100 mb-1">
                              {formatCurrency(totalRevenue)}
                           </div>
-                          <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">Saldo disponível</p>
+                          <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest">Saldo disponível</p>
                        </CardContent>
                     </Card>
 
                     <Card className="clay-card">
                        <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
-                          <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-[0.2em]">Débitos Operacionais</CardTitle>
+                          <CardTitle className="text-xs uppercase font-black text-zinc-400 tracking-[0.2em]">Débitos Operacionais</CardTitle>
                           <AlertCircle className="h-4 w-4 text-red-500" />
                        </CardHeader>
                        <CardContent className="p-6 pt-0">
                           <div className="text-2xl font-black tracking-tighter text-zinc-100 mb-1">
                              {formatCurrency(totalDebt)}
                           </div>
-                          <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">A PAGAR PARA O HUB</p>
+                          <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest">A PAGAR PARA O HUB</p>
                        </CardContent>
                     </Card>
 
                     <Card className="clay-card">
                        <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
-                          <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-[0.2em]">Reservas Ativas</CardTitle>
+                          <CardTitle className="text-xs uppercase font-black text-zinc-400 tracking-[0.2em]">Reservas Ativas</CardTitle>
                           <CalendarDays className="h-4 w-4 text-zinc-600" />
                        </CardHeader>
                        <CardContent className="p-6 pt-0">
                           <div className="text-2xl font-black tracking-tighter text-zinc-100 mb-1">{activeBookings}</div>
-                          <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">{pendingBookingsCount} Pendentes</p>
+                          <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest">{pendingBookingsCount} Pendentes</p>
                        </CardContent>
                     </Card>
 
                     <Card className="clay-card">
                        <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
-                          <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-[0.2em]">Frota Estocada</CardTitle>
+                          <CardTitle className="text-xs uppercase font-black text-zinc-400 tracking-[0.2em]">Frota Estocada</CardTitle>
                           <Package className="h-4 w-4 text-zinc-600" />
                        </CardHeader>
                        <CardContent className="p-6 pt-0">
                           <div className="text-2xl font-black tracking-tighter text-zinc-100 mb-1">{equipments?.length || 0}</div>
-                          <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">Itens cadastrados</p>
+                          <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest">Itens cadastrados</p>
                        </CardContent>
                     </Card>
 
                     <Card className="clay-card">
                        <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
-                          <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-[0.2em]">Em Manutenção</CardTitle>
+                          <CardTitle className="text-xs uppercase font-black text-zinc-400 tracking-[0.2em]">Em Manutenção</CardTitle>
                           <AlertCircle className="h-4 w-4 text-destructive" />
                        </CardHeader>
                        <CardContent className="p-6 pt-0">
                           <div className="text-2xl font-black tracking-tighter text-destructive mb-1">{maintenanceCount}</div>
-                          <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">Atenção requerida</p>
+                          <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest">Atenção requerida</p>
                        </CardContent>
                     </Card>
                  </div>
@@ -570,7 +604,7 @@ export default function Dashboard() {
                                      
                                      <div className="flex items-center gap-8">
                                         <div className="text-right hidden sm:block">
-                                           <p className="text-[8px] uppercase font-black text-zinc-600 tracking-[0.2em] mb-1">Previsão Retorno</p>
+                                           <p className="text-[8px] uppercase font-black text-zinc-400 tracking-[0.2em] mb-1">Previsão Retorno</p>
                                            <div className="flex items-center justify-end gap-1.5 text-[11px] font-black text-zinc-400 uppercase tracking-tighter">
                                               <CalendarDays className="h-3 w-3 text-primary" />
                                               {format(new Date(booking.end_date), "dd 'DE' MMM", { locale: ptBR })}
@@ -585,7 +619,7 @@ export default function Dashboard() {
                                                  return formatCurrency(amount);
                                               })()}
                                            </div>
-                                           <p className="text-[8px] uppercase font-black text-zinc-600 tracking-widest">{booking.status}</p>
+                                           <BookingStatusBadge status={booking.status} />
                                         </div>
                                      </div>
                                   </div>
@@ -631,7 +665,7 @@ export default function Dashboard() {
                 <header className="mb-10 flex items-center justify-between">
                    <div>
                       <h2 className="text-4xl font-black tracking-tighter uppercase mb-2">Pedidos</h2>
-                      <p className="text-zinc-500 font-medium">Gerencie entradas e solicitações do HUB.</p>
+                      <p className="text-zinc-400 font-medium">Gerencie entradas e solicitações do HUB.</p>
                    </div>
                    <div className="flex bg-zinc-900 p-1 rounded-xl border border-zinc-800">
                       <Button variant={bookingFilter === 'received' ? 'secondary' : 'ghost'} onClick={() => setBookingFilter('received')} className="h-9 rounded-lg text-[10px] font-black uppercase">Recebidos</Button>
@@ -657,7 +691,7 @@ export default function Dashboard() {
                           
                           <div className="flex items-center gap-4">
                              <div className="text-right hidden sm:block">
-                                <p className="text-[9px] uppercase font-black text-zinc-600 tracking-widest mb-1">Período</p>
+                                <p className="text-[9px] uppercase font-black text-zinc-400 tracking-widest mb-1">Período</p>
                                 <p className="text-xs font-bold text-zinc-400">{format(new Date(booking.start_date), "dd/MM")} - {format(new Date(booking.end_date), "dd/MM")}</p>
                              </div>
                              <div className="text-right">
@@ -674,10 +708,7 @@ export default function Dashboard() {
                                       return formatCurrency(amount);
                                    })()}
                                 </div>
-                                <Badge className={`text-[8px] uppercase font-black tracking-tighter h-4 ${
-                                   booking.status === 'approved' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
-                                   booking.status === 'pending' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : ''
-                                }`}>{booking.status}</Badge>
+                                <BookingStatusBadge status={booking.status} />
                              </div>
                              <div className="flex flex-col gap-2 ml-2">
                                 <Button
@@ -804,7 +835,7 @@ export default function Dashboard() {
              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <header className="mb-10">
                    <h2 className="text-4xl font-black tracking-tighter uppercase mb-2">Ajustes</h2>
-                   <p className="text-zinc-500 font-medium">Configurações da sua locadora e conta.</p>
+                   <p className="text-zinc-400 font-medium">Configurações da sua locadora e conta.</p>
                 </header>
                 
                 {company && (
