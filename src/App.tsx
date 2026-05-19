@@ -30,12 +30,12 @@ import ResetPassword from '@/pages/ResetPassword';
 const Dashboard = lazy(() => import('@/pages/Dashboard'));
 const Admin = lazy(() => import('@/pages/Admin'));
 const Docs = lazy(() => import('@/pages/Docs'));
-const AIToolsPage = lazy(() => import('@/pages/AITools').then(m => ({ default: m.AIToolsPage })));
 const AcceptInvite = lazy(() => import('@/pages/AcceptInvite'));
 
 import { AIAssistant } from '@/components/ai/AIAssistant';
 import { Footer } from '@/components/layout/Footer';
 import ProfessionalBackground from '@/components/ui/professional-background';
+import { CookieConsent } from '@/components/ui/cookie-consent';
 
 // Fallback de loading para Suspense
 function PageLoader() {
@@ -255,6 +255,7 @@ function MainLayout() {
       {!isAuthPage && <Footer />}
       {!isAuthPage && <BottomNav />}
       {/* <AIAssistant /> */}
+      <CookieConsent />
     </div>
   );
 }

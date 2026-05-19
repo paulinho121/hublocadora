@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AIService } from '@/services/AIService';
 
 const projectSchema = z.object({
   projectDescription: z.string().min(10, 'Descrição deve ter pelo menos 10 caracteres'),
@@ -48,18 +47,11 @@ export function ProjectPlanner({ onResult }: ProjectPlannerProps) {
   const onSubmit = async (data: ProjectFormData) => {
     setLoading(true);
     try {
-      const response = await AIService.planProject(
-        data.projectDescription,
-        data.productionType,
-        data.budget,
-        data.shootingDays,
-        data.locationCity
-      );
-      setResult(response);
-      onResult?.(response);
-    } catch (error) {
-      console.error('Project planning error:', error);
-      alert('Erro ao planejar projeto. Verifique se o servidor Genkit está rodando.');
+      // IA em desenvolvimento — disponível em breve
+      throw new Error('coming_soon');
+    } catch (error: any) {
+      if (error?.message !== 'coming_soon') console.error('Project planning error:', error);
+      alert('Funcionalidade de planejamento por IA em desenvolvimento. Em breve disponível!');
     } finally {
       setLoading(false);
     }

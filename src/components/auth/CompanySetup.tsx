@@ -58,11 +58,12 @@ export function CompanySetup({ ownerId }: { ownerId: string }) {
     defaultValues: savedDraft,
   });
 
-  // Auto-save: salva no localStorage a cada mudança de campo
+  // Auto-save: salva no localStorage a cada mudança (sem dados sensíveis — LGPD)
   const watchedValues = watch();
   useEffect(() => {
     try {
-      localStorage.setItem(FORM_CACHE_KEY, JSON.stringify(watchedValues));
+      const { document: _doc, phone: _phone, ...safeValues } = watchedValues;
+      localStorage.setItem(FORM_CACHE_KEY, JSON.stringify(safeValues));
     } catch {}
   }, [watchedValues]);
 

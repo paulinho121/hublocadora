@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { MessageSquare, X, Send, Sparkles, Loader2, Package, Calculator, Calendar, Mail, History } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AIService } from '@/services/AIService';
 import { Button } from '@/components/ui/button';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -50,26 +49,12 @@ export function AIAssistant() {
     setLoading(true);
 
     try {
-      // Chama o Orchestrator (Assistente Mestre)
-      const data = await AIService.chat(userMessage);
-      
-      // Atualiza o modo do UI baseado na detecção da IA
-      if (data.mode) setMode(data.mode);
-
-      const assistantMsg: ChatMessage = { 
-        role: 'assistant', 
-        content: data.response, 
-        mode: data.mode,
-        timestamp: new Date() 
-      };
-      
-      setChatHistory(prev => [...prev, assistantMsg]);
-    } catch (error) {
-      console.error('AI Error:', error);
-      setChatHistory(prev => [...prev, { 
-        role: 'assistant', 
-        content: 'Desculpe, tive um problema de conexão com o servidor de IA. Por favor, verifique se o backend está rodando.',
-        timestamp: new Date() 
+      // IA em desenvolvimento — disponível em breve
+      await new Promise(resolve => setTimeout(resolve, 800));
+      setChatHistory(prev => [...prev, {
+        role: 'assistant',
+        content: '🚀 **CineHub AI** está em desenvolvimento e em breve estará disponível para te ajudar com planejamento de produções, cotações e muito mais. Fique de olho nas novidades!',
+        timestamp: new Date(),
       }]);
     } finally {
       setLoading(false);
@@ -233,7 +218,7 @@ export function AIAssistant() {
                 </button>
               </div>
               <p className="mt-3 text-center text-[9px] font-medium uppercase tracking-widest text-zinc-600">
-                Powered by Genkit × CineHub Intelligence
+                CineHub AI · Em Breve
               </p>
             </div>
           </motion.div>

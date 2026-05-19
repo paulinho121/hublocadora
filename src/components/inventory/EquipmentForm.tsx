@@ -11,7 +11,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Equipment } from '@/types/database';
 import { useCreateEquipment, useUpdateEquipment, uploadEquipmentImage } from '@/hooks/useEquipments';
 import { useCategories } from '@/hooks/useCategories';
-import { AIService } from '@/services/AIService';
 import { MasterCatalogSelector } from './MasterCatalogSelector';
 import { useTenant } from '@/contexts/TenantContext';
 import { useFormPersist } from '@/hooks/useFormPersist';
@@ -129,7 +128,8 @@ export function EquipmentForm({ equipment, companyId: propCompanyId, onSuccess }
 
     try {
       setIsAiGenerating(true);
-      const data = await AIService.generateCatalog(name);
+      // IA em desenvolvimento — funcionalidade disponível em breve
+      const data: any = {};
       
       if (data.brand) setValue('brand', data.brand);
       if (data.category) setValue('category', data.category);

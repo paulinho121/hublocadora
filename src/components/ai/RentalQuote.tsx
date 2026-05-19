@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AIService } from '@/services/AIService';
 
 const quoteSchema = z.object({
   equipmentItems: z.array(z.string()).min(1, 'Adicione pelo menos um equipamento'),
@@ -84,18 +83,11 @@ export function RentalQuote({ onResult }: RentalQuoteProps) {
   const onSubmit = async (data: QuoteFormData) => {
     setLoading(true);
     try {
-      const response = await AIService.rentalQuote(
-        data.equipmentItems,
-        data.rentalDays,
-        data.location,
-        data.includeInsurance,
-        data.extras
-      );
-      setResult(response);
-      onResult?.(response);
-    } catch (error) {
-      console.error('Quote error:', error);
-      alert('Erro ao gerar cotação. Verifique se o servidor Genkit está rodando.');
+      // IA em desenvolvimento — disponível em breve
+      throw new Error('coming_soon');
+    } catch (error: any) {
+      if (error?.message !== 'coming_soon') console.error('Quote error:', error);
+      alert('Funcionalidade de cotação por IA em desenvolvimento. Em breve disponível!');
     } finally {
       setLoading(false);
     }

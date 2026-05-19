@@ -5,7 +5,6 @@ import cors from 'cors';
 import helmet from 'helmet';
 import * as dotenv from 'dotenv';
 
-// Carrega as variáveis do .env
 dotenv.config();
 
 const app = express();
@@ -16,144 +15,48 @@ Sentry.init({
   integrations: [
     nodeProfilingIntegration(),
   ],
-  // Performance Monitoring
   tracesSampleRate: 1.0,
-  // Set sampling rate for profiling - this is relative to tracesSampleRate
   profilesSampleRate: 1.0,
 });
 
-import { 
-  helloFlow, 
-} from '../lib/genkit.js';
-import { 
-  bookingMatchFlow, 
-  maintenanceAnalysisFlow, 
-  logisticsOptimizerFlow, 
-  catalogGeneratorFlow,
-  projectGearPlannerFlow,
-  rentalQuoteFlow,
-  availabilityAdvisorFlow,
-  customerFollowUpFlow
-} from '../lib/ai/flows.js';
-import { masterAssistantFlow } from '../lib/ai/masterFlow.js';
+// Em produção, ALLOWED_ORIGINS é obrigatório — nunca aceitar wildcard
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',').map(o => o.trim()).filter(Boolean);
+if (!allowedOrigins?.length) {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('ALLOWED_ORIGINS env var is required in production');
+  }
+  console.warn('[CORS] ALLOWED_ORIGINS not set — restricting to localhost only');
+}
 
-// Configurações de Segurança
-app.use(helmet()); 
+app.use(helmet());
 Sentry.setupExpressErrorHandler(app);
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : '*',
+  origin: allowedOrigins?.length
+    ? allowedOrigins
+    : ['http://localhost:5173', 'http://localhost:3000'],
   methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
-app.use(express.json({ limit: '10kb' })); // Limita o tamanho do payload para evitar DoS
+app.use(express.json({ limit: '10kb' }));
 
-// Middleware básico de Logging
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
 });
 
-// Rota raiz
 app.get('/', (req, res) => {
-  res.status(200).json({ status: 'online', service: 'CineHub Genkit Server' });
+  res.status(200).json({ status: 'online', service: 'CineHub Server' });
 });
 
-// Helper para tratar erros
-const handleAsync = (fn: Function) => (req: any, res: any, next: any) => {
-  Promise.resolve(fn(req, res, next)).catch(next);
-};
-
-// 1. Endpoint: Match de Equipamento
-app.post('/api/ai/match', handleAsync(async (req: any, res: any) => {
-  if (!req.body.description) return res.status(400).json({ error: 'Descrição é obrigatória' });
-  const result = await bookingMatchFlow(req.body.description);
-  res.json(result);
-}));
-
-// 2. Endpoint: Análise de Manutenção
-app.post('/api/ai/maintenance', handleAsync(async (req: any, res: any) => {
-  const result = await maintenanceAnalysisFlow(req.body);
-  res.json(result);
-}));
-
-// 3. Endpoint: Otimização Logística
-app.post('/api/ai/logistics', handleAsync(async (req: any, res: any) => {
-  if (!req.body.items) return res.status(400).json({ error: 'Itens são obrigatórios' });
-  const result = await logisticsOptimizerFlow(req.body.items);
-  res.json(result);
-}));
-
-// 4. Endpoint: Geração de Catálogo
-app.post('/api/ai/catalog', handleAsync(async (req: any, res: any) => {
-  if (!req.body.model) return res.status(400).json({ error: 'Modelo é obrigatório' });
-  const result = await catalogGeneratorFlow(req.body.model);
-  res.json(result);
-}));
-
-// 5. Endpoint: Planejamento de Projeto
-app.post('/api/ai/project-planner', handleAsync(async (req: any, res: any) => {
-  const { projectDescription, productionType, budget, shootingDays, locationCity } = req.body;
-  if (!projectDescription || !productionType || !budget || !shootingDays) {
-    return res.status(400).json({ error: 'Todos os campos principais são obrigatórios' });
-  }
-  const result = await projectGearPlannerFlow({ projectDescription, productionType, budget, shootingDays, locationCity });
-  res.json(result);
-}));
-
-// 6. Endpoint: Cotação de Aluguel
-app.post('/api/ai/rental-quote', handleAsync(async (req: any, res: any) => {
-  const { equipmentItems, rentalDays, location, includeInsurance, extras } = req.body;
-  if (!equipmentItems || !rentalDays || !location) {
-    return res.status(400).json({ error: 'Itens, dias e local são obrigatórios' });
-  }
-  const result = await rentalQuoteFlow({ equipmentItems, rentalDays, location, includeInsurance: Boolean(includeInsurance), extras: extras || [] });
-  res.json(result);
-}));
-
-// 7. Endpoint: Disponibilidade de Equipamentos
-app.post('/api/ai/availability', handleAsync(async (req: any, res: any) => {
-  const { startDate, endDate, projectType, priority } = req.body;
-  if (!startDate || !endDate || !projectType || !priority) {
-    return res.status(400).json({ error: 'Data de início, fim, tipo de projeto e prioridade são obrigatórios' });
-  }
-  const result = await availabilityAdvisorFlow({ startDate, endDate, projectType, priority });
-  res.json(result);
-}));
-
-// 8. Endpoint: Follow-up de Cliente
-app.post('/api/ai/followup', handleAsync(async (req: any, res: any) => {
-  const { customerName, bookingSummary, status } = req.body;
-  if (!customerName || !bookingSummary || !status) {
-    return res.status(400).json({ error: 'Nome do cliente, resumo do booking e status são obrigatórios' });
-  }
-  const result = await customerFollowUpFlow({ customerName, bookingSummary, status });
-  res.json(result);
-}));
-
-// 9. Endpoint: Assistente Mestre (Orquestrador)
-app.post('/api/ai/chat', handleAsync(async (req: any, res: any) => {
-  if (!req.body.message) return res.status(400).json({ error: 'Mensagem é obrigatória' });
-  const result = await masterAssistantFlow(req.body.message);
-  res.json(result);
-}));
-
-// Endpoint de Teste
-app.get('/api/genkit/hello', handleAsync(async (req: any, res: any) => {
-  const name = (req.query.name as string) || 'CineHub User';
-  const result = await helloFlow(name);
-  res.json({ message: result });
-}));
-
-// Error Handler Centralizado
 app.use((err: any, req: any, res: any, next: any) => {
   Sentry.captureException(err);
   console.error('❌ Server Error:', err.stack);
-  res.status(500).json({ 
+  res.status(500).json({
     error: 'Erro interno do servidor',
-    message: process.env.NODE_ENV === 'development' ? err.message : undefined 
+    message: process.env.NODE_ENV === 'development' ? err.message : undefined,
   });
 });
 
 app.listen(port, () => {
-  console.log(`🚀 Servidor Seguro rodando em: http://localhost:${port}`);
+  console.log(`🚀 Servidor rodando em: http://localhost:${port}`);
 });
