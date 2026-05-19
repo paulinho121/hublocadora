@@ -51,7 +51,8 @@ export function HubSupplementRequest({ onSuccess }: HubSupplementRequestProps) {
   // Buscar equipamentos do HUB (assumindo que equipamentos sem companyId específico ou com uma tag são do HUB)
   // Para o MVP, vamos carregar todos e filtrar ou deixar o usuário escolher.
   // Idealmente: carregar apenas da conta "HUB MASTER"
-  const { data: hubEquipments, isLoading: isLoadingEquipments } = useEquipments();
+  const { data: hubEquipmentsPage, isLoading: isLoadingEquipments } = useEquipments();
+  const hubEquipments = hubEquipmentsPage?.items ?? [];
 
   const { data: myBranch } = useQuery({
     queryKey: ['my-branch', user?.email],

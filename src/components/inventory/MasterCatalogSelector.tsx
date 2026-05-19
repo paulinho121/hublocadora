@@ -25,7 +25,8 @@ interface MasterCatalogSelectorProps {
 
 export function MasterCatalogSelector({ companyId, onSuccess }: MasterCatalogSelectorProps) {
   const { data: catalog, isLoading } = useMasterCatalog();
-  const { data: userInventory } = useEquipments({ companyId });
+  const { data: userInventoryPage } = useEquipments({ companyId });
+  const userInventory = userInventoryPage?.items ?? [];
   const createEquipment = useCreateEquipment(companyId);
   const updateEquipment = useUpdateEquipment();
   

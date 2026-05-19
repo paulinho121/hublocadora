@@ -19,7 +19,8 @@ interface BranchStockModalProps {
 
 export function BranchStockModal({ branchId, branchName, isOpen, onClose }: BranchStockModalProps) {
     const { tenantId } = useTenant();
-    const { data: equipments, isLoading: loadingEquipments } = useEquipments({ companyId: tenantId || undefined });
+    const { data: equipmentsPage, isLoading: loadingEquipments } = useEquipments({ companyId: tenantId || undefined });
+    const equipments = equipmentsPage?.items ?? [];
     const { stock, updateStock } = useBranchStock(branchId);
     const { createTransfer } = useTransfers();
     const [search, setSearch] = useState('');

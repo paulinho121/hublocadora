@@ -39,12 +39,13 @@ export default function Marketplace() {
   const [showAll, setShowAll] = useState(false);
   const [shuffledDefaultItems, setShuffledDefaultItems] = useState<Equipment[]>([]);
   
-  const { data: rawEquipments, isLoading } = useEquipments({
+  const { data: rawEquipmentsPage, isLoading } = useEquipments({
     searchQuery: search,
     category: selectedCategory,
     brand: selectedBrand,
     subCategory: selectedSubCategory
   });
+  const rawEquipments = rawEquipmentsPage?.items ?? [];
 
   // ─── Consolidação "Pote Principal" ────────────────────────────────────────
   // Agrupa itens pelo nome e soma a quantidade real disponível no Hub

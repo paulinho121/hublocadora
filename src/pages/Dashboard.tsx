@@ -80,10 +80,11 @@ export default function Dashboard() {
     renterId: user?.id
   });
 
-  const { data: equipments, isLoading: isLoadingEquipments } = useEquipments({
+  const { data: equipmentsPage, isLoading: isLoadingEquipments } = useEquipments({
     companyId: tenantId || undefined,
     branchId: isBranchManager ? branchId : undefined
   });
+  const equipments = equipmentsPage?.items ?? [];
   
   const deleteMutation = useDeleteEquipment();
   const updateStatusMutation = useUpdateBookingStatus();
@@ -901,9 +902,10 @@ export default function Dashboard() {
 // ─── Favorites Tab Content ──────────────────────────────────────────────
 function FavoritesTabContent({ onSelect }: { onSelect: (eq: any) => void }) {
   const { favoriteIds, isLoading: isLoadingIds } = useFavorites();
-  const { data: favoriteEquipments, isLoading: isLoadingEquipments } = useEquipments({
-    ids: favoriteIds && favoriteIds.length > 0 ? favoriteIds : ['__none__'] // Evita buscar tudo se vazio
+  const { data: favoriteEquipmentsPage, isLoading: isLoadingEquipments } = useEquipments({
+    ids: favoriteIds && favoriteIds.length > 0 ? favoriteIds : ['__none__']
   });
+  const favoriteEquipments = favoriteEquipmentsPage?.items ?? [];
 
   if (isLoadingIds || isLoadingEquipments) {
     return (

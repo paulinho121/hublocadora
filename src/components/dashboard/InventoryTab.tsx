@@ -1,14 +1,15 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useEquipments } from '@/hooks/useEquipments';
 import { InventoryCard } from './InventoryCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { 
-  Plus, 
-  Search, 
-  Package, 
-  CheckCircle2, 
+import { PaginationBar } from '@/components/ui/pagination-bar';
+import {
+  Plus,
+  Search,
+  Package,
+  CheckCircle2,
   AlertCircle,
   ChevronDown
 } from 'lucide-react';
@@ -18,6 +19,8 @@ import { Equipment, Booking } from '@/types/database';
 import { useBookings } from '@/hooks/useBookings';
 
 import { useTenant } from '@/contexts/TenantContext';
+
+const PAGE_SIZE = 12; // 3 colunas × 4 linhas
 
 interface InventoryTabProps {
   tenantId: string | undefined;
@@ -30,28 +33,40 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [assigningItem, setAssigningItem] = useState<Equipment | null>(null);
+  const [page, setPage] = useState(0);
   const { isBranchManager, branchId } = useTenant();
 
-  // Buscar lista completa apenas para extrair as categorias (evita o bug de sumir opções no filtro)
-  const { data: allEquipments } = useEquipments({
+  // Reset de página quando filtros mudam
+  useEffect(() => { setPage(0); }, [searchQuery, categoryFilter]);
+
+  // Busca sem paginação apenas para extrair categorias únicas
+  const { data: allEquipmentsPage } = useEquipments({
     companyId: tenantId || undefined,
     branchId: isBranchManager ? branchId : undefined
   });
+  const allEquipments = allEquipmentsPage?.items ?? [];
 
-  const { data: equipments, isLoading: isLoadingEquipments } = useEquipments({
+  // Busca paginada para o grid
+  const { data: equipmentsPage, isLoading: isLoadingEquipments } = useEquipments({
     companyId: tenantId || undefined,
     branchId: isBranchManager ? branchId : undefined,
     category: categoryFilter === 'all' ? undefined : categoryFilter,
-    searchQuery: searchQuery || undefined
+    searchQuery: searchQuery || undefined,
+    page,
+    pageSize: PAGE_SIZE,
   });
+  const equipments = equipmentsPage?.items ?? [];
+  const totalCount = equipmentsPage?.count ?? 0;
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   const { data: allBookings, isLoading: isLoadingBookings } = useBookings({
     companyId: tenantId || undefined
   });
+  const allBookingsItems = (allBookings as any) ?? [];
 
   const activeBookings = useMemo(() => {
-    return allBookings?.filter(b => b.status === 'approved' || b.status === 'active') || [];
-  }, [allBookings]);
+    return allBookingsItems?.filter((b: any) => b.status === 'approved' || b.status === 'active') || [];
+  }, [allBookingsItems]);
 
   const isLoading = isLoadingEquipments || isLoadingBookings;
 
@@ -62,14 +77,14 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
   }, [allEquipments]);
 
   const computedStats = useMemo(() => {
-    if (!equipments) return { available: 0, rented: 0, maintenance: 0 };
-    
+    if (!allEquipments) return { available: 0, rented: 0, maintenance: 0 };
+
     let available = 0;
     let rented = 0;
     let maintenance = 0;
-    
-    equipments.forEach(item => {
-      const isRented = item.status === 'rented' || activeBookings?.some(b => b.equipment_id === item.id);
+
+    allEquipments.forEach(item => {
+      const isRented = item.status === 'rented' || activeBookings?.some((b: any) => b.equipment_id === item.id);
       if (isRented) {
         rented++;
       } else if (item.status === 'maintenance') {
@@ -78,9 +93,9 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
         available++;
       }
     });
-    
+
     return { available, rented, maintenance };
-  }, [equipments, activeBookings]);
+  }, [allEquipments, activeBookings]);
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
@@ -91,21 +106,21 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
             <h2 className="text-xl font-black uppercase tracking-tighter">Seu Inventário</h2>
             <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
              <div className="md:col-span-8 relative group">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 group-focus-within:text-primary transition-colors" />
-                <Input 
-                  placeholder="Buscar pelo nome do equipamento..." 
+                <Input
+                  placeholder="Buscar pelo nome do equipamento..."
                   className="pl-10 h-11 bg-zinc-900/50 border-zinc-800/80 focus:border-primary/50 focus:ring-primary/20 transition-all rounded-xl"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
              </div>
-             
+
              <div className="md:col-span-4 relative">
-                <Select 
-                  value={categoryFilter} 
+                <Select
+                  value={categoryFilter}
                   onChange={(e: any) => setCategoryFilter(e.target.value)}
                   className="h-11 bg-zinc-900/50 border-zinc-800/80 rounded-xl focus:ring-primary/20 appearance-none pr-10 cursor-pointer"
                 >
@@ -120,10 +135,10 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
              </div>
           </div>
         </div>
-        
+
         <div className="flex gap-2 w-full md:w-auto">
-           <Button 
-            onClick={onAdd} 
+           <Button
+            onClick={onAdd}
             className="h-11 px-6 font-bold flex-1 md:flex-none uppercase text-xs tracking-widest gap-2 bg-primary hover:bg-primary/90 rounded-xl shadow-[0_0_20px_rgba(var(--primary),0.3)] transition-all transform hover:scale-[1.02] active:scale-[0.98]"
            >
              <Plus className="h-4 w-4" /> Novo Item
@@ -134,7 +149,7 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
       {/* Grid */}
       {isLoading ? (
         <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3, 4, 5].map(i => (
+          {[1, 2, 3, 4, 5, 6].map(i => (
             <div key={i} className="space-y-4">
               <Skeleton className="h-48 w-full rounded-2xl" />
               <div className="space-y-2">
@@ -145,7 +160,7 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
             </div>
           ))}
         </div>
-      ) : equipments?.length === 0 ? (
+      ) : equipments.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 bg-zinc-950/20 border border-dashed border-zinc-800 rounded-3xl text-center space-y-6 animate-in zoom-in-95 duration-500">
           <div className="w-24 h-24 rounded-full bg-zinc-900 flex items-center justify-center shadow-inner">
              <Package className="h-10 w-10 text-zinc-700" />
@@ -158,23 +173,33 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
           </div>
         </div>
       ) : (
-        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {equipments?.map((item) => (
-            <InventoryCard 
-              key={item.id} 
-              item={item} 
-              onEdit={onEdit} 
-              onDelete={onDelete} 
-              onAssign={(item) => setAssigningItem(item)}
-              tenantId={tenantId}
-              activeBooking={activeBookings?.find(b => b.equipment_id === item.id)}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            {equipments.map((item) => (
+              <InventoryCard
+                key={item.id}
+                item={item}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onAssign={(item) => setAssigningItem(item)}
+                tenantId={tenantId}
+                activeBooking={activeBookings?.find((b: any) => b.equipment_id === item.id)}
+              />
+            ))}
+          </div>
+
+          <PaginationBar
+            page={page}
+            totalPages={totalPages}
+            totalItems={totalCount}
+            pageSize={PAGE_SIZE}
+            onPageChange={setPage}
+          />
+        </>
       )}
-      
+
       {/* Stats footer */}
-      {!isLoading && equipments && equipments.length > 0 && (
+      {!isLoading && allEquipments.length > 0 && (
         <div className="pt-8 flex flex-wrap gap-6 border-t border-zinc-900 mt-12 justify-center md:justify-start">
            <div className="flex items-center gap-2.5">
               <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
@@ -185,7 +210,7 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
                  <p className="font-bold text-sm tracking-tighter">{computedStats.available} itens</p>
               </div>
            </div>
-           
+
            <div className="flex items-center gap-2.5">
               <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
                  <Package className="h-4 w-4 text-amber-500" />
@@ -206,9 +231,9 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
               </div>
            </div>
         </div>
-      )/* Stats footer finish */}
+      )}
 
-      <AssignEquipmentModal 
+      <AssignEquipmentModal
         equipment={assigningItem}
         isOpen={!!assigningItem}
         onClose={() => setAssigningItem(null)}

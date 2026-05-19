@@ -11,6 +11,11 @@ export function useEquipment(id: string) {
     });
 }
 
+export interface EquipmentPage {
+    items: Equipment[];
+    count: number;
+}
+
 export function useEquipments(options?: {
     companyId?: string;
     branchId?: string | null;
@@ -19,47 +24,50 @@ export function useEquipments(options?: {
     brand?: string;
     searchQuery?: string;
     ids?: string[];
+    page?: number;
+    pageSize?: number;
 }) {
+    const page = options?.page ?? 0;
+    const pageSize = options?.pageSize;
+
     return useQuery({
         queryKey: ['equipments', options],
-        queryFn: async () => {
-             // Se é um gerente de filial, precisa filtrar pelo estoque da filial dele
+        queryFn: async (): Promise<EquipmentPage> => {
+             // Caminho 1: Gerente de filial — filtra pelo estoque da sua unidade
              if (options?.branchId) {
                  const { data: stockData, error: stockError } = await supabase
                     .from('equipment_stock')
                     .select('equipment_id, quantity')
                     .eq('branch_id', options.branchId)
                     .gt('quantity', 0);
-                 
+
                  if (stockError) throw stockError;
-                 
-                 if (!stockData || stockData.length === 0) return [];
-                 
+                 if (!stockData || stockData.length === 0) return { items: [], count: 0 };
+
                  const equipmentIds = stockData.map(s => s.equipment_id);
-                 
+
                  let query = supabase
                     .from('equipments')
-                    .select('*')
+                    .select('*', { count: 'exact' })
                     .in('id', equipmentIds);
-                    
+
                  if (options?.category) query = query.eq('category', options.category);
                  if (options?.subCategory) query = query.eq('sub_category', options.subCategory);
                  if (options?.brand) query = query.eq('brand', options.brand);
                  if (options?.searchQuery) query = query.ilike('name', `%${options.searchQuery}%`);
-                 
-                 const { data, error } = await query.order('created_at', { ascending: false });
+
+                 query = query.order('created_at', { ascending: false });
+                 if (pageSize !== undefined) query = query.range(page * pageSize, (page + 1) * pageSize - 1);
+
+                 const { data, error, count } = await query;
                  if (error) throw error;
-                 
-                 // Pode injetar a quantidade em estoque real se quiser (opcional)
-                 return data as Equipment[];
+                 return { items: (data ?? []) as Equipment[], count: count ?? 0 };
              }
 
-             // Caso base: buscar itens PRÓPRIOS + itens CEDIDOS à empresa (sub-locação)
+             // Caminho 2: Empresa — busca itens próprios + cedidos (merge, sem filtros)
              if (options?.companyId && !options.category && !options.searchQuery) {
                  const [ownResult, assignedResult] = await Promise.all([
-                     // Itens próprios da empresa
                      EquipmentService.getAllByTenant(options.companyId),
-                     // Itens cedidos por outra locadora para esta empresa gerenciar
                      supabase
                          .from('equipments')
                          .select('*')
@@ -67,51 +75,37 @@ export function useEquipments(options?: {
                          .neq('company_id', options.companyId)
                  ]);
 
-                 const ownItems = ownResult || [];
+                 const ownItems = (ownResult || []) as Equipment[];
                  const assignedItems = (assignedResult.data || []) as Equipment[];
 
-                 // Merge removendo duplicatas
-                 const allIds = new Set(ownItems.map((e: Equipment) => e.id));
-                 const newAssigned = assignedItems.filter(e => !allIds.has(e.id));
-                 return [...ownItems, ...newAssigned] as Equipment[];
+                 const allIds = new Set(ownItems.map(e => e.id));
+                 const merged = [...ownItems, ...assignedItems.filter(e => !allIds.has(e.id))];
+                 const count = merged.length;
+                 const items = pageSize !== undefined ? merged.slice(page * pageSize, (page + 1) * pageSize) : merged;
+                 return { items, count };
              }
 
-            // Fallback para filtros complexos (Marketplace)
+            // Caminho 3: Fallback genérico (Marketplace + filtros)
             let query = supabase
                 .from('equipments')
-                .select('*')
+                .select('*', { count: 'exact' })
                 .neq('status', 'unavailable');
 
             if (options?.companyId) {
-                // Filtra por dono OU por sublocação
                 query = query.or(`company_id.eq.${options.companyId},subrental_company_id.eq.${options.companyId}`);
             }
-
-            if (options?.category) {
-                query = query.eq('category', options.category);
-            }
-
-            if (options?.subCategory) {
-                query = query.eq('sub_category', options.subCategory);
-            }
-
-            if (options?.brand) {
-                query = query.eq('brand', options.brand);
-            }
-
-            if (options?.searchQuery) {
-                query = query.ilike('name', `%${options.searchQuery}%`);
-            }
-            
-            if (options?.ids && options.ids.length > 0) {
-                query = query.in('id', options.ids);
-            }
+            if (options?.category) query = query.eq('category', options.category);
+            if (options?.subCategory) query = query.eq('sub_category', options.subCategory);
+            if (options?.brand) query = query.eq('brand', options.brand);
+            if (options?.searchQuery) query = query.ilike('name', `%${options.searchQuery}%`);
+            if (options?.ids && options.ids.length > 0) query = query.in('id', options.ids);
 
             query = query.order('created_at', { ascending: false });
+            if (pageSize !== undefined) query = query.range(page * pageSize, (page + 1) * pageSize - 1);
 
-            const { data, error } = await query;
+            const { data, error, count } = await query;
             if (error) throw error;
-            return data as Equipment[];
+            return { items: (data ?? []) as Equipment[], count: count ?? 0 };
         },
     });
 }

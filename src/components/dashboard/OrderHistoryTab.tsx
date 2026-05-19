@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { 
@@ -21,12 +21,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { PaginationBar } from '@/components/ui/pagination-bar';
 
 export function OrderHistoryTab() {
   const { user } = useAuth();
   const { tenantId, company, branchId, isBranchManager } = useTenant();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'completed' | 'cancelled' | 'rejected'>('all');
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 15;
 
   const { data: bookingsReceived, isLoading: isLoadingReceived } = useBookings({
     companyId: tenantId || undefined,
@@ -45,6 +48,9 @@ export function OrderHistoryTab() {
     // Remover duplicados (caso o usuário seja locador e locatário ao mesmo tempo)
     .filter((v, i, a) => a.findIndex(t => t.id === v.id) === i)
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+  // Reset página quando filtros mudam
+  useEffect(() => { setPage(0); }, [searchTerm, filterStatus]);
 
   const filteredBookings = allBookings.filter(booking => {
     const matchesSearch = 
@@ -145,8 +151,9 @@ export function OrderHistoryTab() {
           </p>
         </div>
       ) : (
+        <>
         <div className="grid grid-cols-1 gap-4">
-          {filteredBookings.map((booking: any) => {
+          {filteredBookings.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE).map((booking: any) => {
             const d = getDelivery(booking);
             const isRequested = booking.renter_id === user?.id;
             const fulfillmentId = d?.fulfilling_company_id || d?.origin_branch_id;
@@ -209,6 +216,14 @@ export function OrderHistoryTab() {
             );
           })}
         </div>
+        <PaginationBar
+          page={page}
+          totalPages={Math.ceil(filteredBookings.length / PAGE_SIZE)}
+          totalItems={filteredBookings.length}
+          pageSize={PAGE_SIZE}
+          onPageChange={setPage}
+        />
+        </>
       )}
     </div>
   );

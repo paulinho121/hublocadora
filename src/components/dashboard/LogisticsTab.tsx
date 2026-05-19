@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Package, Truck, Clock, MapPin, CheckCircle2, ShoppingBag, ArrowRight, Loader2, Phone, User, Hash, ShieldAlert, Navigation, RotateCcw, Building2, Eye, Info, Weight, Boxes, Ruler, MoreHorizontal, PhoneCall, History, Search, Filter, AlertCircle, ChevronRight, Gauge } from 'lucide-react';
+import { PaginationBar } from '@/components/ui/pagination-bar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -277,6 +278,11 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
     };
 
     const [activeSubTab, setActiveSubTab] = useState<'deliveries' | 'reverse' | 'transfers' | 'availability'>('deliveries');
+    const [deliveryPage, setDeliveryPage] = useState(0);
+    const DELIVERY_PAGE_SIZE = 5;
+
+    // Reset paginação ao mudar de modo (enviar/receber)
+    useEffect(() => { setDeliveryPage(0); }, [logisticsMode]);
 
     const renderOperationalConsole = (delivery: any) => {
         const fulfillmentId = delivery.fulfilling_company_id || delivery.origin_branch_id;
@@ -575,7 +581,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                         </motion.div>
                                     ))}
 
-                                    {activeDeliveries?.map((delivery: any) => (
+                                    {activeDeliveries?.slice(deliveryPage * DELIVERY_PAGE_SIZE, (deliveryPage + 1) * DELIVERY_PAGE_SIZE).map((delivery: any) => (
                                         <motion.div
                                             key={delivery.id}
                                             layout
@@ -779,6 +785,16 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                 </div>
                             )}
                         </AnimatePresence>
+
+                        {(activeDeliveries?.length ?? 0) > DELIVERY_PAGE_SIZE && (
+                            <PaginationBar
+                                page={deliveryPage}
+                                totalPages={Math.ceil((activeDeliveries?.length ?? 0) / DELIVERY_PAGE_SIZE)}
+                                totalItems={activeDeliveries?.length ?? 0}
+                                pageSize={DELIVERY_PAGE_SIZE}
+                                onPageChange={setDeliveryPage}
+                            />
+                        )}
                     </div>
                 </div>
             )}
