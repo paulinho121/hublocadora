@@ -47,6 +47,9 @@ export function PixPaymentModal({ isOpen, onClose, bookingId, amount, onSuccess 
         <Button onClick={copyToClipboard} variant="outline" className="w-full h-12 uppercase text-[10px] font-black tracking-widest rounded-xl">
            {copied ? "PIX Copiado!" : "Copiar Código PIX"}
         </Button>
+        <Button onClick={onSuccess} className="w-full h-12 bg-emerald-500 hover:bg-emerald-600 text-white uppercase text-[10px] font-black tracking-widest rounded-xl mt-2">
+           Simular Pagamento Concluído
+        </Button>
         <p className="text-[9px] uppercase font-black text-zinc-600 tracking-widest">Pagamento Seguro via HUB PAY</p>
       </div>
     </Dialog>

@@ -358,6 +358,19 @@ export default function EquipmentDetails() {
 
         </div>
       </div>
+
+      {createdBookingId && (
+        <PixPaymentModal
+          isOpen={isPixModalOpen}
+          onClose={() => setIsPixModalOpen(false)}
+          bookingId={createdBookingId}
+          amount={equipment.daily_rate * Math.max(1, Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24)))}
+          onSuccess={() => {
+            setIsPixModalOpen(false);
+            navigate('/dashboard/bookings');
+          }}
+        />
+      )}
     </div>
   );
 }
