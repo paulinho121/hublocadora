@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface AnimatedGlowingSearchBarProps {
   value: string;
@@ -7,12 +7,69 @@ interface AnimatedGlowingSearchBarProps {
   placeholder?: string;
 }
 
+const PLACEHOLDERS = [
+  'Câmera Sony A7S III...',
+  'Lente Sigma 24-70mm f/2.8...',
+  'Drone DJI Mavic 3 Pro...',
+  'Gimbal DJI RS 3...',
+  'Monitor de campo Atomos...',
+  'Painel LED bi-color...',
+  'Microfone Sennheiser MKH 416...',
+  'Steadicam Tiffen Flyer...',
+];
+
 const AnimatedGlowingSearchBar = ({
   value,
   onChange,
   onSearch,
-  placeholder = 'Search...',
 }: AnimatedGlowingSearchBarProps) => {
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const [displayText, setDisplayText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    if (value) return; // Para animação enquanto o usuário digita
+
+    const current = PLACEHOLDERS[placeholderIndex];
+
+    if (isPaused) {
+      const timeout = setTimeout(() => setIsPaused(false), 1800);
+      return () => clearTimeout(timeout);
+    }
+
+    if (!isDeleting && displayText === current) {
+      setIsPaused(true);
+      setIsDeleting(true);
+      return;
+    }
+
+    if (isDeleting && displayText === '') {
+      setIsDeleting(false);
+      setPlaceholderIndex(i => (i + 1) % PLACEHOLDERS.length);
+      return;
+    }
+
+    const speed = isDeleting ? 30 : 55;
+    const timeout = setTimeout(() => {
+      setDisplayText(isDeleting
+        ? current.slice(0, displayText.length - 1)
+        : current.slice(0, displayText.length + 1)
+      );
+    }, speed);
+
+    return () => clearTimeout(timeout);
+  }, [displayText, isDeleting, isPaused, placeholderIndex, value]);
+
+  // Reset animação quando o usuário limpa o campo
+  useEffect(() => {
+    if (!value) {
+      setDisplayText('');
+      setIsDeleting(false);
+      setIsPaused(false);
+    }
+  }, [value]);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') onSearch();
   };
@@ -47,15 +104,28 @@ const AnimatedGlowingSearchBar = ({
 
         {/* Input wrapper */}
         <div className="relative group w-full">
+          {/* Animated placeholder — só aparece quando não há valor digitado e não está focado */}
+          {!value && (
+            <div className="pointer-events-none absolute left-[52px] md:left-[60px] top-1/2 -translate-y-1/2 flex items-center gap-[2px] group-focus-within:opacity-0 transition-opacity duration-200 overflow-hidden pr-[52px]">
+              <span className="text-sm md:text-base text-zinc-500 font-medium tracking-wide whitespace-nowrap">
+                {displayText}
+              </span>
+              <span className="inline-block w-[2px] h-[16px] bg-primary/70 animate-pulse rounded-full ml-[1px]" />
+            </div>
+          )}
+
           <input
-            placeholder={placeholder}
             type="text"
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="bg-[#010201] border-none w-full h-[52px] md:h-[56px] rounded-lg text-white px-[52px] md:px-[59px] text-sm md:text-base focus:outline-none placeholder-zinc-500"
+            placeholder=""
+            className="bg-[#010201] border-none w-full h-[52px] md:h-[56px] rounded-lg text-white px-[52px] md:px-[60px] text-sm md:text-base focus:outline-none"
           />
-          <div className="pointer-events-none w-[80px] h-[20px] absolute bg-gradient-to-r from-transparent to-black top-[16px] left-[60px] group-focus-within:hidden" />
+
+          {/* Fade para o botão de filtro — só no lado direito */}
+          <div className="pointer-events-none absolute top-0 right-[50px] h-full w-[40px] bg-gradient-to-l from-[#010201] to-transparent" />
+
           <div className="pointer-events-none w-[30px] h-[20px] absolute bg-[#D81545] top-[10px] left-[5px] blur-2xl opacity-80 transition-all duration-[2000ms] group-hover:opacity-0" />
 
           {/* Right spinning border */}
