@@ -23,6 +23,7 @@ import {
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBookings, useUpdateBookingStatus, useDeleteBooking } from '@/hooks/useBookings';
 import { useEquipments, useDeleteEquipment } from '@/hooks/useEquipments';
@@ -78,6 +79,22 @@ export default function Dashboard() {
 
   const { data: bookingsRequested } = useBookings({
     renterId: user?.id
+  });
+
+  // Pagamentos aprovados confirmados para este tenant
+  const { data: approvedPayments } = useQuery({
+    queryKey: ['payments-approved', tenantId],
+    queryFn: async () => {
+      if (!tenantId) return [];
+      const { data, error } = await supabase
+        .from('payments')
+        .select('amount, booking_id, status')
+        .eq('tenant_id', tenantId)
+        .eq('status', 'approved');
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!tenantId,
   });
 
   const { data: equipmentsPage, isLoading: isLoadingEquipments } = useEquipments({
@@ -259,37 +276,41 @@ export default function Dashboard() {
     return (d as any).fulfilling_company_id || (d as any).origin_branch_id;
   };
 
-  const totalRevenue = bookingsReceived
-    ?.filter(b => b.status === 'completed' || b.status === 'approved' || b.status === 'active')
+  // Receita confirmada: soma dos pagamentos aprovados (fonte mais confiável)
+  const confirmedRevenue = (approvedPayments ?? []).reduce((acc, p) => acc + (p.amount || 0), 0);
+
+  // Receita prevista: todas as reservas não canceladas/rejeitadas (inclui pending)
+  const bookingBasedRevenue = bookingsReceived
+    ?.filter(b => !['cancelled', 'rejected'].includes(b.status))
     .reduce((acc, curr) => {
       const fulfillmentId = getFulfillmentId(curr);
       const isFulfiller = fulfillmentId === tenantId;
       const isOwner = curr.company_id === tenantId;
 
       if (isFulfiller && !isOwner) {
-        // Sou sub-locadora: ganho 50% do total
         return acc + (curr.total_amount * 0.5);
       } else if (isOwner && fulfillmentId && fulfillmentId !== tenantId) {
-        // Sou o dono, mas terceirizei: fico com 50% (comissão)
         return acc + (curr.total_amount * 0.5);
       } else if (isOwner) {
-        // Sou o dono e eu mesmo entreguei: ganho 100%
         return acc + curr.total_amount;
       }
       return acc;
     }, 0) || 0;
+
+  // Usa pagamentos aprovados se existirem, senão usa soma de reservas ativas
+  const totalRevenue = confirmedRevenue > 0 ? confirmedRevenue : bookingBasedRevenue;
 
   const recentOrders = [...(bookingsReceived || []), ...(bookingsRequested || [])]
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 10);
 
   const totalDebt = bookingsReceived
-    ?.filter(b => b.status === 'completed' || b.status === 'approved' || b.status === 'active')
+    ?.filter(b => !['cancelled', 'rejected'].includes(b.status))
     .reduce((acc, curr) => {
       const fulfillmentId = getFulfillmentId(curr);
       const isOwner = curr.company_id === tenantId;
-      
-      // Se sou o dono mas outra empresa entregou, eu devo 50% do valor para ela
+
+      // Sou o dono mas outra empresa entregou: devo 50% para o parceiro
       if (isOwner && fulfillmentId && fulfillmentId !== tenantId) {
         return acc + (curr.total_amount * 0.5);
       }
@@ -473,7 +494,9 @@ export default function Dashboard() {
                           <div className="text-2xl font-black tracking-tighter text-zinc-100 mb-1">
                              {formatCurrency(totalRevenue)}
                           </div>
-                          <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">Saldo disponível</p>
+                          <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">
+                            {confirmedRevenue > 0 ? 'Pagamentos confirmados' : 'Reservas em andamento'}
+                          </p>
                        </CardContent>
                     </Card>
 
@@ -486,7 +509,9 @@ export default function Dashboard() {
                           <div className="text-2xl font-black tracking-tighter text-zinc-100 mb-1">
                              {formatCurrency(totalDebt)}
                           </div>
-                          <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">A PAGAR PARA O HUB</p>
+                          <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">
+                            {totalDebt > 0 ? 'A pagar a parceiros' : 'Sem débitos pendentes'}
+                          </p>
                        </CardContent>
                     </Card>
 
