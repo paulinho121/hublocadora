@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Building2, MapPin, Globe, ChevronDown, ChevronUp, Package, Check, Copy, Loader2, Phone, FileText } from 'lucide-react';
+import { Building2, MapPin, Globe, ChevronDown, ChevronUp, Package, Check, Copy, Loader2, Phone, FileText, Send } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,11 +12,14 @@ interface BranchCardProps {
     branch: Branch;
     onManageStock: () => void;
     onCopyInvite: (token: string, id: string) => void;
+    onResendInvite: (branch: Branch) => void;
     onEdit: () => void;
     isCopied: boolean;
+    isSent: boolean;
+    isResending: boolean;
 }
 
-export function BranchCard({ branch, onManageStock, onCopyInvite, onEdit, isCopied }: BranchCardProps) {
+export function BranchCard({ branch, onManageStock, onCopyInvite, onResendInvite, onEdit, isCopied, isSent, isResending }: BranchCardProps) {
     const [isExpanded, setIsExpanded] = useState(false);
     const { stock, isLoading } = useBranchStock(branch.id);
 
@@ -135,13 +138,23 @@ export function BranchCard({ branch, onManageStock, onCopyInvite, onEdit, isCopi
                 </AnimatePresence>
 
                 <div className="flex gap-3 mt-6" onClick={(e) => e.stopPropagation()}>
-                    <Button 
-                        variant="outline" 
-                        onClick={() => onCopyInvite(branch.invite_token, branch.id)} 
-                        className="h-10 text-[9px] uppercase font-black tracking-widest rounded-xl border-zinc-800 bg-zinc-900/50 flex-1"
+                    <Button
+                        variant="outline"
+                        onClick={() => branch.status === 'invited' ? onResendInvite(branch) : onCopyInvite(branch.invite_token, branch.id)}
+                        disabled={isResending}
+                        className={cn(
+                            "h-10 text-[9px] uppercase font-black tracking-widest rounded-xl flex-1",
+                            branch.status === 'invited'
+                                ? "border-amber-500/30 bg-amber-500/5 text-amber-400 hover:bg-amber-500/10"
+                                : "border-zinc-800 bg-zinc-900/50"
+                        )}
                     >
-                        {isCopied ? <Check className="h-3 w-3 mr-2 text-emerald-500" /> : <Copy className="h-3 w-3 mr-2" />}
-                        Convite
+                        {isResending ? <Loader2 className="h-3 w-3 mr-2 animate-spin" />
+                            : isSent ? <Check className="h-3 w-3 mr-2 text-emerald-500" />
+                            : isCopied ? <Check className="h-3 w-3 mr-2 text-emerald-500" />
+                            : branch.status === 'invited' ? <Send className="h-3 w-3 mr-2" />
+                            : <Copy className="h-3 w-3 mr-2" />}
+                        {isSent ? 'Enviado!' : branch.status === 'invited' ? 'Reenviar' : 'Convite'}
                     </Button>
                     <Button 
                         variant="outline"

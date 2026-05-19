@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, LayoutGrid, List, MapPin, Package, Phone, Building2, ExternalLink, Copy, CheckCircle2, Loader2, FileText } from 'lucide-react';
+import { Plus, LayoutGrid, List, MapPin, Package, Phone, Building2, ExternalLink, Copy, CheckCircle2, Loader2, FileText, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useBranches } from '@/hooks/useBranches';
@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 import { NetworkReportModal } from './NetworkReportModal';
 
 export function BranchesTab({ tenantId }: { tenantId: string }) {
-    const { branches, isLoading, createBranch, updateBranch } = useBranches();
+    const { branches, isLoading, createBranch, updateBranch, resendInvite } = useBranches();
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
     const [isCreating, setIsCreating] = useState(false);
     const [name, setName] = useState('');
@@ -23,6 +23,7 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
     const [phone, setPhone] = useState('');
     const [document, setDocument] = useState('');
     const [copiedId, setCopiedId] = useState<string | null>(null);
+    const [sentInviteId, setSentInviteId] = useState<string | null>(null);
     const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
     const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
     const [isStockModalOpen, setIsStockModalOpen] = useState(false);
@@ -92,10 +93,28 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
     };
 
     const copyInviteLink = (token: string, id: string) => {
+        if (!token) {
+            alert('Token de convite não disponível. Tente recriar a unidade.');
+            return;
+        }
         const link = `${window.location.origin}/invite/${token}`;
         navigator.clipboard.writeText(link);
         setCopiedId(id);
         setTimeout(() => setCopiedId(null), 2000);
+    };
+
+    const handleResendInvite = async (branch: Branch) => {
+        if (!branch.manager_email) {
+            alert('Esta unidade não tem e-mail de gestor cadastrado.');
+            return;
+        }
+        try {
+            await resendInvite.mutateAsync(branch);
+            setSentInviteId(branch.id);
+            setTimeout(() => setSentInviteId(null), 3000);
+        } catch (err: any) {
+            alert('Erro ao reenviar convite: ' + (err.message || 'Tente novamente.'));
+        }
     };
 
     if (isLoading) return null;
@@ -262,11 +281,14 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
             {viewMode === 'grid' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {branches?.map((branch) => (
-                        <BranchCard 
+                        <BranchCard
                             key={branch.id}
                             branch={branch}
                             isCopied={copiedId === branch.id}
+                            isSent={sentInviteId === branch.id}
+                            isResending={resendInvite.isPending && sentInviteId === branch.id}
                             onCopyInvite={copyInviteLink}
+                            onResendInvite={handleResendInvite}
                             onEdit={() => handleEdit(branch)}
                             onManageStock={() => {
                                 setSelectedBranch(branch);
@@ -323,23 +345,45 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
-                                            <Button 
-                                                variant="ghost" 
-                                                size="sm" 
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
                                                 onClick={() => handleEdit(branch)}
                                                 className="h-9 w-9 rounded-xl border border-zinc-900 hover:bg-zinc-900"
+                                                title="Editar unidade"
                                             >
                                                 <ExternalLink className="h-4 w-4 text-zinc-500" />
                                             </Button>
-                                            <Button 
-                                                variant="ghost" 
-                                                size="sm" 
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
                                                 onClick={() => copyInviteLink(branch.invite_token, branch.id)}
                                                 className="h-9 w-9 rounded-xl border border-zinc-900 hover:bg-zinc-900"
+                                                title="Copiar link do convite"
                                             >
                                                 {copiedId === branch.id ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4 text-zinc-500" />}
                                             </Button>
-                                            <Button 
+                                            {branch.status === 'invited' && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleResendInvite(branch)}
+                                                    disabled={resendInvite.isPending}
+                                                    className="h-9 rounded-xl border border-amber-500/30 hover:bg-amber-500/10 px-3 gap-1.5"
+                                                    title="Reenviar e-mail de convite"
+                                                >
+                                                    {resendInvite.isPending && sentInviteId === branch.id
+                                                        ? <Loader2 className="h-3 w-3 animate-spin text-amber-400" />
+                                                        : sentInviteId === branch.id
+                                                            ? <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                                                            : <Send className="h-3 w-3 text-amber-400" />
+                                                    }
+                                                    <span className="text-[9px] font-black uppercase tracking-widest text-amber-400">
+                                                        {sentInviteId === branch.id ? 'Enviado' : 'Reenviar'}
+                                                    </span>
+                                                </Button>
+                                            )}
+                                            <Button
                                                 onClick={() => {
                                                     setSelectedBranch(branch);
                                                     setIsStockModalOpen(true);

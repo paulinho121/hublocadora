@@ -94,6 +94,43 @@ export class EmailService {
     });
   }
 
+  static async sendBranchInvite(params: { to: string; branchName: string; inviteLink: string; masterName: string }) {
+    return this.send({
+      to: params.to,
+      subject: `Convite CineHub — Gerencie a unidade ${params.branchName}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0f0f0f;color:#f5f5f5;border-radius:12px;overflow:hidden;">
+          <div style="background:linear-gradient(135deg,#D81545,#7a0020);padding:32px;text-align:center;">
+            <h1 style="margin:0;font-size:28px;color:#fff;letter-spacing:-1px;">CINE<span style="color:#ff6b6b;">•</span>HUB</h1>
+            <p style="margin:8px 0 0;color:rgba(255,255,255,0.7);font-size:13px;">Hub de Produção Cinematográfica</p>
+          </div>
+          <div style="padding:32px;">
+            <h2 style="color:#fff;margin-top:0;">Você foi convidado!</h2>
+            <p style="color:#ccc;line-height:1.6;">
+              <strong style="color:#fff;">${params.masterName}</strong> convidou você para gerenciar a unidade
+              <strong style="color:#D81545;">${params.branchName}</strong> na plataforma CineHub.
+            </p>
+            <p style="color:#aaa;line-height:1.6;font-size:14px;">
+              Clique no botão abaixo para criar sua senha de acesso e ativar sua conta. O link é exclusivo para este convite.
+            </p>
+            <div style="text-align:center;margin:32px 0;">
+              <a href="${params.inviteLink}"
+                 style="background:#D81545;color:#fff;padding:16px 36px;border-radius:10px;text-decoration:none;font-weight:bold;font-size:15px;letter-spacing:0.5px;">
+                Aceitar Convite →
+              </a>
+            </div>
+            <p style="color:#555;font-size:12px;text-align:center;">
+              Se você não esperava este convite, pode ignorar este e-mail com segurança.
+            </p>
+          </div>
+          <div style="border-top:1px solid #222;padding:16px 32px;text-align:center;color:#555;font-size:12px;">
+            CineHub · O Hub da sua produção cinematográfica
+          </div>
+        </div>
+      `,
+    });
+  }
+
   static async sendPasswordReset(params: { to: string; name: string; resetLink: string }) {
     return this.send({
       to: params.to,

@@ -72,10 +72,23 @@ export default function AcceptInvite() {
             return;
         }
 
-        // 2. Aguardar um pouco para garantir que a trigger criou o profile
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // 2. Aguardar a trigger do Supabase criar o profile (retry até 10s)
+        const userId = authData.user?.id;
+        if (userId) {
+            let profileReady = false;
+            for (let i = 0; i < 10; i++) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                const { data: p } = await supabase.from('profiles').select('id').eq('id', userId).maybeSingle();
+                if (p) { profileReady = true; break; }
+            }
+            if (!profileReady) {
+                setError('Timeout ao criar perfil. Tente novamente ou contate o suporte.');
+                setSubmitting(false);
+                return;
+            }
+        }
 
-        // 3. Chamar a RPC para vincular a branch
+        // 3. Vincular a branch ao novo usuário
         const { error: rpcError } = await supabase.rpc('accept_branch_invite', { p_token: token });
 
         if (rpcError) {
@@ -84,8 +97,7 @@ export default function AcceptInvite() {
             return;
         }
 
-        alert('Conta ativada com sucesso! Você já pode acessar a gestão.');
-        navigate('/login');
+        navigate('/login', { state: { message: 'Conta ativada com sucesso! Faça login para acessar a gestão.' } });
     };
 
     if (loading) {
