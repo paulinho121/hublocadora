@@ -13,7 +13,7 @@ import { NetworkReportModal } from './NetworkReportModal';
 
 export function BranchesTab({ tenantId }: { tenantId: string }) {
     const { branches, isLoading, createBranch, updateBranch } = useBranches();
-    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
     const [isCreating, setIsCreating] = useState(false);
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
