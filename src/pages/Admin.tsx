@@ -21,7 +21,7 @@ import {
 
 import { Dialog } from '@/components/ui/dialog';
 
-type TabType = 'overview' | 'companies' | 'bookings' | 'users';
+type TabType = 'overview' | 'companies' | 'bookings' | 'users' | 'network';
 type DateRange = '7d' | '30d' | '90d' | 'all';
 
 const BRL = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(v);
@@ -42,6 +42,8 @@ export default function Admin() {
   const [dateRange, setDateRange] = useState<DateRange>('30d');
   const [searchTerm, setSearchTerm] = useState('');
   const [userSearch, setUserSearch] = useState('');
+  const [networkSearch, setNetworkSearch] = useState('');
+  const [networkStatusFilter, setNetworkStatusFilter] = useState<'all' | 'active' | 'pending' | 'suspended'>('all');
   const [selectedCompanyForDetail, setSelectedCompanyForDetail] = useState<any | null>(null);
   const [selectedLogisticsBooking, setSelectedLogisticsBooking] = useState<any | null>(null);
   const [updatingCompanyId, setUpdatingCompanyId] = useState<string | null>(null);
@@ -86,12 +88,13 @@ export default function Admin() {
   const { data: profiles, isLoading: profilesLoading } = useQuery({
     queryKey: ['admin-profiles'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*, company:companies(name)')
-        .order('created_at', { ascending: false });
+      const { data, error } = await supabase.rpc('admin_get_all_profiles');
       if (error) throw error;
-      return data;
+      return data as Array<{
+        id: string; email: string; full_name: string | null;
+        role: string; company_id: string | null;
+        created_at: string; updated_at: string; company_name: string | null;
+      }>;
     },
     enabled: !!profile && profile.role === 'admin',
   });
@@ -235,6 +238,21 @@ export default function Admin() {
     p.email?.toLowerCase().includes(userSearch.toLowerCase())
   );
 
+  // --- NETWORK (locadoras) FILTER ---
+  const networkCompanies = useMemo(() => {
+    return (companies || []).filter(c => {
+      const matchesSearch =
+        c.name?.toLowerCase().includes(networkSearch.toLowerCase()) ||
+        c.document?.includes(networkSearch);
+      const matchesStatus =
+        networkStatusFilter === 'all' ||
+        (networkStatusFilter === 'active' && (c.status === 'approved' || c.status === 'active')) ||
+        (networkStatusFilter === 'pending' && c.status === 'pending') ||
+        (networkStatusFilter === 'suspended' && c.status === 'suspended');
+      return matchesSearch && matchesStatus;
+    });
+  }, [companies, networkSearch, networkStatusFilter]);
+
   const hasUrgentActions = urgentPendingBookings.length > 0 || pendingCompanies.length > 0;
 
   return (
@@ -365,6 +383,7 @@ export default function Admin() {
         <div className="flex gap-8 border-b border-zinc-900/50 pb-0">
           {([
             { id: 'overview', label: 'Dashboard', icon: BarChart3 },
+            { id: 'network', label: 'Minha Rede', icon: Globe },
             { id: 'companies', label: 'Ecossistema', icon: Building2, badge: pendingCompanies.length },
             { id: 'bookings', label: 'Fluxo de Caixa', icon: Truck, badge: urgentPendingBookings.length },
             { id: 'users', label: 'Usuários', icon: Users },
@@ -527,6 +546,161 @@ export default function Admin() {
                 )}
               </CardContent>
             </Card>
+          </div>
+        )}
+
+        {/* ===== MINHA REDE TAB ===== */}
+        {activeTab === 'network' && (
+          <div className="space-y-6 animate-in fade-in duration-500">
+
+            {/* Summary cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { label: 'Total de Parceiros', value: (companies || []).length, color: 'text-zinc-300' },
+                { label: 'Operando', value: activeCompanies.length, color: 'text-emerald-400' },
+                { label: 'Aguard. KYC', value: pendingCompanies.length, color: 'text-amber-400' },
+                { label: 'Suspensos', value: (companies || []).filter(c => c.status === 'suspended').length, color: 'text-red-400' },
+              ].map((s, i) => (
+                <div key={i} className="bg-zinc-950 border border-zinc-900 rounded-2xl p-5 flex items-center gap-4">
+                  <div>
+                    <p className="text-[9px] font-black uppercase text-zinc-500 tracking-widest">{s.label}</p>
+                    <h4 className={`text-2xl font-black tracking-tight ${s.color}`}>{s.value}</h4>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Filters */}
+            <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+              <div className="relative w-full max-w-lg">
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600" />
+                <input
+                  type="text"
+                  placeholder="Buscar locadora ou CNPJ..."
+                  className="w-full bg-zinc-950 border border-zinc-900 rounded-2xl py-3.5 pl-12 pr-5 text-sm font-bold text-white focus:outline-none focus:border-primary/50 transition-all placeholder:text-zinc-700"
+                  value={networkSearch}
+                  onChange={e => setNetworkSearch(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-2">
+                {(['all', 'active', 'pending', 'suspended'] as const).map(f => (
+                  <button
+                    key={f}
+                    onClick={() => setNetworkStatusFilter(f)}
+                    className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
+                      networkStatusFilter === f
+                        ? 'bg-primary/10 border-primary/30 text-primary'
+                        : 'bg-zinc-950 border-zinc-900 text-zinc-500 hover:text-white'
+                    }`}
+                  >
+                    {f === 'all' ? 'Todas' : f === 'active' ? 'Ativas' : f === 'pending' ? 'Pendentes' : 'Suspensas'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Network table */}
+            <div className="bg-zinc-950 border border-zinc-900 rounded-2xl overflow-hidden">
+              <table className="w-full text-left">
+                <thead className="bg-zinc-900/40">
+                  <tr>
+                    {['Locadora', 'Status', 'Itens', 'Pedidos', 'Volume Gerado', 'Repasse HUB (15%)', 'Cadastro', 'Ações'].map((h, i) => (
+                      <th key={i} className="p-5 text-[9px] font-black uppercase text-zinc-500 tracking-widest whitespace-nowrap">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-900">
+                  {companiesLoading ? (
+                    <tr><td colSpan={8} className="p-16 text-center"><Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" /></td></tr>
+                  ) : networkCompanies.length === 0 ? (
+                    <tr><td colSpan={8} className="p-16 text-center text-zinc-600 font-black uppercase tracking-widest text-xs">Nenhuma locadora encontrada.</td></tr>
+                  ) : networkCompanies.map((company: any) => {
+                    const companyBookings = (bookings || []).filter(b => b.company_id === company.id);
+                    const companyVolume = companyBookings.reduce((s, b) => s + (b.total_amount || 0), 0);
+                    const companyItems = (equipments || []).filter((e: any) => e.company_id === company.id).length;
+                    return (
+                      <tr key={company.id} className="hover:bg-white/[0.015] transition-colors group">
+                        <td className="p-5">
+                          <div className="flex items-center gap-3">
+                            <div className="h-9 w-9 bg-zinc-900 rounded-xl border border-zinc-800 flex items-center justify-center font-black text-zinc-400 text-sm shrink-0">
+                              {company.name?.charAt(0)}
+                            </div>
+                            <div>
+                              <p className="text-xs font-black text-zinc-200 group-hover:text-primary transition-colors">{company.name}</p>
+                              <p className="text-[9px] text-zinc-600 font-bold">{company.document}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-5">
+                          <Badge className={`text-[8px] font-black uppercase border-none px-2 ${
+                            company.status === 'approved' || company.status === 'active' ? 'bg-emerald-500/10 text-emerald-500' :
+                            company.status === 'pending' ? 'bg-amber-500/10 text-amber-500' :
+                            company.status === 'suspended' ? 'bg-red-500/10 text-red-500' :
+                            'bg-zinc-800 text-zinc-400'
+                          }`}>
+                            {company.status === 'approved' ? 'Operando' : company.status === 'pending' ? 'KYC Pendente' : company.status === 'suspended' ? 'Suspenso' : company.status}
+                          </Badge>
+                        </td>
+                        <td className="p-5 text-sm font-black text-zinc-300">{companyItems}</td>
+                        <td className="p-5 text-sm font-black text-zinc-300">{companyBookings.length}</td>
+                        <td className="p-5 text-sm font-black text-zinc-200">{BRL(companyVolume)}</td>
+                        <td className="p-5 text-sm font-black text-emerald-400">{BRL(companyVolume * 0.15)}</td>
+                        <td className="p-5 text-[10px] text-zinc-500 font-medium whitespace-nowrap">
+                          {new Date(company.created_at).toLocaleDateString('pt-BR')}
+                        </td>
+                        <td className="p-5">
+                          <div className="flex items-center gap-2">
+                            {company.status === 'pending' && (
+                              <Button
+                                size="sm"
+                                onClick={() => updateCompanyStatus.mutate({ id: company.id, status: 'approved' })}
+                                disabled={updatingCompanyId === company.id}
+                                className="bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase text-[9px] tracking-widest h-7 px-3 rounded-lg"
+                              >
+                                {updatingCompanyId === company.id ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Aprovar'}
+                              </Button>
+                            )}
+                            {(company.status === 'approved' || company.status === 'active') && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => updateCompanyStatus.mutate({ id: company.id, status: 'suspended' })}
+                                disabled={updatingCompanyId === company.id}
+                                className="h-7 w-7 p-0 rounded-lg hover:bg-red-500/10 text-zinc-500 hover:text-red-500"
+                                title="Suspender"
+                              >
+                                {updatingCompanyId === company.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Ban className="h-3.5 w-3.5" />}
+                              </Button>
+                            )}
+                            {company.status === 'suspended' && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => updateCompanyStatus.mutate({ id: company.id, status: 'approved' })}
+                                disabled={updatingCompanyId === company.id}
+                                className="h-7 w-7 p-0 rounded-lg hover:bg-emerald-500/10 text-zinc-500 hover:text-emerald-500"
+                                title="Reativar"
+                              >
+                                {updatingCompanyId === company.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
+                              </Button>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setSelectedCompanyForDetail(company)}
+                              className="h-7 w-7 p-0 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-white"
+                              title="Ver detalhes"
+                            >
+                              <ArrowUpRight className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 
