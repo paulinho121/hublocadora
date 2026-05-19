@@ -141,6 +141,34 @@ export function useUpdateBookingStatus() {
     });
 }
 
+export function useDeleteBooking() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (id: string) => {
+            const { error } = await supabase.from('bookings').delete().eq('id', id);
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['bookings'] });
+        },
+    });
+}
+
+export function useEditBooking() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ id, data }: { id: string; data: Partial<Pick<Booking, 'start_date' | 'end_date' | 'quantity' | 'status' | 'notes' | 'total_amount'>> }) => {
+            const { error } = await supabase.from('bookings').update(data).eq('id', id);
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['bookings'] });
+        },
+    });
+}
+
 export function useEquipmentOccupiedDates(id: string) {
     return useQuery({
         queryKey: ['equipment-occupied', id],

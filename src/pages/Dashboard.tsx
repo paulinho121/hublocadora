@@ -3,26 +3,28 @@ import { useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Loader2, 
-  Plus, 
-  Package, 
-  TrendingUp, 
-  CalendarDays, 
-  AlertCircle, 
-  BarChart3, 
+import {
+  Loader2,
+  Plus,
+  Package,
+  TrendingUp,
+  CalendarDays,
+  AlertCircle,
+  BarChart3,
   ArrowRight,
   MapPin,
   Truck,
   ArrowDownLeft,
   ArrowUpRight,
-  Heart
+  Heart,
+  Pencil,
+  Trash2
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { useBookings, useUpdateBookingStatus } from '@/hooks/useBookings';
+import { useBookings, useUpdateBookingStatus, useDeleteBooking } from '@/hooks/useBookings';
 import { useEquipments, useDeleteEquipment } from '@/hooks/useEquipments';
 import { useFavorites } from '@/hooks/useFavorites';
 import { EquipmentCard } from '@/components/marketplace/EquipmentCard';
@@ -53,6 +55,7 @@ import { AuditTab } from '@/components/dashboard/AuditTab';
 import { OrderHistoryTab } from '@/components/dashboard/OrderHistoryTab';
 import { ReportsTab } from '@/components/dashboard/ReportsTab';
 import { CompanyProfileSettings } from '@/components/dashboard/CompanyProfileSettings';
+import { EditBookingModal } from '@/components/dashboard/EditBookingModal';
 
 type TabType = 'overview' | 'inventory' | 'bookings' | 'logistics' | 'reports' | 'network' | 'settings' | 'audit' | 'history' | 'favorites';
 const VALID_TABS: TabType[] = ['overview', 'inventory', 'bookings', 'logistics', 'reports', 'network', 'settings', 'audit', 'history', 'favorites'];
@@ -84,6 +87,7 @@ export default function Dashboard() {
   
   const deleteMutation = useDeleteEquipment();
   const updateStatusMutation = useUpdateBookingStatus();
+  const deleteBookingMutation = useDeleteBooking();
 
   // Other UI state
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -97,6 +101,10 @@ export default function Dashboard() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  // Booking edit/delete state
+  const [editingBooking, setEditingBooking] = useState<any | null>(null);
+  const [deletingBookingId, setDeletingBookingId] = useState<string | null>(null);
 
   // Modal de roteamento: master seleciona de qual sub-locadora o item sairá
   const [fulfillmentModal, setFulfillmentModal] = useState<{
@@ -647,7 +655,7 @@ export default function Dashboard() {
                              </div>
                           </div>
                           
-                          <div className="flex items-center gap-8">
+                          <div className="flex items-center gap-4">
                              <div className="text-right hidden sm:block">
                                 <p className="text-[9px] uppercase font-black text-zinc-600 tracking-widest mb-1">Período</p>
                                 <p className="text-xs font-bold text-zinc-400">{format(new Date(booking.start_date), "dd/MM")} - {format(new Date(booking.end_date), "dd/MM")}</p>
@@ -662,14 +670,35 @@ export default function Dashboard() {
 
                                       if (isFulfiller && !isOwner) amount = amount * 0.5;
                                       else if (isOwner && fulfillmentId && fulfillmentId !== tenantId) amount = amount * 0.5;
-                                      
+
                                       return formatCurrency(amount);
                                    })()}
                                 </div>
                                 <Badge className={`text-[8px] uppercase font-black tracking-tighter h-4 ${
-                                   booking.status === 'approved' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 
+                                   booking.status === 'approved' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
                                    booking.status === 'pending' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : ''
                                 }`}>{booking.status}</Badge>
+                             </div>
+                             <div className="flex flex-col gap-2 ml-2">
+                                <Button
+                                   size="sm"
+                                   variant="ghost"
+                                   onClick={() => setEditingBooking(booking)}
+                                   className="h-8 w-8 p-0 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white"
+                                   title="Editar pedido"
+                                >
+                                   <Pencil className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button
+                                   size="sm"
+                                   variant="ghost"
+                                   disabled={deletingBookingId === booking.id}
+                                   onClick={() => setDeletingBookingId(booking.id)}
+                                   className="h-8 w-8 p-0 rounded-lg hover:bg-red-500/10 text-zinc-400 hover:text-red-500"
+                                   title="Excluir pedido"
+                                >
+                                   {deletingBookingId === booking.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                                </Button>
                              </div>
                           </div>
                        </div>
@@ -840,14 +869,30 @@ export default function Dashboard() {
         {trackingBookingId && <BookingTrackingModal bookingId={trackingBookingId} />}
       </Dialog>
       
-      <ConfirmDeleteModal 
-        isOpen={deleteModalOpen} 
-        onClose={() => setDeleteModalOpen(false)} 
+      <ConfirmDeleteModal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
         loading={deleteMutation.isPending}
       />
 
+      <EditBookingModal
+        booking={editingBooking}
+        isOpen={!!editingBooking}
+        onClose={() => setEditingBooking(null)}
+      />
 
+      <ConfirmDeleteModal
+        isOpen={!!deletingBookingId}
+        onClose={() => setDeletingBookingId(null)}
+        onConfirm={async () => {
+          if (deletingBookingId) {
+            await deleteBookingMutation.mutateAsync(deletingBookingId);
+            setDeletingBookingId(null);
+          }
+        }}
+        loading={deleteBookingMutation.isPending}
+      />
 
     </div>
   );
