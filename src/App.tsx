@@ -73,10 +73,21 @@ function Navbar() {
 
         <div className="flex items-center space-x-6">
           {user ? (
-            <div className="flex items-center gap-6">
-              <span className="text-xs font-black uppercase tracking-widest text-muted-foreground hidden lg:inline-block">
-                {user.email}
-              </span>
+            <div className="flex items-center gap-4">
+              <div className="hidden lg:flex items-center gap-2.5">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                </span>
+                <div className="flex flex-col leading-none">
+                  <span className="text-[11px] font-black uppercase tracking-widest text-white/90">
+                    {profile?.full_name ?? user.email?.split('@')[0]}
+                  </span>
+                  <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-emerald-500">
+                    Online
+                  </span>
+                </div>
+              </div>
               <Button size="sm" variant="ghost" onClick={handleLogout} className="text-muted-foreground hover:text-destructive h-10 px-4 rounded-xl font-black uppercase text-xs tracking-widest">
                 <LogOut className="h-4 w-4 mr-2" />
                 Sair
