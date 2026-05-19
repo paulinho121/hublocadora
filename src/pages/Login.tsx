@@ -78,10 +78,10 @@ export default function Login() {
 
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-zinc-950 p-4 relative overflow-hidden">
+        <div className="min-h-[100dvh] flex items-center justify-center bg-zinc-950 p-4 relative overflow-hidden">
             {/* Ambient Background Glow */}
-            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px]" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-[120px]" />
+            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[60px] md:blur-[120px]" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-[60px] md:blur-[120px]" />
 
             <Card className="w-full max-w-md glass-dark border-zinc-800/50 relative z-10 shadow-2xl">
                 <CardHeader className="space-y-1 flex flex-col items-center text-center pb-8 border-b border-zinc-800/30 mb-6">

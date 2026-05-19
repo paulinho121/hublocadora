@@ -187,11 +187,11 @@ export default function Marketplace() {
             <span className="text-[9px] font-black uppercase tracking-[0.25em] text-primary">O Hub da sua produção</span>
           </motion.div>
           {/* Headline */}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-black tracking-tighter text-white mb-3 leading-[0.9]">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-black tracking-tighter text-white mb-3 leading-[0.9]">
             Encontre o equipamento<br />
             <span className="text-primary">perfeito</span> para o seu set.
           </h1>
-          <p className="text-zinc-500 text-sm md:text-base font-medium mb-10 max-w-xl">
+          <p className="text-zinc-400 text-sm md:text-base font-medium mb-10 max-w-xl">
             A maior infraestrutura cinematográfica do Brasil — tecnologia high-end e logística inteligente.
           </p>
 
@@ -233,7 +233,7 @@ export default function Marketplace() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.6 }}
-            className="mt-6 flex overflow-x-auto no-scrollbar md:flex-wrap md:justify-center gap-2.5 w-full px-6 md:px-0 py-2 max-w-full touch-pan-x snap-x scroll-smooth"
+            className="mt-10 flex overflow-x-auto no-scrollbar md:flex-wrap md:justify-center gap-2.5 w-full px-6 md:px-0 py-2 max-w-full touch-pan-x snap-x scroll-smooth"
           >
             {categories.map((cat, idx) => (
               <motion.button

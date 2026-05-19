@@ -84,7 +84,7 @@
     --secondary: 240 3.7% 12%;
     --secondary-foreground: 0 0% 98%;
     --muted: 240 3.7% 12%;
-    --muted-foreground: 240 5% 60%;
+    --muted-foreground: 240 5% 65%;
     --accent: 348 83% 47%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
@@ -223,8 +223,24 @@
 .clay-inset {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 1.25rem;
-  box-shadow: 
+  box-shadow:
     inset 6px 6px 12px rgba(0, 0, 0, 0.5),
     inset -6px -6px 12px rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+/* Safe area for iOS bottom bar */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Touch-friendly: disable hover on touch devices */
+@media (hover: none) {
+  .clay-card:hover {
+    transform: none;
+    box-shadow:
+      8px 8px 16px rgba(0, 0, 0, 0.4),
+      inset -6px -6px 12px rgba(0, 0, 0, 0.5),
+      inset 6px 6px 12px rgba(255, 255, 255, 0.03);
+  }
 }

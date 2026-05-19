@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import { 
-  ShieldAlert, 
-  Trash2, 
-  Download, 
-  Lock, 
+import {
+  ShieldAlert,
+  Trash2,
+  Download,
+  Lock,
   AlertCircle,
   Loader2,
-  CheckCircle2
+  CheckCircle2,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,6 +20,15 @@ export function PrivacySettings() {
     const [isDeleting, setIsDeleting] = useState(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [soundEnabled, setSoundEnabled] = useState(() => {
+        return localStorage.getItem('notification-sound') !== 'false';
+    });
+
+    const toggleSound = () => {
+        const next = !soundEnabled;
+        setSoundEnabled(next);
+        localStorage.setItem('notification-sound', String(next));
+    };
 
     const handleAnonymize = async () => {
         if (!user) return;
@@ -58,6 +69,24 @@ export function PrivacySettings() {
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-8 space-y-8">
+                    {/* SOM DE NOTIFICAÇÕES */}
+                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 p-6 bg-zinc-900/40 border border-zinc-900 rounded-2xl">
+                        <div className="space-y-1">
+                            <h4 className="text-sm font-bold text-zinc-100 flex items-center gap-2">
+                                {soundEnabled ? <Volume2 className="h-4 w-4 text-primary" /> : <VolumeX className="h-4 w-4 text-zinc-500" />}
+                                Som de Notificações
+                            </h4>
+                            <p className="text-[10px] text-zinc-500 font-medium">Alerta sonoro ao receber um novo pedido em tempo real.</p>
+                        </div>
+                        <Button
+                            variant="outline"
+                            onClick={toggleSound}
+                            className={`w-full md:w-auto rounded-xl text-[10px] uppercase font-black tracking-widest px-6 border-zinc-800 transition-colors ${soundEnabled ? 'text-primary border-primary/30' : 'text-zinc-500'}`}
+                        >
+                            {soundEnabled ? 'Ativado — Desativar' : 'Desativado — Ativar'}
+                        </Button>
+                    </div>
+
                     {/* PORTABILIDADE */}
                     <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 p-6 bg-zinc-900/40 border border-zinc-900 rounded-2xl">
                         <div className="space-y-1">
