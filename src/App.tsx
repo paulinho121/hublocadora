@@ -4,6 +4,7 @@ import { LogOut, LayoutDashboard, Settings, ShoppingBag, User, BarChart3, Packag
 import { Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import CineHubLogo from '@/components/ui/cinehub-logo';
 import { QueryClientProvider } from '@tanstack/react-query';
 
 // Context & Auth
@@ -59,7 +60,7 @@ function Navbar() {
       <div className="container flex h-16 md:h-20 items-center justify-between mx-auto px-6 max-w-7xl">
         <div className="flex items-center gap-12">
           <Link to="/" className="flex items-center transition-transform hover:scale-105 active:scale-95">
-            <img src="/logo.png" alt="Moving Logo" className="h-10 md:h-12 w-auto object-contain" />
+            <CineHubLogo />
           </Link>
           <nav className="hidden md:flex items-center space-x-8 text-xs font-black text-muted-foreground uppercase tracking-[0.2em]">
             <NavLink to="/dashboard" className={({isActive}) => isActive ? "text-primary" : "hover:text-foreground transition-all"}>Locadora</NavLink>
