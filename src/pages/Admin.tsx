@@ -54,20 +54,29 @@ export default function Admin() {
   useEffect(() => {
     if (!profile || profile.role !== 'admin') return;
 
+    const syncState = (ch: ReturnType<typeof supabase.channel>) => {
+      const state = ch.presenceState<{ user_id: string; email: string; last_sign_in_at: string | null; is_admin_observer?: boolean }>();
+      const map: Record<string, { email: string; last_sign_in_at: string | null }> = {};
+      Object.values(state).flat().forEach((p) => {
+        if (p.user_id && !p.is_admin_observer) map[p.user_id] = { email: p.email, last_sign_in_at: p.last_sign_in_at };
+      });
+      setOnlineUsers(map);
+    };
+
     const channel = supabase.channel('hub:online', {
-      config: { presence: { key: 'admin-observer' } },
+      config: { presence: { key: `admin-${profile.id}` } },
     });
 
     channel
-      .on('presence', { event: 'sync' }, () => {
-        const state = channel.presenceState<{ user_id: string; email: string; last_sign_in_at: string | null }>();
-        const map: Record<string, { email: string; last_sign_in_at: string | null }> = {};
-        Object.values(state).flat().forEach((p) => {
-          if (p.user_id) map[p.user_id] = { email: p.email, last_sign_in_at: p.last_sign_in_at };
-        });
-        setOnlineUsers(map);
-      })
-      .subscribe();
+      .on('presence', { event: 'sync' }, () => syncState(channel))
+      .on('presence', { event: 'join' }, () => syncState(channel))
+      .on('presence', { event: 'leave' }, () => syncState(channel))
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          // O canal precisa chamar track() para receber o presenceState completo do servidor
+          await channel.track({ user_id: profile.id, email: profile.email, last_sign_in_at: null, is_admin_observer: true });
+        }
+      });
 
     return () => { supabase.removeChannel(channel); };
   }, [profile?.role]);
