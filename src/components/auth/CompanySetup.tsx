@@ -11,13 +11,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { validateDocument } from '@/lib/document-validators';
 
 const FORM_CACHE_KEY = 'cinehub_company_setup_draft';
 
 const companySchema = z.object({
   full_name: z.string().min(3, 'Seu nome completo deve ter pelo menos 3 caracteres'),
   name: z.string().min(3, 'O nome da empresa deve ter pelo menos 3 caracteres'),
-  document: z.string().min(14, 'Documento inválido'),
+  document: z.string().min(14, 'Documento inválido').refine(
+    (val) => validateDocument(val),
+    { message: 'CPF ou CNPJ inválido — verifique os dígitos' }
+  ),
   phone: z.string().min(10, 'Telefone inválido'),
   description: z.string().optional(),
   address_street: z.string().min(1, 'Logradouro é obrigatório'),
