@@ -589,7 +589,7 @@ export default function Dashboard() {
                                               </Badge>
                                            </div>
                                            <p className="text-[10px] uppercase text-zinc-500 font-bold tracking-widest truncate">
-                                              {isRequested ? 'Destino: Seu Estoque' : `Solicitante: ${booking.renter?.company?.name || booking.renter?.full_name}`}
+                                              {isRequested ? 'Destino: Seu Estoque' : `Solicitante: ${booking.renter?.company?.name || booking.renter?.full_name || 'Desconhecido'}`}
                                            </p>
                                         </div>
                                      </div>

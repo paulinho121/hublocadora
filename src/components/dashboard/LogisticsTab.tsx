@@ -201,15 +201,15 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                 origin_branch_id: selectedBranchId || delivery.origin_branch_id
             });
             
-            // Se o status final da entrega foi atingido, marcamos o pedido como concluído
-            // para que ele apareça no Histórico.
+            // Quando a entrega é confirmada (item chegou ao cliente), marca o pedido como ativo.
+            // O pedido só será 'completed' quando o item for devolvido e conferido.
             if (nextStatus === 'confirmed' && delivery.booking_id) {
                 const { error: bookingError } = await supabase
                     .from('bookings')
-                    .update({ status: 'completed' })
+                    .update({ status: 'active' })
                     .eq('id', delivery.booking_id);
-                
-                if (bookingError) console.error('Erro ao finalizar pedido:', bookingError);
+
+                if (bookingError) console.error('Erro ao ativar pedido:', bookingError);
             }
             
             console.log("Logística atualizada com sucesso!");
@@ -909,13 +909,23 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                             <p className="text-[10px] text-indigo-400 font-black uppercase tracking-widest mb-1">Aguardando Conferência de Reentrada</p>
                                                             <p className="text-[11px] text-zinc-500">Valide o estado físico dos itens antes de liberar para o estoque.</p>
                                                         </div>
-                                                        <Button 
+                                                        <Button
                                                             onClick={async () => {
                                                                 const { error } = await supabase
                                                                     .from('deliveries')
                                                                     .update({ reverse_logistics_status: 'completed' })
                                                                     .eq('id', delivery.id);
-                                                                if (!error) queryClient.invalidateQueries({ queryKey: ['deliveries'] });
+                                                                if (!error) {
+                                                                    // Marcar o pedido como concluído agora que o item foi devolvido e conferido
+                                                                    if (delivery.booking_id) {
+                                                                        await supabase
+                                                                            .from('bookings')
+                                                                            .update({ status: 'completed' })
+                                                                            .eq('id', delivery.booking_id);
+                                                                    }
+                                                                    queryClient.invalidateQueries({ queryKey: ['deliveries'] });
+                                                                    queryClient.invalidateQueries({ queryKey: ['bookings'] });
+                                                                }
                                                             }}
                                                             className="w-full bg-white text-black font-black uppercase text-[10px] tracking-widest h-14 rounded-2xl shadow-xl flex items-center gap-2"
                                                         >

@@ -193,7 +193,7 @@ export function OrderHistoryTab() {
                           </span>
                           <span className="text-zinc-800">•</span>
                           <span>
-                            {isRequested ? 'Destino: Sua Unidade' : `Solicitante: ${booking.renter?.company?.name || booking.renter?.full_name}`}
+                            {isRequested ? 'Destino: Sua Unidade' : `Solicitante: ${booking.renter?.company?.name || booking.renter?.full_name || 'Desconhecido'}`}
                           </span>
                         </div>
                       </div>

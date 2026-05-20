@@ -65,7 +65,18 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
   const allBookingsItems = (allBookings as any) ?? [];
 
   const activeBookings = useMemo(() => {
-    return allBookingsItems?.filter((b: any) => b.status === 'approved' || b.status === 'active') || [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return allBookingsItems?.filter((b: any) => {
+      if (b.status === 'approved' || b.status === 'active') return true;
+      // Bookings 'completed' com end_date no futuro ainda estão em locação ativa
+      if (b.status === 'completed' && b.end_date) {
+        const endDate = new Date(b.end_date);
+        endDate.setHours(0, 0, 0, 0);
+        return endDate >= today;
+      }
+      return false;
+    }) || [];
   }, [allBookingsItems]);
 
   const isLoading = isLoadingEquipments || isLoadingBookings;
@@ -84,7 +95,7 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
     let maintenance = 0;
 
     allEquipments.forEach(item => {
-      const isRented = item.status === 'rented' || activeBookings?.some((b: any) => b.equipment_id === item.id);
+      const isRented = item.status === 'rented' || activeBookings.some((b: any) => b.equipment_id === item.id);
       if (isRented) {
         rented++;
       } else if (item.status === 'maintenance') {
