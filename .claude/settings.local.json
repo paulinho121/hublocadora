@@ -8,7 +8,12 @@
       "Bash(git push *)",
       "Bash(git checkout *)",
       "Bash(git merge claude/hungry-morse-a82396 --no-ff -m ' *)",
-      "Bash(git fetch *)"
+      "Bash(git fetch *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Acer\\\\Desktop\\\\HUB STUDIO\\\\cinehub-source\" -Force)",
+      "Bash(Select-Object Name, FullName)",
+      "Bash(npx tsc *)",
+      "Bash(git stash *)",
+      "Bash(git pull *)"
     ]
   }
 }

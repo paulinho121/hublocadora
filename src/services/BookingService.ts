@@ -59,6 +59,24 @@ export class BookingService {
      * Cria uma nova reserva
      */
     static async createBooking(booking: Omit<Booking, 'id' | 'created_at'>) {
+        const { data: equipment, error: equipError } = await supabase
+            .from('equipments')
+            .select('stock_quantity')
+            .eq('id', booking.equipment_id)
+            .single();
+
+        if (equipError || !equipment) throw new Error('Equipamento não encontrado');
+
+        const available = await this.checkAvailability(
+            booking.equipment_id,
+            booking.start_date,
+            booking.end_date,
+            booking.quantity,
+            equipment.stock_quantity
+        );
+
+        if (!available) throw new Error('Equipamento indisponível para o período solicitado');
+
         const { data, error } = await supabase
             .from('bookings')
             .insert([booking])

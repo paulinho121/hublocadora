@@ -3,12 +3,12 @@ import { useEquipment } from '@/hooks/useEquipments';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { 
-  ChevronLeft, 
-  Star, 
-  MapPin, 
-  Calendar, 
-  ShieldCheck, 
+import {
+  ChevronLeft,
+  Star,
+  MapPin,
+  Calendar,
+  ShieldCheck,
   MessageSquare,
   Package,
   ArrowRight,
@@ -17,11 +17,15 @@ import {
   Camera,
   Truck,
   Hash,
-  Building2
+  Building2,
+  CalendarSearch,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { useState } from 'react';
 import { useEquipmentAvailability } from '@/hooks/useAvailability';
 import { QuickBookingModal } from '@/components/marketplace/QuickBookingModal';
+import { AvailabilityCalendar } from '@/components/marketplace/AvailabilityCalendar';
 import { useAuth } from '@/contexts/AuthContext';
 import { ReviewService } from '@/services/ReviewService';
 import { useQuery } from '@tanstack/react-query';
@@ -42,6 +46,7 @@ export default function EquipmentDetails() {
   const { data: availability, isLoading: isLoadingAvail } = useEquipmentAvailability(id || '', startDate, endDate);
   const { user } = useAuth();
   const [isQuickBookingOpen, setIsQuickBookingOpen] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
 
   const { data: reviews } = useQuery({
     queryKey: ['reviews', id],
@@ -242,42 +247,77 @@ export default function EquipmentDetails() {
                 </div>
 
                 <div className="mt-8 p-4 bg-zinc-900/50 rounded-2xl border border-zinc-800 space-y-4">
-                   <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest text-center">Consultar Calendário</p>
-                   <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-1">
-                         <label className="text-[11px] uppercase font-bold text-zinc-500 ml-1">Retirada</label>
-                         <input 
-                           type="date" 
-                           value={startDate} 
-                           onChange={(e) => setStartDate(e.target.value)}
-                           className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2 text-xs font-bold text-zinc-100 focus:outline-none focus:ring-1 focus:ring-primary"
-                         />
-                      </div>
-                      <div className="space-y-1">
-                         <label className="text-[11px] uppercase font-bold text-zinc-500 ml-1">Devolução</label>
-                         <input 
-                           type="date" 
-                           value={endDate} 
-                           onChange={(e) => setEndDate(e.target.value)}
-                           className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2 text-xs font-bold text-zinc-100 focus:outline-none focus:ring-1 focus:ring-primary"
-                         />
-                      </div>
+                   {/* Header com botão de calendário */}
+                   <div className="flex items-center justify-between">
+                     <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest">Consultar Calendário</p>
+                     <button
+                       onClick={() => setShowCalendar(v => !v)}
+                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 hover:border-zinc-600 transition-all group"
+                     >
+                       <CalendarSearch className="w-3.5 h-3.5 text-primary" />
+                       <span className="text-[10px] uppercase font-black text-zinc-300 tracking-widest">
+                         {showCalendar ? 'Fechar' : 'Ver Datas'}
+                       </span>
+                       {showCalendar
+                         ? <ChevronUp className="w-3 h-3 text-zinc-500" />
+                         : <ChevronDown className="w-3 h-3 text-zinc-500" />
+                       }
+                     </button>
                    </div>
 
+                   {/* Calendário expandível */}
+                   {showCalendar && id && equipment && (
+                     <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                       <AvailabilityCalendar
+                         equipmentId={id}
+                         stockQuantity={equipment.stock_quantity || 1}
+                         selectedStart={startDate}
+                         selectedEnd={endDate}
+                         onRangeChange={(start, end) => {
+                           setStartDate(start);
+                           setEndDate(end);
+                         }}
+                       />
+                     </div>
+                   )}
+
+                   {/* Date inputs */}
+                   <div className="grid grid-cols-2 gap-2">
+                     <div className="space-y-1">
+                       <label className="text-[11px] uppercase font-bold text-zinc-500 ml-1">Retirada</label>
+                       <input
+                         type="date"
+                         value={startDate}
+                         onChange={(e) => setStartDate(e.target.value)}
+                         className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2 text-xs font-bold text-zinc-100 focus:outline-none focus:ring-1 focus:ring-primary"
+                       />
+                     </div>
+                     <div className="space-y-1">
+                       <label className="text-[11px] uppercase font-bold text-zinc-500 ml-1">Devolução</label>
+                       <input
+                         type="date"
+                         value={endDate}
+                         onChange={(e) => setEndDate(e.target.value)}
+                         className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2 text-xs font-bold text-zinc-100 focus:outline-none focus:ring-1 focus:ring-primary"
+                       />
+                     </div>
+                   </div>
+
+                   {/* Disponibilidade */}
                    {isLoadingAvail ? (
                      <div className="flex justify-center p-2"><Loader2 className="w-4 h-4 animate-spin text-primary" /></div>
                    ) : availability && (
                      <div className="flex items-center justify-between px-2 pt-2 border-t border-zinc-800/50">
-                        <div className="flex items-center gap-2">
-                           <div className={`w-2 h-2 rounded-full ${availability.isAvailable ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
-                           <span className={`text-[11px] font-black uppercase ${availability.isAvailable ? 'text-emerald-500' : 'text-red-500'}`}>
-                              {availability.isAvailable ? 'Equipamento Disponível' : 'Indisponível no Período'}
-                           </span>
-                        </div>
-                        <div className="flex items-center gap-1 text-[11px] font-bold text-zinc-500">
-                           <Hash className="w-3 h-3" />
-                           Estoque: <span className="text-zinc-200">{availability.available} / {availability.total}</span>
-                        </div>
+                       <div className="flex items-center gap-2">
+                         <div className={`w-2 h-2 rounded-full ${availability.isAvailable ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+                         <span className={`text-[11px] font-black uppercase ${availability.isAvailable ? 'text-emerald-500' : 'text-red-500'}`}>
+                           {availability.isAvailable ? 'Equipamento Disponível' : 'Indisponível no Período'}
+                         </span>
+                       </div>
+                       <div className="flex items-center gap-1 text-[11px] font-bold text-zinc-500">
+                         <Hash className="w-3 h-3" />
+                         Estoque: <span className="text-zinc-200">{availability.available} / {availability.total}</span>
+                       </div>
                      </div>
                    )}
                 </div>

@@ -15,7 +15,10 @@ import {
   FileSignature,
   Info,
   MapPin,
-  User
+  User,
+  CalendarSearch,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { 
   Dialog 
@@ -28,6 +31,7 @@ import { useCreateBooking, useEquipmentOccupiedDates } from '@/hooks/useBookings
 import { useTenant } from '@/contexts/TenantContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { format, differenceInDays, isWithinInterval, parseISO, isAfter, startOfDay, addDays } from 'date-fns';
+import { AvailabilityCalendar } from './AvailabilityCalendar';
 
 interface QuickBookingModalProps {
     equipment: Equipment | null;
@@ -49,6 +53,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
     const [quantity, setQuantity] = useState(1);
     const [isSuccess, setIsSuccess] = useState(false);
     const [acceptContract, setAcceptContract] = useState(false);
+    const [showCalendar, setShowCalendar] = useState(false);
 
     const { data: occupiedDates } = useEquipmentOccupiedDates(equipment?.id || '');
 
@@ -293,6 +298,38 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                         <div className="bg-red-500/10 p-3 rounded-xl border border-red-500/20 flex items-center gap-3 text-red-500">
                                             <AlertCircle className="w-4 h-4 flex-shrink-0" />
                                             <p className="text-[11px] font-bold">Opa! Este item já está reservado por outra produtora neste período.</p>
+                                        </div>
+                                    )}
+
+                                    {/* Calendar toggle */}
+                                    <button
+                                        onClick={() => setShowCalendar(v => !v)}
+                                        className="w-full flex items-center justify-between px-3 py-2.5 bg-zinc-900/50 rounded-xl border border-zinc-800 hover:border-zinc-700 transition-colors"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <CalendarSearch className="w-3.5 h-3.5 text-primary" />
+                                            <span className="text-[10px] uppercase font-black text-zinc-400 tracking-widest">
+                                                {showCalendar ? 'Fechar Calendário' : 'Ver Disponibilidade no Calendário'}
+                                            </span>
+                                        </div>
+                                        {showCalendar
+                                            ? <ChevronUp className="w-3.5 h-3.5 text-zinc-500" />
+                                            : <ChevronDown className="w-3.5 h-3.5 text-zinc-500" />
+                                        }
+                                    </button>
+
+                                    {showCalendar && equipment && (
+                                        <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                                            <AvailabilityCalendar
+                                                equipmentId={equipment.id}
+                                                stockQuantity={equipment.stock_quantity || 1}
+                                                selectedStart={startDate}
+                                                selectedEnd={endDate}
+                                                onRangeChange={(start, end) => {
+                                                    setStartDate(start);
+                                                    setEndDate(end);
+                                                }}
+                                            />
                                         </div>
                                     )}
                                 </div>

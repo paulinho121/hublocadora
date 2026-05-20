@@ -40,8 +40,12 @@ export function useBookings(options?: {
                 const delegatedIds = delegated?.map(d => d.booking_id) || [];
                 
                 if (delegatedIds.length > 0) {
+                    const safeCompanyId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(options.companyId ?? '')
+                        ? options.companyId
+                        : null;
+                    if (!safeCompanyId) throw new Error('companyId inválido');
                     // Filtra reservas onde a empresa é a dona OU onde ela é a encarregada da entrega
-                    query = query.or(`company_id.eq.${options.companyId},id.in.(${delegatedIds.join(',')})`);
+                    query = query.or(`company_id.eq.${safeCompanyId},id.in.(${delegatedIds.join(',')})`);
                 } else {
                     query = query.eq('company_id', options.companyId);
                 }
