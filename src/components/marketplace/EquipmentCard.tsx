@@ -90,25 +90,25 @@ export function EquipmentCard({ item, onClick, rentedQuantity = 0, nextReturnDat
           <Badge className={`
             ${isFullyRented
               ? 'bg-red-500/15 text-red-400 border-red-500/30'
-              : isPartiallyRented
-                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                : isAvailable
-                  ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
-                  : 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'}
+              : isAvailable
+                ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                : 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'}
             uppercase font-black tracking-widest text-[9px] backdrop-blur-md px-2 py-1 rounded-md border
           `}>
             {isFullyRented
-              ? 'Locado'
+              ? 'Esgotado'
               : isAvailable
                 ? `${availableQuantity} Disponíve${availableQuantity === 1 ? 'l' : 'is'}`
                 : 'Esgotado'}
           </Badge>
 
-          {/* Badge de unidades locadas (só aparece quando tem locação parcial ou total) */}
+          {/* Badge LOCADO — aparece sempre que houver locação ativa, mesmo com unidades disponíveis */}
           {rentedQuantity > 0 && (
             <Badge className="bg-amber-500/15 text-amber-400 border-amber-500/30 uppercase font-black tracking-widest text-[9px] backdrop-blur-md px-2 py-1 rounded-md border flex items-center gap-1">
               <Clock className="w-2.5 h-2.5" />
-              {rentedQuantity} Locada{rentedQuantity > 1 ? 's' : ''}
+              {totalStock > 1
+                ? `${rentedQuantity} Locada${rentedQuantity > 1 ? 's' : ''}`
+                : 'Locado'}
               {formattedReturnDate && (
                 <span className="text-amber-300/70 font-bold normal-case">· retorno {formattedReturnDate}</span>
               )}

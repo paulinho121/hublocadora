@@ -54,13 +54,18 @@ export default function Marketplace() {
   const { data: activeBookings } = useQuery({
     queryKey: ['marketplace-active-bookings', today],
     queryFn: async () => {
+      // Inclui bookings ativos/aprovados de hoje E bookings 'completed' com end_date futuro
+      // (dados legados onde o status foi marcado prematuramente como completed)
       const { data } = await supabase
         .from('bookings')
-        .select('equipment_id, quantity, end_date')
-        .in('status', ['active', 'approved'])
-        .lte('start_date', today)
+        .select('equipment_id, quantity, end_date, status, start_date')
+        .in('status', ['active', 'approved', 'completed'])
         .gte('end_date', today);
-      return data || [];
+      return (data || []).filter((b: any) => {
+        if (b.status === 'active' || b.status === 'approved') return true;
+        // Para 'completed': só conta se ainda está dentro do período (start <= hoje <= end)
+        return b.start_date <= today;
+      });
     },
     staleTime: 60_000,
   });
