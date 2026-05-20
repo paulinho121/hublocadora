@@ -1,27 +1,28 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useEquipments } from '@/hooks/useEquipments';
 import { Card, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import AnimatedGlowingSearchBar from '@/components/ui/animated-glowing-search-bar';
-import { 
-  MapPin, 
-  ChevronRight, 
-  Video, 
-  Loader2, 
-  Package, 
-  Search, 
-  Sparkles, 
-  Aperture, 
-  Zap, 
-  Mic2, 
-  Navigation, 
+import {
+  MapPin,
+  ChevronRight,
+  Video,
+  Loader2,
+  Package,
+  Search,
+  Sparkles,
+  Aperture,
+  Zap,
+  Mic2,
   Layers,
   BoxSelect,
-  Wrench
+  Wrench,
+  LayoutGrid,
+  RefreshCw
 } from 'lucide-react';
 import { BrandMarquee } from '@/components/home/BrandMarquee';
 import { QuickBookingModal } from '@/components/marketplace/QuickBookingModal';
@@ -32,6 +33,7 @@ import { EquipmentCard } from '@/components/marketplace/EquipmentCard';
 
 export default function Marketplace() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>();
   const [selectedBrand, setSelectedBrand] = useState<string | undefined>();
@@ -179,12 +181,12 @@ export default function Marketplace() {
       types: ['LED Panel', 'COB', 'Fresnel', 'Tubo LED'],
       brands: ['Arri', 'Aputure', 'Nanlite', 'Astera']
     },
-    { 
-      name: 'Drones', 
-      value: 'Drones', 
-      icon: <Navigation className="w-3.5 h-3.5" />,
-      types: ['Cinematic', 'FPV', 'Enterprise'],
-      brands: ['DJI', 'Freefly', 'Autel']
+    {
+      name: 'Todos',
+      value: '__all__',
+      icon: <LayoutGrid className="w-3.5 h-3.5" />,
+      types: [],
+      brands: []
     },
     { 
       name: 'Áudio', 
@@ -277,10 +279,12 @@ export default function Marketplace() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.5 + idx * 0.05 }}
                 onClick={() => {
-                  if (selectedCategory === cat.value) {
+                  const isAll = cat.value === '__all__';
+                  if (isAll || selectedCategory === cat.value) {
                     setSelectedCategory(undefined);
                     setSelectedBrand(undefined);
                     setSelectedSubCategory(undefined);
+                    if (isAll) setShowAll(true);
                   } else {
                     setSelectedCategory(cat.value);
                     setSelectedBrand(undefined);
@@ -288,12 +292,12 @@ export default function Marketplace() {
                   }
                 }}
                 className={`relative flex items-center gap-2.5 px-6 py-3 rounded-full text-[11px] font-black uppercase tracking-[0.18em] transition-all duration-300 border backdrop-blur-md overflow-hidden group shrink-0 whitespace-nowrap snap-start
-                  ${selectedCategory === cat.value
+                  ${(cat.value === '__all__' ? !selectedCategory : selectedCategory === cat.value)
                     ? `bg-primary/20 border-primary/40 text-primary scale-105 shadow-lg shadow-primary/20`
                     : `bg-zinc-900/40 border-white/8 text-zinc-400 hover:text-white hover:border-white/20 hover:bg-zinc-800/60 hover:scale-105`
                   }`}
               >
-                {selectedCategory === cat.value && (
+                {(cat.value === '__all__' ? !selectedCategory : selectedCategory === cat.value) && (
                   <span className={`absolute inset-0 opacity-10 bg-primary animate-pulse`} />
                 )}
                 <span className="relative z-10 flex items-center gap-2">
@@ -323,20 +327,34 @@ export default function Marketplace() {
               </h3>
               <div className="h-1 w-12 bg-primary rounded-full" />
             </div>
-            {selectedCategory && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => {
-                  setSelectedCategory(undefined);
-                  setSelectedBrand(undefined);
-                  setSelectedSubCategory(undefined);
-                }} 
-                className="text-zinc-500 hover:text-white uppercase font-black tracking-widest text-[10px]"
+                  queryClient.invalidateQueries({ queryKey: ['equipments'] });
+                  queryClient.invalidateQueries({ queryKey: ['marketplace-active-bookings'] });
+                }}
+                className="text-zinc-500 hover:text-white uppercase font-black tracking-widest text-[10px] gap-1.5"
               >
-                Limpar Filtros
+                <RefreshCw className="w-3 h-3" />
+                Atualizar
               </Button>
-            )}
+              {selectedCategory && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedCategory(undefined);
+                    setSelectedBrand(undefined);
+                    setSelectedSubCategory(undefined);
+                  }}
+                  className="text-zinc-500 hover:text-white uppercase font-black tracking-widest text-[10px]"
+                >
+                  Limpar Filtros
+                </Button>
+              )}
+            </div>
           </div>
           
           {isLoading ? (
