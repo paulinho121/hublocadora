@@ -1,5 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
 import { useEquipments } from '@/hooks/useEquipments';
 import { Card, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -47,28 +49,73 @@ export default function Marketplace() {
   });
   const rawEquipments = rawEquipmentsPage?.items ?? [];
 
-  // ─── Consolidação "Pote Principal" ────────────────────────────────────────
-  // Agrupa itens pelo nome e soma a quantidade real disponível no Hub
-  const equipments = (() => {
-    if (!rawEquipments) return [];
-    
-    const consolidated = new Map<string, Equipment>();
-    
-    rawEquipments.forEach(item => {
-      // Segurança: Se o item não tiver nome, ignora para não quebrar o sistema
-      if (!item.name) return;
+  // Busca os bookings ativos HOJE para todos os equipamentos (uma única query)
+  const today = new Date().toISOString().split('T')[0];
+  const { data: activeBookings } = useQuery({
+    queryKey: ['marketplace-active-bookings', today],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('bookings')
+        .select('equipment_id, quantity, end_date')
+        .in('status', ['active', 'approved'])
+        .lte('start_date', today)
+        .gte('end_date', today);
+      return data || [];
+    },
+    staleTime: 60_000,
+  });
 
+  // Mapa de equipment_id → { rentedQuantity, nextReturnDate }
+  const bookingMap = useMemo(() => {
+    const map = new Map<string, { rentedQuantity: number; nextReturnDate: string }>();
+    (activeBookings || []).forEach((b: any) => {
+      const existing = map.get(b.equipment_id);
+      if (existing) {
+        existing.rentedQuantity += b.quantity || 0;
+        if (b.end_date < existing.nextReturnDate) existing.nextReturnDate = b.end_date;
+      } else {
+        map.set(b.equipment_id, { rentedQuantity: b.quantity || 0, nextReturnDate: b.end_date });
+      }
+    });
+    return map;
+  }, [activeBookings]);
+
+  // ─── Consolidação "Pote Principal" ────────────────────────────────────────
+  // Agrupa itens pelo nome, soma estoque e agrega dados de locação
+  type ConsolidatedItem = Equipment & { _mergedIds: string[]; rentedQuantity: number; nextReturnDate: string | null };
+
+  const equipments = useMemo<ConsolidatedItem[]>(() => {
+    if (!rawEquipments) return [];
+
+    const consolidated = new Map<string, ConsolidatedItem>();
+
+    rawEquipments.forEach(item => {
+      if (!item.name) return;
       const key = item.name.trim().toUpperCase();
+      const bookingInfo = bookingMap.get(item.id);
+
       if (consolidated.has(key)) {
         const existing = consolidated.get(key)!;
         existing.stock_quantity = (existing.stock_quantity || 0) + (item.stock_quantity || 0);
+        existing._mergedIds.push(item.id);
+        if (bookingInfo) {
+          existing.rentedQuantity += bookingInfo.rentedQuantity;
+          if (!existing.nextReturnDate || bookingInfo.nextReturnDate < existing.nextReturnDate) {
+            existing.nextReturnDate = bookingInfo.nextReturnDate;
+          }
+        }
       } else {
-        consolidated.set(key, { ...item });
+        consolidated.set(key, {
+          ...item,
+          _mergedIds: [item.id],
+          rentedQuantity: bookingInfo?.rentedQuantity ?? 0,
+          nextReturnDate: bookingInfo?.nextReturnDate ?? null,
+        });
       }
     });
-    
+
     return Array.from(consolidated.values());
-  })();
+  }, [rawEquipments, bookingMap]);
 
   // Randomiza e muda de lugar os equipamentos em destaque a cada atualização do acervo
   useEffect(() => {
@@ -326,13 +373,15 @@ export default function Marketplace() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {displayedEquipments.map((item) => (
-                    <EquipmentCard 
-                      key={item.id} 
-                      item={item} 
+                    <EquipmentCard
+                      key={item.id}
+                      item={item}
+                      rentedQuantity={(item as any).rentedQuantity ?? 0}
+                      nextReturnDate={(item as any).nextReturnDate ?? null}
                       onClick={() => {
                         setSelectedEquipment(item);
                         setIsModalOpen(true);
-                      }} 
+                      }}
                     />
                   ))}
                 </div>
