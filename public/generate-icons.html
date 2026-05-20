@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>CineHub — Gerador de Ícones</title>
+  <style>
+    body { background: #0a0a0a; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 40px; gap: 32px; }
+    h1 { font-size: 20px; letter-spacing: 4px; text-transform: uppercase; color: #e5e7eb; }
+    .row { display: flex; gap: 48px; align-items: flex-end; flex-wrap: wrap; justify-content: center; }
+    .card { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+    canvas { border-radius: 22%; box-shadow: 0 8px 40px #dc262640; }
+    button {
+      background: #dc2626; color: #fff; border: none; padding: 10px 28px;
+      border-radius: 999px; font-weight: 800; font-size: 11px; letter-spacing: 3px;
+      text-transform: uppercase; cursor: pointer; transition: opacity .2s;
+    }
+    button:hover { opacity: .8; }
+    .label { font-size: 11px; color: #6b7280; letter-spacing: 2px; text-transform: uppercase; }
+    .note { font-size: 12px; color: #4b5563; text-align: center; max-width: 480px; line-height: 1.8; }
+  </style>
+</head>
+<body>
+  <h1>CineHub · Gerador de Ícones</h1>
+
+  <div class="row">
+    <div class="card">
+      <canvas id="c512" width="512" height="512"></canvas>
+      <span class="label">512 × 512</span>
+      <button onclick="download('c512','icon-512.png')">Baixar icon-512.png</button>
+    </div>
+    <div class="card">
+      <canvas id="c192" width="192" height="192"></canvas>
+      <span class="label">192 × 192</span>
+      <button onclick="download('c192','icon-192.png')">Baixar icon-192.png</button>
+    </div>
+    <div class="card">
+      <canvas id="cOG" width="1200" height="630" style="width:320px;height:168px;border-radius:8px;"></canvas>
+      <span class="label">1200 × 630 · OG Image</span>
+      <button onclick="download('cOG','og-image.png')">Baixar og-image.png</button>
+    </div>
+  </div>
+
+  <p class="note">
+    Após baixar, mova os arquivos para <strong>public/</strong> e delete este arquivo.<br/>
+    Os ícones já estão configurados no <code>manifest.json</code>.
+  </p>
+
+  <script>
+    function drawIcon(canvas, size) {
+      const ctx = canvas.getContext('2d');
+      const s = size;
+
+      // ── Background ──────────────────────────────────────────
+      ctx.fillStyle = '#0d1117';
+      ctx.fillRect(0, 0, s, s);
+
+      // subtle radial glow
+      const grd = ctx.createRadialGradient(s/2, s*0.45, 0, s/2, s*0.45, s*0.6);
+      grd.addColorStop(0, 'rgba(220,38,38,0.18)');
+      grd.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, s, s);
+
+      const cx = s / 2;
+      const unit = s / 10; // base unit
+
+      // ── Camera body ─────────────────────────────────────────
+      const camW  = unit * 5.6;
+      const camH  = unit * 3.8;
+      const camX  = cx - camW / 2;
+      const camY  = s * 0.46 - camH / 2;
+      const r     = unit * 0.5;
+
+      ctx.beginPath();
+      ctx.moveTo(camX + r, camY);
+      ctx.lineTo(camX + camW - r, camY);
+      ctx.quadraticCurveTo(camX + camW, camY, camX + camW, camY + r);
+      ctx.lineTo(camX + camW, camY + camH - r);
+      ctx.quadraticCurveTo(camX + camW, camY + camH, camX + camW - r, camY + camH);
+      ctx.lineTo(camX + r, camY + camH);
+      ctx.quadraticCurveTo(camX, camY + camH, camX, camY + camH - r);
+      ctx.lineTo(camX, camY + r);
+      ctx.quadraticCurveTo(camX, camY, camX + r, camY);
+      ctx.closePath();
+      ctx.fillStyle = '#dc2626';
+      ctx.fill();
+
+      // camera top bump
+      const bumpW = unit * 1.4;
+      const bumpH = unit * 0.55;
+      const bumpX = cx - bumpW / 2;
+      const bumpY = camY - bumpH;
+      ctx.beginPath();
+      ctx.moveTo(bumpX + unit*0.25, bumpY);
+      ctx.lineTo(bumpX + bumpW - unit*0.25, bumpY);
+      ctx.quadraticCurveTo(bumpX + bumpW, bumpY, bumpX + bumpW, bumpY + bumpH);
+      ctx.lineTo(bumpX, bumpY + bumpH);
+      ctx.quadraticCurveTo(bumpX, bumpY, bumpX + unit*0.25, bumpY);
+      ctx.closePath();
+      ctx.fillStyle = '#dc2626';
+      ctx.fill();
+
+      // ── Lens (outer ring) ────────────────────────────────────
+      const lensX = cx;
+      const lensY = camY + camH / 2 + unit * 0.1;
+      const lensR = unit * 1.35;
+
+      ctx.beginPath();
+      ctx.arc(lensX, lensY, lensR, 0, Math.PI * 2);
+      ctx.fillStyle = '#0d1117';
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(lensX, lensY, lensR * 0.7, 0, Math.PI * 2);
+      ctx.fillStyle = '#1e293b';
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(lensX, lensY, lensR * 0.45, 0, Math.PI * 2);
+      ctx.fillStyle = '#0f172a';
+      ctx.fill();
+
+      // lens shine
+      ctx.beginPath();
+      ctx.arc(lensX - lensR*0.22, lensY - lensR*0.22, lensR*0.15, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      ctx.fill();
+
+      // ── Location pin on top of camera ───────────────────────
+      const pinCX = cx + unit * 1.6;
+      const pinCY = camY - unit * 0.4;
+      const pinR  = unit * 0.7;
+
+      ctx.beginPath();
+      ctx.arc(pinCX, pinCY, pinR, 0, Math.PI * 2);
+      ctx.fillStyle = '#fff';
+      ctx.fill();
+
+      // pin drop
+      ctx.beginPath();
+      ctx.moveTo(pinCX - pinR * 0.55, pinCY + pinR * 0.5);
+      ctx.lineTo(pinCX + pinR * 0.55, pinCY + pinR * 0.5);
+      ctx.lineTo(pinCX, pinCY + pinR * 1.65);
+      ctx.closePath();
+      ctx.fillStyle = '#fff';
+      ctx.fill();
+
+      // pin inner dot
+      ctx.beginPath();
+      ctx.arc(pinCX, pinCY, pinR * 0.4, 0, Math.PI * 2);
+      ctx.fillStyle = '#dc2626';
+      ctx.fill();
+
+      // ── "CINEHUB" text ───────────────────────────────────────
+      if (size >= 192) {
+        const fontSize = unit * 1.25;
+        ctx.font = `900 ${fontSize}px Arial, sans-serif`;
+        ctx.textAlign = 'center';
+
+        const textY = camY + camH + unit * 1.55;
+
+        // "CINE" in white
+        ctx.fillStyle = '#ffffff';
+        const cineW = ctx.measureText('CINE').width;
+        const hubW  = ctx.measureText('HUB').width;
+        const totalW = cineW + hubW;
+        ctx.fillText('CINE', cx - hubW / 2, textY);
+
+        // "HUB" in red
+        ctx.fillStyle = '#dc2626';
+        ctx.fillText('HUB', cx + cineW / 2, textY);
+
+        // subtitle
+        if (size >= 300) {
+          const subSize = unit * 0.52;
+          ctx.font = `600 ${subSize}px Arial, sans-serif`;
+          ctx.fillStyle = 'rgba(255,255,255,0.35)';
+          ctx.letterSpacing = '3px';
+          ctx.fillText('O HUB DA SUA PRODUÇÃO', cx, textY + unit * 1.1);
+        }
+      }
+    }
+
+    function drawOG(canvas) {
+      const ctx = canvas.getContext('2d');
+      const W = 1200, H = 630;
+
+      // background
+      ctx.fillStyle = '#0d1117';
+      ctx.fillRect(0, 0, W, H);
+
+      // glow
+      const grd = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, 500);
+      grd.addColorStop(0, 'rgba(220,38,38,0.20)');
+      grd.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, W, H);
+
+      // draw icon at left-center
+      const offCanvas = document.createElement('canvas');
+      offCanvas.width = 300;
+      offCanvas.height = 300;
+      drawIcon(offCanvas, 300);
+      ctx.drawImage(offCanvas, 140, H/2 - 150, 300, 300);
+
+      // "CINE" + "HUB"
+      ctx.textBaseline = 'middle';
+      ctx.font = '900 120px Arial, sans-serif';
+      const cineW = ctx.measureText('CINE').width;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText('CINE', 480, H/2 - 30);
+      ctx.fillStyle = '#dc2626';
+      ctx.fillText('HUB', 480 + cineW, H/2 - 30);
+
+      // subtitle
+      ctx.font = '600 28px Arial, sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.40)';
+      ctx.fillText('O HUB DA SUA PRODUÇÃO', 480, H/2 + 65);
+
+      // bottom line
+      ctx.fillStyle = '#dc2626';
+      ctx.fillRect(480, H/2 + 95, 360, 3);
+    }
+
+    function download(id, filename) {
+      const canvas = document.getElementById(id);
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = filename;
+      a.click();
+    }
+
+    // render on load
+    drawIcon(document.getElementById('c512'), 512);
+    drawIcon(document.getElementById('c192'), 192);
+    drawOG(document.getElementById('cOG'));
+  </script>
+</body>
+</html>
