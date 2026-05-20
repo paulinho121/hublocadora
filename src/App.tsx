@@ -36,6 +36,7 @@ import { AIAssistant } from '@/components/ai/AIAssistant';
 import { Footer } from '@/components/layout/Footer';
 import ProfessionalBackground from '@/components/ui/professional-background';
 import { CookieConsent } from '@/components/ui/cookie-consent';
+import { PWAInstallBanner } from '@/components/ui/pwa-install-banner';
 
 // Fallback de loading para Suspense
 function PageLoader() {
@@ -254,6 +255,7 @@ function MainLayout() {
       </ErrorBoundary>
       {!isAuthPage && <Footer />}
       {!isAuthPage && <BottomNav />}
+      {!isAuthPage && <PWAInstallBanner />}
       {/* <AIAssistant /> */}
       <CookieConsent />
     </div>
