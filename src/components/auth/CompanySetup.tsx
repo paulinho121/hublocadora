@@ -6,6 +6,7 @@ import { Loader2, Building2, MapPin, FileDigit, Briefcase, Search, AlertCircle, 
 import { supabase } from '@/lib/supabase';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,23 +37,30 @@ type CompanyFormValues = z.infer<typeof companySchema>;
 
 export function CompanySetup({ ownerId }: { ownerId: string }) {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [isLoadingCep, setIsLoadingCep] = useState(false);
   const [isLoadingCnpj, setIsLoadingCnpj] = useState(false);
 
-  // Restaurar rascunho salvo no localStorage
+  // Restaurar rascunho salvo no localStorage; fallback para user_metadata do cadastro
   const savedDraft = (() => {
     try {
       const raw = localStorage.getItem(FORM_CACHE_KEY);
-      return raw ? JSON.parse(raw) : {};
+      const draft = raw ? JSON.parse(raw) : {};
+      const meta = user?.user_metadata || {};
+      return {
+        full_name: draft.full_name || meta.full_name || '',
+        name: draft.name || meta.company_name || '',
+        ...draft,
+      };
     } catch { return {}; }
   })();
 
-  const { 
-    register, 
-    handleSubmit, 
-    setValue, 
-    watch, 
-    formState: { errors, isSubmitting } 
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors, isSubmitting }
   } = useForm<CompanyFormValues>({
     resolver: zodResolver(companySchema),
     defaultValues: savedDraft,

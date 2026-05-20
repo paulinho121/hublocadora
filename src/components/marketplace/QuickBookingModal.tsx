@@ -1,19 +1,21 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Package, 
-  Truck, 
-  Store, 
-  ChevronRight, 
-  ArrowRight, 
-  CheckCircle2, 
+import {
+  Package,
+  Truck,
+  Store,
+  ChevronRight,
+  ArrowRight,
+  CheckCircle2,
   Clock,
   ShieldCheck,
   Calendar as CalendarIcon,
   AlertCircle,
   FileSignature,
-  Info
+  Info,
+  MapPin,
+  User
 } from 'lucide-react';
 import { 
   Dialog 
@@ -42,11 +44,29 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
     const [startDate, setStartDate] = useState(format(new Date(), 'yyyy-MM-dd'));
     const [endDate, setEndDate] = useState(format(addDays(new Date(), 1), 'yyyy-MM-dd'));
     const [deliveryMethod, setDeliveryMethod] = useState<'pickup' | 'delivery'>('pickup');
+    const [deliveryAddress, setDeliveryAddress] = useState('');
+    const [deliveryContact, setDeliveryContact] = useState('');
     const [quantity, setQuantity] = useState(1);
     const [isSuccess, setIsSuccess] = useState(false);
     const [acceptContract, setAcceptContract] = useState(false);
 
     const { data: occupiedDates } = useEquipmentOccupiedDates(equipment?.id || '');
+
+    // Pré-preenche endereço de entrega com o endereço da empresa ao selecionar delivery
+    const handleDeliveryMethodChange = (method: 'pickup' | 'delivery') => {
+        setDeliveryMethod(method);
+        if (method === 'delivery' && !deliveryAddress && company) {
+            const parts = [
+                company.address_street,
+                company.address_number,
+                company.address_neighborhood,
+                company.address_city && company.address_state
+                    ? `${company.address_city} - ${company.address_state}`
+                    : company.address_city || company.address_state,
+            ].filter(Boolean);
+            setDeliveryAddress(parts.join(', '));
+        }
+    };
 
     const totalDays = useMemo(() => {
         const start = parseISO(startDate);
@@ -144,19 +164,30 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
     const handleReserve = async () => {
         if (!user?.id || !isAvailable) return;
 
+        if (deliveryMethod === 'delivery') {
+            if (!deliveryAddress.trim()) {
+                alert('Informe o endereço de entrega.');
+                return;
+            }
+            if (!deliveryContact.trim()) {
+                alert('Informe o nome do responsável pelo recebimento.');
+                return;
+            }
+        }
+
         try {
             await createBooking.mutateAsync({
                 equipment_id: equipment.id,
                 company_id: equipment.company_id,
-                renter_id: user.id, 
-                // Enviar como 'YYYY-MM-DD' puro (tipo date no banco), não como ISO timestamp
+                renter_id: user.id,
                 start_date: startDate,
                 end_date: endDate,
                 total_amount: equipment.daily_rate * totalDays * quantity,
                 status: 'pending',
                 quantity,
                 delivery_method: deliveryMethod,
-                delivery_address: deliveryMethod === 'delivery' ? company?.address_street : null,
+                delivery_address: deliveryMethod === 'delivery' ? deliveryAddress.trim() : null,
+                delivery_contact: deliveryMethod === 'delivery' ? deliveryContact.trim() : null,
                 notes: `Reserva rápida via HUB`,
                 subrental_company_id: null,
                 origin_branch_id: null
@@ -316,11 +347,11 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                         <Truck className="w-3 h-3" /> Logística Opcional
                                     </h4>
                                     <div className="grid grid-cols-2 gap-4">
-                                        <button 
-                                            onClick={() => setDeliveryMethod('pickup')}
+                                        <button
+                                            onClick={() => handleDeliveryMethodChange('pickup')}
                                             className={`group relative p-4 sm:p-5 rounded-2xl border-2 transition-all text-left ${
-                                                deliveryMethod === 'pickup' 
-                                                ? 'bg-emerald-500/10 border-emerald-500' 
+                                                deliveryMethod === 'pickup'
+                                                ? 'bg-emerald-500/10 border-emerald-500'
                                                 : 'bg-zinc-900/30 border-zinc-800 hover:border-zinc-700'
                                             }`}
                                         >
@@ -334,11 +365,11 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                             )}
                                         </button>
 
-                                        <button 
-                                            onClick={() => setDeliveryMethod('delivery')}
+                                        <button
+                                            onClick={() => handleDeliveryMethodChange('delivery')}
                                             className={`group relative p-4 sm:p-5 rounded-2xl border-2 transition-all text-left ${
-                                                deliveryMethod === 'delivery' 
-                                                ? 'bg-primary/10 border-primary' 
+                                                deliveryMethod === 'delivery'
+                                                ? 'bg-primary/10 border-primary'
                                                 : 'bg-zinc-900/30 border-zinc-800 hover:border-zinc-700'
                                             }`}
                                         >
@@ -352,6 +383,36 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                             )}
                                         </button>
                                     </div>
+
+                                    {deliveryMethod === 'delivery' && (
+                                        <div className="mt-4 space-y-3 animate-in slide-in-from-top-2 duration-200">
+                                            <div className="space-y-1.5">
+                                                <p className="text-[10px] text-zinc-400 font-bold uppercase flex items-center gap-1.5">
+                                                    <MapPin className="w-3 h-3 text-primary" /> Endereço de Entrega *
+                                                </p>
+                                                <textarea
+                                                    value={deliveryAddress}
+                                                    onChange={(e) => setDeliveryAddress(e.target.value)}
+                                                    placeholder="Rua, número, complemento, bairro, cidade..."
+                                                    rows={2}
+                                                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-primary/50 resize-none"
+                                                    required
+                                                />
+                                            </div>
+                                            <div className="space-y-1.5">
+                                                <p className="text-[10px] text-zinc-400 font-bold uppercase flex items-center gap-1.5">
+                                                    <User className="w-3 h-3 text-primary" /> Responsável pelo Recebimento *
+                                                </p>
+                                                <Input
+                                                    value={deliveryContact}
+                                                    onChange={(e) => setDeliveryContact(e.target.value)}
+                                                    placeholder="Nome e telefone de quem vai receber"
+                                                    className="bg-zinc-900 border-zinc-800 rounded-xl focus:border-primary/50"
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="bg-zinc-900/50 p-4 sm:p-6 rounded-3xl border border-dashed border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -391,14 +452,20 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                 </div>
 
                                 <div className="flex gap-4">
-                                    <Button 
+                                    <Button
                                         className={`flex-1 h-14 rounded-2xl font-black uppercase tracking-tighter group transition-all ${
-                                            isAvailable && acceptContract
-                                            ? 'bg-white text-black hover:bg-zinc-200' 
+                                            isAvailable && acceptContract &&
+                                            (deliveryMethod !== 'delivery' || (deliveryAddress.trim() && deliveryContact.trim()))
+                                            ? 'bg-white text-black hover:bg-zinc-200'
                                             : 'bg-zinc-800 text-zinc-500 cursor-not-allowed border-zinc-700'
                                         }`}
                                         onClick={handleReserve}
-                                        disabled={createBooking.isPending || !isAvailable || !acceptContract}
+                                        disabled={
+                                            createBooking.isPending ||
+                                            !isAvailable ||
+                                            !acceptContract ||
+                                            (deliveryMethod === 'delivery' && (!deliveryAddress.trim() || !deliveryContact.trim()))
+                                        }
                                     >
                                         {createBooking.isPending ? (
                                             <Clock className="w-5 h-5 animate-spin" />

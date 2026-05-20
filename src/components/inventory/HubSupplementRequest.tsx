@@ -34,7 +34,17 @@ const supplementSchema = z.object({
   endDate: z.string().min(1, 'Data de fim é obrigatória'),
   deliveryMethod: z.enum(['pickup', 'delivery']),
   deliveryAddress: z.string().optional(),
+  deliveryContact: z.string().optional(),
   notes: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (data.deliveryMethod === 'delivery') {
+    if (!data.deliveryAddress?.trim()) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['deliveryAddress'], message: 'Informe o endereço de entrega' });
+    }
+    if (!data.deliveryContact?.trim()) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['deliveryContact'], message: 'Informe o responsável pelo recebimento' });
+    }
+  }
 });
 
 type SupplementFormValues = z.infer<typeof supplementSchema>;
@@ -106,6 +116,7 @@ export function HubSupplementRequest({ onSuccess }: HubSupplementRequestProps) {
             quantity: values.quantity,
             delivery_method: values.deliveryMethod,
             delivery_address: values.deliveryMethod === 'delivery' ? values.deliveryAddress || null : null,
+            delivery_contact: values.deliveryMethod === 'delivery' ? values.deliveryContact || null : null,
             subrental_company_id: null,
             origin_branch_id: null,
           });
@@ -233,15 +244,31 @@ export function HubSupplementRequest({ onSuccess }: HubSupplementRequestProps) {
         </div>
 
         {deliveryMethod === 'delivery' && (
-          <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-            <Label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Endereço de Entrega</Label>
-            <div className="relative">
-              <MapPin className="absolute left-3 top-3 w-4 h-4 text-zinc-600" />
-              <Textarea 
-                placeholder="Rua, número, complemento, bairro, cidade..."
-                className="pl-10 bg-zinc-950 border-zinc-800 min-h-[80px]"
-                {...form.register('deliveryAddress')}
+          <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
+            <div className="space-y-2">
+              <Label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Endereço de Entrega *</Label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-3 w-4 h-4 text-zinc-600" />
+                <Textarea
+                  placeholder="Rua, número, complemento, bairro, cidade..."
+                  className="pl-10 bg-zinc-950 border-zinc-800 min-h-[80px]"
+                  {...form.register('deliveryAddress')}
+                />
+              </div>
+              {form.formState.errors.deliveryAddress && (
+                <p className="text-xs text-red-400 font-bold">{form.formState.errors.deliveryAddress.message}</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Responsável pelo Recebimento *</Label>
+              <Input
+                placeholder="Nome e telefone de quem vai receber"
+                className="bg-zinc-950 border-zinc-800"
+                {...form.register('deliveryContact')}
               />
+              {form.formState.errors.deliveryContact && (
+                <p className="text-xs text-red-400 font-bold">{form.formState.errors.deliveryContact.message}</p>
+              )}
             </div>
           </div>
         )}

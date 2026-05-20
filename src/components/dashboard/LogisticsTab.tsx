@@ -642,6 +642,20 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                         {delivery.origin_branch?.name || 'HUB CENTRAL'}
                                                                     </span>
                                                                 </div>
+                                                                {delivery.booking?.delivery_method === 'delivery' && delivery.booking?.delivery_address && (
+                                                                    <div className="flex items-start gap-3 bg-primary/5 p-4 rounded-2xl border border-primary/20 hover:border-primary/30 transition-colors">
+                                                                        <Truck className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                                                                        <div className="space-y-0.5 min-w-0">
+                                                                            <p className="text-[9px] font-black uppercase tracking-widest text-primary/70">Endereço de Entrega</p>
+                                                                            <p className="text-[10px] font-bold text-zinc-300 leading-snug">{delivery.booking.delivery_address}</p>
+                                                                            {delivery.booking?.delivery_contact && (
+                                                                                <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">
+                                                                                    Responsável: {delivery.booking.delivery_contact}
+                                                                                </p>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                )}
                                                                 <div className="flex items-center gap-3 bg-black/40 p-4 rounded-2xl border border-white/5 hover:border-white/10 transition-colors">
                                                                     <RotateCcw className="h-4 w-4 text-emerald-500/50" />
                                                                     <span className="text-[10px] font-black uppercase tracking-[0.1em] text-emerald-500/80">

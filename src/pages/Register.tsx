@@ -8,6 +8,8 @@ import { Camera, Loader2, Eye, EyeOff } from 'lucide-react';
 
 export default function Register() {
     const navigate = useNavigate();
+    const [fullName, setFullName] = useState('');
+    const [companyName, setCompanyName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -24,6 +26,18 @@ export default function Register() {
         setError(null);
         setSuccessMessage(null);
 
+        if (!fullName.trim() || fullName.trim().length < 3) {
+            setError('Digite seu nome completo (mínimo 3 caracteres)');
+            setLoading(false);
+            return;
+        }
+
+        if (!companyName.trim() || companyName.trim().length < 3) {
+            setError('Digite o nome da sua locadora ou empresa (mínimo 3 caracteres)');
+            setLoading(false);
+            return;
+        }
+
         if (password !== confirmPassword) {
             setError('As senhas não coincidem');
             setLoading(false);
@@ -33,6 +47,12 @@ export default function Register() {
         const { data, error } = await supabase.auth.signUp({
             email,
             password,
+            options: {
+                data: {
+                    full_name: fullName.trim(),
+                    company_name: companyName.trim(),
+                }
+            }
         });
 
         if (error) {
@@ -115,6 +135,26 @@ export default function Register() {
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleRegister} className="space-y-4">
+                        <div className="space-y-1.5">
+                            <Input
+                                type="text"
+                                placeholder="Nome completo do responsável *"
+                                className="h-12 bg-zinc-900/50 border-zinc-800 focus:border-primary/50 transition-all font-medium"
+                                value={fullName}
+                                onChange={(e) => setFullName(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="space-y-1.5">
+                            <Input
+                                type="text"
+                                placeholder="Nome da locadora / empresa *"
+                                className="h-12 bg-zinc-900/50 border-zinc-800 focus:border-primary/50 transition-all font-medium"
+                                value={companyName}
+                                onChange={(e) => setCompanyName(e.target.value)}
+                                required
+                            />
+                        </div>
                         <div className="space-y-1.5">
                             <Input
                                 type="email"
