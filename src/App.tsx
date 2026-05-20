@@ -57,7 +57,10 @@ function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-background/60 backdrop-blur-xl border-b border-white/5">
+    <header
+      className="sticky top-0 z-50 w-full bg-background/60 backdrop-blur-xl border-b border-white/5"
+      style={{ paddingTop: 'env(safe-area-inset-top)' }}
+    >
       <div className="container flex h-16 md:h-20 items-center justify-between mx-auto px-6 max-w-7xl">
         <div className="flex items-center gap-12">
           <Link to="/" className="flex items-center transition-transform hover:scale-105 active:scale-95">
@@ -140,7 +143,7 @@ function BottomNav() {
       { id: 'settings', label: 'Ajustes', icon: Settings },
     ];
     return (
-      <div className="md:hidden fixed bottom-4 left-3 right-3 z-50 flex justify-center pointer-events-none">
+      <div className="md:hidden fixed left-3 right-3 z-50 flex justify-center pointer-events-none" style={{ bottom: 'calc(env(safe-area-inset-bottom) + 12px)' }}>
         <nav className="pointer-events-auto flex items-center justify-between w-full max-w-lg bg-zinc-950/80 backdrop-blur-xl border border-zinc-800/80 px-2 py-2 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.8)] relative">
           {tabs.map(({ id, label, icon: Icon }) => {
             const isActive = currentTab === id;
@@ -176,7 +179,7 @@ function BottomNav() {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-4 left-3 right-3 z-50 flex justify-center pointer-events-none">
+    <div className="md:hidden fixed left-3 right-3 z-50 flex justify-center pointer-events-none" style={{ bottom: 'calc(env(safe-area-inset-bottom) + 12px)' }}>
       <nav className="pointer-events-auto flex items-center justify-around w-full max-w-sm bg-zinc-950/80 backdrop-blur-xl border border-zinc-800/80 px-3 py-2 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.8)]">
         {navItems.map(({ to, label, icon: Icon }) => {
           const isActive = location.pathname === to;

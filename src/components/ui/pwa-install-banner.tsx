@@ -58,7 +58,7 @@ export function PWAInstallBanner() {
   if (!visible) return null;
 
   return (
-    <div className="md:hidden fixed bottom-[72px] left-3 right-3 z-50 animate-in slide-in-from-bottom-4 fade-in duration-300">
+    <div className="md:hidden fixed left-3 right-3 z-50 animate-in slide-in-from-bottom-4 fade-in duration-300" style={{ bottom: 'calc(env(safe-area-inset-bottom) + 80px)' }}>
       <div className="bg-zinc-900/95 backdrop-blur-xl border border-zinc-700/60 rounded-2xl px-4 py-3.5 shadow-[0_8px_32px_rgba(0,0,0,0.6)] flex items-center gap-3">
         {/* Ícone do app */}
         <div className="w-11 h-11 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
