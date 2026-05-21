@@ -325,18 +325,24 @@ export default function Dashboard() {
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 10);
 
-  // BUG FIX ▶ débitos só existem em reservas confirmadas (não pendentes)
-  const totalDebt = bookingsReceived
+  // Taxa da plataforma CineHub: 15% sobre reservas confirmadas
+  const HUB_RATE = 0.15;
+  const hubFee = totalRevenue * HUB_RATE;
+
+  // Repasse a sub-locadoras parceiras (50% quando outra empresa entregou)
+  const partnerDebt = bookingsReceived
     ?.filter(b => ['approved', 'active', 'completed'].includes(b.status))
     .reduce((acc, curr) => {
       const fulfillmentId = getFulfillmentId(curr);
       const isOwner = curr.company_id === tenantId;
-      // Sou o dono mas outra empresa entregou: devo 50% ao parceiro
       if (isOwner && fulfillmentId && fulfillmentId !== tenantId) {
         return acc + (curr.total_amount * 0.5);
       }
       return acc;
     }, 0) || 0;
+
+  // Débito operacional total = taxa HUB + repasse a parceiros
+  const totalDebt = hubFee + partnerDebt;
 
   const activeBookings      = bookingsReceived?.filter(b => b.status === 'active' || b.status === 'approved').length || 0;
   const completedBookings   = bookingsReceived?.filter(b => b.status === 'completed').length || 0;
@@ -542,9 +548,16 @@ export default function Dashboard() {
                           <div className={`text-2xl font-black tracking-tighter mb-1 ${totalDebt > 0 ? 'text-red-400' : 'text-zinc-100'}`}>
                              {formatCurrency(totalDebt)}
                           </div>
-                          <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">
-                            {totalDebt > 0 ? 'Repasse a parceiros' : 'Sem débitos'}
-                          </p>
+                          <div className="flex flex-col gap-0.5">
+                            <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">
+                              Taxa HUB (15%): {formatCurrency(hubFee)}
+                            </p>
+                            {partnerDebt > 0 && (
+                              <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">
+                                Parceiros: {formatCurrency(partnerDebt)}
+                              </p>
+                            )}
+                          </div>
                        </CardContent>
                     </Card>
 
