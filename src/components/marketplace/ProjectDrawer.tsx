@@ -14,6 +14,7 @@ import { useProject } from '@/contexts/ProjectContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTenant } from '@/contexts/TenantContext';
 import { BookingService } from '@/services/BookingService';
+import { useCreateProject, createOutboundShipment } from '@/hooks/useProjects';
 import { useQueryClient } from '@tanstack/react-query';
 
 // ─── Availability per item ────────────────────────────────────────────────────
@@ -44,6 +45,7 @@ export function ProjectDrawer() {
   const { user } = useAuth();
   const { company } = useTenant();
   const queryClient = useQueryClient();
+  const createProject = useCreateProject();
 
   // ── local UI state ──────────────────────────────────────────────────────────
   const [availMap, setAvailMap]         = useState<AvailMap>({});
@@ -137,35 +139,70 @@ export function ProjectDrawer() {
     const projectLabel = state.projectName.trim() || 'Projeto via HUB';
     const out: BookingResult[] = [];
 
+    // 1. Create the project record first
+    let projectId: string | null = null;
+    try {
+      const proj = await createProject.mutateAsync({
+        name:             projectLabel,
+        renter_id:        user.id,
+        delivery_method:  deliveryMethod,
+        delivery_address: deliveryMethod === 'delivery' ? deliveryAddress.trim() : null,
+        delivery_contact: deliveryMethod === 'delivery' ? deliveryContact.trim() : null,
+        start_date:       state.startDate,
+        end_date:         state.endDate,
+      });
+      projectId = proj.id;
+    } catch (err: any) {
+      toast.error('Erro ao criar projeto. Tente novamente.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    // 2. Create one booking per item, linked to the project
     for (const item of state.items) {
       try {
-        await BookingService.createBooking({
-          equipment_id:       item.equipment.id,
-          company_id:         item.equipment.company_id,
-          renter_id:          user.id,
-          start_date:         state.startDate,
-          end_date:           state.endDate,
-          total_amount:       item.equipment.daily_rate * item.quantity * totalDays,
-          status:             'pending',
-          quantity:           item.quantity,
-          delivery_method:    deliveryMethod,
-          delivery_address:   deliveryMethod === 'delivery' ? deliveryAddress.trim() : null,
-          delivery_contact:   deliveryMethod === 'delivery' ? deliveryContact.trim() : null,
-          notes:              `Projeto: ${projectLabel}`,
+        const booking = await BookingService.createBooking({
+          equipment_id:         item.equipment.id,
+          company_id:           item.equipment.company_id,
+          renter_id:            user.id,
+          project_id:           projectId,
+          start_date:           state.startDate,
+          end_date:             state.endDate,
+          total_amount:         item.equipment.daily_rate * item.quantity * totalDays,
+          status:               'pending',
+          quantity:             item.quantity,
+          delivery_method:      deliveryMethod,
+          delivery_address:     deliveryMethod === 'delivery' ? deliveryAddress.trim() : null,
+          delivery_contact:     deliveryMethod === 'delivery' ? deliveryContact.trim() : null,
+          notes:                `Projeto: ${projectLabel}`,
           subrental_company_id: null,
-          origin_branch_id:   null,
+          origin_branch_id:     null,
         });
+
+        // 3. Create outbound shipment record for this booking
+        try {
+          await createOutboundShipment({
+            project_id: projectId!,
+            booking_id: booking.id,
+            company_id: item.equipment.company_id,
+          });
+        } catch {
+          // shipment creation is non-critical — log but don't fail the booking
+          console.warn('Shipment record could not be created for booking', booking.id);
+        }
+
         out.push({ name: item.equipment.name, success: true });
       } catch (err: any) {
         out.push({ name: item.equipment.name, success: false, error: err?.message });
       }
     }
 
-    const ok  = out.filter(r => r.success).length;
+    const ok   = out.filter(r => r.success).length;
     const fail = out.filter(r => !r.success).length;
 
     if (ok > 0) {
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
       queryClient.invalidateQueries({ queryKey: ['marketplace-active-bookings'] });
     }
 

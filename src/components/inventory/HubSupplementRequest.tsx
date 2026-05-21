@@ -117,8 +117,9 @@ export function HubSupplementRequest({ onSuccess }: HubSupplementRequestProps) {
             delivery_method: values.deliveryMethod,
             delivery_address: values.deliveryMethod === 'delivery' ? values.deliveryAddress || null : null,
             delivery_contact: values.deliveryMethod === 'delivery' ? values.deliveryContact || null : null,
+            project_id:           null,
             subrental_company_id: null,
-            origin_branch_id: null,
+            origin_branch_id:     null,
           });
       }
 

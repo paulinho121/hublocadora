@@ -1,20 +1,21 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { 
-  BarChart3, 
-  Package, 
-  CalendarDays, 
-  Truck, 
-  Settings, 
-  LogOut, 
-  ChevronRight, 
+import {
+  BarChart3,
+  Package,
+  CalendarDays,
+  Truck,
+  Settings,
+  LogOut,
+  ChevronRight,
   ChevronLeft,
   User,
   Globe,
   History,
   Activity,
   Heart,
-  FileText
+  FileText,
+  Clapperboard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -49,6 +50,7 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
     { id: 'overview', label: 'Visão Geral', icon: BarChart3 },
     { id: 'inventory', label: 'Inventário', icon: Package },
     { id: 'bookings', label: 'Reservas', icon: CalendarDays },
+    { id: 'projects', label: 'Projetos', icon: Clapperboard },
     { id: 'logistics', label: 'Logística', icon: Truck },
     { id: 'reports', label: 'Relatórios', icon: FileText },
     { id: 'history', label: 'Histórico', icon: History },

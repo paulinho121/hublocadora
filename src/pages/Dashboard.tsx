@@ -55,11 +55,12 @@ import { AuditTab } from '@/components/dashboard/AuditTab';
 
 import { OrderHistoryTab } from '@/components/dashboard/OrderHistoryTab';
 import { ReportsTab } from '@/components/dashboard/ReportsTab';
+import { ProjectsTab } from '@/components/dashboard/ProjectsTab';
 import { CompanyProfileSettings } from '@/components/dashboard/CompanyProfileSettings';
 import { EditBookingModal } from '@/components/dashboard/EditBookingModal';
 
-type TabType = 'overview' | 'inventory' | 'bookings' | 'logistics' | 'reports' | 'network' | 'settings' | 'audit' | 'history' | 'favorites';
-const VALID_TABS: TabType[] = ['overview', 'inventory', 'bookings', 'logistics', 'reports', 'network', 'settings', 'audit', 'history', 'favorites'];
+type TabType = 'overview' | 'inventory' | 'bookings' | 'projects' | 'logistics' | 'reports' | 'network' | 'settings' | 'audit' | 'history' | 'favorites';
+const VALID_TABS: TabType[] = ['overview', 'inventory', 'bookings', 'projects', 'logistics', 'reports', 'network', 'settings', 'audit', 'history', 'favorites'];
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -789,6 +790,12 @@ export default function Dashboard() {
                     </Card>
                   ))}
                 </div>
+             </div>
+           )}
+
+           {activeTab === 'projects' && (
+             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+               <ProjectsTab />
              </div>
            )}
 

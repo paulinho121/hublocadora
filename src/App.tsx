@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, NavLink } from 'react-router-dom';
 import { lazy, Suspense, useEffect } from 'react';
-import { LogOut, LayoutDashboard, Settings, ShoppingBag, BarChart3, Package, CalendarDays, Truck, History, FileText, Heart, FolderOpen } from 'lucide-react';
+import { LogOut, LayoutDashboard, Settings, ShoppingBag, BarChart3, Package, CalendarDays, Truck, History, FileText, Heart, FolderOpen, Clapperboard } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -187,10 +187,11 @@ function BottomNav() {
     const tabs = [
       { id: 'overview', label: 'Visão', icon: BarChart3 },
       { id: 'inventory', label: 'Inventário', icon: Package },
-      { id: 'bookings', label: 'Pedidos', icon: CalendarDays },
+      { id: 'bookings',  label: 'Pedidos',   icon: CalendarDays },
+      { id: 'projects',  label: 'Projetos',  icon: Clapperboard },
       { id: 'logistics', label: 'Logística', icon: Truck },
       { id: 'favorites', label: 'Favoritos', icon: Heart },
-      { id: 'settings', label: 'Ajustes', icon: Settings },
+      { id: 'settings',  label: 'Ajustes',   icon: Settings },
     ];
     return (
       <div className="md:hidden fixed left-3 right-3 z-50 flex justify-center pointer-events-none" style={{ bottom: 'calc(env(safe-area-inset-bottom) + 12px)' }}>

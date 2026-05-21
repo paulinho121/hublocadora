@@ -68,9 +68,10 @@ export interface Equipment {
 
 export interface Booking {
     id: string;
-    equipment_id: string; 
-    renter_id: string; 
-    company_id: string; 
+    equipment_id: string;
+    renter_id: string;
+    company_id: string;
+    project_id: string | null;
     start_date: string;
     end_date: string;
     total_amount: number;
@@ -83,6 +84,58 @@ export interface Booking {
     subrental_company_id: string | null;
     origin_branch_id: string | null;
     created_at: string;
+}
+
+// ─── Project types ────────────────────────────────────────────────────────────
+
+export type ProjectStatus =
+    | 'draft' | 'pending' | 'approved' | 'shipping'
+    | 'delivered' | 'active' | 'returning' | 'completed' | 'cancelled';
+
+export type ShipmentStatus =
+    | 'awaiting_approval' | 'approved' | 'label_created' | 'picked_up'
+    | 'in_transit' | 'out_for_delivery' | 'delivered' | 'failed';
+
+export interface ProjectShipment {
+    id: string;
+    project_id: string;
+    booking_id: string;
+    company_id: string;
+    direction: 'outbound' | 'return';
+    carrier: string | null;
+    tracking_code: string | null;
+    tracking_url: string | null;
+    committed_ship_by: string | null;
+    estimated_arrival: string | null;
+    actual_arrival: string | null;
+    status: ShipmentStatus;
+    status_history: { status: string; ts: string; description: string; location?: string }[];
+    notes: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface ProjectBooking extends Booking {
+    equipment?: Equipment;
+    company?: Company;
+    project_shipments?: ProjectShipment[];
+}
+
+export interface Project {
+    id: string;
+    renter_id: string;
+    name: string;
+    status: ProjectStatus;
+    delivery_method: 'pickup' | 'delivery' | 'mixed';
+    delivery_address: string | null;
+    delivery_contact: string | null;
+    delivery_window_start: string | null;
+    delivery_window_end: string | null;
+    notes: string | null;
+    created_at: string;
+    updated_at: string;
+    // joined
+    bookings?: ProjectBooking[];
 }
 
 export interface Payment {
