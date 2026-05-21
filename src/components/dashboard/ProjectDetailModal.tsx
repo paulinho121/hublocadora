@@ -57,6 +57,7 @@ function shipmentIcon(status: string, className = 'w-4 h-4') {
 }
 
 // ─── Inline tracking form (for rental house owners — outbound) ─────────────────
+// 🟢 LOCADORA action — verde
 
 function TrackingForm({
     shipment,
@@ -95,33 +96,34 @@ function TrackingForm({
     };
 
     return (
-        <div className="mt-3 p-3 bg-zinc-800/40 rounded-xl border border-zinc-700/50 space-y-2">
-            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500">
-                Adicionar rastreio de envio
+        <div className="mt-3 p-3 bg-emerald-500/5 rounded-xl border border-emerald-500/20 space-y-2">
+            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-400 flex items-center gap-1.5">
+                <Truck className="w-3 h-3" />
+                Rastreio de envio — Locadora
             </p>
             <div className="grid grid-cols-2 gap-2">
                 <input
                     value={carrier}
                     onChange={e => setCarrier(e.target.value)}
                     placeholder="Transportadora (ex: Correios)"
-                    className="col-span-2 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-primary/50"
+                    className="col-span-2 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/50"
                 />
                 <input
                     value={code}
                     onChange={e => setCode(e.target.value)}
                     placeholder="Código de rastreio"
-                    className="bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-primary/50"
+                    className="bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/50"
                 />
                 <input
                     type="date"
                     value={estimated}
                     onChange={e => setEstimated(e.target.value)}
-                    className="bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-primary/50"
+                    className="bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500/50"
                     title="Previsão de entrega"
                 />
             </div>
             <Button
-                className="w-full h-8 rounded-lg bg-primary text-white font-black uppercase tracking-widest text-[10px]"
+                className="w-full h-8 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase tracking-widest text-[10px]"
                 onClick={handleSave}
                 disabled={update.isPending}
             >
@@ -134,6 +136,7 @@ function TrackingForm({
 }
 
 // ─── Return tracking form (for renter — adds return carrier + code) ────────────
+// 🔴 LOCATÁRIO action — vermelho
 
 function ReturnTrackingForm({
     shipment,
@@ -172,34 +175,34 @@ function ReturnTrackingForm({
     };
 
     return (
-        <div className="mt-3 p-3 bg-orange-500/5 rounded-xl border border-orange-500/20 space-y-2">
-            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-orange-400 flex items-center gap-1.5">
+        <div className="mt-3 p-3 bg-red-500/5 rounded-xl border border-red-500/20 space-y-2">
+            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-red-400 flex items-center gap-1.5">
                 <ArrowUpFromLine className="w-3 h-3" />
-                Rastreio do retorno
+                Rastreio do retorno — Locatário
             </p>
             <div className="grid grid-cols-2 gap-2">
                 <input
                     value={carrier}
                     onChange={e => setCarrier(e.target.value)}
                     placeholder="Transportadora (ex: Correios)"
-                    className="col-span-2 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-orange-500/50"
+                    className="col-span-2 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-red-500/50"
                 />
                 <input
                     value={code}
                     onChange={e => setCode(e.target.value)}
                     placeholder="Código de rastreio"
-                    className="bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-orange-500/50"
+                    className="bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-red-500/50"
                 />
                 <input
                     type="date"
                     value={pickupDate}
                     onChange={e => setPickupDate(e.target.value)}
-                    className="bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500/50"
+                    className="bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500/50"
                     title="Data prevista de chegada na locadora"
                 />
             </div>
             <Button
-                className="w-full h-8 rounded-lg bg-orange-500 hover:bg-orange-400 text-white font-black uppercase tracking-widest text-[10px]"
+                className="w-full h-8 rounded-lg bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-widest text-[10px]"
                 onClick={handleSave}
                 disabled={update.isPending}
             >
@@ -352,18 +355,18 @@ function CompanyGroup({
 
                                         {/* Action buttons */}
                                         <div className="flex gap-2 mt-3">
-                                            {/* Rental house: add/edit tracking */}
+                                            {/* 🟢 Locadora: add/edit tracking */}
                                             {isOwner && booking.status === 'approved' && shipment && shipSt !== 'delivered' && (
                                                 <button
                                                     onClick={() => setShowTrackingId(isShowingTracking ? null : booking.id)}
-                                                    className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-primary transition-colors"
+                                                    className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-emerald-500 hover:text-emerald-400 transition-colors"
                                                 >
                                                     <Edit3 className="w-3 h-3" />
                                                     {shipment.tracking_code ? 'Editar rastreio' : 'Adicionar rastreio'}
                                                 </button>
                                             )}
 
-                                            {/* Renter: confirm delivery */}
+                                            {/* 🔴 Locatário: confirm delivery */}
                                             {!isOwner && shipSt === 'in_transit' && shipment && (
                                                 <ConfirmDeliveryButton shipmentId={shipment.id} />
                                             )}
@@ -413,11 +416,11 @@ function ReturnCompanyGroup({
     const anyInTransit = returnShipments.some(s => s.status === 'in_transit' || s.status === 'picked_up');
 
     return (
-        <div className="border border-orange-500/20 rounded-2xl overflow-hidden">
+        <div className="border border-red-500/20 rounded-2xl overflow-hidden">
             {/* Company header */}
             <button
                 onClick={() => setExpanded(v => !v)}
-                className="w-full flex items-center justify-between p-4 bg-orange-500/5 hover:bg-orange-500/10 transition-colors"
+                className="w-full flex items-center justify-between p-4 bg-red-500/5 hover:bg-red-500/10 transition-colors"
             >
                 <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center overflow-hidden">
@@ -441,7 +444,7 @@ function ReturnCompanyGroup({
                         </span>
                     )}
                     {anyInTransit && !allReturned && (
-                        <span className="text-[9px] font-black uppercase tracking-widest text-orange-400 flex items-center gap-1">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-red-400 flex items-center gap-1">
                             <Truck className="w-3 h-3" /> Retornando
                         </span>
                     )}
@@ -526,11 +529,11 @@ function ReturnCompanyGroup({
 
                                         {/* Action buttons */}
                                         <div className="flex gap-2 mt-3">
-                                            {/* Renter: add return tracking when status is awaiting */}
+                                            {/* 🔴 Locatário: add return tracking when status is awaiting */}
                                             {isRenter && retShipment && retStatus === 'awaiting_approval' && (
                                                 <button
                                                     onClick={() => setShowReturnTrackingId(isShowingForm ? null : booking.id)}
-                                                    className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-orange-400 hover:text-orange-300 transition-colors"
+                                                    className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-red-400 hover:text-red-300 transition-colors"
                                                 >
                                                     <ArrowUpFromLine className="w-3 h-3" />
                                                     {retShipment.tracking_code ? 'Editar rastreio de retorno' : 'Informar envio'}
@@ -572,7 +575,8 @@ function ReturnCompanyGroup({
     );
 }
 
-// ─── Confirm delivery button (outbound) ───────────────────────────────────────
+// ─── Confirm delivery button (outbound — renter confirms they received it) ─────
+// 🔴 LOCATÁRIO action — vermelho
 
 function ConfirmDeliveryButton({ shipmentId }: { shipmentId: string }) {
     const update = useUpdateShipment();
@@ -596,7 +600,7 @@ function ConfirmDeliveryButton({ shipmentId }: { shipmentId: string }) {
         <button
             onClick={handleConfirm}
             disabled={update.isPending}
-            className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-emerald-400 hover:text-emerald-300 transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
         >
             {update.isPending
                 ? <Loader2 className="w-3 h-3 animate-spin" />
@@ -607,6 +611,7 @@ function ConfirmDeliveryButton({ shipmentId }: { shipmentId: string }) {
 }
 
 // ─── Confirm return receipt button (rental house confirms item came back) ──────
+// 🟢 LOCADORA action — verde
 
 function ConfirmReturnButton({
     shipmentId,
@@ -703,22 +708,22 @@ function ReturnSection({
             {/* Divider with label */}
             <div className="flex items-center gap-3 py-1">
                 <div className="flex-1 h-px bg-zinc-800" />
-                <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.25em] text-orange-400">
+                <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.25em] text-red-400">
                     <RotateCcw className="w-3 h-3" />
                     Logística Reversa
                 </div>
                 <div className="flex-1 h-px bg-zinc-800" />
             </div>
 
-            {/* Initiate return CTA — only visible to the renter */}
+            {/* 🔴 Initiate return CTA — only visible to the renter (locatário) */}
             {canInitiateReturn && isRenter && (
                 <motion.div
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-orange-500/5 border border-orange-500/20 rounded-2xl p-6 text-center"
+                    className="bg-red-500/5 border border-red-500/20 rounded-2xl p-6 text-center"
                 >
-                    <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center mx-auto mb-4">
-                        <RotateCcw className="w-6 h-6 text-orange-400" />
+                    <div className="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+                        <RotateCcw className="w-6 h-6 text-red-400" />
                     </div>
                     <p className="text-sm font-black uppercase tracking-wider text-white mb-1">
                         Todos os itens foram entregues!
@@ -730,7 +735,7 @@ function ReturnSection({
                     <Button
                         onClick={handleInitiateReturn}
                         disabled={initiateReturn.isPending}
-                        className="bg-orange-500 hover:bg-orange-400 text-white font-black uppercase tracking-widest text-[10px] h-10 px-8 rounded-xl shadow-lg shadow-orange-500/20"
+                        className="bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-widest text-[10px] h-10 px-8 rounded-xl shadow-lg shadow-red-500/20"
                     >
                         {initiateReturn.isPending
                             ? <Loader2 className="w-4 h-4 animate-spin" />
@@ -739,13 +744,13 @@ function ReturnSection({
                 </motion.div>
             )}
 
-            {/* Rental house view — waiting for renter to send */}
+            {/* 🟢 Rental house view — waiting for renter to send */}
             {canInitiateReturn && !isRenter && (
-                <div className="bg-zinc-900/40 border border-zinc-800/50 rounded-2xl p-4 flex items-center gap-3">
-                    <Clock className="w-5 h-5 text-zinc-500 shrink-0" />
+                <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-4 flex items-center gap-3">
+                    <Clock className="w-5 h-5 text-emerald-500 shrink-0" />
                     <div>
-                        <p className="text-xs font-black uppercase tracking-wider text-white">
-                            Aguardando devolução pelo cliente
+                        <p className="text-xs font-black uppercase tracking-wider text-emerald-400">
+                            Aguardando devolução pelo locatário
                         </p>
                         <p className="text-[10px] text-zinc-500 mt-0.5">
                             Todos os itens foram entregues. O locatário ainda não iniciou a devolução.

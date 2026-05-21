@@ -62,7 +62,7 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
     const progressPct = bookings.length > 0
         ? Math.round((progressCurrent / bookings.length) * 100)
         : 0;
-    const progressColor = isReturning ? 'bg-orange-500' : 'bg-primary';
+    const progressColor = isReturning ? 'bg-red-500' : 'bg-primary';
     const progressLabel = isReturning ? 'Devolvidos' : 'Entregues';
     const progressCount = isReturning ? returnedCount : deliveredCount;
 
@@ -116,7 +116,7 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
             {bookings.length > 0 && derived !== 'pending' && derived !== 'approved' && (
                 <div className="mb-4">
                     <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-1.5">
-                        <span className={isReturning ? 'text-orange-400/70' : ''}>
+                        <span className={isReturning ? 'text-red-400/70' : ''}>
                             {isReturning && <RotateCcw className="w-2.5 h-2.5 inline mr-1" />}
                             {progressLabel}
                         </span>
