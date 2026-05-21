@@ -11,7 +11,7 @@ import {
   Search, ArrowUpRight, Ban,
   Truck, Clock, TrendingUp, Zap, Activity,
   Globe, Users, CheckCircle2, XCircle, AlertCircle,
-  Target, BarChart3, Wifi
+  Target, BarChart3, Wifi, Radio, Camera, ChevronUp, ChevronDown, Minus
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -21,7 +21,16 @@ import {
 
 import { Dialog } from '@/components/ui/dialog';
 
-type TabType = 'overview' | 'companies' | 'bookings' | 'users' | 'network';
+type TabType = 'overview' | 'companies' | 'bookings' | 'users' | 'network' | 'equipment';
+
+interface LiveEvent {
+  id: string;
+  type: 'new_booking' | 'approved' | 'active' | 'completed' | 'cancelled' | 'rejected' | 'delivery';
+  company: string;
+  equipment: string;
+  amount: number;
+  ts: Date;
+}
 type DateRange = '7d' | '30d' | '90d' | 'all';
 
 const BRL = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(v);
@@ -46,6 +55,41 @@ export default function Admin() {
   const [selectedCompanyForDetail, setSelectedCompanyForDetail] = useState<any | null>(null);
   const [selectedLogisticsBooking, setSelectedLogisticsBooking] = useState<any | null>(null);
   const [updatingCompanyId, setUpdatingCompanyId] = useState<string | null>(null);
+
+  // Live operations feed
+  const [liveEvents, setLiveEvents] = useState<LiveEvent[]>([]);
+
+  useEffect(() => {
+    if (!profile || profile.role !== 'admin') return;
+    const pushEvent = (evt: Omit<LiveEvent, 'id'>) => {
+      setLiveEvents(prev => [{ ...evt, id: crypto.randomUUID() }, ...prev].slice(0, 30));
+    };
+    const ch = supabase
+      .channel('admin:live-ops')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bookings' }, (payload) => {
+        pushEvent({
+          type: 'new_booking',
+          company: '—',
+          equipment: (payload.new as any).equipment_id?.slice(0, 6) || '—',
+          amount: (payload.new as any).total_amount || 0,
+          ts: new Date(),
+        });
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'bookings' }, (payload) => {
+        const s = (payload.new as any).status;
+        if (['approved','active','completed','cancelled','rejected'].includes(s)) {
+          pushEvent({
+            type: s as LiveEvent['type'],
+            company: '—',
+            equipment: (payload.new as any).equipment_id?.slice(0, 6) || '—',
+            amount: (payload.new as any).total_amount || 0,
+            ts: new Date(),
+          });
+        }
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [profile?.role]);
 
   // Presence — usuários online em tempo real
   const [onlineUsers, setOnlineUsers] = useState<Record<string, { email: string; last_sign_in_at: string | null }>>({});
@@ -109,7 +153,7 @@ export default function Admin() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('bookings')
-        .select('*, equipment:equipments(name), company:companies(name)')
+        .select('*, equipment_id, company_id, equipment:equipments(name, category), company:companies(name)')
         .order('created_at', { ascending: false });
       if (error) throw error;
       return data;
@@ -233,6 +277,46 @@ export default function Admin() {
     });
     return Object.values(map).sort((a, b) => b.total - a.total).slice(0, 5);
   }, [filteredBookings, companies]);
+
+  // --- EQUIPMENT TRANSACTION STATS ---
+  const equipmentStats = useMemo(() => {
+    if (!bookings || !equipments) return [];
+    const map: Record<string, {
+      id: string; name: string; company: string; category: string;
+      bookingCount: number; completedCount: number; cancelledCount: number;
+      totalRevenue: number; hubFee: number; dailyRate: number;
+      lastBookingDate: string | null;
+    }> = {};
+    bookings.forEach(b => {
+      const eqId = b.equipment_id;
+      if (!eqId) return;
+      const eq = equipments.find((e: any) => e.id === eqId);
+      if (!map[eqId]) {
+        const co = companies?.find((c: any) => c.id === (eq as any)?.company_id);
+        map[eqId] = {
+          id: eqId,
+          name: b.equipment?.name || eq?.name || '—',
+          company: co?.name || b.company?.name || '—',
+          category: (eq as any)?.category || '—',
+          bookingCount: 0, completedCount: 0, cancelledCount: 0,
+          totalRevenue: 0, hubFee: 0,
+          dailyRate: (eq as any)?.daily_rate || 0,
+          lastBookingDate: null,
+        };
+      }
+      map[eqId].bookingCount += 1;
+      if (b.status === 'completed') map[eqId].completedCount += 1;
+      if (['cancelled','rejected'].includes(b.status)) map[eqId].cancelledCount += 1;
+      if (['approved','active','completed'].includes(b.status)) {
+        map[eqId].totalRevenue += b.total_amount || 0;
+        map[eqId].hubFee += (b.total_amount || 0) * 0.15;
+      }
+      if (!map[eqId].lastBookingDate || b.created_at > map[eqId].lastBookingDate!) {
+        map[eqId].lastBookingDate = b.created_at;
+      }
+    });
+    return Object.values(map).sort((a, b) => b.totalRevenue - a.totalRevenue);
+  }, [bookings, equipments, companies]);
 
   // --- CONVERSION METRICS ---
   const conversion = useMemo(() => {
@@ -415,9 +499,10 @@ export default function Admin() {
         <div className="flex gap-8 border-b border-zinc-900/50 pb-0">
           {([
             { id: 'overview', label: 'Dashboard', icon: BarChart3 },
+            { id: 'equipment', label: 'Transações', icon: Camera },
             { id: 'network', label: 'Minha Rede', icon: Globe },
             { id: 'companies', label: 'Ecossistema', icon: Building2, badge: pendingCompanies.length },
-            { id: 'bookings', label: 'Fluxo de Caixa', icon: Truck, badge: urgentPendingBookings.length },
+            { id: 'bookings', label: 'Financeiro', icon: Truck, badge: urgentPendingBookings.length },
             { id: 'users', label: 'Usuários', icon: Users },
           ] as { id: TabType; label: string; icon: any; badge?: number }[]).map(tab => (
             <button
@@ -533,6 +618,66 @@ export default function Admin() {
                     ))}
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* LIVE OPS FEED */}
+            <Card className="col-span-12 lg:col-span-4 bg-zinc-950 border-zinc-900 rounded-[32px] overflow-hidden">
+              <CardHeader className="p-8 pb-4 flex flex-row items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                  </span>
+                  <CardTitle className="text-xs font-black text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
+                    <Radio className="h-3.5 w-3.5 text-emerald-400" /> Operações ao Vivo
+                  </CardTitle>
+                </div>
+                <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">
+                  {liveEvents.length} eventos
+                </span>
+              </CardHeader>
+              <CardContent className="px-6 pb-6">
+                {liveEvents.length === 0 ? (
+                  <div className="py-10 flex flex-col items-center justify-center gap-3 text-zinc-700">
+                    <Radio className="h-8 w-8 opacity-30" />
+                    <p className="text-[10px] font-black uppercase tracking-widest text-center">
+                      Aguardando operações em tempo real...
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-[280px] overflow-y-auto custom-scrollbar pr-1">
+                    {liveEvents.map(ev => {
+                      const cfg: Record<LiveEvent['type'], { label: string; color: string; dot: string }> = {
+                        new_booking: { label: 'Nova reserva',  color: 'text-amber-400',   dot: 'bg-amber-400' },
+                        approved:    { label: 'Aprovada',      color: 'text-emerald-400', dot: 'bg-emerald-500' },
+                        active:      { label: 'Ativa',         color: 'text-blue-400',    dot: 'bg-blue-500' },
+                        completed:   { label: 'Concluída',     color: 'text-violet-400',  dot: 'bg-violet-500' },
+                        cancelled:   { label: 'Cancelada',     color: 'text-zinc-500',    dot: 'bg-zinc-600' },
+                        rejected:    { label: 'Recusada',      color: 'text-red-400',     dot: 'bg-red-500' },
+                        delivery:    { label: 'Entrega',       color: 'text-cyan-400',    dot: 'bg-cyan-500' },
+                      };
+                      const c = cfg[ev.type];
+                      const ago = Math.floor((Date.now() - ev.ts.getTime()) / 1000);
+                      const agoStr = ago < 60 ? `${ago}s` : `${Math.floor(ago/60)}m`;
+                      return (
+                        <div key={ev.id} className="flex items-start gap-2.5 p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800/50 animate-in fade-in slide-in-from-top-2 duration-300">
+                          <span className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 ${c.dot}`} />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-1">
+                              <span className={`text-[9px] font-black uppercase tracking-widest ${c.color}`}>{c.label}</span>
+                              <span className="text-[8px] text-zinc-600 font-bold shrink-0">{agoStr}</span>
+                            </div>
+                            <p className="text-[9px] text-zinc-400 font-bold truncate">{ev.equipment}</p>
+                            {ev.amount > 0 && (
+                              <p className="text-[9px] text-zinc-500 font-bold">{BRL2(ev.amount)}</p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -915,6 +1060,134 @@ export default function Admin() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ===== EQUIPMENT TRANSACTIONS TAB ===== */}
+        {activeTab === 'equipment' && (
+          <div className="space-y-6 animate-in fade-in duration-500">
+
+            {/* KPI strip */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { label: 'Equipamentos com Locações', value: equipmentStats.length, color: 'text-white', icon: Camera },
+                { label: 'Total de Locações', value: bookings?.length || 0, color: 'text-white', icon: TrendingUp },
+                { label: 'Receita por Equipamentos', value: BRL(equipmentStats.reduce((a,e) => a + e.totalRevenue, 0)), color: 'text-emerald-400', icon: BarChart3 },
+                { label: 'Taxa HUB Gerada', value: BRL(equipmentStats.reduce((a,e) => a + e.hubFee, 0)), color: 'text-primary', icon: Target },
+              ].map((k, i) => (
+                <div key={i} className={`bg-zinc-950 border border-zinc-900 rounded-2xl p-5 flex items-center gap-4`}>
+                  <div className="p-2.5 bg-zinc-900 rounded-xl shrink-0">
+                    <k.icon className={`h-5 w-5 ${k.color === 'text-primary' ? 'text-primary' : k.color === 'text-emerald-400' ? 'text-emerald-400' : 'text-zinc-400'}`} />
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-black uppercase text-zinc-500 tracking-widest">{k.label}</p>
+                    <h4 className={`text-xl font-black tracking-tight ${k.color}`}>{k.value}</h4>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Equipment transactions table */}
+            <div className="bg-zinc-950 border border-zinc-900 rounded-2xl overflow-hidden">
+              <div className="p-6 border-b border-zinc-900 flex justify-between items-center">
+                <h2 className="text-sm font-black uppercase tracking-tight flex items-center gap-2">
+                  <Camera className="h-4 w-4 text-primary" /> Transações por Equipamento
+                </h2>
+                <span className="text-[10px] text-zinc-500 font-bold uppercase">{equipmentStats.length} equipamentos com movimentação</span>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead className="bg-zinc-900/40">
+                    <tr>
+                      {['Equipamento', 'Locadora', 'Categoria', 'Locações', 'Concluídas', 'Canceladas', 'Receita Gerada', 'Taxa HUB (15%)', 'Última Locação'].map((h, i) => (
+                        <th key={i} className="p-5 text-[9px] font-black uppercase text-zinc-500 tracking-widest whitespace-nowrap">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-900">
+                    {equipmentStats.length === 0 ? (
+                      <tr><td colSpan={9} className="p-16 text-center text-zinc-600 font-black uppercase tracking-widest text-xs">Nenhuma transação registrada.</td></tr>
+                    ) : equipmentStats.map(eq => {
+                      const convRate = eq.bookingCount > 0 ? ((eq.completedCount / eq.bookingCount) * 100).toFixed(0) : '0';
+                      return (
+                        <tr key={eq.id} className="hover:bg-white/[0.015] transition-colors group">
+                          <td className="p-5">
+                            <div className="flex items-center gap-3">
+                              <div className="h-8 w-8 bg-zinc-900 rounded-lg border border-zinc-800 flex items-center justify-center shrink-0">
+                                <Camera className="h-3.5 w-3.5 text-zinc-500" />
+                              </div>
+                              <p className="text-[11px] font-black text-zinc-200 group-hover:text-primary transition-colors max-w-[160px] truncate">{eq.name}</p>
+                            </div>
+                          </td>
+                          <td className="p-5 text-[10px] font-bold text-zinc-400 max-w-[100px] truncate">{eq.company}</td>
+                          <td className="p-5">
+                            <span className="text-[8px] font-black uppercase text-zinc-500 bg-zinc-900 px-2 py-1 rounded-lg">{eq.category}</span>
+                          </td>
+                          <td className="p-5 text-sm font-black text-white">{eq.bookingCount}</td>
+                          <td className="p-5">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-sm font-black text-emerald-400">{eq.completedCount}</span>
+                              <span className="text-[9px] text-zinc-600">({convRate}%)</span>
+                            </div>
+                          </td>
+                          <td className="p-5 text-sm font-black text-red-400/70">{eq.cancelledCount}</td>
+                          <td className="p-5 text-sm font-black text-white">{BRL2(eq.totalRevenue)}</td>
+                          <td className="p-5 text-sm font-black text-primary">{BRL2(eq.hubFee)}</td>
+                          <td className="p-5 text-[10px] text-zinc-500 font-medium whitespace-nowrap">
+                            {eq.lastBookingDate ? new Date(eq.lastBookingDate).toLocaleDateString('pt-BR') : '—'}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Top 5 most rented equipment */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-6 space-y-4">
+                <h3 className="text-xs font-black uppercase text-zinc-500 tracking-widest flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-emerald-400" /> Mais Locados (por número)
+                </h3>
+                {equipmentStats.slice(0, 5).sort((a,b) => b.bookingCount - a.bookingCount).map((eq, i) => (
+                  <div key={eq.id} className="flex items-center gap-3">
+                    <span className="text-[10px] font-black text-zinc-600 w-4">{i + 1}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-[10px] font-black text-zinc-200 truncate">{eq.name}</span>
+                        <span className="text-xs font-black text-white ml-2 shrink-0">{eq.bookingCount} locações</span>
+                      </div>
+                      <div className="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden">
+                        <div className="h-full bg-emerald-500 transition-all duration-700"
+                          style={{ width: `${(eq.bookingCount / (equipmentStats[0]?.bookingCount || 1)) * 100}%` }} />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-6 space-y-4">
+                <h3 className="text-xs font-black uppercase text-zinc-500 tracking-widest flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-primary" /> Maior Receita por Equipamento
+                </h3>
+                {equipmentStats.slice(0, 5).map((eq, i) => (
+                  <div key={eq.id} className="flex items-center gap-3">
+                    <span className="text-[10px] font-black text-zinc-600 w-4">{i + 1}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-[10px] font-black text-zinc-200 truncate">{eq.name}</span>
+                        <span className="text-xs font-black text-primary ml-2 shrink-0">{BRL(eq.totalRevenue)}</span>
+                      </div>
+                      <div className="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden">
+                        <div className="h-full bg-primary/70 transition-all duration-700"
+                          style={{ width: `${(eq.totalRevenue / (equipmentStats[0]?.totalRevenue || 1)) * 100}%` }} />
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
