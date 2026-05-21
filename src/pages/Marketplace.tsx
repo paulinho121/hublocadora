@@ -468,8 +468,8 @@ export default function Marketplace() {
       <div className="w-full max-w-7xl mx-auto px-6 mb-20">
         <div id="results-section" className="w-full scroll-mt-24">
 
-          {/* ── Project date bar ── */}
-          <ProjectDateBar availableCount={availableCount} />
+          {/* ── Project date bar — oculto temporariamente ── */}
+          {/* <ProjectDateBar availableCount={availableCount} /> */}
 
           <div className="flex items-center justify-between mb-10">
             <div className="flex flex-col gap-1">
