@@ -18,7 +18,8 @@ import {
   ArrowUpRight,
   Heart,
   Pencil,
-  Trash2
+  Trash2,
+  RefreshCw,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -107,6 +108,14 @@ export default function Dashboard() {
   const deleteMutation = useDeleteEquipment();
   const updateStatusMutation = useUpdateBookingStatus();
   const deleteBookingMutation = useDeleteBooking();
+
+  // Refresh (PWA)
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    queryClient.invalidateQueries();
+    setTimeout(() => window.location.reload(), 500);
+  };
 
   // Other UI state
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -484,7 +493,17 @@ export default function Dashboard() {
               <h1 className="text-sm font-black uppercase tracking-[0.3em] text-zinc-500">Área de Gestão</h1>
            </div>
 
-           <div className="flex items-center gap-4">
+           <div className="flex items-center gap-3">
+              {/* Refresh button — visible on mobile (PWA) */}
+              <button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="md:hidden h-9 w-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500 hover:text-emerald-400 hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-all active:scale-95"
+                title="Atualizar aplicativo"
+              >
+                <RefreshCw className={`h-4 w-4 transition-transform duration-700 ${isRefreshing ? 'animate-spin text-emerald-400' : ''}`} />
+              </button>
+
               <div className="h-8 w-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center">
                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               </div>

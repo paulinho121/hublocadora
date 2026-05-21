@@ -16,6 +16,7 @@ import {
   Heart,
   FileText,
   Clapperboard,
+  RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -32,7 +33,13 @@ interface SidebarProps {
 export function DashboardSidebar({ activeTab, onTabChange, companyName }: SidebarProps) {
   const { user, signOut } = useAuth();
   const { isAdmin, company } = useTenant();
-  
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    setTimeout(() => window.location.reload(), 400);
+  };
+
   // Persist sidebar state in localStorage for a seamless user experience
   const [isCollapsed, setIsCollapsed] = useState(() => {
     return localStorage.getItem("sidebar-collapsed") === "true";
@@ -173,8 +180,27 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
            )}
         </div>
         
-        <Button 
-          variant="ghost" 
+        {/* Refresh / Atualizar App */}
+        <Button
+          variant="ghost"
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className={cn(
+            "text-[10px] sm:text-xs uppercase font-black tracking-widest text-zinc-600 hover:text-emerald-400 hover:bg-emerald-500/5 h-10 rounded-xl transition-all duration-300 mb-1",
+            isCollapsed ? "w-12 h-12 justify-center mx-auto p-0" : "w-full justify-start"
+          )}
+          title={isCollapsed ? "Atualizar aplicativo" : undefined}
+        >
+          <RefreshCw className={cn(
+            "h-3.5 w-3.5 shrink-0 transition-transform duration-700",
+            isRefreshing ? "animate-spin" : "",
+            !isCollapsed && "mr-2"
+          )} />
+          {!isCollapsed && "Atualizar"}
+        </Button>
+
+        <Button
+          variant="ghost"
           onClick={() => signOut()}
           className={cn(
             "text-[10px] sm:text-xs uppercase font-black tracking-widest text-zinc-600 hover:text-destructive hover:bg-destructive/5 h-10 rounded-xl transition-all duration-300",
@@ -182,7 +208,7 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
           )}
           title={isCollapsed ? "Sair da Plataforma" : undefined}
         >
-          <LogOut className={cn("h-3.5 w-3.5 shrink-0", !isCollapsed && "mr-2")} /> 
+          <LogOut className={cn("h-3.5 w-3.5 shrink-0", !isCollapsed && "mr-2")} />
           {!isCollapsed && "Sair"}
         </Button>
       </div>
