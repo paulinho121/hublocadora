@@ -34,7 +34,11 @@ export function EquipmentCard({
   const images = item.images ?? [];
   const hasMultiple = images.length > 1;
   const [activeIdx, setActiveIdx] = useState(0);
+  const [loadedSet, setLoadedSet] = useState<Set<number>>(() => new Set());
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const markLoaded = (i: number) =>
+    setLoadedSet(prev => prev.has(i) ? prev : new Set([...prev, i]));
 
   useEffect(() => {
     if (!hasMultiple) return;
@@ -89,6 +93,15 @@ export function EquipmentCard({
         onClick={handleViewDetails}
         className="relative w-full h-52 overflow-hidden bg-zinc-900 shrink-0 cursor-pointer"
       >
+        {/* Shimmer placeholder — hidden once first image is loaded */}
+        <div className={`absolute inset-0 transition-opacity duration-500
+          ${loadedSet.has(0) ? 'opacity-0' : 'opacity-100'}`}>
+          <div className="w-full h-full bg-zinc-900 relative overflow-hidden">
+            <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.6s_infinite]
+                            bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
+          </div>
+        </div>
+
         {/* Product images */}
         {images.length > 0 ? (
           images.map((src, i) => (
@@ -96,9 +109,14 @@ export function EquipmentCard({
               key={i}
               src={src}
               alt={item.name}
+              loading={i === 0 ? 'eager' : 'lazy'}
+              decoding="async"
+              onLoad={() => markLoaded(i)}
               className={`absolute inset-0 w-full h-full object-contain p-6
                 transition-all duration-700 ease-in-out
-                ${i === activeIdx ? 'opacity-100 scale-100' : 'opacity-0 scale-105 blur-sm'}`}
+                ${i === activeIdx && loadedSet.has(i)
+                  ? 'opacity-100 scale-100'
+                  : 'opacity-0 scale-105'}`}
             />
           ))
         ) : (
