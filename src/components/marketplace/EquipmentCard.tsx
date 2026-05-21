@@ -178,7 +178,7 @@ export function EquipmentCard({ item, onClick, rentedQuantity = 0, nextReturnDat
         <div
           onClick={(e) => {
             e.stopPropagation();
-            if (!isFullyRented) onClick();
+            if (!isFullyRented) handleViewDetails(e);
           }}
           className={`mt-auto flex items-center justify-between bg-white/5 p-4 rounded-2xl border border-white/5 transition-colors ${isFullyRented ? 'opacity-50 cursor-not-allowed' : 'group-hover:bg-primary/5 cursor-pointer'}`}
         >

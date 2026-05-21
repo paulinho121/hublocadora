@@ -30,7 +30,6 @@ import {
 import { format, addDays, differenceInDays, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { BrandMarquee } from '@/components/home/BrandMarquee';
-import { QuickBookingModal } from '@/components/marketplace/QuickBookingModal';
 import { Equipment } from '@/types/database';
 import { motion, AnimatePresence } from 'motion/react';
 import { EquipmentCard } from '@/components/marketplace/EquipmentCard';
@@ -172,8 +171,6 @@ export default function Marketplace() {
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>();
   const [selectedBrand, setSelectedBrand] = useState<string | undefined>();
   const [selectedSubCategory, setSelectedSubCategory] = useState<string | undefined>();
-  const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const [shuffledDefaultItems, setShuffledDefaultItems] = useState<Equipment[]>([]);
   
@@ -294,8 +291,7 @@ export default function Marketplace() {
 
   const handleSearch = () => {
     if (equipments && equipments.length === 1) {
-      setSelectedEquipment(equipments[0]);
-      setIsModalOpen(true);
+      navigate(`/equipment/${equipments[0].id}`);
     } else {
       document.getElementById('results-section')?.scrollIntoView({ behavior: 'smooth' });
     }
@@ -562,10 +558,7 @@ export default function Marketplace() {
                           ? { start: projectState.startDate, end: projectState.endDate }
                           : null
                       }
-                      onClick={() => {
-                        setSelectedEquipment(item);
-                        setIsModalOpen(true);
-                      }}
+                      onClick={() => navigate(`/equipment/${item.id}`)}
                     />
                   ))}
                 </div>
@@ -612,11 +605,6 @@ export default function Marketplace() {
       </div>
       */}
 
-      <QuickBookingModal 
-        equipment={selectedEquipment} 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-      />
     </div>
   );
 }
