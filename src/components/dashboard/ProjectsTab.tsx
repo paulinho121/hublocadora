@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
     Clapperboard, CalendarDays, Package, Loader2, FolderOpen,
     ChevronRight, MapPin, CheckCircle2, Clock, Truck, AlertCircle,
-    ArrowRight, Building2,
+    ArrowRight, Building2, RotateCcw,
 } from 'lucide-react';
 import { format, parseISO, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -48,13 +48,23 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
         ? Math.max(1, differenceInDays(parseISO(bookings[0].end_date), parseISO(bookings[0].start_date)))
         : 0;
 
+    const isReturning = derived === 'returning' || derived === 'completed';
+
     const deliveredCount = bookings.filter(b =>
-        (b.project_shipments ?? []).some(s => s.status === 'delivered'),
+        (b.project_shipments ?? []).some(s => s.direction === 'outbound' && s.status === 'delivered'),
     ).length;
 
+    const returnedCount = bookings.filter(b =>
+        (b.project_shipments ?? []).some(s => s.direction === 'return' && s.status === 'delivered'),
+    ).length;
+
+    const progressCurrent = isReturning ? returnedCount : deliveredCount;
     const progressPct = bookings.length > 0
-        ? Math.round((deliveredCount / bookings.length) * 100)
+        ? Math.round((progressCurrent / bookings.length) * 100)
         : 0;
+    const progressColor = isReturning ? 'bg-orange-500' : 'bg-primary';
+    const progressLabel = isReturning ? 'Devolvidos' : 'Entregues';
+    const progressCount = isReturning ? returnedCount : deliveredCount;
 
     // Group by company for the mini-thumbnail row
     const companies = Array.from(
@@ -106,15 +116,19 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
             {bookings.length > 0 && derived !== 'pending' && derived !== 'approved' && (
                 <div className="mb-4">
                     <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-1.5">
-                        <span>Entregues</span>
-                        <span>{deliveredCount}/{bookings.length}</span>
+                        <span className={isReturning ? 'text-orange-400/70' : ''}>
+                            {isReturning && <RotateCcw className="w-2.5 h-2.5 inline mr-1" />}
+                            {progressLabel}
+                        </span>
+                        <span>{progressCount}/{bookings.length}</span>
                     </div>
                     <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
                         <motion.div
+                            key={progressLabel}
                             initial={{ width: 0 }}
                             animate={{ width: `${progressPct}%` }}
                             transition={{ delay: 0.2, duration: 0.6, ease: 'easeOut' }}
-                            className="h-full bg-primary rounded-full"
+                            className={`h-full rounded-full ${progressColor}`}
                         />
                     </div>
                 </div>
@@ -124,7 +138,12 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
             <div className="flex items-center gap-2 mb-4 flex-wrap">
                 {bookings.slice(0, 6).map((b) => {
                     const img = (b.equipment as any)?.images?.[0];
-                    const shipStatus = b.project_shipments?.[0]?.status ?? 'awaiting_approval';
+                    // Show return shipment status when in returning phase, else outbound
+                    const returnSh  = (b.project_shipments ?? []).find(s => s.direction === 'return');
+                    const outboundSh = (b.project_shipments ?? []).find(s => s.direction === 'outbound');
+                    const shipStatus = isReturning && returnSh
+                        ? returnSh.status
+                        : (outboundSh?.status ?? 'awaiting_approval');
                     return (
                         <div key={b.id} className="relative">
                             <div className="w-10 h-10 rounded-xl bg-zinc-800/60 overflow-hidden border border-zinc-700/40 flex items-center justify-center">

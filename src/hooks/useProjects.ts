@@ -126,6 +126,78 @@ export function useUpdateShipment() {
     });
 }
 
+// ─── Initiate return — creates one return shipment per delivered outbound ─────
+
+export function useInitiateReturn() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({
+            projectId,
+            items,
+        }: {
+            projectId: string;
+            items: { bookingId: string; companyId: string }[];
+        }) => {
+            const { error } = await supabase
+                .from('project_shipments')
+                .insert(
+                    items.map(i => ({
+                        project_id: projectId,
+                        booking_id: i.bookingId,
+                        company_id: i.companyId,
+                        direction:  'return',
+                        status:     'awaiting_approval', // renter must add tracking
+                    })),
+                );
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['projects'] });
+        },
+    });
+}
+
+// ─── Confirm return — rental house marks item as physically received ───────────
+
+export function useConfirmReturn() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({
+            shipmentId,
+            bookingId,
+            notes,
+        }: {
+            shipmentId: string;
+            bookingId:  string;
+            notes?:     string;
+        }) => {
+            const { error: sErr } = await supabase
+                .from('project_shipments')
+                .update({
+                    status:         'delivered',
+                    actual_arrival: new Date().toISOString(),
+                    notes:          notes ?? null,
+                })
+                .eq('id', shipmentId);
+            if (sErr) throw sErr;
+
+            // Mark booking as completed once item physically returned
+            const { error: bErr } = await supabase
+                .from('bookings')
+                .update({ status: 'completed' })
+                .eq('id', bookingId);
+            if (bErr) throw bErr;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['projects'] });
+            queryClient.invalidateQueries({ queryKey: ['bookings'] });
+            queryClient.invalidateQueries({ queryKey: ['marketplace-active-bookings'] });
+        },
+    });
+}
+
 // ─── Helpers — status labels & colors ────────────────────────────────────────
 
 export const PROJECT_STATUS_LABEL: Record<string, string> = {
@@ -133,7 +205,7 @@ export const PROJECT_STATUS_LABEL: Record<string, string> = {
     pending:    'Aguardando aprovação',
     approved:   'Aprovado',
     shipping:   'Em trânsito',
-    delivered:  'Entregue',
+    delivered:  'Entregue — aguardando devolução',
     active:     'Em uso',
     returning:  'Devolvendo',
     completed:  'Concluído',
@@ -145,13 +217,14 @@ export const PROJECT_STATUS_COLOR: Record<string, string> = {
     pending:    'bg-amber-500/15 text-amber-400 border-amber-500/30',
     approved:   'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
     shipping:   'bg-blue-500/15 text-blue-400 border-blue-500/30',
-    delivered:  'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+    delivered:  'bg-amber-500/15 text-amber-400 border-amber-500/30',
     active:     'bg-primary/15 text-primary border-primary/30',
     returning:  'bg-orange-500/15 text-orange-400 border-orange-500/30',
     completed:  'bg-zinc-500/15 text-zinc-400 border-zinc-500/30',
     cancelled:  'bg-red-500/15 text-red-400 border-red-500/30',
 };
 
+// Labels for outbound direction
 export const SHIPMENT_STATUS_LABEL: Record<string, string> = {
     awaiting_approval:  'Aguardando aprovação',
     approved:           'Aprovado',
@@ -161,6 +234,18 @@ export const SHIPMENT_STATUS_LABEL: Record<string, string> = {
     out_for_delivery:   'Saiu para entrega',
     delivered:          'Entregue',
     failed:             'Falha na entrega',
+};
+
+// Labels for return direction (same status codes, different meaning)
+export const RETURN_SHIPMENT_STATUS_LABEL: Record<string, string> = {
+    awaiting_approval:  'Aguardando envio do locatário',
+    approved:           'Preparando envio',
+    label_created:      'Etiqueta de retorno criada',
+    picked_up:          'Coletado para retorno',
+    in_transit:         'Em retorno à locadora',
+    out_for_delivery:   'Saiu para entrega na locadora',
+    delivered:          'Recebido pela locadora ✓',
+    failed:             'Falha no retorno',
 };
 
 export const SHIPMENT_STATUS_COLOR: Record<string, string> = {
@@ -174,18 +259,37 @@ export const SHIPMENT_STATUS_COLOR: Record<string, string> = {
     failed:             'text-red-400',
 };
 
+// ─── Status machine — driven by outbound vs return shipments separately ───────
+
 /** Derives project status from its bookings + shipments */
 export function deriveProjectStatus(bookings: Project['bookings']): string {
     if (!bookings || bookings.length === 0) return 'draft';
 
-    const statuses = bookings.map(b => b.status);
-    const shipStatuses = bookings.flatMap(b => b.project_shipments ?? []).map(s => s.status);
+    const bookingStatuses = bookings.map(b => b.status);
+    const allShipments    = bookings.flatMap(b => b.project_shipments ?? []);
+    const outbound        = allShipments.filter(s => s.direction === 'outbound');
+    const returns         = allShipments.filter(s => s.direction === 'return');
 
-    if (statuses.some(s => s === 'cancelled'))        return 'cancelled';
-    if (statuses.every(s => s === 'completed'))       return 'completed';
-    if (shipStatuses.some(s => s === 'in_transit' || s === 'out_for_delivery' || s === 'picked_up')) return 'shipping';
-    if (shipStatuses.every(s => s === 'delivered') && shipStatuses.length > 0) return 'delivered';
-    if (statuses.every(s => s === 'approved' || s === 'active')) return 'approved';
-    if (statuses.some(s => s === 'rejected'))         return 'pending'; // partial
+    if (bookingStatuses.some(s => s === 'cancelled'))     return 'cancelled';
+    if (bookingStatuses.every(s => s === 'completed'))    return 'completed';
+
+    // ── Return phase ───────────────────────────────────────────────────────────
+    if (returns.length > 0) {
+        if (returns.every(s => s.status === 'delivered')) return 'completed';
+        if (returns.some(s => s.status === 'in_transit' || s.status === 'picked_up'))
+                                                          return 'returning';
+        return 'returning'; // returns exist but not yet in transit
+    }
+
+    // ── Outbound phase ────────────────────────────────────────────────────────
+    if (outbound.length > 0) {
+        if (outbound.every(s => s.status === 'delivered')) return 'delivered'; // ready to return
+        if (outbound.some(s =>
+            s.status === 'in_transit' || s.status === 'out_for_delivery' || s.status === 'picked_up',
+        ))                                                return 'shipping';
+    }
+
+    if (bookingStatuses.every(s => s === 'approved' || s === 'active')) return 'approved';
+    if (bookingStatuses.some(s => s === 'rejected'))   return 'pending';
     return 'pending';
 }
