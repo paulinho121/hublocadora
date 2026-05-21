@@ -9,7 +9,6 @@ import {
   LogOut,
   ChevronRight,
   ChevronLeft,
-  User,
   Globe,
   History,
   Activity,
@@ -17,6 +16,7 @@ import {
   FileText,
   Clapperboard,
   RefreshCw,
+  Pencil,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -31,8 +31,22 @@ interface SidebarProps {
 }
 
 export function DashboardSidebar({ activeTab, onTabChange, companyName }: SidebarProps) {
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const { isAdmin, company } = useTenant();
+
+  const ROLE_LABEL: Record<string, string> = {
+    admin: 'Administrador',
+    rental_house: 'Locadora',
+    branch_manager: 'Gerente de Unidade',
+  };
+
+  const displayName = profile?.full_name || user?.email?.split('@')[0] || 'Usuário';
+  const initials = displayName
+    .split(' ')
+    .slice(0, 2)
+    .map((w: string) => w[0]?.toUpperCase())
+    .join('');
+  const roleLabel = profile?.role ? ROLE_LABEL[profile.role] : 'Locadora';
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleRefresh = () => {
@@ -165,20 +179,47 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
            <NotificationCenter />
         </div>
         
-        <div className={cn(
-          "bg-zinc-900/40 border border-zinc-900 flex items-center mb-3 transition-all duration-300 overflow-hidden",
-          isCollapsed ? "h-12 w-12 rounded-2xl justify-center mx-auto" : "p-4 rounded-2xl gap-3"
-        )} title={isCollapsed ? user?.email || 'Usuário' : undefined}>
-           <div className="h-9 w-9 rounded-full bg-zinc-800 flex items-center justify-center border border-zinc-700 shrink-0">
-              <User className="h-4 w-4 text-zinc-400" />
-           </div>
-           {!isCollapsed && (
-             <div className="min-w-0 flex-1 animate-in fade-in duration-300">
-                <p className="text-xs uppercase font-black text-zinc-300 truncate tracking-wider leading-none mb-1">Empresário</p>
-                <p className="text-xs text-zinc-500 truncate lowercase font-medium">{user?.email}</p>
-             </div>
-           )}
-        </div>
+        {/* User profile card — click to open settings */}
+        <button
+          onClick={() => onTabChange('settings')}
+          title={isCollapsed ? `${displayName} · ${roleLabel}` : undefined}
+          className={cn(
+            "group w-full mb-3 transition-all duration-200 rounded-2xl border text-left",
+            "bg-zinc-900/40 border-zinc-800/60",
+            "hover:bg-zinc-800/60 hover:border-zinc-700 hover:shadow-lg",
+            "active:scale-[0.98]",
+            isCollapsed ? "h-12 w-12 flex items-center justify-center mx-auto p-0" : "p-3.5 flex items-center gap-3"
+          )}
+        >
+          {/* Avatar with initials */}
+          <div className="relative shrink-0">
+            <div className={cn(
+              "rounded-xl bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center font-black text-white shadow-lg shadow-primary/20",
+              isCollapsed ? "h-9 w-9 text-[11px]" : "h-10 w-10 text-[12px]"
+            )}>
+              {initials || '?'}
+            </div>
+            {/* Online dot */}
+            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 bg-emerald-500 rounded-full border-2 border-zinc-950 shadow" />
+          </div>
+
+          {/* Name + role + edit hint */}
+          {!isCollapsed && (
+            <div className="min-w-0 flex-1 animate-in fade-in duration-300">
+              <p className="text-[11px] font-black text-zinc-100 truncate leading-none mb-1 group-hover:text-white transition-colors">
+                {displayName}
+              </p>
+              <p className="text-[9px] uppercase font-black text-zinc-500 tracking-widest truncate leading-none">
+                {roleLabel}
+              </p>
+            </div>
+          )}
+
+          {/* Edit hint — appears on hover */}
+          {!isCollapsed && (
+            <Pencil className="h-3 w-3 text-zinc-600 group-hover:text-zinc-400 transition-all opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 shrink-0" />
+          )}
+        </button>
         
         {/* Refresh / Atualizar App */}
         <Button
