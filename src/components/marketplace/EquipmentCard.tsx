@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Camera, ChevronRight, Info, Clock, FolderPlus, FolderCheck } from 'lucide-react';
+import { MapPin, Camera, ChevronRight, Info, Clock, FolderPlus, FolderCheck, CalendarCheck, CalendarX } from 'lucide-react';
 import { Equipment } from '@/types/database';
 import { FavoriteButton } from './FavoriteButton';
 import { format, parseISO } from 'date-fns';
@@ -16,9 +16,12 @@ interface EquipmentCardProps {
   onClick: () => void;
   rentedQuantity?: number;
   nextReturnDate?: string | null;
+  /** null = project dates not yet set; true/false = available/unavailable for chosen dates */
+  isAvailableForDates?: boolean | null;
+  projectDates?: { start: string; end: string } | null;
 }
 
-export function EquipmentCard({ item, onClick, rentedQuantity = 0, nextReturnDate = null }: EquipmentCardProps) {
+export function EquipmentCard({ item, onClick, rentedQuantity = 0, nextReturnDate = null, isAvailableForDates = null, projectDates = null }: EquipmentCardProps) {
   const navigate = useNavigate();
   const { addItem, removeItem, isInCart, openDrawer } = useProject();
   const inCart = isInCart(item.id);
@@ -131,6 +134,20 @@ export function EquipmentCard({ item, onClick, rentedQuantity = 0, nextReturnDat
               )}
             </Badge>
           )}
+
+          {/* Badge "Para suas datas" — só aparece quando há datas de projeto definidas */}
+          {isAvailableForDates === true && (
+            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 uppercase font-black tracking-widest text-[9px] backdrop-blur-md px-2 py-1 rounded-md border flex items-center gap-1 animate-in fade-in duration-300">
+              <CalendarCheck className="w-2.5 h-2.5" />
+              Suas datas: livre
+            </Badge>
+          )}
+          {isAvailableForDates === false && (
+            <Badge className="bg-red-500/20 text-red-400 border-red-500/30 uppercase font-black tracking-widest text-[9px] backdrop-blur-md px-2 py-1 rounded-md border flex items-center gap-1 animate-in fade-in duration-300">
+              <CalendarX className="w-2.5 h-2.5" />
+              Suas datas: ocupado
+            </Badge>
+          )}
         </div>
 
         {/* Favorites button overlay */}
@@ -182,16 +199,21 @@ export function EquipmentCard({ item, onClick, rentedQuantity = 0, nextReturnDat
           <Button
             size="sm"
             onClick={handleToggleProject}
-            disabled={isFullyRented}
+            disabled={isFullyRented || isAvailableForDates === false}
+            title={isAvailableForDates === false ? 'Indisponível nas suas datas' : undefined}
             className={`flex-1 text-[10px] uppercase font-black h-8 gap-1.5 transition-all ${
               inCart
                 ? 'bg-primary/15 text-primary border border-primary/30 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30'
-                : 'bg-zinc-800/60 text-zinc-400 border border-zinc-700/50 hover:bg-primary/10 hover:text-primary hover:border-primary/30'
+                : isAvailableForDates === true
+                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 hover:bg-emerald-500/20 hover:border-emerald-500/40'
+                  : 'bg-zinc-800/60 text-zinc-400 border border-zinc-700/50 hover:bg-primary/10 hover:text-primary hover:border-primary/30'
             } disabled:opacity-30 disabled:cursor-not-allowed`}
           >
             {inCart
               ? <><FolderCheck className="h-3 w-3" /> No projeto</>
-              : <><FolderPlus  className="h-3 w-3" /> + Projeto</>}
+              : isAvailableForDates === false
+                ? <><CalendarX className="h-3 w-3" /> Ocupado</>
+                : <><FolderPlus  className="h-3 w-3" /> + Projeto</>}
           </Button>
 
           {/* Ver Detalhes button */}

@@ -22,18 +22,152 @@ import {
   BoxSelect,
   Wrench,
   LayoutGrid,
-  RefreshCw
+  RefreshCw,
+  Calendar,
+  ArrowRight,
+  FolderOpen,
 } from 'lucide-react';
+import { format, addDays, differenceInDays, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { BrandMarquee } from '@/components/home/BrandMarquee';
 import { QuickBookingModal } from '@/components/marketplace/QuickBookingModal';
 import { Equipment } from '@/types/database';
 import { motion, AnimatePresence } from 'motion/react';
 import { EquipmentCard } from '@/components/marketplace/EquipmentCard';
+import { useProject } from '@/contexts/ProjectContext';
+
+// ─── helpers ──────────────────────────────────────────────────────────────────
+
+const brl = (v: number) =>
+  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+
+/** Returns true if booking [bStart, bEnd] overlaps with project window [pStart, pEnd] */
+function dateOverlaps(bStart: string, bEnd: string, pStart: string, pEnd: string) {
+  return bStart <= pEnd && bEnd >= pStart;
+}
+
+// ─── Sticky project date bar ───────────────────────────────────────────────────
+
+function ProjectDateBar({ availableCount }: { availableCount: number }) {
+  const { state, setDates, openDrawer, estimatedTotal } = useProject();
+  const itemCount  = state.items.length;
+  const today      = new Date().toISOString().split('T')[0];
+  const totalDays  = Math.max(
+    1,
+    differenceInDays(parseISO(state.endDate), parseISO(state.startDate)),
+  );
+
+  const handleStart = (val: string) => {
+    if (!val) return;
+    const newEnd = val >= state.endDate
+      ? format(addDays(parseISO(val), 1), 'yyyy-MM-dd')
+      : state.endDate;
+    setDates(val, newEnd);
+  };
+
+  const handleEnd = (val: string) => {
+    if (!val || val <= state.startDate) return;
+    setDates(state.startDate, val);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="sticky top-[72px] md:top-[88px] z-40 w-full
+                 bg-zinc-950/95 border border-zinc-800/70 backdrop-blur-xl
+                 rounded-2xl px-4 py-3 mb-6
+                 flex items-center gap-3 flex-wrap
+                 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+    >
+      {/* ── Date inputs ── */}
+      <div className="flex items-center gap-2 flex-1 min-w-0">
+        {/* Start */}
+        <label className="flex items-center gap-2 bg-zinc-900/70 rounded-xl px-3 py-2
+                          border border-zinc-800/60 hover:border-primary/40 transition-colors
+                          cursor-pointer group">
+          <Calendar className="w-3.5 h-3.5 text-primary shrink-0" />
+          <div className="flex flex-col leading-none">
+            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-0.5">
+              Início
+            </span>
+            <input
+              type="date"
+              value={state.startDate}
+              min={today}
+              onChange={e => handleStart(e.target.value)}
+              className="bg-transparent text-[11px] font-black text-white focus:outline-none
+                         cursor-pointer [color-scheme:dark] w-[96px]"
+            />
+          </div>
+        </label>
+
+        <ArrowRight className="w-3.5 h-3.5 text-zinc-600 shrink-0" />
+
+        {/* End */}
+        <label className="flex items-center gap-2 bg-zinc-900/70 rounded-xl px-3 py-2
+                          border border-zinc-800/60 hover:border-primary/40 transition-colors
+                          cursor-pointer group">
+          <Calendar className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+          <div className="flex flex-col leading-none">
+            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-0.5">
+              Término
+            </span>
+            <input
+              type="date"
+              value={state.endDate}
+              min={state.startDate}
+              onChange={e => handleEnd(e.target.value)}
+              className="bg-transparent text-[11px] font-black text-white focus:outline-none
+                         cursor-pointer [color-scheme:dark] w-[96px]"
+            />
+          </div>
+        </label>
+
+        {/* Days pill */}
+        <span className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-lg
+                         bg-zinc-900/50 border border-zinc-800/40
+                         text-[9px] font-black uppercase tracking-widest text-zinc-500 shrink-0">
+          {totalDays} {totalDays === 1 ? 'diária' : 'diárias'}
+        </span>
+      </div>
+
+      {/* ── Availability hint ── */}
+      {availableCount > 0 && (
+        <span className="hidden lg:block text-[10px] font-black text-emerald-400 shrink-0">
+          {availableCount} disponíveis nas suas datas
+        </span>
+      )}
+
+      {/* ── Cart CTA / empty hint ── */}
+      {itemCount > 0 ? (
+        <motion.button
+          whileHover={{ scale: 1.03, y: -1 }}
+          whileTap={{ scale: 0.97 }}
+          onClick={openDrawer}
+          className="flex items-center gap-2 bg-primary text-white rounded-xl
+                     px-4 py-2.5 font-black uppercase tracking-widest text-[10px]
+                     shadow-lg shadow-primary/25 shrink-0 transition-colors hover:bg-primary/90"
+        >
+          <FolderOpen className="w-3.5 h-3.5" />
+          {itemCount} {itemCount === 1 ? 'item' : 'itens'} · {brl(estimatedTotal)}
+          <ChevronRight className="w-3 h-3" />
+        </motion.button>
+      ) : (
+        <span className="hidden md:block text-[10px] text-zinc-600 shrink-0">
+          Selecione as datas e adicione itens ao seu projeto →
+        </span>
+      )}
+    </motion.div>
+  );
+}
 
 
 export default function Marketplace() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { state: projectState } = useProject();
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>();
   const [selectedBrand, setSelectedBrand] = useState<string | undefined>();
@@ -118,6 +252,28 @@ export default function Marketplace() {
 
     return Array.from(consolidated.values());
   }, [rawEquipments, bookingMap]);
+
+  // ─── Per-item availability for the project date window ───────────────────────
+  // Re-computes whenever activeBookings or project dates change — no extra network calls
+  const availabilityMap = useMemo(() => {
+    const map = new Map<string, boolean>();
+    if (!activeBookings || !projectState.startDate || !projectState.endDate) return map;
+    equipments.forEach(item => {
+      const bookedQty = (activeBookings as any[])
+        .filter(b =>
+          (item as any)._mergedIds?.includes(b.equipment_id) &&
+          dateOverlaps(b.start_date, b.end_date, projectState.startDate, projectState.endDate),
+        )
+        .reduce((sum, b) => sum + (b.quantity || 0), 0);
+      map.set(item.id, bookedQty < item.stock_quantity);
+    });
+    return map;
+  }, [equipments, activeBookings, projectState.startDate, projectState.endDate]);
+
+  const availableCount = useMemo(
+    () => Array.from(availabilityMap.values()).filter(Boolean).length,
+    [availabilityMap],
+  );
 
   // Randomiza e muda de lugar os equipamentos em destaque a cada atualização do acervo
   useEffect(() => {
@@ -315,6 +471,10 @@ export default function Marketplace() {
       {/* Results section wrapper */}
       <div className="w-full max-w-7xl mx-auto px-6 mb-20">
         <div id="results-section" className="w-full scroll-mt-24">
+
+          {/* ── Project date bar ── */}
+          <ProjectDateBar availableCount={availableCount} />
+
           <div className="flex items-center justify-between mb-10">
             <div className="flex flex-col gap-1">
               <h3 className="text-2xl md:text-3xl font-display font-black tracking-tighter uppercase">
@@ -396,6 +556,12 @@ export default function Marketplace() {
                       item={item}
                       rentedQuantity={(item as any).rentedQuantity ?? 0}
                       nextReturnDate={(item as any).nextReturnDate ?? null}
+                      isAvailableForDates={availabilityMap.get(item.id) ?? null}
+                      projectDates={
+                        projectState.startDate && projectState.endDate
+                          ? { start: projectState.startDate, end: projectState.endDate }
+                          : null
+                      }
                       onClick={() => {
                         setSelectedEquipment(item);
                         setIsModalOpen(true);
