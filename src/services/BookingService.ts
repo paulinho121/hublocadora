@@ -7,14 +7,13 @@ export class BookingService {
      * Busca todas as datas ocupadas de um equipamento (reservas aprovadas/ativas)
      */
     static async getOccupiedDates(equipmentId: string) {
+        // Uses SECURITY DEFINER RPC to bypass RLS — regular SELECT is restricted
+        // to the authenticated user's own bookings, causing false availability.
         const { data, error } = await supabase
-            .from('bookings')
-            .select('start_date, end_date, quantity, status')
-            .eq('equipment_id', equipmentId)
-            .in('status', ['approved', 'active', 'pending', 'completed']);
+            .rpc('get_equipment_occupied_dates', { p_equipment_id: equipmentId });
 
         if (error) throw error;
-        return data;
+        return data as { start_date: string; end_date: string; quantity: number; status: string }[];
     }
 
     /**

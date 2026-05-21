@@ -52,22 +52,17 @@ export default function Marketplace() {
   const rawEquipments = rawEquipmentsPage?.items ?? [];
 
   // Busca os bookings ativos HOJE para todos os equipamentos (uma única query)
+  // Usa RPC com SECURITY DEFINER para bypassar RLS — a query direta em bookings
+  // é filtrada por usuário, fazendo items com reserva de outro usuário aparecerem
+  // como disponíveis, permitindo dupla locação na mesma data.
   const today = new Date().toISOString().split('T')[0];
   const { data: activeBookings } = useQuery({
     queryKey: ['marketplace-active-bookings', today],
     queryFn: async () => {
-      // Inclui bookings ativos/aprovados de hoje E bookings 'completed' com end_date futuro
-      // (dados legados onde o status foi marcado prematuramente como completed)
-      const { data } = await supabase
-        .from('bookings')
-        .select('equipment_id, quantity, end_date, status, start_date')
-        .in('status', ['active', 'approved', 'completed'])
-        .gte('end_date', today);
-      return (data || []).filter((b: any) => {
-        if (b.status === 'active' || b.status === 'approved') return true;
-        // Para 'completed': só conta se ainda está dentro do período (start <= hoje <= end)
-        return b.start_date <= today;
-      });
+      const { data, error } = await supabase
+        .rpc('get_marketplace_active_bookings', { p_from_date: today });
+      if (error) throw error;
+      return data || [];
     },
     staleTime: 60_000,
   });

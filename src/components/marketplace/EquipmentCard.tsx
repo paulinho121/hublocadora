@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Camera, ChevronRight, Info, Clock } from 'lucide-react';
+import { MapPin, Camera, ChevronRight, Info, Clock, FolderPlus, FolderCheck } from 'lucide-react';
 import { Equipment } from '@/types/database';
 import { FavoriteButton } from './FavoriteButton';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useProject } from '@/contexts/ProjectContext';
+import { toast } from 'sonner';
 
 interface EquipmentCardProps {
   item: Equipment;
@@ -18,6 +20,8 @@ interface EquipmentCardProps {
 
 export function EquipmentCard({ item, onClick, rentedQuantity = 0, nextReturnDate = null }: EquipmentCardProps) {
   const navigate = useNavigate();
+  const { addItem, removeItem, isInCart, openDrawer } = useProject();
+  const inCart = isInCart(item.id);
   const images = item.images ?? [];
   const hasMultiple = images.length > 1;
   const [activeIdx, setActiveIdx] = useState(0);
@@ -45,6 +49,19 @@ export function EquipmentCard({ item, onClick, rentedQuantity = 0, nextReturnDat
   const handleViewDetails = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigate(`/equipment/${item.id}`);
+  };
+
+  const handleToggleProject = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (inCart) {
+      removeItem(item.id);
+      toast.info(`${item.name} removido do projeto`);
+    } else {
+      addItem(item);
+      toast.success(`${item.name} adicionado ao projeto!`, {
+        action: { label: 'Ver projeto', onClick: openDrawer },
+      });
+    }
   };
 
   return (
@@ -159,16 +176,33 @@ export function EquipmentCard({ item, onClick, rentedQuantity = 0, nextReturnDat
           </Button>
         </div>
 
-        {/* Ver Detalhes Button - always visible on mobile, hover-only on desktop */}
-        <div className="mt-2 pt-2 border-t border-zinc-900 block md:hidden md:group-hover:block animate-in fade-in slide-in-from-top-2 duration-300">
-           <Button
+        {/* Bottom actions: always visible */}
+        <div className="mt-2 pt-2 border-t border-zinc-900 flex gap-2">
+          {/* + Projeto button */}
+          <Button
+            size="sm"
+            onClick={handleToggleProject}
+            disabled={isFullyRented}
+            className={`flex-1 text-[10px] uppercase font-black h-8 gap-1.5 transition-all ${
+              inCart
+                ? 'bg-primary/15 text-primary border border-primary/30 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30'
+                : 'bg-zinc-800/60 text-zinc-400 border border-zinc-700/50 hover:bg-primary/10 hover:text-primary hover:border-primary/30'
+            } disabled:opacity-30 disabled:cursor-not-allowed`}
+          >
+            {inCart
+              ? <><FolderCheck className="h-3 w-3" /> No projeto</>
+              : <><FolderPlus  className="h-3 w-3" /> + Projeto</>}
+          </Button>
+
+          {/* Ver Detalhes button */}
+          <Button
             variant="outline"
             size="sm"
-            className="w-full text-[10px] uppercase font-bold h-8 gap-1.5 border-zinc-800 hover:bg-zinc-900"
+            className="flex-1 text-[10px] uppercase font-bold h-8 gap-1.5 border-zinc-800 hover:bg-zinc-900"
             onClick={handleViewDetails}
-           >
-             <Info className="h-3 w-3" /> Ver Detalhes
-           </Button>
+          >
+            <Info className="h-3 w-3" /> Detalhes
+          </Button>
         </div>
       </div>
     </Card>

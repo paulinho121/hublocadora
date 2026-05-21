@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, NavLink } from 'react-router-dom';
 import { lazy, Suspense, useEffect } from 'react';
-import { LogOut, LayoutDashboard, Settings, ShoppingBag, User, BarChart3, Package, CalendarDays, Truck, History, FileText, Heart } from 'lucide-react';
+import { LogOut, LayoutDashboard, Settings, ShoppingBag, BarChart3, Package, CalendarDays, Truck, History, FileText, Heart, FolderOpen } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,8 @@ import { QueryClientProvider } from '@tanstack/react-query';
 // Context & Auth
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { TenantProvider } from '@/contexts/TenantContext';
+import { ProjectProvider, useProject } from '@/contexts/ProjectContext';
+import { ProjectDrawer } from '@/components/marketplace/ProjectDrawer';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AdminRoute } from '@/components/auth/AdminRoute';
 import { queryClient } from '@/lib/react-query';
@@ -47,6 +49,26 @@ function PageLoader() {
   );
 }
 
+function ProjectNavButton() {
+  const { state, openDrawer } = useProject();
+  const count = state.items.length;
+  return (
+    <button
+      onClick={openDrawer}
+      className="relative flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-all"
+      title="Meu Projeto"
+    >
+      <FolderOpen className="h-4 w-4" />
+      <span className="hidden lg:inline">Projeto</span>
+      {count > 0 && (
+        <span className="absolute -top-1.5 -right-2 lg:static lg:ml-0 w-4 h-4 lg:w-auto lg:h-auto lg:px-1.5 lg:py-0.5 bg-primary text-white text-[9px] font-black rounded-full flex items-center justify-center leading-none">
+          {count}
+        </span>
+      )}
+    </button>
+  );
+}
+
 function Navbar() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
@@ -68,7 +90,7 @@ function Navbar() {
           </Link>
           <nav className="hidden md:flex items-center space-x-8 text-xs font-black text-muted-foreground uppercase tracking-[0.2em]">
             <NavLink to="/dashboard" className={({isActive}) => isActive ? "text-primary" : "hover:text-foreground transition-all"}>Locadora</NavLink>
-            {/* <NavLink to="/ai-tools" className={({isActive}) => isActive ? "text-primary" : "hover:text-foreground transition-all"}>IA Tools</NavLink> */}
+            <ProjectNavButton />
             {profile?.role === 'admin' && (
               <NavLink to="/admin" className={({isActive}) => isActive ? "text-primary" : "hover:text-foreground transition-all"}>Gestão HUB</NavLink>
             )}
@@ -119,6 +141,34 @@ function Navbar() {
         </div>
       </div>
     </header>
+  );
+}
+
+function ProjectBottomButton() {
+  const { state, openDrawer } = useProject();
+  const count = state.items.length;
+  const isActive = state.isDrawerOpen;
+  return (
+    <button
+      onClick={openDrawer}
+      className={`flex items-center justify-center transition-all duration-300 relative rounded-xl ${
+        isActive
+          ? 'bg-primary text-white px-3.5 py-2.5 shadow-lg shadow-primary/20 scale-105'
+          : 'text-zinc-500 hover:text-zinc-300 p-2.5'
+      }`}
+    >
+      <FolderOpen className="w-4 h-4 shrink-0" />
+      {isActive && (
+        <span className="text-[10px] font-black uppercase tracking-wider whitespace-nowrap ml-1.5 animate-in fade-in slide-in-from-left-2 duration-300">
+          Projeto
+        </span>
+      )}
+      {count > 0 && !isActive && (
+        <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-primary text-white text-[8px] font-black rounded-full flex items-center justify-center">
+          {count}
+        </span>
+      )}
+    </button>
   );
 }
 
@@ -203,9 +253,7 @@ function BottomNav() {
           );
         })}
         
-        <button className="flex items-center justify-center text-zinc-500 hover:text-zinc-300 p-2.5 transition-all duration-300">
-          <User className="w-4.5 h-4.5" />
-        </button>
+        <ProjectBottomButton />
       </nav>
     </div>
   );
@@ -220,6 +268,7 @@ function MainLayout() {
     <div className="min-h-screen bg-background font-sans antialiased flex flex-col relative overflow-x-hidden">
       <ProfessionalBackground />
       {!isAuthPage && <Navbar />}
+      {!isAuthPage && <ProjectDrawer />}
       <ErrorBoundary>
         <main className="flex-1 pb-20 md:pb-0">
         <Suspense fallback={<PageLoader />}>
@@ -276,10 +325,12 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TenantProvider>
-          <Router>
-            <MainLayout />
-          </Router>
-          <Toaster position="bottom-right" richColors theme="dark" />
+          <ProjectProvider>
+            <Router>
+              <MainLayout />
+            </Router>
+            <Toaster position="bottom-right" richColors theme="dark" />
+          </ProjectProvider>
         </TenantProvider>
       </AuthProvider>
     </QueryClientProvider>

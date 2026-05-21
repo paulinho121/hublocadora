@@ -55,7 +55,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
     const [acceptContract, setAcceptContract] = useState(false);
     const [showCalendar, setShowCalendar] = useState(false);
 
-    const { data: occupiedDates } = useEquipmentOccupiedDates(equipment?.id || '');
+    const { data: occupiedDates, isLoading: isLoadingDates } = useEquipmentOccupiedDates(equipment?.id || '');
 
     // Pré-preenche endereço de entrega com o endereço da empresa ao selecionar delivery
     const handleDeliveryMethodChange = (method: 'pickup' | 'delivery') => {
@@ -82,7 +82,8 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
     }, [startDate, endDate]);
 
     const isAvailable = useMemo(() => {
-        if (!occupiedDates || !equipment) return true;
+        // Block by default while loading — never assume available before data arrives
+        if (isLoadingDates || !occupiedDates || !equipment) return false;
         
         const start = startOfDay(parseISO(startDate));
         const end = startOfDay(parseISO(endDate));
@@ -245,8 +246,8 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
                                 <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6">
                                     <div className="flex items-center gap-2 mb-2 flex-wrap">
-                                        <Badge className={`${isAvailable ? 'bg-emerald-500/20 text-emerald-500 border-emerald-500/20' : 'bg-red-500/20 text-red-500 border-red-500/20'} uppercase font-black tracking-widest text-[9px] sm:text-[10px]`}>
-                                            {isAvailable ? `${equipment.stock_quantity || 0} Disponíveis no HUB` : 'Limite de Estoque Atingido'}
+                                        <Badge className={`${isLoadingDates ? 'bg-zinc-500/20 text-zinc-400 border-zinc-500/20' : isAvailable ? 'bg-emerald-500/20 text-emerald-500 border-emerald-500/20' : 'bg-red-500/20 text-red-500 border-red-500/20'} uppercase font-black tracking-widest text-[9px] sm:text-[10px]`}>
+                                            {isLoadingDates ? 'Verificando...' : isAvailable ? `${equipment.stock_quantity || 0} Disponíveis no HUB` : 'Limite de Estoque Atingido'}
                                         </Badge>
                                         <button
                                             type="button"
@@ -294,7 +295,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                         </div>
                                     </div>
                                     
-                                    {!isAvailable && (
+                                    {!isLoadingDates && !isAvailable && (
                                         <div className="bg-red-500/10 p-3 rounded-xl border border-red-500/20 flex items-center gap-3 text-red-500">
                                             <AlertCircle className="w-4 h-4 flex-shrink-0" />
                                             <p className="text-[11px] font-bold">Opa! Este item já está reservado por outra produtora neste período.</p>
@@ -499,6 +500,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                         onClick={handleReserve}
                                         disabled={
                                             createBooking.isPending ||
+                                            isLoadingDates ||
                                             !isAvailable ||
                                             !acceptContract ||
                                             (deliveryMethod === 'delivery' && (!deliveryAddress.trim() || !deliveryContact.trim()))
