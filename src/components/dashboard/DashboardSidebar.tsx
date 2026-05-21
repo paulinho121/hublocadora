@@ -101,9 +101,9 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
       </button>
 
       {/* Brand / Company Header */}
-      <div className={cn("pb-10 transition-all duration-300", isCollapsed ? "p-4 pt-8" : "p-8 pb-10")}>
-        <div className={cn("flex items-center group cursor-default", isCollapsed ? "justify-center" : "gap-3")}>
-          <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center shadow-[0_0_20px_rgba(225,29,72,0.3)] group-hover:scale-110 transition-transform shrink-0 overflow-hidden">
+      <div className={cn("pb-6 transition-all duration-300", isCollapsed ? "p-4 pt-8" : "p-6 pb-6")}>
+        <div className={cn("flex items-center", isCollapsed ? "justify-center" : "gap-3")}>
+          <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center shadow-[0_0_20px_rgba(225,29,72,0.3)] shrink-0 overflow-hidden">
              {company?.logo_url ? (
                <img src={company.logo_url} alt="Logo" className="h-full w-full object-cover" />
              ) : (
@@ -112,16 +112,28 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
           </div>
           {!isCollapsed && (
             <div className="min-w-0 flex-1 animate-in fade-in duration-300">
-              <h2 className="text-xl font-black tracking-tighter uppercase truncate leading-none mb-1">
+              <h2 className="text-base font-black tracking-tighter uppercase truncate leading-none mb-1">
                 {companyName || 'Moving'}
               </h2>
               <div className="flex items-center gap-1.5 shrink-0">
                  <div className="h-1 w-1 rounded-full bg-emerald-500" />
-                 <span className="text-[10px] font-black uppercase text-zinc-500 tracking-[0.2em] truncate">Locadora Verificada</span>
+                 <span className="text-[9px] font-black uppercase text-zinc-500 tracking-[0.2em] truncate">Locadora Verificada</span>
               </div>
             </div>
           )}
+          {/* Notification bell — top right of header */}
+          {!isCollapsed && (
+            <div className="shrink-0 ml-auto animate-in fade-in duration-300">
+              <NotificationCenter />
+            </div>
+          )}
         </div>
+        {/* Bell centered when collapsed */}
+        {isCollapsed && (
+          <div className="mt-3 flex justify-center">
+            <NotificationCenter />
+          </div>
+        )}
       </div>
 
       {/* Main Nav */}
@@ -175,10 +187,6 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
 
       {/* User Footer */}
       <div className={cn("mt-auto border-t border-zinc-900/50 bg-zinc-950/80 backdrop-blur-md transition-all duration-300", isCollapsed ? "p-2" : "p-4")}>
-        <div className="flex flex-col items-center gap-4 mb-4">
-           <NotificationCenter />
-        </div>
-        
         {/* User profile card — click to open settings */}
         <button
           onClick={() => onTabChange('settings')}
