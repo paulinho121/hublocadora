@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { Activity, ShieldCheck, HelpCircle } from 'lucide-react';
+import { ShieldCheck, HelpCircle } from 'lucide-react';
+import CineHubLogo from '@/components/ui/cinehub-logo';
 
 export function Footer() {
   return (
@@ -7,7 +8,7 @@ export function Footer() {
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-16">
         <div className="md:col-span-2 space-y-6">
           <Link to="/" className="flex items-center group w-fit transition-transform hover:scale-105 active:scale-95">
-            <img src="/logo.png" alt="Moving Logo" className="h-12 md:h-16 w-auto object-contain drop-shadow-[0_0_20px_rgba(var(--primary),0.2)]" />
+            <CineHubLogo className="scale-150 origin-left" />
           </Link>
           <p className="text-zinc-500 text-sm font-medium leading-relaxed max-w-sm">
             O ecossistema definitivo para locação de equipamentos audiovisuais. 
