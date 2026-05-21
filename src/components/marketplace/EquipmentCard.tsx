@@ -2,8 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { MapPin, Camera, ChevronRight, Info, Clock, FolderPlus, FolderCheck, CalendarCheck, CalendarX } from 'lucide-react';
+import { MapPin, Camera, ChevronRight, Clock, FolderPlus, FolderCheck, CalendarCheck, CalendarX } from 'lucide-react';
 import { Equipment } from '@/types/database';
 import { FavoriteButton } from './FavoriteButton';
 import { format, parseISO } from 'date-fns';
@@ -21,7 +20,14 @@ interface EquipmentCardProps {
   projectDates?: { start: string; end: string } | null;
 }
 
-export function EquipmentCard({ item, onClick, rentedQuantity = 0, nextReturnDate = null, isAvailableForDates = null, projectDates = null }: EquipmentCardProps) {
+export function EquipmentCard({
+  item,
+  onClick,
+  rentedQuantity = 0,
+  nextReturnDate = null,
+  isAvailableForDates = null,
+  projectDates = null,
+}: EquipmentCardProps) {
   const navigate = useNavigate();
   const { addItem, removeItem, isInCart, openDrawer } = useProject();
   const inCart = isInCart(item.id);
@@ -38,14 +44,13 @@ export function EquipmentCard({ item, onClick, rentedQuantity = 0, nextReturnDat
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [hasMultiple, images.length]);
 
-  const totalStock = item.stock_quantity || 0;
-  const availableQuantity = Math.max(0, totalStock - rentedQuantity);
-  const isFullyRented = availableQuantity === 0 && totalStock > 0;
-  const isPartiallyRented = rentedQuantity > 0 && availableQuantity > 0;
-  const isAvailable = availableQuantity > 0;
-  const dailyRate = item.daily_rate;
+  const totalStock      = item.stock_quantity || 0;
+  const availableQty    = Math.max(0, totalStock - rentedQuantity);
+  const isFullyRented   = availableQty === 0 && totalStock > 0;
+  const dailyRate       = item.daily_rate;
+  const price           = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(dailyRate);
 
-  const formattedReturnDate = nextReturnDate
+  const formattedReturn = nextReturnDate
     ? format(parseISO(nextReturnDate), "dd/MM", { locale: ptBR })
     : null;
 
@@ -67,163 +72,179 @@ export function EquipmentCard({ item, onClick, rentedQuantity = 0, nextReturnDat
     }
   };
 
+  // Card border highlight when date availability is known
+  const borderAccent =
+    isAvailableForDates === true  ? 'hover:border-emerald-500/25' :
+    isAvailableForDates === false ? 'border-red-500/10'           : '';
+
   return (
     <Card
-      className="group overflow-hidden clay-card transition-all duration-500 flex flex-col h-full"
+      className={`group overflow-hidden clay-card flex flex-col h-full
+        transition-all duration-300 ease-out
+        hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/50
+        ${borderAccent}`}
     >
-      {/* ── Image area ── */}
+      {/* ─── Image area ──────────────────────────────────────────── */}
       <div
         onClick={handleViewDetails}
-        className="relative w-full h-48 overflow-hidden bg-zinc-900/50 shrink-0 cursor-pointer"
+        className="relative w-full h-52 overflow-hidden bg-zinc-900 shrink-0 cursor-pointer"
       >
+        {/* Product images */}
         {images.length > 0 ? (
           images.map((src, i) => (
             <img
               key={i}
               src={src}
               alt={item.name}
-              className={`absolute inset-0 w-full h-full object-contain p-4 transition-all duration-1000 ease-in-out
-                ${i === activeIdx ? 'opacity-100 scale-100' : 'opacity-0 scale-110 blur-sm'}`}
+              className={`absolute inset-0 w-full h-full object-contain p-6
+                transition-all duration-700 ease-in-out
+                ${i === activeIdx ? 'opacity-100 scale-100' : 'opacity-0 scale-105 blur-sm'}`}
             />
           ))
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-zinc-800">
-            <Camera className="h-16 w-16" />
+          <div className="w-full h-full flex items-center justify-center">
+            <Camera className="h-10 w-10 text-zinc-800" />
           </div>
         )}
 
-        {/* Dot indicators */}
+        {/* Gradient overlays */}
+        <div className="absolute inset-x-0 top-0    h-20 bg-gradient-to-b from-black/60 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/95 via-black/40 to-transparent pointer-events-none" />
+
+        {/* ── Top row: availability pill + heart ── */}
+        <div className="absolute top-3 inset-x-3 z-10 flex items-start justify-between">
+          {/* Availability pill */}
+          <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full
+            backdrop-blur-md text-[9px] font-black uppercase tracking-widest border
+            ${isFullyRented
+              ? 'bg-zinc-950/90 border-red-500/30  text-red-400'
+              : 'bg-zinc-950/80 border-emerald-500/25 text-emerald-400'}`}>
+            <span className={`w-1.5 h-1.5 rounded-full shrink-0
+              ${isFullyRented ? 'bg-red-500' : 'bg-emerald-400 animate-pulse'}`}
+            />
+            {isFullyRented
+              ? 'Esgotado'
+              : `${availableQty} ${availableQty === 1 ? 'disponível' : 'disponíveis'}`}
+          </div>
+
+          {/* Heart */}
+          <div onClick={e => e.stopPropagation()}>
+            <FavoriteButton equipmentId={item.id} />
+          </div>
+        </div>
+
+        {/* ── Date availability chip (only when project dates set) ── */}
+        {isAvailableForDates !== null && (
+          <div className={`absolute z-10 flex items-center gap-1 px-2 py-1 rounded-full
+            backdrop-blur-md text-[8px] font-black uppercase tracking-widest border
+            transition-all duration-300 animate-in fade-in
+            ${isAvailableForDates === true
+              ? 'top-[2.75rem] left-3 bg-emerald-950/80 border-emerald-500/20 text-emerald-400'
+              : 'top-[2.75rem] left-3 bg-red-950/80    border-red-500/20    text-red-400'}`}>
+            {isAvailableForDates
+              ? <><CalendarCheck className="w-2.5 h-2.5" /> Suas datas</>
+              : <><CalendarX     className="w-2.5 h-2.5" /> Ocupado</>}
+          </div>
+        )}
+
+        {/* ── Slide dots ── */}
         {hasMultiple && (
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1 z-10">
+          <div className="absolute bottom-9 left-1/2 -translate-x-1/2 flex gap-1 z-10">
             {images.map((_, i) => (
-              <span
-                key={i}
-                className={`block h-1 rounded-full transition-all duration-500 ${i === activeIdx ? 'w-4 bg-primary' : 'w-1 bg-white/20'}`}
+              <span key={i} className={`block h-0.5 rounded-full transition-all duration-500
+                ${i === activeIdx ? 'w-4 bg-white/80' : 'w-1 bg-white/20'}`}
               />
             ))}
           </div>
         )}
 
-        {/* Availability badge overlay */}
-        <div className="absolute top-4 left-4 z-10 flex flex-col gap-1.5">
-          {/* Badge principal de disponibilidade */}
-          <Badge className={`
-            ${isFullyRented
-              ? 'bg-red-500/15 text-red-400 border-red-500/30'
-              : isAvailable
-                ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
-                : 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'}
-            uppercase font-black tracking-widest text-[9px] backdrop-blur-md px-2 py-1 rounded-md border
-          `}>
-            {isFullyRented
-              ? 'Esgotado'
-              : isAvailable
-                ? `${availableQuantity} Disponíve${availableQuantity === 1 ? 'l' : 'is'}`
-                : 'Esgotado'}
-          </Badge>
-
-          {/* Badge LOCADO — aparece sempre que houver locação ativa, mesmo com unidades disponíveis */}
-          {rentedQuantity > 0 && (
-            <Badge className="bg-amber-500/15 text-amber-400 border-amber-500/30 uppercase font-black tracking-widest text-[9px] backdrop-blur-md px-2 py-1 rounded-md border flex items-center gap-1">
-              <Clock className="w-2.5 h-2.5" />
-              {totalStock > 1
-                ? `${rentedQuantity} Locada${rentedQuantity > 1 ? 's' : ''}`
-                : 'Locado'}
-              {formattedReturnDate && (
-                <span className="text-amber-300/70 font-bold normal-case">· retorno {formattedReturnDate}</span>
-              )}
-            </Badge>
-          )}
-
-          {/* Badge "Para suas datas" — só aparece quando há datas de projeto definidas */}
-          {isAvailableForDates === true && (
-            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 uppercase font-black tracking-widest text-[9px] backdrop-blur-md px-2 py-1 rounded-md border flex items-center gap-1 animate-in fade-in duration-300">
-              <CalendarCheck className="w-2.5 h-2.5" />
-              Suas datas: livre
-            </Badge>
-          )}
-          {isAvailableForDates === false && (
-            <Badge className="bg-red-500/20 text-red-400 border-red-500/30 uppercase font-black tracking-widest text-[9px] backdrop-blur-md px-2 py-1 rounded-md border flex items-center gap-1 animate-in fade-in duration-300">
-              <CalendarX className="w-2.5 h-2.5" />
-              Suas datas: ocupado
-            </Badge>
-          )}
-        </div>
-
-        {/* Favorites button overlay */}
-        <div className="absolute top-4 right-4 z-10" onClick={(e) => e.stopPropagation()}>
-          <FavoriteButton equipmentId={item.id} />
-        </div>
-        
-        {/* Location badge overlay */}
-        {item.state_uf && (
-          <div className="absolute bottom-4 right-4 z-10">
-            <Badge className="bg-zinc-950/60 text-zinc-400 border-white/5 uppercase font-black tracking-widest text-[9px] backdrop-blur-md px-2 py-1 rounded-md border">
-              <MapPin className="w-2.5 h-2.5 mr-1" />
-              {item.state_uf}
-            </Badge>
+        {/* ── Bottom overlay: price + location ── */}
+        <div className="absolute bottom-0 inset-x-0 z-10 px-4 py-3 flex items-end justify-between">
+          <div className="flex flex-col leading-none">
+            <span className="text-[8px] uppercase text-white/40 font-black tracking-[0.2em] mb-1">
+              por diária
+            </span>
+            <span className="text-[1.35rem] font-display font-black text-white tracking-tight leading-none">
+              {price}
+            </span>
           </div>
-        )}
+
+          {item.state_uf && (
+            <div className="flex items-center gap-1 bg-white/8 backdrop-blur-sm
+                            border border-white/8 px-2 py-1 rounded-lg">
+              <MapPin className="w-2.5 h-2.5 text-white/50" />
+              <span className="text-[8px] font-black text-white/60 uppercase tracking-widest">
+                {item.state_uf}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* ── Card body ── */}
-      <div className="flex flex-col flex-1 p-5 gap-4">
+      {/* ─── Card body ───────────────────────────────────────────── */}
+      <div className="flex flex-col flex-1 px-4 pt-4 pb-4 gap-0">
+
+        {/* Name */}
         <h4
           onClick={handleViewDetails}
-          className="text-xs font-black leading-relaxed uppercase tracking-widest group-hover:text-primary transition-colors line-clamp-2 min-h-[2.5rem] cursor-pointer"
+          className="text-[11px] font-black leading-snug uppercase tracking-widest
+                     text-zinc-100 group-hover:text-primary transition-colors duration-200
+                     line-clamp-2 cursor-pointer mb-2"
         >
           {item.name}
         </h4>
 
-        <div
-          onClick={(e) => {
-            e.stopPropagation();
-            if (!isFullyRented) handleViewDetails(e);
-          }}
-          className={`mt-auto flex items-center justify-between bg-white/5 p-4 rounded-2xl border border-white/5 transition-colors ${isFullyRented ? 'opacity-50 cursor-not-allowed' : 'group-hover:bg-primary/5 cursor-pointer'}`}
-        >
-          <div className="flex flex-col">
-            <span className="text-[9px] uppercase text-zinc-500 font-black tracking-[0.2em] mb-1">Diária</span>
-            <div className="text-lg font-display font-black text-white tracking-tighter">
-              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(dailyRate)}
-            </div>
+        {/* Rental status — only shown when relevant */}
+        {rentedQuantity > 0 && (
+          <div className="flex items-center gap-1.5 mb-2">
+            <Clock className="w-2.5 h-2.5 text-amber-500/60 shrink-0" />
+            <span className="text-[8px] text-amber-500/70 font-bold uppercase tracking-widest leading-none">
+              {totalStock > 1
+                ? `${rentedQuantity} em uso`
+                : 'Em uso'}
+              {formattedReturn && ` · retorno ${formattedReturn}`}
+            </span>
           </div>
-          <Button size="icon" className="h-10 w-10 clay-button-primary transition-all text-white group-hover:-translate-y-0.5">
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
+        )}
 
-        {/* Bottom actions: always visible */}
-        <div className="mt-2 pt-2 border-t border-zinc-900 flex gap-2">
+        <div className="flex-1" />
+
+        {/* ── Action row ── */}
+        <div className="flex gap-2 pt-3 border-t border-white/[0.05]">
+
           {/* + Projeto button */}
           <Button
             size="sm"
             onClick={handleToggleProject}
             disabled={isFullyRented || isAvailableForDates === false}
             title={isAvailableForDates === false ? 'Indisponível nas suas datas' : undefined}
-            className={`flex-1 text-[10px] uppercase font-black h-8 gap-1.5 transition-all ${
-              inCart
-                ? 'bg-primary/15 text-primary border border-primary/30 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30'
+            className={`flex-1 h-9 text-[9px] font-black uppercase tracking-widest gap-1.5 rounded-xl
+              transition-all duration-200
+              ${inCart
+                ? 'bg-primary/10 text-primary border border-primary/25 hover:bg-red-500/8 hover:text-red-400 hover:border-red-500/25'
                 : isAvailableForDates === true
-                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 hover:bg-emerald-500/20 hover:border-emerald-500/40'
-                  : 'bg-zinc-800/60 text-zinc-400 border border-zinc-700/50 hover:bg-primary/10 hover:text-primary hover:border-primary/30'
-            } disabled:opacity-30 disabled:cursor-not-allowed`}
+                  ? 'bg-emerald-500/8 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/15 hover:border-emerald-500/30'
+                  : 'bg-zinc-900 text-zinc-400 border border-white/6 hover:bg-zinc-800 hover:text-zinc-200 hover:border-white/12'
+              } disabled:opacity-20 disabled:cursor-not-allowed`}
           >
             {inCart
               ? <><FolderCheck className="h-3 w-3" /> No projeto</>
               : isAvailableForDates === false
-                ? <><CalendarX className="h-3 w-3" /> Ocupado</>
-                : <><FolderPlus  className="h-3 w-3" /> + Projeto</>}
+                ? <><CalendarX    className="h-3 w-3" /> Ocupado</>
+                : <><FolderPlus   className="h-3 w-3" /> + Projeto</>}
           </Button>
 
-          {/* Ver Detalhes button */}
+          {/* Reserve → */}
           <Button
-            variant="outline"
             size="sm"
-            className="flex-1 text-[10px] uppercase font-bold h-8 gap-1.5 border-zinc-800 hover:bg-zinc-900"
             onClick={handleViewDetails}
+            disabled={isFullyRented}
+            className="h-9 w-9 shrink-0 p-0 bg-primary text-white rounded-xl
+                       hover:bg-primary/90 transition-all duration-200 hover:-translate-y-0.5
+                       shadow-lg shadow-primary/20
+                       disabled:opacity-25 disabled:cursor-not-allowed"
           >
-            <Info className="h-3 w-3" /> Detalhes
+            <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
       </div>
