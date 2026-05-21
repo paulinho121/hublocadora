@@ -277,50 +277,71 @@ export default function Dashboard() {
     return (d as any).fulfilling_company_id || (d as any).origin_branch_id;
   };
 
-  // Receita confirmada: soma dos pagamentos aprovados (fonte mais confiável)
+  // ─── Financial calculations ──────────────────────────────────────────────────
+
+  // Helper: revenue share for a single booking considering sub-rental splits
+  const getBookingRevenue = (booking: any): number => {
+    const fulfillmentId = getFulfillmentId(booking);
+    const isFulfiller   = fulfillmentId === tenantId;
+    const isOwner       = booking.company_id === tenantId;
+    if (isFulfiller && !isOwner)                              return booking.total_amount * 0.5;
+    if (isOwner && fulfillmentId && fulfillmentId !== tenantId) return booking.total_amount * 0.5;
+    if (isOwner)                                               return booking.total_amount;
+    return 0;
+  };
+
+  // Gate aprovada pelo gateway de pagamentos (fonte mais confiável — quando existir)
   const confirmedRevenue = (approvedPayments ?? []).reduce((acc, p) => acc + (p.amount || 0), 0);
 
-  // Receita prevista: todas as reservas não canceladas/rejeitadas (inclui pending)
-  const bookingBasedRevenue = bookingsReceived
-    ?.filter(b => !['cancelled', 'rejected'].includes(b.status))
-    .reduce((acc, curr) => {
-      const fulfillmentId = getFulfillmentId(curr);
-      const isFulfiller = fulfillmentId === tenantId;
-      const isOwner = curr.company_id === tenantId;
+  // BUG FIX ▶ só conta reservas CONFIRMADAS (approved / active / completed)
+  // Pendentes não são receita — ainda não foram aceitas pela locadora
+  const confirmedBookingRevenue = bookingsReceived
+    ?.filter(b => ['approved', 'active', 'completed'].includes(b.status))
+    .reduce((acc, b) => acc + getBookingRevenue(b), 0) || 0;
 
-      if (isFulfiller && !isOwner) {
-        return acc + (curr.total_amount * 0.5);
-      } else if (isOwner && fulfillmentId && fulfillmentId !== tenantId) {
-        return acc + (curr.total_amount * 0.5);
-      } else if (isOwner) {
-        return acc + curr.total_amount;
-      }
-      return acc;
-    }, 0) || 0;
+  // Receita pendente — solicitações ainda não aprovadas (não conta como lucro)
+  const pendingRevenue = bookingsReceived
+    ?.filter(b => b.status === 'pending')
+    .reduce((acc, b) => acc + getBookingRevenue(b), 0) || 0;
 
-  // Usa pagamentos aprovados se existirem, senão usa soma de reservas ativas
-  const totalRevenue = confirmedRevenue > 0 ? confirmedRevenue : bookingBasedRevenue;
+  // Receita realizada — apenas locações concluídas (melhor indicador de caixa real)
+  const completedRevenue = bookingsReceived
+    ?.filter(b => b.status === 'completed')
+    .reduce((acc, b) => acc + getBookingRevenue(b), 0) || 0;
+
+  // Este mês (bookings aprovados/ativos/concluídos criados no mês corrente)
+  const thisMonthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+  const thisMonthRevenue = bookingsReceived
+    ?.filter(b =>
+      ['approved', 'active', 'completed'].includes(b.status) &&
+      b.created_at >= thisMonthStart,
+    )
+    .reduce((acc, b) => acc + getBookingRevenue(b), 0) || 0;
+
+  // Ganhos líquidos: gateway aprovado > bookings confirmados > 0
+  const totalRevenue = confirmedRevenue > 0 ? confirmedRevenue : confirmedBookingRevenue;
 
   const recentOrders = [...(bookingsReceived || []), ...(bookingsRequested || [])]
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 10);
 
+  // BUG FIX ▶ débitos só existem em reservas confirmadas (não pendentes)
   const totalDebt = bookingsReceived
-    ?.filter(b => !['cancelled', 'rejected'].includes(b.status))
+    ?.filter(b => ['approved', 'active', 'completed'].includes(b.status))
     .reduce((acc, curr) => {
       const fulfillmentId = getFulfillmentId(curr);
       const isOwner = curr.company_id === tenantId;
-
-      // Sou o dono mas outra empresa entregou: devo 50% para o parceiro
+      // Sou o dono mas outra empresa entregou: devo 50% ao parceiro
       if (isOwner && fulfillmentId && fulfillmentId !== tenantId) {
         return acc + (curr.total_amount * 0.5);
       }
       return acc;
     }, 0) || 0;
 
-  const activeBookings = bookingsReceived?.filter(b => b.status === 'active' || b.status === 'approved').length || 0;
+  const activeBookings      = bookingsReceived?.filter(b => b.status === 'active' || b.status === 'approved').length || 0;
+  const completedBookings   = bookingsReceived?.filter(b => b.status === 'completed').length || 0;
   const pendingBookingsCount = bookingsReceived?.filter(b => b.status === 'pending').length || 0;
-  const maintenanceCount = equipments?.filter(e => e.status === 'maintenance').length || 0;
+  const maintenanceCount    = equipments?.filter(e => e.status === 'maintenance').length || 0;
 
   // Handlers
   const handleAddEquipment = () => {
@@ -495,9 +516,20 @@ export default function Dashboard() {
                           <div className="text-2xl font-black tracking-tighter text-zinc-100 mb-1">
                              {formatCurrency(totalRevenue)}
                           </div>
-                          <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">
-                            {confirmedRevenue > 0 ? 'Pagamentos confirmados' : 'Reservas em andamento'}
-                          </p>
+                          <div className="flex flex-col gap-0.5">
+                            {pendingRevenue > 0 && (
+                              <p className="text-xs text-amber-500/80 font-bold uppercase tracking-widest">
+                                + {formatCurrency(pendingRevenue)} a confirmar
+                              </p>
+                            )}
+                            <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">
+                              {thisMonthRevenue > 0
+                                ? `${formatCurrency(thisMonthRevenue)} este mês`
+                                : completedRevenue > 0
+                                  ? `${formatCurrency(completedRevenue)} realizados`
+                                  : 'Nenhuma receita confirmada'}
+                            </p>
+                          </div>
                        </CardContent>
                     </Card>
 
@@ -507,11 +539,11 @@ export default function Dashboard() {
                           <AlertCircle className="h-4 w-4 text-red-500" />
                        </CardHeader>
                        <CardContent className="p-6 pt-0">
-                          <div className="text-2xl font-black tracking-tighter text-zinc-100 mb-1">
+                          <div className={`text-2xl font-black tracking-tighter mb-1 ${totalDebt > 0 ? 'text-red-400' : 'text-zinc-100'}`}>
                              {formatCurrency(totalDebt)}
                           </div>
                           <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">
-                            {totalDebt > 0 ? 'A pagar a parceiros' : 'Sem débitos pendentes'}
+                            {totalDebt > 0 ? 'Repasse a parceiros' : 'Sem débitos'}
                           </p>
                        </CardContent>
                     </Card>
@@ -523,7 +555,16 @@ export default function Dashboard() {
                        </CardHeader>
                        <CardContent className="p-6 pt-0">
                           <div className="text-2xl font-black tracking-tighter text-zinc-100 mb-1">{activeBookings}</div>
-                          <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">{pendingBookingsCount} Pendentes</p>
+                          <div className="flex flex-col gap-0.5">
+                            {pendingBookingsCount > 0 && (
+                              <p className="text-xs text-amber-500/80 font-bold uppercase tracking-widest">
+                                {pendingBookingsCount} aguardando aprovação
+                              </p>
+                            )}
+                            <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">
+                              {completedBookings > 0 ? `${completedBookings} concluídas` : 'Nenhuma concluída'}
+                            </p>
+                          </div>
                        </CardContent>
                     </Card>
 
@@ -534,7 +575,11 @@ export default function Dashboard() {
                        </CardHeader>
                        <CardContent className="p-6 pt-0">
                           <div className="text-2xl font-black tracking-tighter text-zinc-100 mb-1">{equipments?.length || 0}</div>
-                          <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">Itens cadastrados</p>
+                          <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">
+                            {maintenanceCount > 0
+                              ? `${(equipments?.length || 0) - maintenanceCount} disponíveis`
+                              : 'Todos disponíveis'}
+                          </p>
                        </CardContent>
                     </Card>
 
