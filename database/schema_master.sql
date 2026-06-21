@@ -559,16 +559,19 @@ CREATE POLICY "Branches_Access" ON public.branches
 
 -- 4. EQUIPMENTS POLICIES
 DROP POLICY IF EXISTS "Equipments_Select" ON public.equipments;
-CREATE POLICY "Equipments_Select" ON public.equipments
-    FOR SELECT TO authenticated
+DROP POLICY IF EXISTS "Equipments_Select_V12" ON public.equipments;
+CREATE POLICY "Equipments_Select_V13" ON public.equipments
+    FOR SELECT TO public
     USING (
-        status != 'unavailable' -- Visível para o Marketplace
-        OR company_id = public.get_my_company_id()
-        OR EXISTS (
-            SELECT 1 FROM public.companies 
-            WHERE id = equipments.company_id AND parent_company_id = public.get_my_company_id()
-        )
-        OR public.check_is_admin()
+        status != 'unavailable' -- Qualquer visitante (logado ou não) pode ver equipamentos disponíveis no marketplace
+        OR (auth.uid() IS NOT NULL AND (
+            company_id = public.get_my_company_id()
+            OR EXISTS (
+                SELECT 1 FROM public.companies
+                WHERE id = equipments.company_id AND parent_company_id = public.get_my_company_id()
+            )
+            OR public.check_is_admin()
+        ))
     );
 
 DROP POLICY IF EXISTS "Equipments_Modify" ON public.equipments;
