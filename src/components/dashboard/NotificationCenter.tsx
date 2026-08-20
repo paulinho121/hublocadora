@@ -113,7 +113,7 @@ export function NotificationCenter() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className="absolute right-0 mt-4 w-[380px] bg-zinc-950/80 border border-white/5 rounded-[32px] shadow-[0_30px_100px_rgba(0,0,0,0.8)] backdrop-blur-3xl overflow-hidden z-[100]"
+                        className="absolute right-0 mt-4 w-[380px] max-w-[calc(100vw-1rem)] bg-zinc-950/80 border border-white/5 rounded-[32px] shadow-[0_30px_100px_rgba(0,0,0,0.8)] backdrop-blur-3xl overflow-hidden z-[100]"
                     >
                         <header className="p-6 border-b border-white/5 flex justify-between items-center bg-black/40">
                              <div className="space-y-1">
