@@ -14,6 +14,8 @@ export function NotificationCenter() {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+    const buttonRef = useRef<HTMLButtonElement>(null);
+    const [panelStyle, setPanelStyle] = useState<React.CSSProperties>({});
 
     const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -88,8 +90,19 @@ export function NotificationCenter() {
 
     return (
         <div className="relative" ref={containerRef}>
-            <button 
-                onClick={() => setIsOpen(!isOpen)} 
+            <button
+                ref={buttonRef}
+                onClick={() => {
+                    if (!isOpen && buttonRef.current) {
+                        const rect = buttonRef.current.getBoundingClientRect();
+                        const panelW = Math.min(380, window.innerWidth - 16);
+                        let left = rect.left;
+                        if (left + panelW > window.innerWidth - 8) left = window.innerWidth - panelW - 8;
+                        if (left < 8) left = 8;
+                        setPanelStyle({ position: 'fixed', top: rect.bottom + 12, left, width: panelW, zIndex: 9999 });
+                    }
+                    setIsOpen(prev => !prev);
+                }}
                 className={cn(
                     "h-12 w-12 flex items-center justify-center rounded-2xl transition-all duration-500 relative group",
                     isOpen 
@@ -113,7 +126,8 @@ export function NotificationCenter() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className="absolute right-0 mt-4 w-[380px] max-w-[calc(100vw-1rem)] bg-zinc-950/80 border border-white/5 rounded-[32px] shadow-[0_30px_100px_rgba(0,0,0,0.8)] backdrop-blur-3xl overflow-hidden z-[100]"
+                        className="bg-zinc-950/80 border border-white/5 rounded-[32px] shadow-[0_30px_100px_rgba(0,0,0,0.8)] backdrop-blur-3xl overflow-hidden"
+                        style={panelStyle}
                     >
                         <header className="p-6 border-b border-white/5 flex justify-between items-center bg-black/40">
                              <div className="space-y-1">
