@@ -151,12 +151,14 @@ export default function Admin() {
   const { data: bookings, isLoading: bookingsLoading } = useQuery({
     queryKey: ['admin-bookings'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('bookings')
-        .select('*, equipment_id, company_id, equipment:equipments(name, category), company:companies(name)')
-        .order('created_at', { ascending: false });
+      const { data, error } = await supabase.rpc('admin_get_all_bookings');
       if (error) throw error;
-      return data;
+      // Normalise shape to match what the rest of the page expects
+      return (data as any[]).map(b => ({
+        ...b,
+        equipment: { name: b.equipment_name, category: b.equipment_category },
+        company:   { name: b.company_name },
+      }));
     },
     enabled: !!profile && profile.role === 'admin',
   });
