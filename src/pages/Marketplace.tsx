@@ -412,50 +412,7 @@ export default function Marketplace() {
             />
           </motion.div>
 
-          {/* ── Category pill buttons ── */}
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.6 }}
-            className="mt-6 flex overflow-x-auto no-scrollbar md:flex-wrap md:justify-center gap-2.5 w-full px-6 md:px-0 py-2 max-w-full touch-pan-x snap-x scroll-smooth"
-          >
-            {categories.map((cat, idx) => (
-              <motion.button
-                key={cat.name}
-                initial={{ opacity: 0, scale: 0.85 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.5 + idx * 0.05 }}
-                onClick={() => {
-                  const isAll = cat.value === '__all__';
-                  if (isAll || selectedCategory === cat.value) {
-                    setSelectedCategory(undefined);
-                    setSelectedBrand(undefined);
-                    setSelectedSubCategory(undefined);
-                    if (isAll) setShowAll(true);
-                  } else {
-                    setSelectedCategory(cat.value);
-                    setSelectedBrand(undefined);
-                    setSelectedSubCategory(undefined);
-                  }
-                }}
-                className={`relative flex items-center gap-2.5 px-6 py-3 rounded-full text-[11px] font-black uppercase tracking-[0.18em] transition-all duration-300 border backdrop-blur-md overflow-hidden group shrink-0 whitespace-nowrap snap-start
-                  ${(cat.value === '__all__' ? !selectedCategory : selectedCategory === cat.value)
-                    ? `bg-primary/20 border-primary/40 text-primary scale-105 shadow-lg shadow-primary/20`
-                    : `bg-zinc-900/40 border-white/8 text-zinc-400 hover:text-white hover:border-white/20 hover:bg-zinc-800/60 hover:scale-105`
-                  }`}
-              >
-                {(cat.value === '__all__' ? !selectedCategory : selectedCategory === cat.value) && (
-                  <span className={`absolute inset-0 opacity-10 bg-primary animate-pulse`} />
-                )}
-                <span className="relative z-10 flex items-center gap-2">
-                  {cat.icon}
-                  {cat.name}
-                </span>
-              </motion.button>
-            ))}
-          </motion.div>
-
-          {/* ── Interactive Sub-filters (Removidos a pedido do usuário) ── */}
+          {/* ── Category pills e Sub-filters (Removidos a pedido do usuário) ── */}
         </motion.div>
 
         {/* Divider glow line */}
