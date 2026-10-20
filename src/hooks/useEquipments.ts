@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Equipment, Company, MasterCatalog } from '@/types/database';
 import { EquipmentService } from '@/services/EquipmentService';
+import { COMPANY_PUBLIC_COLUMNS, withPrivateFields } from '@/lib/companies';
 
 export function useEquipment(id: string) {
     return useQuery({
@@ -174,12 +175,12 @@ export function useCompany(ownerId?: string) {
             if (!ownerId) return null;
             const { data, error } = await supabase
                 .from('companies')
-                .select('*')
+                .select(COMPANY_PUBLIC_COLUMNS)
                 .eq('owner_id', ownerId)
                 .maybeSingle();
 
             if (error) throw error;
-            return data as Company;
+            return data ? await withPrivateFields(data as unknown as Company) : null;
         },
         enabled: !!ownerId,
     });

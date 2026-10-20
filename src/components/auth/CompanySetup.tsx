@@ -203,14 +203,8 @@ export function CompanySetup({ ownerId }: { ownerId: string }) {
 
       if (profileError) throw new Error('Erro ao salvar seu perfil de usuário.');
 
-      // 1.5 Verificar duplicidade
-      const { data: existingDoc } = await supabase
-        .from('companies')
-        .select('id')
-        .eq('document', values.document)
-        .maybeSingle();
-
-      if (existingDoc) throw new Error('Este CPF/CNPJ já está registrado em outra conta CineHub.');
+      // Duplicidade de CPF/CNPJ é garantida por índice único no banco (V38);
+      // o documento de outras empresas não é legível pelo app.
 
       // 2. Inserir a empresa
       const { error: companyError } = await supabase
@@ -230,7 +224,10 @@ export function CompanySetup({ ownerId }: { ownerId: string }) {
           status: 'pending' 
         }]);
 
-      if (companyError) throw new Error(companyError.message);
+      if (companyError) {
+        if (companyError.code === '23505') throw new Error('Este CPF/CNPJ já está registrado em outra conta CineHub.');
+        throw new Error(companyError.message);
+      }
       
       setSubmittedName(values.name);
       setIsSuccess(true);

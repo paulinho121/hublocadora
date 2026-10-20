@@ -3,6 +3,7 @@ import { useAuth } from './AuthContext';
 import { supabase } from '@/lib/supabase';
 import { Profile, Company, Branch } from '@/types/database';
 import { isMasterUser } from '@/lib/masterUsers';
+import { COMPANY_PUBLIC_COLUMNS, withPrivateFields } from '@/lib/companies';
 
 interface TenantContextType {
     tenantId: string | null;
@@ -65,12 +66,12 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
             if (currentProfile?.company_id) {
                 const { data: companyData } = await supabase
                     .from('companies')
-                    .select('*')
+                    .select(COMPANY_PUBLIC_COLUMNS)
                     .eq('id', currentProfile.company_id)
                     .maybeSingle();
                 
                 if (companyData) {
-                    currentCompany = companyData as Company;
+                    currentCompany = companyData as unknown as Company;
                 }
             }
 
@@ -78,13 +79,13 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
             if (!currentCompany) {
                 const { data: ownedCompany } = await supabase
                     .from('companies')
-                    .select('*')
+                    .select(COMPANY_PUBLIC_COLUMNS)
                     .eq('owner_id', user.id)
                     .limit(1)
                     .maybeSingle();
 
                 if (ownedCompany) {
-                    currentCompany = ownedCompany as Company;
+                    currentCompany = ownedCompany as unknown as Company;
                 }
             }
 
@@ -102,18 +103,18 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
                 if (otherProfile?.company_id) {
                     const { data: companyByEmail } = await supabase
                         .from('companies')
-                        .select('*')
+                        .select(COMPANY_PUBLIC_COLUMNS)
                         .eq('id', otherProfile.company_id)
                         .limit(1)
                         .maybeSingle();
 
                     if (companyByEmail) {
-                        currentCompany = companyByEmail as Company;
+                        currentCompany = companyByEmail as unknown as Company;
                         // Sincronizar o owner_id da empresa - Silencioso, não deve travar o fluxo
                         supabase
                             .from('companies')
                             .update({ owner_id: user.id })
-                            .eq('id', companyByEmail.id)
+                            .eq('id', currentCompany.id)
                             .then(({ error }) => {
                                 if (error) console.warn('[TenantContext] Background sync failed (company owner):', error.message);
                             });
@@ -141,16 +142,21 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
                     if (!currentCompany && branchData.company_id) {
                         const { data: branchCompany } = await supabase
                             .from('companies')
-                            .select('*')
+                            .select(COMPANY_PUBLIC_COLUMNS)
                             .eq('id', branchData.company_id)
                             .limit(1)
                             .maybeSingle();
                         
                         if (branchCompany) {
-                            currentCompany = branchCompany as Company;
+                            currentCompany = branchCompany as unknown as Company;
                         }
                     }
                 }
+            }
+
+            // Documento, telefone, endereço completo e dados financeiros vêm por RPC (V38)
+            if (currentCompany) {
+                currentCompany = await withPrivateFields(currentCompany);
             }
 
             // Sincronizar o perfil se encontrarmos uma empresa mas o perfil estiver desatualizado

@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { COMPANY_PUBLIC_COLUMNS, withPrivateFieldsAdmin } from '@/lib/companies';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -129,9 +130,9 @@ export default function Admin() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('companies')
-        .select('*, owner:profiles!companies_owner_id_fkey(full_name, email, updated_at)');
+        .select(`${COMPANY_PUBLIC_COLUMNS}, owner:profiles!companies_owner_id_fkey(full_name, email, updated_at)`);
       if (error) throw error;
-      return data;
+      return withPrivateFieldsAdmin(data as any[]);
     },
     enabled: !!profile && profile.role === 'admin',
   });

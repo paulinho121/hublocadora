@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { COMPANY_PUBLIC_COLUMNS, withPrivateFieldsAdmin } from '@/lib/companies';
 import { Company, Profile, Booking } from '@/types/database';
 
 export function useAdminStats() {
@@ -23,11 +24,11 @@ export function useAdminStats() {
             // Contagem de locadoras
             const { count: companiesCount } = await supabase
                 .from('companies')
-                .select('*', { count: 'exact', head: true });
+                .select('id', { count: 'exact', head: true });
 
             const { count: pendingCompaniesCount } = await supabase
                 .from('companies')
-                .select('*', { count: 'exact', head: true })
+                .select('id', { count: 'exact', head: true })
                 .eq('status', 'pending');
 
             // Contagem de usuários
@@ -52,12 +53,12 @@ export function usePendingCompanies() {
         queryFn: async () => {
             const { data, error } = await supabase
                 .from('companies')
-                .select('*')
+                .select(COMPANY_PUBLIC_COLUMNS)
                 .eq('status', 'pending')
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
-            return data as Company[];
+            return withPrivateFieldsAdmin(data as unknown as Company[]);
         },
     });
 }
@@ -68,11 +69,11 @@ export function useAllCompanies() {
         queryFn: async () => {
             const { data, error } = await supabase
                 .from('companies')
-                .select('*')
+                .select(COMPANY_PUBLIC_COLUMNS)
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
-            return data as Company[];
+            return withPrivateFieldsAdmin(data as unknown as Company[]);
         },
     });
 }

@@ -1,4 +1,7 @@
 import { supabase } from '@/lib/supabase';
+import { COMPANY_PUBLIC_COLUMNS } from '@/lib/companies';
+
+const EQUIPMENT_WITH_COMPANY: string = `*, company:companies!equipments_company_id_fkey(${COMPANY_PUBLIC_COLUMNS})`;
 import { Equipment, EquipmentStock } from '@/types/database';
 
 export class EquipmentService {
@@ -28,19 +31,12 @@ export class EquipmentService {
     static async getById(id: string) {
         const { data, error } = await supabase
             .from('equipments')
-            .select(`
-                *,
-                company:companies!equipments_company_id_fkey(*),
-                stock:equipment_stock(
-                    *,
-                    branch:branches(*)
-                )
-            `)
+            .select(EQUIPMENT_WITH_COMPANY)
             .eq('id', id)
             .maybeSingle();
 
         if (error) throw error;
-        return data;
+        return data as any;
     }
 
     /**
