@@ -16,16 +16,15 @@ export function useEquipmentAvailability(equipmentId: string, startDate: string,
 
             if (eqError) throw eqError;
 
-            // 2. Buscar todas as reservas aprovadas/ativas no período
-            const { data: bookings, error: bkError } = await supabase
-                .from('bookings')
-                .select('quantity')
-                .eq('equipment_id', equipmentId)
-                .in('status', ['approved', 'active', 'pending']) // Pending também bloqueia por segurança
-                .filter('start_date', 'lte', endDate)
-                .filter('end_date', 'gte', startDate);
+            // 2. Buscar as reservas pendentes/aprovadas/ativas que se sobrepõem ao período.
+            //    Usa a RPC SECURITY DEFINER: um SELECT direto em bookings só enxerga as
+            //    reservas do próprio usuário (RLS) e mostraria unidades livres a mais.
+            const { data: occupied, error: bkError } = await supabase
+                .rpc('get_equipment_occupied_dates', { p_equipment_id: equipmentId });
 
             if (bkError) throw bkError;
+            const bookings = (occupied as { start_date: string; end_date: string; quantity: number }[])
+                .filter(b => b.start_date <= endDate && b.end_date >= startDate);
 
             // 3. Calcular a soma das quantidades reservadas
             const reservedQuantity = bookings.reduce((sum, b) => sum + (b.quantity || 1), 0);

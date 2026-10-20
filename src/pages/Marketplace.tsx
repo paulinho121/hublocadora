@@ -202,6 +202,8 @@ export default function Marketplace() {
   const bookingMap = useMemo(() => {
     const map = new Map<string, { rentedQuantity: number; nextReturnDate: string }>();
     (activeBookings || []).forEach((b: any) => {
+      // Reservas futuras não ocupam unidades hoje — só contam as que já começaram
+      if (b.start_date > today) return;
       const existing = map.get(b.equipment_id);
       if (existing) {
         existing.rentedQuantity += b.quantity || 0;
@@ -211,7 +213,7 @@ export default function Marketplace() {
       }
     });
     return map;
-  }, [activeBookings]);
+  }, [activeBookings, today]);
 
   // ─── Consolidação "Pote Principal" ────────────────────────────────────────
   // Agrupa itens pelo nome, soma estoque e agrega dados de locação
