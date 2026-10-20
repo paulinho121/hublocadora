@@ -19,6 +19,7 @@ import {
   Building2,
   CalendarSearch,
   ChevronDown,
+  FileText,
   ChevronUp,
   Plus,
   Minus,
@@ -500,6 +501,7 @@ export default function EquipmentDetails() {
   const navigate = useNavigate();
   const { data: equipment, isLoading, error } = useEquipment(id || '');
   const [activeImage, setActiveImage] = useState(0);
+  const [showDescription, setShowDescription] = useState(false);
 
   const { data: reviews } = useQuery({
     queryKey: ['reviews', id],
@@ -640,9 +642,40 @@ export default function EquipmentDetails() {
               <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tighter leading-tight md:leading-none mb-4">
                 {equipment.name}
               </h1>
-              <p className="text-zinc-400 text-sm md:text-base leading-relaxed font-medium">
-                {equipment.description}
-              </p>
+              {equipment.description && (
+                <>
+                  <button
+                    onClick={() => setShowDescription(v => !v)}
+                    aria-expanded={showDescription}
+                    className="w-full flex items-center justify-between px-4 py-3 rounded-2xl
+                               bg-zinc-900/40 border border-zinc-800/60 hover:border-zinc-700
+                               text-[10px] font-black uppercase tracking-widest text-zinc-500
+                               hover:text-zinc-300 transition-all"
+                  >
+                    <span className="flex items-center gap-2">
+                      <FileText className="w-3.5 h-3.5" />
+                      Descrição
+                    </span>
+                    {showDescription ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                  </button>
+
+                  <AnimatePresence>
+                    {showDescription && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        <p className="text-zinc-400 text-sm md:text-base leading-relaxed font-medium pt-4 px-1">
+                          {equipment.description}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </>
+              )}
             </div>
 
             {/* Technical specs */}
