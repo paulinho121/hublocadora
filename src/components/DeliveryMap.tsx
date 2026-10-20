@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useDeliveryTracking } from '../hooks/useDeliveryTracking';
-import { getRoute, distanceMeters, LatLng, Route } from '@/lib/geo';
+import { getRoute, distanceMeters, LatLng, Route, MAP_TILES } from '@/lib/geo';
 import { MapPin, Loader2 } from 'lucide-react';
 
 // Ícones em HTML puro (sem depender de imagens externas)
@@ -77,13 +77,12 @@ export function TrackingMap({ position, destination, waitingMessage, onRoute }: 
   return (
     <div className="relative h-full w-full z-0">
       <MapContainer center={[position.lat, position.lng]} zoom={15} style={{ height: '100%', width: '100%' }}>
-        {/* Tiles do OpenStreetMap (gratuitos, sem chave). A CARTO passou a exigir chave de API.
-            O tema escuro é um filtro CSS (.map-tiles-dark em index.css) aplicado só aos tiles. */}
+        {/* Geoapify (tema escuro) quando há chave; senão OSM escurecido por CSS — ver geo.ts */}
         <TileLayer
-          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-          className="map-tiles-dark"
+          url={MAP_TILES.url}
+          className={MAP_TILES.className}
           maxZoom={19}
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          attribution={MAP_TILES.attribution}
         />
         <FitBounds points={destination ? [position, destination] : [position]} />
         {route && <Polyline positions={route.coords} pathOptions={{ color: '#e11d48', weight: 5, opacity: 0.85 }} />}
