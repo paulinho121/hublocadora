@@ -27,7 +27,7 @@ import {
   StickyNote,
   Hash,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format, addDays, differenceInDays, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'motion/react';
@@ -41,6 +41,7 @@ import { useProject } from '@/contexts/ProjectContext';
 import { ReviewService } from '@/services/ReviewService';
 import { useQuery } from '@tanstack/react-query';
 import { Equipment } from '@/types/database';
+import { savePendingBooking, loadPendingBooking, clearPendingBooking } from '@/lib/pendingBooking';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -73,14 +74,18 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
   const today    = new Date().toISOString().split('T')[0];
   const tomorrow = format(addDays(new Date(), 1), 'yyyy-MM-dd');
 
+  // Reserva iniciada antes do cadastro (visitante sem login) — restaura ao voltar
+  const [draft] = useState(() => loadPendingBooking(id || ''));
+  const draftDatesValid = !!draft && draft.startDate >= today;
+
   // Pre-fill from project context if user already set dates in the marketplace bar
-  const [startDate, setStartDate] = useState(proj.startDate || today);
-  const [endDate,   setEndDate]   = useState(proj.endDate   || format(addDays(new Date(), 7), 'yyyy-MM-dd'));
-  const [quantity,  setQty]       = useState(1);
-  const [method,    setMethod]    = useState<'pickup' | 'delivery'>('pickup');
-  const [address,   setAddress]   = useState('');
-  const [contact,   setContact]   = useState('');
-  const [notes,     setNotes]     = useState('');
+  const [startDate, setStartDate] = useState(draftDatesValid ? draft!.startDate : (proj.startDate || today));
+  const [endDate,   setEndDate]   = useState(draftDatesValid ? draft!.endDate : (proj.endDate || format(addDays(new Date(), 7), 'yyyy-MM-dd')));
+  const [quantity,  setQty]       = useState(draft?.quantity ?? 1);
+  const [method,    setMethod]    = useState<'pickup' | 'delivery'>(draft?.method ?? 'pickup');
+  const [address,   setAddress]   = useState(draft?.address ?? '');
+  const [contact,   setContact]   = useState(draft?.contact ?? '');
+  const [notes,     setNotes]     = useState(draft?.notes ?? '');
   const [showNotes, setShowNotes] = useState(false);
   const [showCal,   setShowCal]   = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -100,9 +105,18 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
     if (val >= endDate) setEndDate(format(addDays(parseISO(val), 1), 'yyyy-MM-dd'));
   };
 
+  useEffect(() => {
+    if (user && draft) toast.info('Mantivemos os dados da sua reserva. Confira e confirme.');
+  }, [user?.id]);
+
   const handleBook = async () => {
-    if (!user) { navigate('/login'); return; }
     if (!canBook) return;
+    if (!user) {
+      // Guarda a seleção e leva o visitante para o cadastro; ele volta para cá logado
+      savePendingBooking({ equipmentId: equipment.id, startDate, endDate, quantity, method, address, contact, notes });
+      navigate('/register', { state: { from: { pathname: `/equipment/${equipment.id}` }, intent: 'booking' } });
+      return;
+    }
     if (method === 'delivery' && !address.trim()) {
       toast.error('Informe o endereço de entrega.');
       return;
@@ -125,6 +139,7 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
         subrental_company_id: null,
         origin_branch_id:     null,
       });
+      clearPendingBooking();
       setIsSuccess(true);
     } catch {
       toast.error('Erro ao realizar a reserva. Tente novamente.');
@@ -443,10 +458,10 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
         >
           {createBooking.isPending ? (
             <Loader2 className="w-5 h-5 animate-spin" />
-          ) : !user ? (
-            <>Entrar para Reservar <ArrowRight className="w-4 h-4" /></>
-          ) : !avail?.isAvailable ? (
+          ) : !loadingAvail && !avail?.isAvailable ? (
             'Indisponível no período'
+          ) : !user ? (
+            <>Cadastre-se para Reservar <ArrowRight className="w-4 h-4" /></>
           ) : (
             <>Confirmar Reserva <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></>
           )}
@@ -488,7 +503,8 @@ export default function EquipmentDetails() {
 
   const { data: reviews } = useQuery({
     queryKey: ['reviews', id],
-    queryFn: () => ReviewService.getByEquipment(id || ''),
+    // Visitantes sem login não têm acesso às avaliações — mostra a página sem elas
+    queryFn: () => ReviewService.getByEquipment(id || '').catch(() => []),
     enabled: !!id,
   });
 

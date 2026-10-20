@@ -45,7 +45,7 @@ export default function Login() {
         const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: window.location.origin + '/dashboard',
+                redirectTo: window.location.origin + from,
             }
         });
         
@@ -173,7 +173,7 @@ export default function Login() {
                 <CardFooter className="flex flex-col space-y-4 text-center pb-8">
                     <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">
                         Novo na produção?{' '}
-                        <Button variant="link" className="p-0 h-auto text-primary font-black ml-1 uppercase underline underline-offset-4" onClick={() => navigate('/register')}>
+                        <Button variant="link" className="p-0 h-auto text-primary font-black ml-1 uppercase underline underline-offset-4" onClick={() => navigate('/register', { state: location.state })}>
                             Criar Conta
                         </Button>
                     </p>

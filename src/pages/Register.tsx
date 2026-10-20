@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,10 @@ import { Camera, Loader2, Eye, EyeOff } from 'lucide-react';
 
 export default function Register() {
     const navigate = useNavigate();
+    const location = useLocation();
+    // Para onde voltar depois do cadastro (ex.: o equipamento que o visitante quis reservar)
+    const from: string | undefined = location.state?.from?.pathname;
+    const isBookingIntent = location.state?.intent === 'booking';
     const [fullName, setFullName] = useState('');
     const [companyName, setCompanyName] = useState('');
     const [email, setEmail] = useState('');
@@ -51,7 +55,9 @@ export default function Register() {
                 data: {
                     full_name: fullName.trim(),
                     company_name: companyName.trim(),
-                }
+                },
+                // O link de confirmação do e-mail traz o usuário de volta, já logado
+                emailRedirectTo: window.location.origin + (from || '/dashboard'),
             }
         });
 
@@ -73,7 +79,9 @@ export default function Register() {
             return;
         }
 
-        setSuccessMessage('Conta criada com sucesso! Por favor, confirme seu e-mail para ativar sua conta.');
+        setSuccessMessage(isBookingIntent
+            ? 'Conta criada! Confirme seu e-mail: o link vai te trazer de volta ao equipamento para concluir a reserva.'
+            : 'Conta criada com sucesso! Por favor, confirme seu e-mail para ativar sua conta.');
         setLoading(false);
     };
 
@@ -104,7 +112,7 @@ export default function Register() {
         const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: window.location.origin + '/dashboard',
+                redirectTo: window.location.origin + (from || '/dashboard'),
             }
         });
         
@@ -130,7 +138,9 @@ export default function Register() {
                     </div>
                     <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tight">Novo no Hub</CardTitle>
                     <CardDescription className="text-xs md:text-sm font-medium">
-                        Junte-se ao maior ecossistema audiovisual.
+                        {isBookingIntent
+                            ? 'Crie sua conta grátis para concluir a reserva. Seus dados da reserva ficam salvos.'
+                            : 'Junte-se ao maior ecossistema audiovisual.'}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -274,7 +284,7 @@ export default function Register() {
                 <CardFooter className="flex flex-col space-y-4 text-center pb-8">
                     <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">
                         Já faz parte da cena?{' '}
-                        <Button variant="link" className="p-0 h-auto text-primary font-black ml-1 uppercase underline underline-offset-4" onClick={() => navigate('/login')}>
+                        <Button variant="link" className="p-0 h-auto text-primary font-black ml-1 uppercase underline underline-offset-4" onClick={() => navigate('/login', { state: location.state })}>
                             Entrar
                         </Button>
                     </p>
