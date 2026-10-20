@@ -1,134 +1,145 @@
-import React, { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { useEffect, useRef, useState } from 'react';
+import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useDeliveryTracking } from '../hooks/useDeliveryTracking';
-import { Truck, MapPin, Package, CheckCircle, Clock } from 'lucide-react';
+import { getRoute, distanceMeters, LatLng, Route } from '@/lib/geo';
+import { MapPin, Loader2 } from 'lucide-react';
 
-// Corrigindo o problema padrão dos ícones do Leaflet com webpack/vite
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
-
-// Ícone customizado para o caminhão (opcional)
-const truckIcon = new L.Icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/2769/2769339.png',
+// Ícones em HTML puro (sem depender de imagens externas)
+const truckIcon = L.divIcon({
+  className: '',
+  html: '<div style="width:40px;height:40px;border-radius:9999px;background:#e11d48;border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 20px rgba(225,29,72,.6)">🚚</div>',
   iconSize: [40, 40],
   iconAnchor: [20, 20],
-  popupAnchor: [0, -20]
 });
 
-// Componente utilitário para mover o mapa suavemente até a nova posição
-function MapUpdater({ center }: { center: [number, number] }) {
+const destinationIcon = L.divIcon({
+  className: '',
+  html: '<div style="width:32px;height:32px;border-radius:9999px;background:#10b981;border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 16px rgba(16,185,129,.6)">📍</div>',
+  iconSize: [32, 32],
+  iconAnchor: [16, 16],
+});
+
+// Recalcula a rota só quando o veículo andou isso (evita abusar do OSRM público)
+const ROUTE_REFRESH_METERS = 200;
+
+function FitBounds({ points }: { points: LatLng[] }) {
   const map = useMap();
+  const fitted = useRef(false);
   useEffect(() => {
-    map.flyTo(center, map.getZoom());
-  }, [center, map]);
+    if (!points.length) return;
+    if (points.length === 1) {
+      map.flyTo([points[0].lat, points[0].lng], fitted.current ? map.getZoom() : 15);
+    } else if (!fitted.current) {
+      map.fitBounds(L.latLngBounds(points.map(p => [p.lat, p.lng])), { padding: [40, 40] });
+    } else {
+      map.panTo([points[0].lat, points[0].lng]);
+    }
+    fitted.current = true;
+  }, [points.map(p => `${p.lat},${p.lng}`).join('|'), map]);
   return null;
+}
+
+interface TrackingMapProps {
+  position: LatLng | null;
+  destination: LatLng | null;
+  waitingMessage?: string;
+  onRoute?: (route: Route) => void;
+}
+
+/** Mapa com o veículo, o destino e a rota entre eles (km e tempo restantes). */
+export function TrackingMap({ position, destination, waitingMessage, onRoute }: TrackingMapProps) {
+  const [route, setRoute] = useState<Route | null>(null);
+  const lastRouted = useRef<LatLng | null>(null);
+
+  useEffect(() => {
+    if (!position || !destination) return;
+    if (lastRouted.current && distanceMeters(lastRouted.current, position) < ROUTE_REFRESH_METERS) return;
+    lastRouted.current = position;
+    getRoute(position, destination).then(r => {
+      if (!r) return;
+      setRoute(r);
+      onRoute?.(r);
+    }).catch(() => {});
+  }, [position?.lat, position?.lng, destination?.lat, destination?.lng]);
+
+  if (!position) {
+    return (
+      <div className="h-full w-full bg-zinc-950 flex items-center justify-center">
+        <p className="text-white font-medium flex items-center gap-2 text-sm">
+          <MapPin className="text-red-500" /> {waitingMessage || 'Aguardando sinal GPS do veículo...'}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative h-full w-full z-0">
+      <MapContainer center={[position.lat, position.lng]} zoom={15} style={{ height: '100%', width: '100%' }}>
+        {/* Tema escuro do OpenStreetMap via CARTO (gratuito) */}
+        <TileLayer
+          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        />
+        <FitBounds points={destination ? [position, destination] : [position]} />
+        {route && <Polyline positions={route.coords} pathOptions={{ color: '#e11d48', weight: 5, opacity: 0.85 }} />}
+        {destination && <Marker position={[destination.lat, destination.lng]} icon={destinationIcon} />}
+        <Marker position={[position.lat, position.lng]} icon={truckIcon} />
+      </MapContainer>
+
+      {route && (
+        <div className="absolute bottom-3 left-3 right-3 z-[400] flex justify-between gap-2 bg-black/80 backdrop-blur-md border border-zinc-800 rounded-2xl px-4 py-3">
+          <div>
+            <p className="text-[9px] font-black uppercase text-zinc-500 tracking-widest">Distância</p>
+            <p className="text-sm font-black text-white">{route.distanceKm.toFixed(1)} km</p>
+          </div>
+          <div className="text-right">
+            <p className="text-[9px] font-black uppercase text-zinc-500 tracking-widest">Chegada estimada</p>
+            <p className="text-sm font-black text-white">{Math.max(1, Math.round(route.durationMin))} min</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 interface DeliveryMapProps {
   bookingId: string;
 }
 
+/** Visão do cliente: acompanha em tempo real o GPS enviado pela logística. */
 export function DeliveryMap({ bookingId }: DeliveryMapProps) {
   const { delivery, loading, error } = useDeliveryTracking(bookingId);
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center bg-zinc-900 rounded-lg border border-zinc-800 animate-pulse">
-        <p className="text-zinc-400 flex items-center gap-2"><Truck className="animate-bounce" /> Conectando ao Satélite...</p>
+      <div className="flex h-full items-center justify-center bg-zinc-950">
+        <p className="text-zinc-400 flex items-center gap-2 text-sm"><Loader2 className="h-4 w-4 animate-spin" /> Conectando ao rastreio...</p>
       </div>
     );
   }
 
   if (error || !delivery) {
     return (
-      <div className="flex h-64 items-center justify-center bg-zinc-900 rounded-lg text-red-500 border border-zinc-800">
+      <div className="flex h-full items-center justify-center bg-zinc-950 text-red-500 text-sm">
         Erro ao buscar detalhes do rastreamento.
       </div>
     );
   }
 
-  const hasLocation = delivery.current_lat !== null && delivery.current_lng !== null;
-  const position: [number, number] = hasLocation ? [delivery.current_lat!, delivery.current_lng!] : [0, 0];
-
-  const getStatusColor = (status: string) => {
-    switch(status) {
-      case 'preparing': return 'text-yellow-500';
-      case 'in_transit': return 'text-blue-500';
-      case 'delivered': return 'text-green-500';
-      default: return 'text-zinc-500';
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch(status) {
-      case 'preparing': return <Package className="w-5 h-5" />;
-      case 'in_transit': return <Truck className="w-5 h-5 animate-pulse" />;
-      case 'delivered': return <CheckCircle className="w-5 h-5" />;
-      default: return <Clock className="w-5 h-5" />;
-    }
-  };
-
-  const statusMap: Record<string, string> = {
-    preparing: 'Preparando Kit na Locadora',
-    in_transit: 'Em Trânsito para o Set',
-    delivered: 'Equipamento Entregue',
-    cancelled: 'Entrega Cancelada'
-  };
+  const position = delivery.current_lat != null && delivery.current_lng != null
+    ? { lat: Number(delivery.current_lat), lng: Number(delivery.current_lng) }
+    : null;
+  const destination = delivery.dest_lat != null && delivery.dest_lng != null
+    ? { lat: Number(delivery.dest_lat), lng: Number(delivery.dest_lng) }
+    : null;
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* Header Info */}
-      <div className="bg-zinc-900 p-4 rounded-xl border border-zinc-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h3 className="text-white font-semibold flex items-center gap-2">
-            Rastreio de Entrega
-            <span className="text-xs bg-red-600/20 text-red-500 px-2 py-0.5 rounded-full flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-              Ao Vivo
-            </span>
-          </h3>
-          <p className="text-zinc-400 text-sm mt-1">Motorista: {delivery.driver_name || 'A definir'} • {delivery.driver_phone || '--'}</p>
-        </div>
-        
-        <div className={`flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-800 w-full md:w-auto ${getStatusColor(delivery.status)}`}>
-          {getStatusIcon(delivery.status)}
-          <span className="font-medium whitespace-nowrap">{statusMap[delivery.status] || delivery.status}</span>
-        </div>
-      </div>
-
-      {/* Map Container */}
-      <div className="relative h-[400px] rounded-xl overflow-hidden border border-zinc-800 z-0">
-        {!hasLocation && (
-           <div className="absolute inset-0 bg-zinc-950/80 z-10 flex items-center justify-center">
-             <p className="text-white font-medium flex items-center gap-2">
-               <MapPin className="text-red-500" /> Aguardando sinal GPS do veículo...
-             </p>
-           </div>
-        )}
-        
-        {hasLocation && (
-          <MapContainer center={position} zoom={15} style={{ height: '100%', width: '100%' }}>
-            {/* Tema Escuro do OpenStreetMap via CartoDB */}
-            <TileLayer
-              url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-            />
-            {hasLocation && <MapUpdater center={position} />}
-            <Marker position={position} icon={truckIcon}>
-              <Popup className="text-zinc-900 rounded-lg">
-                <div className="font-semibold text-sm">Caminhão Localizado</div>
-                <div className="text-xs text-zinc-600">Atualizado instantes atrás</div>
-              </Popup>
-            </Marker>
-          </MapContainer>
-        )}
-      </div>
-    </div>
+    <TrackingMap
+      position={position}
+      destination={destination}
+      waitingMessage={delivery.status === 'shipped' ? 'Aguardando sinal GPS do veículo...' : 'O rastreio começa quando o pedido for enviado.'}
+    />
   );
 }

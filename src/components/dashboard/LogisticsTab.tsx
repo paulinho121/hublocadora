@@ -19,6 +19,7 @@ import { useTransfers } from '@/hooks/useTransfers';
 import { cn } from '@/lib/utils';
 import { InventoryStatusReport } from './InventoryStatusReport';
 import { useTenant } from '@/contexts/TenantContext';
+import { DriverTrackingModal } from './DriverTrackingModal';
 
 export function LogisticsTab({ tenantId }: { tenantId: string }) {
     const { user } = useAuth();
@@ -27,6 +28,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
     const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
     const [branchModalOpen, setBranchModalOpen] = useState(false);
     const [pendingDelivery, setPendingDelivery] = useState<any>(null);
+    const [trackingDelivery, setTrackingDelivery] = useState<any>(null);
     const queryClient = useQueryClient();
     const { data: deliveries, isLoading, error: fetchError } = useDeliveries({ 
         tenantId,
@@ -200,6 +202,9 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                 serial_number: serialNumbers[delivery.id],
                 origin_branch_id: selectedBranchId || delivery.origin_branch_id
             });
+
+            // Ao marcar "Enviado", abre o mapa e começa a compartilhar o GPS com o cliente
+            if (nextStatus === 'shipped') setTrackingDelivery(delivery);
             
             // Quando a entrega é confirmada (item chegou ao cliente), marca o pedido como ativo.
             // O pedido só será 'completed' quando o item for devolvido e conferido.
@@ -346,6 +351,16 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                     {/* Ações operacionais: Apenas para Fulfiller ou Locatário (na etapa final) e NUNCA para Master Observador */}
                     {(isFulfiller || (isRenter && delivery.status === 'delivered')) && !isMaster ? (
                         <div className="space-y-4">
+                            {delivery.status === 'shipped' && isFulfiller && (
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setTrackingDelivery(delivery)}
+                                    className="w-full h-14 rounded-2xl border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/10 font-black uppercase text-xs tracking-widest gap-2"
+                                >
+                                    <Navigation className="h-4 w-4" /> Abrir Mapa da Entrega
+                                </Button>
+                            )}
+
                             {/* Token Input for Fulfiller during Delivery Confirmation */}
                             {delivery.status === 'shipped' && isFulfiller && (
                                 <div className="space-y-2">
@@ -1006,6 +1021,8 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
 
 
             {/* Modal de Escolha de Filial */}
+            <DriverTrackingModal delivery={trackingDelivery} onClose={() => setTrackingDelivery(null)} />
+
             <Dialog 
                 isOpen={branchModalOpen} 
                 onClose={() => setBranchModalOpen(false)}

@@ -7,11 +7,15 @@ export type DeliveryTracking = {
   booking_id: string;
   driver_name: string;
   driver_phone: string;
-  status: 'preparing' | 'in_transit' | 'delivered' | 'cancelled';
+  status: 'pending' | 'picking' | 'ready' | 'shipped' | 'delivered' | 'confirmed' | 'cancelled';
   current_lat: number | null;
   current_lng: number | null;
+  dest_lat: number | null;
+  dest_lng: number | null;
+  location_updated_at: string | null;
   estimated_arrival: string | null;
   updated_at: string;
+  booking?: { delivery_address: string | null } | null;
 };
 
 export function useDeliveryTracking(bookingId: string | null) {
@@ -33,7 +37,7 @@ export function useDeliveryTracking(bookingId: string | null) {
         setLoading(true);
         const { data, error: sbError } = await supabase
           .from('deliveries')
-          .select('*')
+          .select('*, booking:bookings(delivery_address)')
           .eq('booking_id', bookingId)
           .order('created_at', { ascending: false })
           .limit(1);
@@ -61,9 +65,9 @@ export function useDeliveryTracking(bookingId: string | null) {
           filter: `booking_id=eq.${bookingId}`,
         },
         (payload) => {
-          console.log('Realtime Delivery Update recebido:', payload.new);
+          // O payload do Realtime não traz o join com bookings — preserva o anterior
           if (isMounted) {
-            setDelivery(payload.new as DeliveryTracking);
+            setDelivery(prev => ({ ...(payload.new as DeliveryTracking), booking: prev?.booking }));
           }
         }
       )

@@ -73,9 +73,9 @@ export function BookingTrackingModal({ bookingId }: BookingTrackingModalProps) {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-4"
         >
-            <div className="h-64 rounded-3xl overflow-hidden border border-zinc-800 shadow-2xl relative">
+            <div className="h-80 rounded-3xl overflow-hidden border border-zinc-800 shadow-2xl relative">
                 <DeliveryMap bookingId={bookingId} />
-                <div className="absolute top-4 left-4 z-10">
+                <div className="absolute top-4 left-4 z-[400]">
                     <Badge className="bg-black/80 backdrop-blur-md text-white border-zinc-800 font-black uppercase text-[9px] px-3 py-1">
                         GPS Ativo
                     </Badge>
@@ -128,7 +128,7 @@ export function BookingTrackingModal({ bookingId }: BookingTrackingModalProps) {
         <div className="bg-zinc-900/30 p-4 rounded-2xl border border-zinc-800/50">
             <p className="text-[9px] font-black uppercase text-zinc-600 tracking-widest mb-1">Previsão</p>
             <p className="text-xs font-bold text-zinc-300">
-                {delivery.estimated_arrival ? new Date(delivery.estimated_arrival).toLocaleTimeString() : 'Em processamento'}
+                {delivery.estimated_arrival ? `Chega por volta das ${new Date(delivery.estimated_arrival).toLocaleTimeString().slice(0, 5)}` : 'Em processamento'}
             </p>
         </div>
         <div className="bg-zinc-900/30 p-4 rounded-2xl border border-zinc-800/50">
