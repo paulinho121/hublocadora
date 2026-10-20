@@ -77,10 +77,13 @@ export function TrackingMap({ position, destination, waitingMessage, onRoute }: 
   return (
     <div className="relative h-full w-full z-0">
       <MapContainer center={[position.lat, position.lng]} zoom={15} style={{ height: '100%', width: '100%' }}>
-        {/* Tema escuro do OpenStreetMap via CARTO (gratuito) */}
+        {/* Tiles do OpenStreetMap (gratuitos, sem chave). A CARTO passou a exigir chave de API.
+            O tema escuro é um filtro CSS (.map-tiles-dark em index.css) aplicado só aos tiles. */}
         <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+          className="map-tiles-dark"
+          maxZoom={19}
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         />
         <FitBounds points={destination ? [position, destination] : [position]} />
         {route && <Polyline positions={route.coords} pathOptions={{ color: '#e11d48', weight: 5, opacity: 0.85 }} />}

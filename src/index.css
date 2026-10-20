@@ -228,3 +228,8 @@
     inset -6px -6px 12px rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.02);
 }
+
+/* Mapa de rastreio: tiles claros do OpenStreetMap convertidos para tema escuro */
+.map-tiles-dark {
+  filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9) saturate(0.6);
+}
