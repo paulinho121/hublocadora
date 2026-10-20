@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, NavLink } from 'react-router-dom';
-import { lazy, Suspense, useEffect } from 'react';
-import { LogOut, LayoutDashboard, Settings, ShoppingBag, BarChart3, Package, CalendarDays, Truck, History, FileText, Heart, FolderOpen, Clapperboard } from 'lucide-react';
+import { lazy, Suspense, useEffect, useState } from 'react';
+import { LogOut, LayoutDashboard, Settings, ShoppingBag, BarChart3, Package, CalendarDays, Truck, History, FileText, Heart, FolderOpen, Clapperboard, Globe, LayoutGrid, X } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 
 // Context & Auth
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
-import { TenantProvider } from '@/contexts/TenantContext';
+import { TenantProvider, useTenant } from '@/contexts/TenantContext';
 import { ProjectProvider, useProject } from '@/contexts/ProjectContext';
 import { ProjectDrawer } from '@/components/marketplace/ProjectDrawer';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -172,6 +172,97 @@ function ProjectBottomButton() {
   );
 }
 
+// Abas mais usadas ficam na barra; o resto (inclusive as que só existem na
+// barra lateral do desktop) fica na gaveta "Mais".
+const DASHBOARD_PRIMARY_TABS = [
+  { id: 'overview',  label: 'Visão',      icon: BarChart3 },
+  { id: 'bookings',  label: 'Pedidos',    icon: CalendarDays },
+  { id: 'logistics', label: 'Logística',  icon: Truck },
+  { id: 'inventory', label: 'Inventário', icon: Package },
+];
+
+function DashboardBottomNav() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { isAdmin } = useTenant();
+  const [moreOpen, setMoreOpen] = useState(false);
+
+  const currentTab = new URLSearchParams(location.search).get('tab') || 'overview';
+  const moreTabs = [
+    { id: 'projects',  label: 'Projetos',      icon: Clapperboard },
+    { id: 'reports',   label: 'Relatórios',    icon: FileText },
+    { id: 'history',   label: 'Histórico',     icon: History },
+    { id: 'favorites', label: 'Favoritos',     icon: Heart },
+    ...(isAdmin ? [
+      { id: 'network', label: 'Minha Rede',    icon: Globe },
+      { id: 'audit',   label: 'Auditoria',     icon: History },
+    ] : []),
+    { id: 'settings',  label: 'Configurações', icon: Settings },
+  ];
+  const isMoreActive = moreTabs.some(t => t.id === currentTab);
+
+  const goTo = (id: string) => {
+    setMoreOpen(false);
+    navigate(`/dashboard?tab=${id}`, { replace: true });
+  };
+
+  const itemClass = (active: boolean) =>
+    `flex-1 flex flex-col items-center justify-center gap-1 min-h-[52px] rounded-xl transition-colors ${
+      active ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-500 active:text-zinc-200'
+    }`;
+
+  return (
+    <>
+      {moreOpen && (
+        <div className="md:hidden fixed inset-0 z-[60]" onClick={() => setMoreOpen(false)}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div
+            className="absolute left-3 right-3 bg-zinc-950 border border-zinc-800 rounded-3xl p-4 shadow-[0_-20px_60px_rgba(0,0,0,0.8)] animate-in slide-in-from-bottom-4 fade-in duration-200"
+            style={{ bottom: 'calc(env(safe-area-inset-bottom) + 88px)' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-3 px-1">
+              <span className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-500">Mais opções</span>
+              <button onClick={() => setMoreOpen(false)} className="h-10 w-10 -mr-2 flex items-center justify-center rounded-xl text-zinc-500" aria-label="Fechar">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {moreTabs.map(({ id, label, icon: Icon }) => (
+                <button
+                  key={id}
+                  onClick={() => goTo(id)}
+                  className={`flex flex-col items-center justify-center gap-2 min-h-[76px] rounded-2xl border transition-colors ${
+                    currentTab === id ? 'bg-primary/15 border-primary/40 text-primary' : 'bg-zinc-900/60 border-zinc-800 text-zinc-300 active:bg-zinc-800'
+                  }`}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="text-[11px] font-bold">{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="md:hidden fixed left-3 right-3 z-[61] flex justify-center pointer-events-none" style={{ bottom: 'calc(env(safe-area-inset-bottom) + 12px)' }}>
+        <nav className="pointer-events-auto flex items-stretch gap-1 w-full max-w-lg bg-zinc-950/90 backdrop-blur-xl border border-zinc-800/80 p-1.5 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.8)]">
+          {DASHBOARD_PRIMARY_TABS.map(({ id, label, icon: Icon }) => (
+            <button key={id} onClick={() => goTo(id)} className={itemClass(currentTab === id && !moreOpen)}>
+              <Icon className="w-5 h-5 shrink-0" />
+              <span className="text-[10px] font-bold leading-none">{label}</span>
+            </button>
+          ))}
+          <button onClick={() => setMoreOpen(v => !v)} className={itemClass(moreOpen || isMoreActive)} aria-expanded={moreOpen}>
+            <LayoutGrid className="w-5 h-5 shrink-0" />
+            <span className="text-[10px] font-bold leading-none">Mais</span>
+          </button>
+        </nav>
+      </div>
+    </>
+  );
+}
+
 function BottomNav() {
   const { user, profile } = useAuth();
   const location = useLocation();
@@ -182,45 +273,7 @@ function BottomNav() {
   const isDashboard = location.pathname === '/dashboard';
 
   // When inside the dashboard, show tab navigation instead of page navigation
-  if (isDashboard) {
-    const currentTab = new URLSearchParams(location.search).get('tab') || 'overview';
-    const tabs = [
-      { id: 'overview', label: 'Visão', icon: BarChart3 },
-      { id: 'inventory', label: 'Inventário', icon: Package },
-      { id: 'bookings',  label: 'Pedidos',   icon: CalendarDays },
-      { id: 'projects',  label: 'Projetos',  icon: Clapperboard },
-      { id: 'logistics', label: 'Logística', icon: Truck },
-      { id: 'favorites', label: 'Favoritos', icon: Heart },
-      { id: 'settings',  label: 'Ajustes',   icon: Settings },
-    ];
-    return (
-      <div className="md:hidden fixed left-3 right-3 z-50 flex justify-center pointer-events-none" style={{ bottom: 'calc(env(safe-area-inset-bottom) + 12px)' }}>
-        <nav className="pointer-events-auto flex items-center justify-between w-full max-w-lg bg-zinc-950/80 backdrop-blur-xl border border-zinc-800/80 px-2 py-2 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.8)] relative">
-          {tabs.map(({ id, label, icon: Icon }) => {
-            const isActive = currentTab === id;
-            return (
-              <button
-                key={id}
-                onClick={() => navigate(`/dashboard?tab=${id}`, { replace: true })}
-                className={`flex items-center justify-center transition-all duration-300 relative rounded-xl ${
-                  isActive 
-                    ? 'bg-primary text-white px-3.5 py-2.5 shadow-lg shadow-primary/20 scale-105 font-black uppercase text-[10px] tracking-wider' 
-                    : 'text-zinc-500 hover:text-zinc-300 p-2.5'
-                }`}
-              >
-                <Icon className={`w-4 h-4 shrink-0 transition-transform ${isActive ? 'scale-110 mr-1.5' : 'scale-100'}`} />
-                {isActive && (
-                  <span className="text-[10px] font-black uppercase tracking-wider whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-300">
-                    {label}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
-      </div>
-    );
-  }
+  if (isDashboard) return <DashboardBottomNav />;
 
   // Non-dashboard pages (e.g. Marketplace, details)
   const navItems = [
@@ -265,8 +318,9 @@ function MainLayout() {
   const location = useLocation();
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname.startsWith('/invite/') || location.pathname === '/reset-password';
 
+  // overflow-x-clip (e não hidden): hidden cria um contêiner de rolagem e quebra o sticky do Navbar
   return (
-    <div className="min-h-screen bg-background font-sans antialiased flex flex-col relative overflow-x-hidden">
+    <div className="min-h-screen bg-background font-sans antialiased flex flex-col relative overflow-x-hidden supports-[overflow:clip]:overflow-x-clip">
       <ProfessionalBackground />
       {!isAuthPage && <Navbar />}
       {!isAuthPage && <ProjectDrawer />}

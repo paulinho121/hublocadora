@@ -28,7 +28,7 @@ import {
   StickyNote,
   Hash,
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { format, addDays, differenceInDays, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'motion/react';
@@ -494,6 +494,47 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
   );
 }
 
+// ─── Mobile booking bar ────────────────────────────────────────────────────────
+// No celular o painel de reserva fica bem abaixo das fotos e da descrição.
+// Esta barra mantém preço + ação sempre à mão e some quando o painel aparece.
+
+function MobileBookingBar({ dailyRate, targetRef }: { dailyRate: number; targetRef: React.RefObject<HTMLDivElement | null> }) {
+  const { user } = useAuth();
+  const [panelVisible, setPanelVisible] = useState(false);
+
+  useEffect(() => {
+    const el = targetRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => setPanelVisible(entry.isIntersecting), { threshold: 0.15 });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [targetRef]);
+
+  if (panelVisible) return null;
+
+  return (
+    <div
+      className="lg:hidden fixed left-3 right-3 z-40 flex items-center justify-between gap-3
+                 bg-zinc-950/95 backdrop-blur-xl border border-zinc-800 rounded-2xl pl-4 pr-2 py-2
+                 shadow-[0_12px_40px_rgba(0,0,0,0.8)] animate-in slide-in-from-bottom-4 fade-in duration-200"
+      // Logado, a barra de navegação inferior ocupa o rodapé: fica logo acima dela
+      style={{ bottom: `calc(env(safe-area-inset-bottom) + ${user ? 84 : 12}px)` }}
+    >
+      <div className="leading-tight">
+        <span className="text-lg font-black text-white tabular-nums">{brl(dailyRate)}</span>
+        <span className="text-xs font-bold text-zinc-500"> /dia</span>
+      </div>
+      <button
+        onClick={() => targetRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+        className="h-12 px-5 rounded-xl bg-primary text-white font-black uppercase tracking-tight text-sm
+                   flex items-center gap-2 shadow-[0_8px_24px_rgba(234,88,12,0.35)] active:scale-[0.98] transition-transform"
+      >
+        {user ? 'Reservar' : 'Cadastre-se e reserve'} <ArrowRight className="w-4 h-4" />
+      </button>
+    </div>
+  );
+}
+
 // ─── Main page ─────────────────────────────────────────────────────────────────
 
 export default function EquipmentDetails() {
@@ -502,6 +543,7 @@ export default function EquipmentDetails() {
   const { data: equipment, isLoading, error } = useEquipment(id || '');
   const [activeImage, setActiveImage] = useState(0);
   const [showDescription, setShowDescription] = useState(false);
+  const bookingPanelRef = useRef<HTMLDivElement>(null);
 
   const { data: reviews } = useQuery({
     queryKey: ['reviews', id],
@@ -553,10 +595,11 @@ export default function EquipmentDetails() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-zinc-100 pb-24 md:pb-12">
+    <div className="min-h-screen bg-black text-zinc-100 pb-44 lg:pb-12">
 
       {/* ── Sticky top bar ──────────────────────────────────────────────────── */}
-      <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-xl border-b border-zinc-800/60">
+      {/* Gruda logo abaixo do Navbar (h-16 / md:h-20 + safe area), e não por cima dele */}
+      <div className="sticky top-[calc(env(safe-area-inset-top)+4rem)] md:top-[calc(env(safe-area-inset-top)+5rem)] z-40 bg-black/80 backdrop-blur-xl border-b border-zinc-800/60">
         <div className="container mx-auto px-4 h-14 flex items-center justify-between max-w-6xl">
           <button
             onClick={() => navigate(-1)}
@@ -697,7 +740,8 @@ export default function EquipmentDetails() {
           </div>
 
           {/* ── Right: booking panel (sticky on desktop) ───────────────────── */}
-          <div className="lg:sticky lg:top-20 lg:self-start space-y-4">
+          {/* Desktop: abaixo do Navbar (5rem) + barra Voltar (3.5rem) + folga */}
+          <div ref={bookingPanelRef} className="lg:sticky lg:top-[calc(env(safe-area-inset-top)+9.5rem)] lg:self-start space-y-4 scroll-mt-32">
             {/* Price header */}
             <div className="flex items-end justify-between">
               <div>
@@ -720,6 +764,8 @@ export default function EquipmentDetails() {
           </div>
         </div>
       </div>
+
+      <MobileBookingBar dailyRate={equipment.daily_rate} targetRef={bookingPanelRef} />
     </div>
   );
 }

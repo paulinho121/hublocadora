@@ -378,7 +378,8 @@ export default function Admin() {
     <div className="min-h-screen bg-[#020202] text-white font-sans">
 
       {/* TOPBAR */}
-      <header className="sticky top-0 z-50 bg-black/50 backdrop-blur-2xl border-b border-zinc-900/50">
+      {/* Gruda abaixo do Navbar do app (h-16 / md:h-20 + safe area) */}
+      <header className="sticky top-[calc(env(safe-area-inset-top)+4rem)] md:top-[calc(env(safe-area-inset-top)+5rem)] z-40 bg-black/50 backdrop-blur-2xl border-b border-zinc-900/50">
         <div className="max-w-[1600px] mx-auto px-6 lg:px-10 py-4 flex justify-between items-center">
           <div className="flex items-center gap-6">
             <div>

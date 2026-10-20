@@ -45,6 +45,7 @@ import { DeliveryMap } from '@/components/DeliveryMap';
 
 // New Professional Components
 import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar';
+import { NotificationCenter } from '@/components/dashboard/NotificationCenter';
 import { InventoryTab } from '@/components/dashboard/InventoryTab';
 import { ConfirmDeleteModal } from '@/components/dashboard/ConfirmDeleteModal';
 import { LogisticsTab } from '@/components/dashboard/LogisticsTab';
@@ -504,7 +505,12 @@ export default function Dashboard() {
                 <RefreshCw className={`h-4 w-4 transition-transform duration-700 ${isRefreshing ? 'animate-spin text-emerald-400' : ''}`} />
               </button>
 
-              <div className="h-8 w-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+              {/* No desktop o sino fica na barra lateral, que some no celular */}
+              <div className="md:hidden">
+                 <NotificationCenter />
+              </div>
+
+              <div className="hidden md:flex h-8 w-8 rounded-full bg-zinc-900 border border-zinc-800 items-center justify-center">
                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               </div>
            </div>
