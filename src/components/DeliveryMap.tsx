@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Polyline, AttributionControl, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useDeliveryTracking } from '../hooks/useDeliveryTracking';
@@ -29,14 +29,23 @@ function FitBounds({ points }: { points: LatLng[] }) {
   const fitted = useRef(false);
   useEffect(() => {
     if (!points.length) return;
-    if (points.length === 1) {
-      map.flyTo([points[0].lat, points[0].lng], fitted.current ? map.getZoom() : 15);
-    } else if (!fitted.current) {
-      map.fitBounds(L.latLngBounds(points.map(p => [p.lat, p.lng])), { padding: [40, 40] });
-    } else {
-      map.panTo([points[0].lat, points[0].lng]);
-    }
-    fitted.current = true;
+    // O mapa pode montar dentro de um modal ainda animando: recalcula o tamanho antes de enquadrar
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+      if (points.length === 1) {
+        map.flyTo([points[0].lat, points[0].lng], fitted.current ? map.getZoom() : 15);
+      } else if (!fitted.current) {
+        // Folga extra embaixo para o painel de distância/tempo não cobrir o destino
+        map.fitBounds(L.latLngBounds(points.map(p => [p.lat, p.lng])), {
+          paddingTopLeft: [40, 50],
+          paddingBottomRight: [40, 100],
+        });
+      } else {
+        map.panTo([points[0].lat, points[0].lng]);
+      }
+      fitted.current = true;
+    }, 250);
+    return () => clearTimeout(timer);
   }, [points.map(p => `${p.lat},${p.lng}`).join('|'), map]);
   return null;
 }
@@ -76,7 +85,15 @@ export function TrackingMap({ position, destination, waitingMessage, onRoute }: 
 
   return (
     <div className="relative h-full w-full z-0">
-      <MapContainer center={[position.lat, position.lng]} zoom={15} style={{ height: '100%', width: '100%' }}>
+      <MapContainer
+        center={[position.lat, position.lng]}
+        zoom={15}
+        attributionControl={false}
+        className="cinehub-map"
+        style={{ height: '100%', width: '100%' }}
+      >
+        {/* Créditos no topo: o painel de distância/tempo ocupa a parte de baixo */}
+        <AttributionControl position="topright" prefix={false} />
         {/* Geoapify (tema escuro) quando há chave; senão OSM escurecido por CSS — ver geo.ts */}
         <TileLayer
           url={MAP_TILES.url}

@@ -20,19 +20,22 @@ export type Route = {
   durationMin: number;
 };
 
-/** Camada de mapa para o Leaflet. Com Geoapify, usa o estilo escuro nativo. */
+/**
+ * Camada de mapa para o Leaflet. Com Geoapify: estilo escuro neutro, clareado por CSS
+ * (.map-tiles-geoapify em index.css) para as ruas ficarem legíveis. {r} vira @2x em telas retina.
+ */
 export const MAP_TILES = GEOAPIFY_KEY
   ? {
-      url: `https://maps.geoapify.com/v1/tile/dark-matter/{z}/{x}/{y}.png?apiKey=${GEOAPIFY_KEY}`,
+      url: `https://maps.geoapify.com/v1/tile/dark-matter-dark-grey/{z}/{x}/{y}{r}.png?apiKey=${GEOAPIFY_KEY}`,
       attribution:
         'Powered by <a href="https://www.geoapify.com/">Geoapify</a> | &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      className: undefined as string | undefined,
+      className: 'map-tiles-geoapify',
     }
   : {
       // Tiles claros do OSM escurecidos por CSS (.map-tiles-dark em index.css)
       url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      className: 'map-tiles-dark' as string | undefined,
+      className: 'map-tiles-dark',
     };
 
 // ── Geocodificação ───────────────────────────────────────────────────────────
