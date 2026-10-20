@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 
 /**
@@ -10,15 +10,23 @@ import { UseFormReturn } from 'react-hook-form';
  * @param key   - Chave única no localStorage (ex: 'cinehub_equipment_draft')
  * @param form  - Instância do useForm retornada pelo react-hook-form
  * @param skip  - Campos para NÃO persistir (ex: senhas, tokens)
+ * @param options.restoreAll - Restaura todos os campos do rascunho, inclusive os que
+ *        já têm valor padrão (ex: quantidade = 1). Use em formulários de criação, onde os
+ *        valores atuais são só os padrões. Em edição, deixe false para não sobrescrever
+ *        dados vindos da API com um rascunho antigo.
  * 
  * @returns clearDraft - Função para apagar o rascunho salvo após envio
  */
 export function useFormPersist<T extends Record<string, any>>(
   key: string,
   form: UseFormReturn<T>,
-  skip: (keyof T)[] = []
+  skip: (keyof T)[] = [],
+  options: { restoreAll?: boolean } = {}
 ): { clearDraft: () => void; hasDraft: boolean } {
   const { watch, reset, getValues } = form;
+  // Na montagem, o auto-save rodaria com os valores padrão antes de a restauração
+  // aplicar — e apagaria o rascunho. Pula essa primeira gravação.
+  const skipNextSave = useRef(true);
 
   // Verifica se existe rascunho no mount
   const hasDraft = (() => {
@@ -43,11 +51,12 @@ export function useFormPersist<T extends Record<string, any>>(
         const currentVal = (current as any)[field];
         const savedVal = saved[field];
         const isEmpty = currentVal === '' || currentVal === 0 || currentVal === null || currentVal === undefined;
-        if (isEmpty && savedVal !== null && savedVal !== undefined) {
+        if ((options.restoreAll || isEmpty) && savedVal !== null && savedVal !== undefined) {
           (merged as any)[field] = savedVal;
         }
       }
       reset(merged as T, { keepDefaultValues: false });
+      skipNextSave.current = true;
     } catch {
       // rascunho corrompido: apaga silenciosamente
       try { localStorage.removeItem(key); } catch {}
@@ -57,6 +66,10 @@ export function useFormPersist<T extends Record<string, any>>(
   // Auto-save a cada mudança de campo
   const watchedValues = watch();
   useEffect(() => {
+    if (skipNextSave.current) {
+      skipNextSave.current = false;
+      return;
+    }
     try {
       const toSave: Partial<T> = { ...watchedValues };
       // Remove campos sensíveis da persistência

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -63,7 +63,24 @@ export function EquipmentForm({ equipment, companyId: propCompanyId, onSuccess }
     equipment ? 'manual_form' : 'selection'
   );
 
-  const [images, setImages] = useState<string[]>(equipment?.images || []);
+  // Persistência: salva rascunho entre trocas de aba (não aplica no modo de edição).
+  // No celular, abrir a galeria/câmera pode recarregar a página — por isso as fotos
+  // já enviadas também entram no rascunho do cadastro novo.
+  const draftKey = equipment ? `cinehub_equipment_edit_${equipment.id}` : 'cinehub_equipment_new_draft';
+  const imagesDraftKey = `${draftKey}_images`;
+  const [images, setImages] = useState<string[]>(() => {
+    if (equipment) return equipment.images || [];
+    try {
+      return JSON.parse(localStorage.getItem(imagesDraftKey) || '[]');
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    if (equipment) return;
+    try { localStorage.setItem(imagesDraftKey, JSON.stringify(images)); } catch {}
+  }, [images, equipment, imagesDraftKey]);
   const [uploading, setUploading] = useState(false);
   const [isAiGenerating, setIsAiGenerating] = useState(false);
 
@@ -88,9 +105,12 @@ export function EquipmentForm({ equipment, companyId: propCompanyId, onSuccess }
 
   const { register, handleSubmit, setValue, watch, formState: { errors, isSubmitting } } = form;
 
-  // Persistência: salva rascunho entre trocas de aba (não aplica no modo de edição)
-  const draftKey = equipment ? `cinehub_equipment_edit_${equipment.id}` : 'cinehub_equipment_new_draft';
-  const { clearDraft } = useFormPersist(draftKey, form, []);
+  // Cadastro novo: restaura todos os campos (senão a quantidade digitada volta para o padrão 1)
+  const { clearDraft: clearFormDraft } = useFormPersist(draftKey, form, [], { restoreAll: !equipment });
+  const clearDraft = () => {
+    clearFormDraft();
+    try { localStorage.removeItem(imagesDraftKey); } catch {}
+  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
