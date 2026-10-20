@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useEquipments } from '@/hooks/useEquipments';
 import { Card, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,7 +22,6 @@ import {
   BoxSelect,
   Wrench,
   LayoutGrid,
-  RefreshCw,
   Calendar,
   ArrowRight,
   FolderOpen,
@@ -165,7 +164,6 @@ function ProjectDateBar({ availableCount }: { availableCount: number }) {
 
 export default function Marketplace() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { state: projectState } = useProject();
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>();
@@ -438,18 +436,6 @@ export default function Marketplace() {
               <div className="h-1 w-12 bg-primary rounded-full" />
             </div>
             <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  queryClient.invalidateQueries({ queryKey: ['equipments'] });
-                  queryClient.invalidateQueries({ queryKey: ['marketplace-active-bookings'] });
-                }}
-                className="text-zinc-500 hover:text-white uppercase font-black tracking-widest text-[10px] gap-1.5"
-              >
-                <RefreshCw className="w-3 h-3" />
-                Atualizar
-              </Button>
               {selectedCategory && (
                 <Button
                   variant="ghost"
