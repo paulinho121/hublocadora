@@ -196,26 +196,29 @@ export default function Marketplace() {
     staleTime: 60_000,
   });
 
-  // Mapa de equipment_id → { rentedQuantity, nextReturnDate }
+  // Mapa de equipment_id → locado hoje (com próximo retorno) e reservas futuras (com próximo início)
+  type BookingInfo = { rentedQuantity: number; nextReturnDate: string | null; upcomingQuantity: number; nextUpcomingStart: string | null };
   const bookingMap = useMemo(() => {
-    const map = new Map<string, { rentedQuantity: number; nextReturnDate: string }>();
+    const map = new Map<string, BookingInfo>();
     (activeBookings || []).forEach((b: any) => {
-      // Reservas futuras não ocupam unidades hoje — só contam as que já começaram
-      if (b.start_date > today) return;
-      const existing = map.get(b.equipment_id);
-      if (existing) {
-        existing.rentedQuantity += b.quantity || 0;
-        if (b.end_date < existing.nextReturnDate) existing.nextReturnDate = b.end_date;
+      const info = map.get(b.equipment_id)
+        ?? { rentedQuantity: 0, nextReturnDate: null, upcomingQuantity: 0, nextUpcomingStart: null };
+      if (b.start_date > today) {
+        // Reserva futura: não ocupa unidades hoje, mas o cliente deve saber que existe
+        info.upcomingQuantity += b.quantity || 0;
+        if (!info.nextUpcomingStart || b.start_date < info.nextUpcomingStart) info.nextUpcomingStart = b.start_date;
       } else {
-        map.set(b.equipment_id, { rentedQuantity: b.quantity || 0, nextReturnDate: b.end_date });
+        info.rentedQuantity += b.quantity || 0;
+        if (!info.nextReturnDate || b.end_date < info.nextReturnDate) info.nextReturnDate = b.end_date;
       }
+      map.set(b.equipment_id, info);
     });
     return map;
   }, [activeBookings, today]);
 
   // ─── Consolidação "Pote Principal" ────────────────────────────────────────
   // Agrupa itens pelo nome, soma estoque e agrega dados de locação
-  type ConsolidatedItem = Equipment & { _mergedIds: string[]; rentedQuantity: number; nextReturnDate: string | null };
+  type ConsolidatedItem = Equipment & { _mergedIds: string[] } & BookingInfo;
 
   const equipments = useMemo<ConsolidatedItem[]>(() => {
     if (!rawEquipments) return [];
@@ -233,8 +236,12 @@ export default function Marketplace() {
         existing._mergedIds.push(item.id);
         if (bookingInfo) {
           existing.rentedQuantity += bookingInfo.rentedQuantity;
-          if (!existing.nextReturnDate || bookingInfo.nextReturnDate < existing.nextReturnDate) {
+          existing.upcomingQuantity += bookingInfo.upcomingQuantity;
+          if (bookingInfo.nextReturnDate && (!existing.nextReturnDate || bookingInfo.nextReturnDate < existing.nextReturnDate)) {
             existing.nextReturnDate = bookingInfo.nextReturnDate;
+          }
+          if (bookingInfo.nextUpcomingStart && (!existing.nextUpcomingStart || bookingInfo.nextUpcomingStart < existing.nextUpcomingStart)) {
+            existing.nextUpcomingStart = bookingInfo.nextUpcomingStart;
           }
         }
       } else {
@@ -243,6 +250,8 @@ export default function Marketplace() {
           _mergedIds: [item.id],
           rentedQuantity: bookingInfo?.rentedQuantity ?? 0,
           nextReturnDate: bookingInfo?.nextReturnDate ?? null,
+          upcomingQuantity: bookingInfo?.upcomingQuantity ?? 0,
+          nextUpcomingStart: bookingInfo?.nextUpcomingStart ?? null,
         });
       }
     });
@@ -497,6 +506,8 @@ export default function Marketplace() {
                       item={item}
                       rentedQuantity={(item as any).rentedQuantity ?? 0}
                       nextReturnDate={(item as any).nextReturnDate ?? null}
+                      upcomingQuantity={(item as any).upcomingQuantity ?? 0}
+                      nextUpcomingStart={(item as any).nextUpcomingStart ?? null}
                       isAvailableForDates={availabilityMap.get(item.id) ?? null}
                       projectDates={
                         projectState.startDate && projectState.endDate

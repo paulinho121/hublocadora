@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MapPin, Camera, ChevronRight, Clock, FolderPlus, FolderCheck, CalendarCheck, CalendarX } from 'lucide-react';
+import { MapPin, Camera, ChevronRight, Clock, FolderPlus, FolderCheck, CalendarCheck, CalendarX, CalendarClock } from 'lucide-react';
 import { Equipment } from '@/types/database';
 import { FavoriteButton } from './FavoriteButton';
 import { format, parseISO } from 'date-fns';
@@ -15,6 +15,9 @@ interface EquipmentCardProps {
   onClick: () => void;
   rentedQuantity?: number;
   nextReturnDate?: string | null;
+  /** Unidades já reservadas para datas futuras (não ocupam estoque hoje) */
+  upcomingQuantity?: number;
+  nextUpcomingStart?: string | null;
   /** null = project dates not yet set; true/false = available/unavailable for chosen dates */
   isAvailableForDates?: boolean | null;
   projectDates?: { start: string; end: string } | null;
@@ -25,6 +28,8 @@ export function EquipmentCard({
   onClick,
   rentedQuantity = 0,
   nextReturnDate = null,
+  upcomingQuantity = 0,
+  nextUpcomingStart = null,
   isAvailableForDates = null,
   projectDates = null,
 }: EquipmentCardProps) {
@@ -56,6 +61,9 @@ export function EquipmentCard({
 
   const formattedReturn = nextReturnDate
     ? format(parseISO(nextReturnDate), "dd/MM", { locale: ptBR })
+    : null;
+  const formattedUpcoming = nextUpcomingStart
+    ? format(parseISO(nextUpcomingStart), "dd/MM", { locale: ptBR })
     : null;
 
   const handleViewDetails = (e: React.MouseEvent) => {
@@ -131,7 +139,8 @@ export function EquipmentCard({
 
         {/* ── Top row: availability pill + heart ── */}
         <div className="absolute top-3 inset-x-3 z-10 flex items-start justify-between">
-          {/* Availability pill */}
+          {/* Availability pills: disponíveis + locados hoje */}
+          <div className="flex flex-wrap items-center gap-1.5">
           <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full
             backdrop-blur-md text-[9px] font-black uppercase tracking-widest border
             ${isFullyRented
@@ -143,6 +152,12 @@ export function EquipmentCard({
             {isFullyRented
               ? 'Esgotado'
               : `${availableQty} ${availableQty === 1 ? 'disponível' : 'disponíveis'}`}
+          </div>
+          {rentedQuantity > 0 && !isFullyRented && (
+            <div className="flex items-center px-2.5 py-1.5 rounded-full backdrop-blur-md text-[9px] font-black uppercase tracking-widest border bg-zinc-950/80 border-amber-500/25 text-amber-400">
+              {rentedQuantity} {rentedQuantity === 1 ? 'locado' : 'locados'}
+            </div>
+          )}
           </div>
 
           {/* Heart */}
@@ -214,13 +229,22 @@ export function EquipmentCard({
 
         {/* Rental status — only shown when relevant */}
         {rentedQuantity > 0 && (
-          <div className="flex items-center gap-1.5 mb-2">
-            <Clock className="w-2.5 h-2.5 text-amber-500/60 shrink-0" />
-            <span className="text-[8px] text-amber-500/70 font-bold uppercase tracking-widest leading-none">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <Clock className="w-3 h-3 text-amber-500/70 shrink-0" />
+            <span className="text-[10px] text-amber-500/80 font-bold uppercase tracking-wider leading-none">
               {totalStock > 1
-                ? `${rentedQuantity} em uso`
-                : 'Em uso'}
+                ? `${rentedQuantity} ${rentedQuantity === 1 ? 'locado' : 'locados'} agora`
+                : 'Locado agora'}
               {formattedReturn && ` · retorno ${formattedReturn}`}
+            </span>
+          </div>
+        )}
+        {upcomingQuantity > 0 && (
+          <div className="flex items-center gap-1.5 mb-2">
+            <CalendarClock className="w-3 h-3 text-zinc-500 shrink-0" />
+            <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider leading-none">
+              {upcomingQuantity} {upcomingQuantity === 1 ? 'reservado' : 'reservados'}
+              {formattedUpcoming && ` a partir de ${formattedUpcoming}`}
             </span>
           </div>
         )}
