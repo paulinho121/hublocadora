@@ -72,6 +72,9 @@ function ProjectNavButton() {
 function Navbar() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  // No celular o painel tem cabeçalho próprio; "Sair" e "Marketplace" ficam na gaveta "Mais"
+  const hideOnMobile = location.pathname === '/dashboard';
 
   const handleLogout = async () => {
     await signOut();
@@ -80,7 +83,7 @@ function Navbar() {
 
   return (
     <header
-      className="sticky top-0 z-50 w-full bg-background/60 backdrop-blur-xl border-b border-white/5"
+      className={`sticky top-0 z-50 w-full bg-background/60 backdrop-blur-xl border-b border-white/5 ${hideOnMobile ? 'hidden md:block' : ''}`}
       style={{ paddingTop: 'env(safe-area-inset-top)' }}
     >
       <div className="container flex h-16 md:h-20 items-center justify-between mx-auto px-6 max-w-7xl">
@@ -184,6 +187,7 @@ const DASHBOARD_PRIMARY_TABS = [
 function DashboardBottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const { isAdmin } = useTenant();
   const [moreOpen, setMoreOpen] = useState(false);
 
@@ -240,6 +244,20 @@ function DashboardBottomNav() {
                   <span className="text-[11px] font-bold">{label}</span>
                 </button>
               ))}
+            </div>
+            <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-zinc-800/60">
+              <button
+                onClick={() => { setMoreOpen(false); navigate('/'); }}
+                className="flex items-center justify-center gap-2 h-12 rounded-2xl bg-zinc-900/60 border border-zinc-800 text-zinc-300 text-[11px] font-bold active:bg-zinc-800"
+              >
+                <ShoppingBag className="w-4 h-4" /> Marketplace
+              </button>
+              <button
+                onClick={async () => { setMoreOpen(false); await signOut(); navigate('/'); }}
+                className="flex items-center justify-center gap-2 h-12 rounded-2xl bg-zinc-900/60 border border-zinc-800 text-red-400 text-[11px] font-bold active:bg-zinc-800"
+              >
+                <LogOut className="w-4 h-4" /> Sair
+              </button>
             </div>
           </div>
         </div>

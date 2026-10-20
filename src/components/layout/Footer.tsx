@@ -20,10 +20,10 @@ export function Footer() {
           <h4 className="text-[10px] uppercase font-black text-zinc-400 tracking-[0.2em] flex items-center gap-2">
             <ShieldCheck className="h-3.5 w-3.5" /> Transparência
           </h4>
-          <nav className="flex flex-col gap-3">
-            <Link to="/privacy" className="text-sm text-zinc-500 hover:text-primary transition-all font-medium">Privacidade</Link>
-            <Link to="/terms" className="text-sm text-zinc-500 hover:text-primary transition-all font-medium">Termos de Uso</Link>
-            <Link to="/docs" className="text-sm text-zinc-500 hover:text-primary transition-all font-medium">API Portal</Link>
+          <nav className="flex flex-col md:gap-3">
+            <Link to="/privacy" className="py-2.5 md:py-0 text-sm text-zinc-500 hover:text-primary transition-all font-medium">Privacidade</Link>
+            <Link to="/terms" className="py-2.5 md:py-0 text-sm text-zinc-500 hover:text-primary transition-all font-medium">Termos de Uso</Link>
+            <Link to="/docs" className="py-2.5 md:py-0 text-sm text-zinc-500 hover:text-primary transition-all font-medium">API Portal</Link>
           </nav>
         </div>
 

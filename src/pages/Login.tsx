@@ -114,7 +114,7 @@ export default function Login() {
                                 <Button 
                                   variant="link" 
                                   type="button" 
-                                  className="h-auto p-0 text-xs text-primary/70 hover:text-primary transition-colors"
+                                  className="h-auto px-2 py-3 -my-3 -mr-2 text-xs text-primary/70 hover:text-primary transition-colors"
                                   onClick={handleResetPassword}
                                 >
                                     Esqueci a senha
@@ -131,7 +131,7 @@ export default function Login() {
                                 />
                                 <button
                                     type="button"
-                                    className="absolute right-3 top-[50%] -translate-y-[50%] text-zinc-500 hover:text-zinc-300 focus:outline-none"
+                                    className="absolute right-1 top-[50%] -translate-y-[50%] h-10 w-10 flex items-center justify-center rounded-lg text-zinc-500 hover:text-zinc-300 focus:outline-none"
                                     onClick={() => setShowPassword(!showPassword)}
                                 >
                                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -173,7 +173,7 @@ export default function Login() {
                 <CardFooter className="flex flex-col space-y-4 text-center pb-8">
                     <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">
                         Novo na produção?{' '}
-                        <Button variant="link" className="p-0 h-auto text-primary font-black ml-1 uppercase underline underline-offset-4" onClick={() => navigate('/register', { state: location.state })}>
+                        <Button variant="link" className="px-2 py-3 -my-3 h-auto text-primary font-black uppercase underline underline-offset-4" onClick={() => navigate('/register', { state: location.state })}>
                             Criar Conta
                         </Button>
                     </p>

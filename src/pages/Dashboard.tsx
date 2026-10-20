@@ -478,7 +478,7 @@ export default function Dashboard() {
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0">
         {/* Top Header Section (Mobile Visible) */}
-        <header className="h-20 border-b border-zinc-900 flex items-center justify-between px-6 md:px-10 shrink-0">
+        <header className="h-16 md:h-20 border-b border-zinc-900 flex items-center justify-between px-4 md:px-10 shrink-0">
            <div className="flex items-center gap-3 md:hidden">
               {company?.logo_url ? (
                  <div className="h-8 w-8 rounded-lg overflow-hidden border border-zinc-800 flex items-center justify-center shrink-0">

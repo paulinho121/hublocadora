@@ -307,7 +307,7 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setQty(q => Math.max(1, q - 1))}
-              className="w-8 h-8 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700
+              className="w-10 h-10 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700
                          flex items-center justify-center transition-colors disabled:opacity-30"
               disabled={quantity <= 1}
             >
@@ -318,7 +318,7 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
             </span>
             <button
               onClick={() => setQty(q => Math.min(maxQty, q + 1))}
-              className="w-8 h-8 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700
+              className="w-10 h-10 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700
                          flex items-center justify-center transition-colors disabled:opacity-30"
               disabled={quantity >= maxQty}
             >
@@ -485,10 +485,6 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
         <span className="text-[9px] font-black uppercase tracking-widest text-zinc-600 flex items-center gap-1">
           <ShieldCheck className="w-3 h-3 text-emerald-600" /> Proteção HUB
         </span>
-        <span className="text-zinc-700">·</span>
-        <span className="text-[9px] font-black uppercase tracking-widest text-zinc-600 flex items-center gap-1">
-          <Star className="w-3 h-3 text-yellow-600 fill-yellow-600" /> Avaliação 4.9
-        </span>
       </div>
     </div>
   );
@@ -551,6 +547,9 @@ export default function EquipmentDetails() {
     queryFn: () => ReviewService.getByEquipment(id || '').catch(() => []),
     enabled: !!id,
   });
+  const avgRating = reviews?.length
+    ? reviews.reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / reviews.length
+    : null;
 
   if (isLoading) {
     return (
@@ -603,7 +602,7 @@ export default function EquipmentDetails() {
         <div className="container mx-auto px-4 h-14 flex items-center justify-between max-w-6xl">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors"
+            className="flex items-center gap-2 h-11 -ml-2 px-2 rounded-xl text-zinc-400 hover:text-white transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
             <span className="text-sm font-bold uppercase tracking-tighter">Voltar</span>
@@ -753,10 +752,14 @@ export default function EquipmentDetails() {
                 </span>
                 <span className="text-zinc-500 text-sm font-bold ml-1">/dia</span>
               </div>
-              <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-xl">
-                <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
-                <span className="text-sm font-black">4.9</span>
-              </div>
+              {/* Nota real das avaliações; sem avaliações, não mostra nada */}
+              {avgRating !== null && (
+                <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-xl">
+                  <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
+                  <span className="text-sm font-black">{avgRating.toFixed(1)}</span>
+                  <span className="text-xs font-bold text-zinc-500">({reviews!.length})</span>
+                </div>
+              )}
             </div>
 
             {/* Inline booking form */}

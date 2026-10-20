@@ -715,17 +715,28 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
 
                                                                 <div className="space-y-8 relative before:absolute before:left-[19px] before:top-2 before:bottom-2 before:w-0.5 before:bg-zinc-900">
                                                                     {[
-                                                                        { id: 'pending', label: 'RECEBIDO', time: '08/05 · 14:35', icon: ShoppingBag, desc: 'Pedido recebido no Hub Central.' },
-                                                                        { id: 'picking', label: 'CONFERIDO', time: '08/05 · 14:45', icon: Search, desc: 'Itens conferidos e aprovados.' },
-                                                                        { id: 'ready', label: 'SEPARAÇÃO', time: '08/05 · 15:00', icon: Package, desc: 'Itens separados e aguardando coleta.' },
-                                                                        { id: 'shipped', label: 'EM TRÂNSITO', time: '--', icon: Truck, desc: 'Aguardando coleta pela transportadora.' },
-                                                                        { id: 'delivered', label: 'ENTREGA', time: '--', icon: MapPin, desc: 'Previsão de entrega disponível em breve.' },
-                                                                    ].map((step, idx) => {
+                                                                        { id: 'pending', label: 'RECEBIDO', icon: ShoppingBag, desc: 'Pedido recebido pela locadora.' },
+                                                                        { id: 'picking', label: 'CONFERIDO', icon: Search, desc: 'Itens conferidos e aprovados.' },
+                                                                        { id: 'ready', label: 'SEPARAÇÃO', icon: Package, desc: 'Itens separados e prontos para envio.' },
+                                                                        { id: 'shipped', label: 'EM TRÂNSITO', icon: Truck, desc: 'Equipamento a caminho do cliente.' },
+                                                                        {
+                                                                            id: 'delivered', label: 'ENTREGA', icon: MapPin,
+                                                                            desc: delivery.estimated_arrival
+                                                                                ? `Previsão de chegada às ${format(new Date(delivery.estimated_arrival), 'HH:mm')}.`
+                                                                                : 'Entrega confirmada com o token do cliente.',
+                                                                        },
+                                                                    ].map((step) => {
                                                                         const statuses = ['pending', 'picking', 'ready', 'shipped', 'delivered', 'confirmed'];
                                                                         const currentIdx = statuses.indexOf(delivery.status);
                                                                         const stepIdx = statuses.indexOf(step.id);
                                                                         const isCompleted = stepIdx < currentIdx || delivery.status === 'confirmed';
                                                                         const isActive = step.id === delivery.status;
+                                                                        // Só há horário real da criação e da última mudança de status
+                                                                        const time = step.id === 'pending'
+                                                                            ? format(new Date(delivery.created_at), 'dd/MM · HH:mm')
+                                                                            : isActive && delivery.updated_at
+                                                                                ? format(new Date(delivery.updated_at), 'dd/MM · HH:mm')
+                                                                                : '';
 
                                                                         return (
                                                                             <div key={step.id} className="flex gap-6 relative z-10 group/step">
@@ -745,7 +756,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                                 <div className="space-y-1.5 py-1">
                                                                                     <div className="flex items-center gap-3">
                                                                                         <p className={cn("text-[11px] font-black uppercase tracking-widest", isCompleted || isActive ? "text-zinc-100" : "text-zinc-700")}>{step.label}</p>
-                                                                                        <p className="text-[9px] font-bold text-zinc-600">{step.time}</p>
+                                                                                        {time && <p className="text-[9px] font-bold text-zinc-600">{time}</p>}
                                                                                     </div>
                                                                                     <p className="text-[10px] text-zinc-500 font-medium leading-relaxed max-w-xs">{step.desc}</p>
                                                                                 </div>
@@ -773,35 +784,36 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                                                     </div>
                                                                 )}
 
+                                                                {/* Dados reais da entrega (antes eram valores fixos de exemplo) */}
                                                                 <div className="grid grid-cols-3 gap-3">
                                                                     {[
-                                                                        { label: 'Previsão de envio', val: '09/05/2024', sub: 'Até 12:00', icon: ShoppingBag },
-                                                                        { label: 'Transportadora', val: 'Total Express', sub: 'Rodoviário', icon: Truck },
-                                                                        { label: 'Código de rastreio', val: 'Aguardando', sub: 'Disponível em breve', icon: Hash },
+                                                                        {
+                                                                            label: 'Previsão',
+                                                                            val: delivery.estimated_arrival ? format(new Date(delivery.estimated_arrival), 'HH:mm') : '—',
+                                                                            sub: delivery.estimated_arrival ? format(new Date(delivery.estimated_arrival), 'dd/MM') : 'Após o envio',
+                                                                            icon: Clock,
+                                                                        },
+                                                                        {
+                                                                            label: 'Motorista',
+                                                                            val: delivery.driver_name || 'A definir',
+                                                                            sub: delivery.driver_phone || '—',
+                                                                            icon: Truck,
+                                                                        },
+                                                                        {
+                                                                            label: 'Nº de série',
+                                                                            val: delivery.serial_number || '—',
+                                                                            sub: delivery.serial_number ? 'Vinculado' : 'Na separação',
+                                                                            icon: Hash,
+                                                                        },
                                                                     ].map((info, i) => (
-                                                                        <div key={i} className="bg-white/5 rounded-2xl p-4 text-center space-y-2 border border-white/5">
-                                                                            <info.icon className="h-4 w-4 mx-auto text-zinc-700" />
+                                                                        <div key={i} className="bg-white/5 rounded-2xl p-4 text-center space-y-2 border border-white/5 min-w-0">
+                                                                            <info.icon className="h-4 w-4 mx-auto text-zinc-600" />
                                                                             <div className="space-y-0.5">
-                                                                                <p className="text-[7px] font-black text-zinc-600 uppercase tracking-widest">{info.label}</p>
-                                                                                <p className="text-[9px] font-black text-zinc-100 uppercase">{info.val}</p>
-                                                                                <p className="text-[7px] font-bold text-zinc-700 uppercase">{info.sub}</p>
+                                                                                <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">{info.label}</p>
+                                                                                <p className="text-[11px] font-black text-zinc-100 uppercase truncate">{info.val}</p>
+                                                                                <p className="text-[9px] font-bold text-zinc-600 uppercase truncate">{info.sub}</p>
                                                                             </div>
                                                                         </div>
-                                                                    ))}
-                                                                </div>
-
-                                                                <div className="flex items-center justify-between pt-8 border-t border-white/5 relative z-10">
-                                                                    {[
-                                                                        { label: 'Localização', icon: MapPin },
-                                                                        { label: 'Contato Hub', icon: PhoneCall },
-                                                                        { label: 'Mais Ações', icon: MoreHorizontal },
-                                                                    ].map((btn, i) => (
-                                                                        <button key={i} className="flex flex-col items-center gap-2 group/action">
-                                                                            <div className="h-10 w-10 rounded-xl bg-zinc-900 border border-white/5 flex items-center justify-center group-hover/action:bg-primary/20 transition-all">
-                                                                                <btn.icon className="h-4 w-4 text-zinc-600 group-hover/action:text-primary transition-colors" />
-                                                                            </div>
-                                                                            <span className="text-[8px] font-black text-zinc-700 uppercase tracking-widest">{btn.label}</span>
-                                                                        </button>
                                                                     ))}
                                                                 </div>
                                                             </div>

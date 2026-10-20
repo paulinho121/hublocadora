@@ -901,8 +901,8 @@ export function ProjectDetailModal({ project, isOpen, onClose }: Props) {
                 {/* Body */}
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
 
-                    {/* Summary row */}
-                    <div className="grid grid-cols-3 gap-3">
+                    {/* Summary row — empilha no celular, onde 3 colunas não cabem a data */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div className="bg-zinc-900/40 rounded-2xl p-4 border border-zinc-800/50">
                             <CalendarDays className="w-4 h-4 text-primary mb-2" />
                             <p className="text-[9px] text-zinc-500 font-black uppercase tracking-widest">Período</p>

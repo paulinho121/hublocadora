@@ -782,7 +782,9 @@ export default function Admin() {
 
             {/* Network table */}
             <div className="bg-zinc-950 border border-zinc-900 rounded-2xl overflow-hidden">
-              <table className="w-full text-left">
+              {/* Rola na horizontal no celular em vez de espremer as colunas */}
+              <div className="overflow-x-auto">
+              <table className="w-full text-left min-w-[900px]">
                 <thead className="bg-zinc-900/40">
                   <tr>
                     {['Locadora', 'Status', 'Itens', 'Pedidos', 'Volume Gerado', 'Repasse HUB (15%)', 'Cadastro', 'Ações'].map((h, i) => (
@@ -881,6 +883,7 @@ export default function Admin() {
                   })}
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
         )}
@@ -1270,7 +1273,9 @@ export default function Admin() {
 
             {/* Tabela de usuários */}
             <div className="bg-zinc-950 border border-zinc-900 rounded-2xl overflow-hidden">
-              <table className="w-full text-left">
+              {/* Rola na horizontal no celular em vez de espremer as colunas */}
+              <div className="overflow-x-auto">
+              <table className="w-full text-left min-w-[760px]">
                 <thead className="bg-zinc-900/40">
                   <tr>
                     {['Usuário', 'E-mail', 'Perfil', 'Empresa', 'Cadastro', 'Último Login'].map((h, i) => (
@@ -1335,6 +1340,7 @@ export default function Admin() {
                   })}
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
         )}
