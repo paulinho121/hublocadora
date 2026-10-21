@@ -197,10 +197,6 @@ export default function Marketplace() {
 
       {/* ── Topo: título + busca ─────────────────────────────────────────── */}
       <div className="relative w-full flex flex-col items-center overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-primary/8 rounded-full blur-[120px] opacity-60" />
-        </div>
-
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -208,11 +204,10 @@ export default function Marketplace() {
           className="w-full max-w-7xl mx-auto px-4 md:px-6 pt-6 md:pt-10 pb-4 flex flex-col items-center text-center relative z-10"
         >
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-black tracking-tighter text-white mb-3 leading-[0.95]">
-            Encontre o equipamento<br />
-            <span className="text-primary">perfeito</span> para o seu set.
+            Equipamento para o seu <span className="text-primary">set</span>.
           </h1>
           <p className="text-zinc-500 text-sm md:text-base font-medium mb-6 md:mb-8 max-w-xl">
-            Alugue equipamentos de locadoras parceiras, com entrega e acompanhamento em tempo real.
+            Alugue de locadoras parceiras e acompanhe a entrega em tempo real.
           </p>
 
           <div className="w-full max-w-3xl">
