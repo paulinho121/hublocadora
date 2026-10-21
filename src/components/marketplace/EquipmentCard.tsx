@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MapPin, Camera, ChevronRight, Clock, FolderPlus, FolderCheck, CalendarCheck, CalendarX } from 'lucide-react';
+import { MapPin, Camera, ChevronRight, Clock, FolderPlus, FolderCheck, CalendarX } from 'lucide-react';
 import { Equipment } from '@/types/database';
 import { FavoriteButton } from './FavoriteButton';
 import { format, parseISO } from 'date-fns';
@@ -20,6 +20,8 @@ interface EquipmentCardProps {
   nextUpcomingStart?: string | null;
   /** null = project dates not yet set; true/false = available/unavailable for chosen dates */
   isAvailableForDates?: boolean | null;
+  /** Unidades livres nas datas escolhidas (null = sem datas) */
+  freeForDates?: number | null;
   projectDates?: { start: string; end: string } | null;
 }
 
@@ -31,6 +33,7 @@ export function EquipmentCard({
   upcomingQuantity = 0,
   nextUpcomingStart = null,
   isAvailableForDates = null,
+  freeForDates = null,
   projectDates = null,
 }: EquipmentCardProps) {
   const navigate = useNavigate();
@@ -86,9 +89,10 @@ export function EquipmentCard({
 
   // Um único selo: disponibilidade nas datas escolhidas (ou hoje, se não houver datas)
   const unavailable = isAvailableForDates === false || (isAvailableForDates === null && isFullyRented);
-  const statusLabel = isAvailableForDates === null
-    ? (isFullyRented ? 'Esgotado' : `${availableQty} ${availableQty === 1 ? 'disponível' : 'disponíveis'}`)
-    : (isAvailableForDates ? 'Disponível nas suas datas' : 'Ocupado nas suas datas');
+  const freeQty = freeForDates ?? availableQty;
+  const statusLabel = unavailable
+    ? 'Sem disponibilidade'
+    : `${freeQty} ${freeQty === 1 ? 'disponível' : 'disponíveis'}`;
 
   // No máximo uma linha de contexto abaixo do preço
   const infoLine = rentedQuantity > 0
@@ -137,9 +141,7 @@ export function EquipmentCard({
           <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border backdrop-blur-md ${unavailable
               ? 'bg-zinc-950/90 border-red-500/30 text-red-400'
               : 'bg-zinc-950/90 border-emerald-500/30 text-emerald-400'}`}>
-            {isAvailableForDates === null
-              ? <span className={`w-1.5 h-1.5 rounded-full ${unavailable ? 'bg-red-500' : 'bg-emerald-400'}`} />
-              : unavailable ? <CalendarX className="w-3 h-3" /> : <CalendarCheck className="w-3 h-3" />}
+            <span className={`w-2 h-2 rounded-full ${unavailable ? 'bg-red-500' : 'bg-emerald-500'}`} />
             {statusLabel}
           </span>
           <div onClick={e => e.stopPropagation()}>

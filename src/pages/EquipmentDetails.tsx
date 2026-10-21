@@ -37,6 +37,7 @@ import { useProject } from '@/contexts/ProjectContext';
 import { ReviewService } from '@/services/ReviewService';
 import { useQuery } from '@tanstack/react-query';
 import { Equipment } from '@/types/database';
+import { SuggestedEquipments } from '@/components/marketplace/SuggestedEquipments';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -366,12 +367,21 @@ export default function EquipmentDetails() {
   const [showDescription, setShowDescription] = useState(false);
   const bookingPanelRef = useRef<HTMLDivElement>(null);
 
+  // Ao abrir uma sugestão, a página é a mesma: volta para a primeira foto e para o topo
+  useEffect(() => {
+    setActiveImage(0);
+    setShowDescription(false);
+    window.scrollTo({ top: 0 });
+  }, [id]);
+
   const { data: reviews } = useQuery({
     queryKey: ['reviews', id],
     // Visitantes sem login não têm acesso às avaliações — mostra a página sem elas
     queryFn: () => ReviewService.getByEquipment(id || '').catch(() => []),
     enabled: !!id,
   });
+  const specs = Object.entries(equipment?.features ?? {})
+    .filter(([key, value]) => key !== 'suggested_ids' && value !== null && value !== '' && typeof value !== 'object');
   const avgRating = reviews?.length
     ? reviews.reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / reviews.length
     : null;
@@ -538,13 +548,13 @@ export default function EquipmentDetails() {
             </div>
 
             {/* Technical specs */}
-            {equipment.features && Object.keys(equipment.features).length > 0 && (
+            {specs.length > 0 && (
               <div className="space-y-4">
                 <h3 className="text-lg font-black uppercase tracking-tighter flex items-center gap-2">
                   <Info className="w-4 h-4 text-primary" /> Detalhes Técnicos
                 </h3>
                 <div className="grid grid-cols-2 gap-3">
-                  {Object.entries(equipment.features).map(([key, value]) => (
+                  {specs.map(([key, value]) => (
                     <div key={key} className="bg-zinc-900/30 p-4 rounded-2xl border border-zinc-800/50">
                       <p className="text-[11px] font-semibold text-zinc-500 mb-1">{FEATURE_LABELS[key.toLowerCase()] ?? key}</p>
                       <p className="font-bold text-zinc-300">{String(value)}</p>
@@ -580,7 +590,9 @@ export default function EquipmentDetails() {
             </div>
 
             {/* Inline booking form */}
-            <InlineBookingPanel equipment={equipment} />
+            <InlineBookingPanel key={equipment.id} equipment={equipment} />
+
+            <SuggestedEquipments equipment={equipment} />
           </div>
         </div>
       </div>

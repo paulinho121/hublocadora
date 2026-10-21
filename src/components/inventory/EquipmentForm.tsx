@@ -4,14 +4,15 @@ import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Loader2, Upload, X, Sparkles, Search, Plus, ChevronLeft } from 'lucide-react';
+import { Loader2, Upload, X, Sparkles, Search, Plus, ChevronLeft, Check, Camera } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Equipment } from '@/types/database';
-import { useCreateEquipment, useUpdateEquipment, uploadEquipmentImage } from '@/hooks/useEquipments';
+import { useCreateEquipment, useUpdateEquipment, uploadEquipmentImage, useEquipments } from '@/hooks/useEquipments';
+import { getSuggestedIds } from '@/components/marketplace/SuggestedEquipments';
 import { useCategories } from '@/hooks/useCategories';
 import { MasterCatalogSelector } from './MasterCatalogSelector';
 import { useTenant } from '@/contexts/TenantContext';
@@ -83,6 +84,32 @@ export function EquipmentForm({ equipment, companyId: propCompanyId, onSuccess }
     if (equipment) return;
     try { localStorage.setItem(imagesDraftKey, JSON.stringify(images)); } catch {}
   }, [images, equipment, imagesDraftKey]);
+  // Equipamentos sugeridos ao locatário junto com este (ex.: bateria, tripé, case)
+  const suggestedDraftKey = `${draftKey}_suggested`;
+  const [suggestedIds, setSuggestedIds] = useState<string[]>(() => {
+    if (equipment) return getSuggestedIds(equipment);
+    try {
+      return JSON.parse(localStorage.getItem(suggestedDraftKey) || '[]');
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    if (equipment) return;
+    try { localStorage.setItem(suggestedDraftKey, JSON.stringify(suggestedIds)); } catch {}
+  }, [suggestedIds, equipment, suggestedDraftKey]);
+
+  const { data: companyEquipmentsPage } = useEquipments({ companyId });
+  // Outros itens da locadora (um por nome, sem o próprio equipamento)
+  const suggestionOptions = (companyEquipmentsPage?.items ?? [])
+    .filter(e => e.id !== equipment?.id && e.company_id === companyId)
+    .filter((e, i, list) => list.findIndex(o => o.name.trim().toUpperCase() === e.name.trim().toUpperCase()) === i)
+    .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+
+  const toggleSuggested = (id: string) =>
+    setSuggestedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+
   const [uploading, setUploading] = useState(false);
   const [isAiGenerating, setIsAiGenerating] = useState(false);
 
@@ -111,7 +138,7 @@ export function EquipmentForm({ equipment, companyId: propCompanyId, onSuccess }
   const { clearDraft: clearFormDraft } = useFormPersist(draftKey, form, [], { restoreAll: !equipment });
   const clearDraft = () => {
     clearFormDraft();
-    try { localStorage.removeItem(imagesDraftKey); } catch {}
+    try { localStorage.removeItem(imagesDraftKey); localStorage.removeItem(suggestedDraftKey); } catch {}
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -190,7 +217,11 @@ export function EquipmentForm({ equipment, companyId: propCompanyId, onSuccess }
         state_uf,
         features: {
           ...(equipment?.features as object || {}),
-          brand
+          brand,
+          // Só guarda sugestões que ainda existem no inventário
+          suggested_ids: companyEquipmentsPage
+            ? suggestedIds.filter(id => suggestionOptions.some(o => o.id === id))
+            : suggestedIds,
         },
       };
 
@@ -446,6 +477,47 @@ export function EquipmentForm({ equipment, companyId: propCompanyId, onSuccess }
             </label>
           )}
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Equipamentos sugeridos <span className="text-zinc-500 font-normal">(opcional)</span></Label>
+        <p className="text-xs text-zinc-500">
+          Escolha itens do seu inventário para sugerir ao cliente junto com este (ex.: bateria, tripé, case).
+        </p>
+        {suggestionOptions.length === 0 ? (
+          <p className="text-xs text-zinc-500 border border-dashed border-zinc-800 rounded-xl px-4 py-3">
+            Cadastre outros equipamentos para poder sugerir aqui.
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-72 overflow-y-auto pr-1">
+            {suggestionOptions.map(option => {
+              const selected = suggestedIds.includes(option.id);
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => toggleSuggested(option.id)}
+                  aria-pressed={selected}
+                  className={`flex items-center gap-3 p-2 rounded-xl border text-left transition-colors ${
+                    selected ? 'border-primary bg-primary/5' : 'border-zinc-800 hover:border-zinc-700'
+                  }`}
+                >
+                  <div className="w-10 h-10 rounded-lg bg-zinc-900 overflow-hidden shrink-0 flex items-center justify-center">
+                    {option.images?.[0]
+                      ? <img src={option.images[0]} alt="" className="w-full h-full object-contain p-0.5" />
+                      : <Camera className="w-4 h-4 text-zinc-500" />}
+                  </div>
+                  <span className="flex-1 min-w-0 text-sm font-medium text-zinc-200 line-clamp-2">{option.name}</span>
+                  <span className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 ${
+                    selected ? 'bg-primary border-primary text-white' : 'border-zinc-700'
+                  }`}>
+                    {selected && <Check className="w-3.5 h-3.5" />}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <div className="flex justify-end gap-2 pt-4 border-t border-zinc-800/50">

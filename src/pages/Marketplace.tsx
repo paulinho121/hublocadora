@@ -119,8 +119,9 @@ export default function Marketplace() {
 
   // ─── Per-item availability for the project date window ───────────────────────
   // Re-computes whenever activeBookings or project dates change — no extra network calls
-  const availabilityMap = useMemo(() => {
-    const map = new Map<string, boolean>();
+  // Unidades livres de cada item no período escolhido
+  const freeForDatesMap = useMemo(() => {
+    const map = new Map<string, number>();
     if (!activeBookings || !projectState.startDate || !projectState.endDate) return map;
     equipments.forEach(item => {
       const bookedQty = (activeBookings as any[])
@@ -129,10 +130,16 @@ export default function Marketplace() {
           dateOverlaps(b.start_date, b.end_date, projectState.startDate, projectState.endDate),
         )
         .reduce((sum, b) => sum + (b.quantity || 0), 0);
-      map.set(item.id, bookedQty < item.stock_quantity);
+      map.set(item.id, Math.max(0, (item.stock_quantity || 0) - bookedQty));
     });
     return map;
   }, [equipments, activeBookings, projectState.startDate, projectState.endDate]);
+
+  const availabilityMap = useMemo(() => {
+    const map = new Map<string, boolean>();
+    freeForDatesMap.forEach((free, id) => map.set(id, free > 0));
+    return map;
+  }, [freeForDatesMap]);
 
   const availableCount = useMemo(
     () => Array.from(availabilityMap.values()).filter(Boolean).length,
@@ -189,6 +196,7 @@ export default function Marketplace() {
       upcomingQuantity={(item as any).upcomingQuantity ?? 0}
       nextUpcomingStart={(item as any).nextUpcomingStart ?? null}
       isAvailableForDates={availabilityMap.get(item.id) ?? null}
+      freeForDates={freeForDatesMap.get(item.id) ?? null}
       projectDates={
         projectState.startDate && projectState.endDate
           ? { start: projectState.startDate, end: projectState.endDate }
