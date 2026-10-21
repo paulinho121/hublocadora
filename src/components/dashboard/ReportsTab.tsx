@@ -88,11 +88,11 @@ export function ReportsTab({ tenantId }: ReportsTabProps) {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'available': return <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 px-2.5 py-1 font-black uppercase tracking-widest text-[9px]">Disponível</Badge>;
-      case 'unavailable': return <Badge className="bg-zinc-500/10 text-zinc-400 border-white/5 px-2.5 py-1 font-black uppercase tracking-widest text-[9px]">Aluguel Externo</Badge>;
-      case 'maintenance': return <Badge className="bg-destructive/10 text-destructive border-destructive/20 px-2.5 py-1 font-black uppercase tracking-widest text-[9px]">Manutenção</Badge>;
-      case 'rented': return <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 px-2.5 py-1 font-black uppercase tracking-widest text-[9px]">Locado HUB</Badge>;
-      default: return <Badge variant="outline" className="font-black uppercase tracking-widest text-[9px]">{status}</Badge>;
+      case 'available': return <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 px-2.5 py-1 font-black uppercase tracking-widest text-[11px]">Disponível</Badge>;
+      case 'unavailable': return <Badge className="bg-zinc-500/10 text-zinc-400 border-white/5 px-2.5 py-1 font-black uppercase tracking-widest text-[11px]">Aluguel Externo</Badge>;
+      case 'maintenance': return <Badge className="bg-destructive/10 text-destructive border-destructive/20 px-2.5 py-1 font-black uppercase tracking-widest text-[11px]">Manutenção</Badge>;
+      case 'rented': return <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 px-2.5 py-1 font-black uppercase tracking-widest text-[11px]">Locado HUB</Badge>;
+      default: return <Badge variant="outline" className="font-black uppercase tracking-widest text-[11px]">{status}</Badge>;
     }
   };
 
@@ -163,7 +163,7 @@ export function ReportsTab({ tenantId }: ReportsTabProps) {
     return (
       <div className="py-24 flex flex-col items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Compilando Relatórios de Frota...</p>
+        <p className="text-[11px] font-black uppercase tracking-wider text-zinc-500">Compilando Relatórios de Frota...</p>
       </div>
     );
   }
@@ -269,7 +269,7 @@ export function ReportsTab({ tenantId }: ReportsTabProps) {
           </div>
           <div>
             <h2 className="text-3xl font-black uppercase tracking-tighter text-zinc-100">Relatórios de Frota</h2>
-            <p className="text-[10px] text-zinc-500 font-black uppercase tracking-[0.25em] mt-1">
+            <p className="text-[11px] text-zinc-500 font-black uppercase tracking-wider mt-1">
               Desempenho operacional e auditoria de locações
             </p>
           </div>
@@ -287,44 +287,44 @@ export function ReportsTab({ tenantId }: ReportsTabProps) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 print-card-grid">
         <Card className="clay-card print-card">
           <CardContent className="p-6">
-            <p className="text-[10px] uppercase font-black text-zinc-500 tracking-[0.2em] mb-2 print-card-title">Total da Frota</p>
+            <p className="text-[11px] uppercase font-black text-zinc-500 tracking-wider mb-2 print-card-title">Total da Frota</p>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-black tracking-tighter text-zinc-100 print-card-value">{metrics.totalEquips}</span>
-              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider print-card-title">itens</span>
+              <span className="text-[11px] text-zinc-500 font-bold uppercase tracking-wider print-card-title">itens</span>
             </div>
-            <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-wider mt-1 no-print">Cadastrados no catálogo</p>
+            <p className="text-[11px] text-zinc-400 font-bold uppercase tracking-wider mt-1 no-print">Cadastrados no catálogo</p>
           </CardContent>
         </Card>
 
         <Card className="clay-card print-card">
           <CardContent className="p-6">
-            <p className="text-[10px] uppercase font-black text-zinc-500 tracking-[0.2em] mb-2 print-card-title">Locações HUB</p>
+            <p className="text-[11px] uppercase font-black text-zinc-500 tracking-wider mb-2 print-card-title">Locações HUB</p>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-black tracking-tighter text-zinc-100 print-card-value">{metrics.totalHub}</span>
-              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider print-card-title">vezes</span>
+              <span className="text-[11px] text-zinc-500 font-bold uppercase tracking-wider print-card-title">vezes</span>
             </div>
-            <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-wider mt-1 no-print">Através da plataforma</p>
+            <p className="text-[11px] text-zinc-400 font-bold uppercase tracking-wider mt-1 no-print">Através da plataforma</p>
           </CardContent>
         </Card>
 
         <Card className="clay-card print-card">
           <CardContent className="p-6">
-            <p className="text-[10px] uppercase font-black text-zinc-500 tracking-[0.2em] mb-2 print-card-title">Locações Externas</p>
+            <p className="text-[11px] uppercase font-black text-zinc-500 tracking-wider mb-2 print-card-title">Locações Externas</p>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-black tracking-tighter text-zinc-100 print-card-value">{metrics.totalExtCount}</span>
-              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider print-card-title">vezes</span>
+              <span className="text-[11px] text-zinc-500 font-bold uppercase tracking-wider print-card-title">vezes</span>
             </div>
-            <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-wider mt-1 no-print">Fora do ecossistema HUB</p>
+            <p className="text-[11px] text-zinc-400 font-bold uppercase tracking-wider mt-1 no-print">Fora do ecossistema HUB</p>
           </CardContent>
         </Card>
 
         <Card className="clay-card print-card">
           <CardContent className="p-6">
-            <p className="text-[10px] uppercase font-black text-zinc-500 tracking-[0.2em] mb-2 print-card-title">Tempo Total Externo</p>
+            <p className="text-[11px] uppercase font-black text-zinc-500 tracking-wider mb-2 print-card-title">Tempo Total Externo</p>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-black tracking-tighter text-zinc-100 print-card-value">{formatDuration(metrics.totalExtDurationMs)}</span>
             </div>
-            <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-wider mt-1 no-print">Acumulado fora do HUB</p>
+            <p className="text-[11px] text-zinc-400 font-bold uppercase tracking-wider mt-1 no-print">Acumulado fora do HUB</p>
           </CardContent>
         </Card>
       </div>
@@ -332,7 +332,7 @@ export function ReportsTab({ tenantId }: ReportsTabProps) {
       {/* Filters and Search controls */}
       <div className="flex flex-col sm:flex-row items-center gap-4 bg-zinc-950/20 border border-white/5 p-4 rounded-2xl no-print filters-section">
         <div className="relative w-full sm:flex-1">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
           <Input 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -342,7 +342,7 @@ export function ReportsTab({ tenantId }: ReportsTabProps) {
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Filter className="h-4 w-4 text-zinc-600 shrink-0 hidden sm:block" />
+          <Filter className="h-4 w-4 text-zinc-400 shrink-0 hidden sm:block" />
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -363,12 +363,12 @@ export function ReportsTab({ tenantId }: ReportsTabProps) {
           <Table className="print-table">
             <TableHeader className="bg-black/40">
               <TableRow className="border-white/5 hover:bg-transparent">
-                <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-6 px-8 text-zinc-500 whitespace-nowrap">Equipamento</TableHead>
-                <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-6 text-zinc-500 whitespace-nowrap">Status Atual</TableHead>
-                <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-6 text-center text-zinc-500 whitespace-nowrap">Locações HUB</TableHead>
-                <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-6 text-center text-zinc-500 whitespace-nowrap">Locações Externas</TableHead>
-                <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-6 text-center text-zinc-500 whitespace-nowrap">Tempo Externo</TableHead>
-                <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-6 px-8 text-zinc-500 whitespace-nowrap text-right no-print">Ações</TableHead>
+                <TableHead className="text-[11px] uppercase font-black tracking-wider py-6 px-8 text-zinc-500 whitespace-nowrap">Equipamento</TableHead>
+                <TableHead className="text-[11px] uppercase font-black tracking-wider py-6 text-zinc-500 whitespace-nowrap">Status Atual</TableHead>
+                <TableHead className="text-[11px] uppercase font-black tracking-wider py-6 text-center text-zinc-500 whitespace-nowrap">Locações HUB</TableHead>
+                <TableHead className="text-[11px] uppercase font-black tracking-wider py-6 text-center text-zinc-500 whitespace-nowrap">Locações Externas</TableHead>
+                <TableHead className="text-[11px] uppercase font-black tracking-wider py-6 text-center text-zinc-500 whitespace-nowrap">Tempo Externo</TableHead>
+                <TableHead className="text-[11px] uppercase font-black tracking-wider py-6 px-8 text-zinc-500 whitespace-nowrap text-right no-print">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -377,7 +377,7 @@ export function ReportsTab({ tenantId }: ReportsTabProps) {
                   <TableCell colSpan={6} className="py-24 text-center">
                     <div className="flex flex-col items-center gap-3">
                       <Package className="h-10 w-10 text-zinc-800" />
-                      <p className="text-[10px] font-black uppercase tracking-widest text-zinc-700">Nenhum equipamento correspondente encontrado.</p>
+                      <p className="text-[11px] font-black uppercase tracking-widest text-zinc-500">Nenhum equipamento correspondente encontrado.</p>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -387,7 +387,7 @@ export function ReportsTab({ tenantId }: ReportsTabProps) {
                     <TableCell className="py-5 px-8 font-black uppercase tracking-tight text-white whitespace-nowrap">
                       <div className="flex flex-col">
                         <span className="text-zinc-100">{item.name}</span>
-                        <span className="text-[8px] text-zinc-500 uppercase tracking-widest font-bold mt-0.5">{item.category}</span>
+                        <span className="text-[11px] text-zinc-500 uppercase tracking-widest font-bold mt-0.5">{item.category}</span>
                       </div>
                     </TableCell>
                     <TableCell className="py-5">
@@ -421,7 +421,7 @@ export function ReportsTab({ tenantId }: ReportsTabProps) {
                         variant="ghost" 
                         size="sm"
                         onClick={() => navigate(`/equipment/${item.id}`)}
-                        className="h-8 border border-zinc-900 hover:border-zinc-800 text-[9px] uppercase font-black tracking-widest gap-1.5 hover:text-white rounded-lg"
+                        className="h-8 border border-zinc-900 hover:border-zinc-800 text-[11px] uppercase font-black tracking-widest gap-1.5 hover:text-white rounded-lg"
                       >
                         <ExternalLink className="w-3 h-3 text-primary" /> Ficha Técnica
                       </Button>

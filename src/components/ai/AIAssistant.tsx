@@ -103,7 +103,7 @@ export function AIAssistant() {
                     CineHub AI Assistant
                     <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                   </h3>
-                  <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">
+                  <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">
                     Modo Ativo: <span className="text-zinc-300">{getModeLabel(mode)}</span>
                   </p>
                 </div>
@@ -171,7 +171,7 @@ export function AIAssistant() {
                       </ReactMarkdown>
                     </div>
                     
-                    <span className={`absolute -bottom-5 text-[9px] font-medium text-zinc-600 opacity-0 group-hover:opacity-100 transition-opacity ${
+                    <span className={`absolute -bottom-5 text-[11px] font-medium text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity ${
                       chat.role === 'user' ? 'right-0' : 'left-0'
                     }`}>
                       {chat.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -207,7 +207,7 @@ export function AIAssistant() {
                     mode === 'quote' ? 'Quais itens e quantos dias?' :
                     'Mande uma mensagem...'
                   }
-                  className="flex-1 bg-transparent py-2 text-sm text-white outline-none placeholder:text-zinc-600"
+                  className="flex-1 bg-transparent py-2 text-sm text-white outline-none placeholder:text-zinc-500"
                 />
                 <button 
                   onClick={handleSend}
@@ -217,7 +217,7 @@ export function AIAssistant() {
                   <Send size={18} />
                 </button>
               </div>
-              <p className="mt-3 text-center text-[9px] font-medium uppercase tracking-widest text-zinc-600">
+              <p className="mt-3 text-center text-[11px] font-medium uppercase tracking-widest text-zinc-400">
                 CineHub AI · Em Breve
               </p>
             </div>
@@ -235,7 +235,7 @@ export function AIAssistant() {
         {isOpen ? <X size={28} /> : (
           <>
             <MessageSquare size={28} className="transition-transform group-hover:scale-110" />
-            <div className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[10px] font-bold text-primary shadow-lg ring-4 ring-zinc-950">
+            <div className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[11px] font-bold text-primary shadow-lg ring-4 ring-zinc-950">
               AI
             </div>
           </>

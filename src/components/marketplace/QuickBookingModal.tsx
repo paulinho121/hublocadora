@@ -1,4 +1,6 @@
 import { useState, useMemo } from 'react';
+import { friendlyError } from '@/lib/errors';
+import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -126,12 +128,12 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                     alt={equipment.name}
                                 />
                             ) : (
-                                <Package className="w-12 h-12 text-zinc-700" />
+                                <Package className="w-12 h-12 text-zinc-500" />
                             )}
                         </div>
 
                         <div className="space-y-2">
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Excelente Escolha</span>
+                            <span className="text-[11px] font-black uppercase tracking-wider text-primary">Excelente Escolha</span>
                             <h3 className="text-xl font-display font-black text-white tracking-tight uppercase leading-tight">
                                 {equipment.name}
                             </h3>
@@ -142,7 +144,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
 
                         <div className="flex flex-col gap-3 w-full mt-4">
                             <Button 
-                                className="h-14 bg-primary hover:bg-primary/90 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5 active:translate-y-0"
+                                className="h-14 bg-primary hover:bg-primary/90 text-white rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5 active:translate-y-0"
                                 onClick={() => {
                                     onClose();
                                     navigate('/register');
@@ -152,7 +154,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                             </Button>
                             <Button 
                                 variant="outline"
-                                className="h-14 border-zinc-800 hover:bg-zinc-900 text-zinc-300 hover:text-white rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all"
+                                className="h-14 border-zinc-800 hover:bg-zinc-900 text-zinc-300 hover:text-white rounded-2xl font-black uppercase tracking-widest text-[11px] transition-all"
                                 onClick={() => {
                                     onClose();
                                     navigate('/login');
@@ -172,11 +174,11 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
 
         if (deliveryMethod === 'delivery') {
             if (!deliveryAddress.trim()) {
-                alert('Informe o endereço de entrega.');
+                toast.error('Informe o endereço de entrega.');
                 return;
             }
             if (!deliveryContact.trim()) {
-                alert('Informe o nome do responsável pelo recebimento.');
+                toast.error('Informe o nome do responsável pelo recebimento.');
                 return;
             }
         }
@@ -206,8 +208,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
             }, 3000);
         } catch (error: any) {
             console.error('Erro ao reservar:', error);
-            const msg = error?.message || 'Erro desconhecido. Tente novamente.';
-            alert(`Não foi possível processar a reserva agora.\n\n${msg}`);
+            toast.error(`Não foi possível processar a reserva agora. ${friendlyError(error)}`);
         }
     };
 
@@ -247,7 +248,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
                                 <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6">
                                     <div className="flex items-center gap-2 mb-2 flex-wrap">
-                                        <Badge className={`${isLoadingDates ? 'bg-zinc-500/20 text-zinc-400 border-zinc-500/20' : isAvailable ? 'bg-emerald-500/20 text-emerald-500 border-emerald-500/20' : 'bg-red-500/20 text-red-500 border-red-500/20'} uppercase font-black tracking-widest text-[9px] sm:text-[10px]`}>
+                                        <Badge className={`${isLoadingDates ? 'bg-zinc-500/20 text-zinc-400 border-zinc-500/20' : isAvailable ? 'bg-emerald-500/20 text-emerald-500 border-emerald-500/20' : 'bg-red-500/20 text-red-500 border-red-500/20'} uppercase font-black tracking-widest text-[11px] sm:text-[11px]`}>
                                             {isLoadingDates ? 'Verificando...' : isAvailable ? `${equipment.stock_quantity || 0} Disponíveis no HUB` : 'Limite de Estoque Atingido'}
                                         </Badge>
                                         <button
@@ -257,7 +258,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                                 onClose();
                                                 navigate(`/equipment/${equipment.id}`);
                                             }}
-                                            className="text-[9px] uppercase font-black text-zinc-400 hover:text-white transition-colors tracking-widest bg-zinc-900/80 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/5 flex items-center gap-1 cursor-pointer"
+                                            className="text-[11px] uppercase font-black text-zinc-400 hover:text-white transition-colors tracking-widest bg-zinc-900/80 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/5 flex items-center gap-1 cursor-pointer"
                                         >
                                             <Info className="w-2.5 h-2.5 text-primary" /> Ver Detalhes
                                         </button>
@@ -270,12 +271,12 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
 
                             <div className="p-8 space-y-8">
                                 <div className="space-y-4">
-                                    <h4 className="text-[10px] uppercase font-black text-zinc-500 tracking-widest flex items-center gap-2">
+                                    <h4 className="text-[11px] uppercase font-black text-zinc-500 tracking-widest flex items-center gap-2">
                                         <CalendarIcon className="w-3 h-3" /> Período da Reserva
                                     </h4>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-2">
-                                            <p className="text-[10px] text-zinc-400 font-bold uppercase">Retirada</p>
+                                            <p className="text-[11px] text-zinc-400 font-bold uppercase">Retirada</p>
                                             <Input 
                                                 type="date" 
                                                 value={startDate} 
@@ -285,7 +286,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <p className="text-[10px] text-zinc-400 font-bold uppercase">Devolução</p>
+                                            <p className="text-[11px] text-zinc-400 font-bold uppercase">Devolução</p>
                                             <Input 
                                                 type="date" 
                                                 value={endDate} 
@@ -310,7 +311,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                     >
                                         <div className="flex items-center gap-2">
                                             <CalendarSearch className="w-3.5 h-3.5 text-primary" />
-                                            <span className="text-[10px] uppercase font-black text-zinc-400 tracking-widest">
+                                            <span className="text-[11px] uppercase font-black text-zinc-400 tracking-widest">
                                                 {showCalendar ? 'Fechar Calendário' : 'Ver Disponibilidade no Calendário'}
                                             </span>
                                         </div>
@@ -338,14 +339,14 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="bg-zinc-900/50 rounded-2xl p-4 border border-zinc-900">
-                                        <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest mb-1">Duração</p>
+                                        <p className="text-[11px] text-zinc-500 uppercase font-bold tracking-widest mb-1">Duração</p>
                                         <div className="flex items-center gap-2">
                                             <Clock className="w-4 h-4 text-emerald-500" />
                                             <span className="text-lg font-black text-zinc-100">{totalDays} Diárias</span>
                                         </div>
                                     </div>
                                     <div className="bg-zinc-900/50 rounded-2xl p-4 border border-zinc-900">
-                                        <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest mb-1">Custo Diária</p>
+                                        <p className="text-[11px] text-zinc-500 uppercase font-bold tracking-widest mb-1">Custo Diária</p>
                                         <div className="flex items-center gap-2">
                                             <Package className="w-4 h-4 text-primary" />
                                             <span className="text-lg font-black text-zinc-100">R$ {equipment.daily_rate}</span>
@@ -354,7 +355,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                 </div>
 
                                 <div className="space-y-4">
-                                    <h4 className="text-[10px] uppercase font-black text-zinc-500 tracking-widest flex items-center gap-2">
+                                    <h4 className="text-[11px] uppercase font-black text-zinc-500 tracking-widest flex items-center gap-2">
                                         <Package className="w-3 h-3" /> Quantidade
                                     </h4>
                                     <div className="flex items-center gap-4 bg-zinc-900/50 p-2 rounded-2xl border border-zinc-800">
@@ -368,7 +369,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                         </Button>
                                         <div className="flex-1 text-center">
                                             <span className="text-xl font-black text-zinc-100">{quantity}</span>
-                                            <span className="text-[10px] text-zinc-500 font-bold uppercase ml-2">unidades</span>
+                                            <span className="text-[11px] text-zinc-500 font-bold uppercase ml-2">unidades</span>
                                         </div>
                                         <Button 
                                             variant="ghost" 
@@ -382,7 +383,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                 </div>
 
                                 <div>
-                                    <h4 className="text-[10px] uppercase font-black text-zinc-500 mb-4 tracking-widest flex items-center gap-2">
+                                    <h4 className="text-[11px] uppercase font-black text-zinc-500 mb-4 tracking-widest flex items-center gap-2">
                                         <Truck className="w-3 h-3" /> Logística Opcional
                                     </h4>
                                     <div className="grid grid-cols-2 gap-4">
@@ -396,7 +397,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                         >
                                             <Store className={`w-6 h-6 mb-3 ${deliveryMethod === 'pickup' ? 'text-emerald-500' : 'text-zinc-500'}`} />
                                             <p className="font-bold text-sm mb-1 uppercase tracking-tighter">Retirar no Local</p>
-                                            <p className="text-[10px] text-zinc-500 line-clamp-1">Você ou seu motorista</p>
+                                            <p className="text-[11px] text-zinc-500 line-clamp-1">Você ou seu motorista</p>
                                             {deliveryMethod === 'pickup' && (
                                                 <div className="absolute top-2 right-2 bg-emerald-500 rounded-full p-0.5">
                                                     <CheckCircle2 className="w-3 h-3 text-black" />
@@ -414,7 +415,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                         >
                                             <Truck className={`w-6 h-6 mb-3 ${deliveryMethod === 'delivery' ? 'text-primary' : 'text-zinc-500'}`} />
                                             <p className="font-bold text-sm mb-1 uppercase tracking-tighter">Tele-Entrega</p>
-                                            <p className="text-[10px] text-zinc-500 line-clamp-1">Via Lalamove / Uber</p>
+                                            <p className="text-[11px] text-zinc-500 line-clamp-1">Via Lalamove / Uber</p>
                                             {deliveryMethod === 'delivery' && (
                                                 <div className="absolute top-2 right-2 bg-primary rounded-full p-0.5">
                                                     <CheckCircle2 className="w-3 h-3 text-white" />
@@ -426,7 +427,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                     {deliveryMethod === 'delivery' && (
                                         <div className="mt-4 space-y-3 animate-in slide-in-from-top-2 duration-200">
                                             <div className="space-y-1.5">
-                                                <p className="text-[10px] text-zinc-400 font-bold uppercase flex items-center gap-1.5">
+                                                <p className="text-[11px] text-zinc-400 font-bold uppercase flex items-center gap-1.5">
                                                     <MapPin className="w-3 h-3 text-primary" /> Endereço de Entrega *
                                                 </p>
                                                 <textarea
@@ -434,12 +435,12 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                                     onChange={(e) => setDeliveryAddress(e.target.value)}
                                                     placeholder="Rua, número, complemento, bairro, cidade..."
                                                     rows={2}
-                                                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-primary/50 resize-none"
+                                                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-primary/50 resize-none"
                                                     required
                                                 />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <p className="text-[10px] text-zinc-400 font-bold uppercase flex items-center gap-1.5">
+                                                <p className="text-[11px] text-zinc-400 font-bold uppercase flex items-center gap-1.5">
                                                     <User className="w-3 h-3 text-primary" /> Responsável pelo Recebimento *
                                                 </p>
                                                 <Input
@@ -461,11 +462,11 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                         </div>
                                         <div>
                                             <p className="text-xs font-bold text-zinc-200 uppercase tracking-tighter">Seguro Co-Participativo</p>
-                                            <p className="text-[10px] text-emerald-500 uppercase font-black tracking-tighter">Ativado no Período</p>
+                                            <p className="text-[11px] text-emerald-500 uppercase font-black tracking-tighter">Ativado no Período</p>
                                         </div>
                                     </div>
                                     <div className="text-center sm:text-right w-full sm:w-auto pt-4 sm:pt-0 border-t sm:border-t-0 border-zinc-800/50">
-                                        <p className="text-[10px] text-zinc-500 uppercase font-bold">Total do Aluguel</p>
+                                        <p className="text-[11px] text-zinc-500 uppercase font-bold">Total do Aluguel</p>
                                         <p className="text-xl sm:text-2xl font-black text-white tracking-tighter">
                                             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(equipment.daily_rate * totalDays * quantity)}
                                         </p>
@@ -484,7 +485,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                         <p className="text-xs font-black uppercase text-white tracking-widest flex items-center gap-2">
                                             <FileSignature className="w-3 h-3" /> Aceite de Termos e Privacidade
                                         </p>
-                                        <p className="text-[10px] text-zinc-500 leading-relaxed mt-1">
+                                        <p className="text-[11px] text-zinc-500 leading-relaxed mt-1">
                                             Li e aceito os <a href="/terms" target="_blank" className="text-primary hover:underline">Termos de Uso</a> e a <a href="/privacy" target="_blank" className="text-primary hover:underline">Política de Privacidade</a>, e autorizo o compartilhamento dos meus dados com a locadora parceira para fins de entrega e contrato (LGPD).
                                         </p>
                                     </label>

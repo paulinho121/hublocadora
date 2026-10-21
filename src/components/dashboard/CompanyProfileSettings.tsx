@@ -122,7 +122,7 @@ export function CompanyProfileSettings() {
           </div>
           <div>
             <CardTitle className="text-xl font-black uppercase tracking-tighter text-zinc-100">Perfil da Locadora</CardTitle>
-            <p className="text-[9px] text-zinc-500 font-black uppercase tracking-[0.25em] mt-1">Identidade Visual e Informações Cadastrais</p>
+            <p className="text-[11px] text-zinc-500 font-black uppercase tracking-wider mt-1">Identidade Visual e Informações Cadastrais</p>
           </div>
         </div>
       </CardHeader>
@@ -139,7 +139,7 @@ export function CompanyProfileSettings() {
                   className="h-full w-full object-cover transition-transform group-hover:scale-105 duration-300"
                 />
               ) : (
-                <Building2 className="h-8 w-8 text-zinc-700" />
+                <Building2 className="h-8 w-8 text-zinc-500" />
               )}
               {isUploading && (
                 <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
@@ -150,7 +150,7 @@ export function CompanyProfileSettings() {
             
             <div className="flex-1 space-y-3 w-full text-center md:text-left">
               <h4 className="text-xs font-black uppercase tracking-wider text-zinc-300">Logomarca Oficial</h4>
-              <p className="text-[10px] text-zinc-500 font-medium leading-relaxed max-w-md">
+              <p className="text-[11px] text-zinc-500 font-medium leading-relaxed max-w-md">
                 Envie uma imagem JPG, PNG ou WebP. Ela será exibida no cabeçalho, faturas de aluguel e nos relatórios de frota e rede.
               </p>
               
@@ -169,7 +169,7 @@ export function CompanyProfileSettings() {
                     type="button" 
                     variant="outline" 
                     size="sm"
-                    className="w-full h-10 border-zinc-800 bg-zinc-950 hover:bg-zinc-900 text-[10px] uppercase font-black tracking-widest gap-2 rounded-xl text-zinc-300 hover:text-white"
+                    className="w-full h-10 border-zinc-800 bg-zinc-950 hover:bg-zinc-900 text-[11px] uppercase font-black tracking-widest gap-2 rounded-xl text-zinc-300 hover:text-white"
                   >
                     <Upload className="w-3.5 h-3.5 text-primary" /> Carregar Arquivo
                   </Button>
@@ -177,13 +177,13 @@ export function CompanyProfileSettings() {
 
                 {/* Paste URL Input */}
                 <div className="flex-1 relative flex items-center">
-                  <Link2 className="absolute left-3.5 w-3.5 h-3.5 text-zinc-600" />
+                  <Link2 className="absolute left-3.5 w-3.5 h-3.5 text-zinc-400" />
                   <Input 
                     placeholder="Ou cole a URL direta de uma imagem..."
                     value={logoUrl}
                     onChange={(e) => setLogoUrl(e.target.value)}
                     readOnly={logoUrl.includes('supabase.co')}
-                    className={`h-10 pl-9 pr-4 bg-zinc-950/70 border-zinc-900 focus:border-zinc-800 rounded-xl text-[10px] text-zinc-400 font-medium ${
+                    className={`h-10 pl-9 pr-4 bg-zinc-950/70 border-zinc-900 focus:border-zinc-800 rounded-xl text-[11px] text-zinc-400 font-medium ${
                       logoUrl.includes('supabase.co') ? 'opacity-50 cursor-not-allowed bg-zinc-900/30' : ''
                     }`}
                     title={logoUrl.includes('supabase.co') ? "Links de imagens enviadas por upload não podem ser modificados para evitar quebras." : ""}
@@ -195,11 +195,11 @@ export function CompanyProfileSettings() {
 
           {/* Basic Info Section */}
           <div className="space-y-6">
-            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary border-b border-white/5 pb-2">Informações Gerais</h3>
+            <h3 className="text-xs font-black uppercase tracking-wider text-primary border-b border-white/5 pb-2">Informações Gerais</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Nome Comercial</label>
+                <label className="text-[11px] font-black uppercase tracking-widest text-zinc-500 ml-1">Nome Comercial</label>
                 <Input 
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -210,7 +210,7 @@ export function CompanyProfileSettings() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Documento (CNPJ/CPF)</label>
+                <label className="text-[11px] font-black uppercase tracking-widest text-zinc-500 ml-1">Documento (CNPJ/CPF)</label>
                 <Input 
                   value={document}
                   onChange={(e) => setDocument(e.target.value)}
@@ -222,7 +222,7 @@ export function CompanyProfileSettings() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Apresentação / Descrição</label>
+              <label className="text-[11px] font-black uppercase tracking-widest text-zinc-500 ml-1">Apresentação / Descrição</label>
               <Textarea 
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -234,11 +234,11 @@ export function CompanyProfileSettings() {
 
           {/* Address Section */}
           <div className="space-y-6">
-            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary border-b border-white/5 pb-2">Endereço da Sede</h3>
+            <h3 className="text-xs font-black uppercase tracking-wider text-primary border-b border-white/5 pb-2">Endereço da Sede</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="md:col-span-3 space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Logradouro / Avenida / Rua</label>
+                <label className="text-[11px] font-black uppercase tracking-widest text-zinc-500 ml-1">Logradouro / Avenida / Rua</label>
                 <Input 
                   value={addressStreet}
                   onChange={(e) => setAddressStreet(e.target.value)}
@@ -248,7 +248,7 @@ export function CompanyProfileSettings() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Número</label>
+                <label className="text-[11px] font-black uppercase tracking-widest text-zinc-500 ml-1">Número</label>
                 <Input 
                   value={addressNumber}
                   onChange={(e) => setAddressNumber(e.target.value)}
@@ -261,7 +261,7 @@ export function CompanyProfileSettings() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Complemento (Opcional)</label>
+                <label className="text-[11px] font-black uppercase tracking-widest text-zinc-500 ml-1">Complemento (Opcional)</label>
                 <Input 
                   value={addressComplement}
                   onChange={(e) => setAddressComplement(e.target.value)}
@@ -270,7 +270,7 @@ export function CompanyProfileSettings() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Bairro</label>
+                <label className="text-[11px] font-black uppercase tracking-widest text-zinc-500 ml-1">Bairro</label>
                 <Input 
                   value={addressNeighborhood}
                   onChange={(e) => setAddressNeighborhood(e.target.value)}
@@ -283,7 +283,7 @@ export function CompanyProfileSettings() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Cidade</label>
+                <label className="text-[11px] font-black uppercase tracking-widest text-zinc-500 ml-1">Cidade</label>
                 <Input 
                   value={addressCity}
                   onChange={(e) => setAddressCity(e.target.value)}
@@ -293,7 +293,7 @@ export function CompanyProfileSettings() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Estado (UF)</label>
+                <label className="text-[11px] font-black uppercase tracking-widest text-zinc-500 ml-1">Estado (UF)</label>
                 <Input 
                   value={addressState}
                   onChange={(e) => setAddressState(e.target.value)}
@@ -304,7 +304,7 @@ export function CompanyProfileSettings() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">CEP</label>
+                <label className="text-[11px] font-black uppercase tracking-widest text-zinc-500 ml-1">CEP</label>
                 <Input 
                   value={addressZip}
                   onChange={(e) => setAddressZip(e.target.value)}

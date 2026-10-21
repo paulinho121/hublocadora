@@ -256,7 +256,7 @@ export default function Register() {
                             disabled={loading || !termsAccepted}
                         >
                             {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
-                            {loading ? 'Preparando Setup...' : 'Cadastrar agora'}
+                            {loading ? 'Criando sua conta...' : 'Cadastrar agora'}
                         </Button>
 
                         <div className="relative flex items-center py-2 shrink-0">

@@ -145,7 +145,7 @@ export default function Login() {
                         <div className="flex flex-col gap-2 mt-6">
                             <Button className="w-full h-12 bg-primary hover:bg-primary/90 font-black uppercase tracking-tighter text-lg shadow-lg shadow-primary/20" type="submit" disabled={loading}>
                                 {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
-                                {loading ? 'Sincronizando...' : 'Entrar no Hub'}
+                                {loading ? 'Entrando...' : 'Entrar'}
                             </Button>
                             <div className="relative flex items-center py-2 shrink-0">
                                 <div className="flex-grow border-t border-zinc-800"></div>

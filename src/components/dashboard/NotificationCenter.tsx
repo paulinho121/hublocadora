@@ -113,7 +113,7 @@ export function NotificationCenter() {
                 <Bell className={cn("h-5 w-5 transition-transform duration-500", isOpen && "scale-110")} />
                 
                 {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-black animate-pulse">
+                    <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-[11px] font-black flex items-center justify-center rounded-full border-2 border-black animate-pulse">
                         {unreadCount > 9 ? '+9' : unreadCount}
                     </span>
                 )}
@@ -131,13 +131,13 @@ export function NotificationCenter() {
                     >
                         <header className="p-6 border-b border-white/5 flex justify-between items-center bg-black/40">
                              <div className="space-y-1">
-                                <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-white">Central de Alertas</h4>
-                                <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Você tem {unreadCount} mensagens não lidas</p>
+                                <h4 className="text-[11px] font-black uppercase tracking-wider text-white">Central de Alertas</h4>
+                                <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">Você tem {unreadCount} mensagens não lidas</p>
                              </div>
                              {unreadCount > 0 && (
                                 <button 
                                     onClick={handleMarkAllAsRead}
-                                    className="text-[9px] font-black uppercase tracking-widest text-primary hover:text-primary/80 transition-colors"
+                                    className="text-[11px] font-black uppercase tracking-widest text-primary hover:text-primary/80 transition-colors"
                                 >
                                     Ler Tudo
                                 </button>
@@ -172,10 +172,10 @@ export function NotificationCenter() {
                                         
                                         <div className="flex-1 space-y-2">
                                             <div className="flex items-center justify-between">
-                                                <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500">
+                                                <span className="text-[11px] font-black uppercase tracking-widest text-zinc-500">
                                                     {getTypeLabel(n.type)}
                                                 </span>
-                                                <span className="text-[9px] font-bold text-zinc-700 flex items-center gap-1">
+                                                <span className="text-[11px] font-bold text-zinc-500 flex items-center gap-1">
                                                     <Clock className="h-3 w-3" />
                                                     {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: ptBR })}
                                                 </span>
@@ -198,14 +198,14 @@ export function NotificationCenter() {
                                    </div>
                                    <div className="space-y-1">
                                        <p className="text-[11px] font-black uppercase tracking-widest text-zinc-500">Espaço Limpo</p>
-                                       <p className="text-[10px] text-zinc-700 font-medium uppercase tracking-tighter">Nenhuma nova notificação por aqui.</p>
+                                       <p className="text-[11px] text-zinc-500 font-medium uppercase tracking-tighter">Nenhuma nova notificação por aqui.</p>
                                    </div>
                                </div>
                            )}
                         </div>
                         
                         <footer className="p-4 bg-black/60 border-t border-white/5 text-center">
-                             <button className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-600 hover:text-zinc-400 transition-colors">
+                             <button className="text-[11px] font-black uppercase tracking-wider text-zinc-400 hover:text-zinc-400 transition-colors">
                                 Configurações de Notificação
                              </button>
                         </footer>

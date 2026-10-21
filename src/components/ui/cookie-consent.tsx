@@ -52,7 +52,7 @@ export function CookieConsent() {
               </div>
               <button
                 onClick={decline}
-                className="shrink-0 text-zinc-600 hover:text-zinc-300 transition-colors"
+                className="shrink-0 text-zinc-400 hover:text-zinc-300 transition-colors"
                 aria-label="Fechar"
               >
                 <X size={16} />

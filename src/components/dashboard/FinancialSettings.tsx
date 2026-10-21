@@ -86,7 +86,7 @@ export function FinancialSettings({ companyId, initialConfig }: { companyId: str
           </CardHeader>
           <CardContent className="p-8 space-y-6">
             <div className="space-y-2">
-              <Label className="text-[10px] uppercase font-black tracking-widest text-zinc-500">Chave PIX Principal</Label>
+              <Label className="text-[11px] uppercase font-black tracking-widest text-zinc-500">Chave PIX Principal</Label>
               <Input 
                 {...register('pix_key')}
                 placeholder="CNPJ, E-mail ou Celular" 
@@ -97,22 +97,22 @@ export function FinancialSettings({ companyId, initialConfig }: { companyId: str
 
             <div className="grid grid-cols-2 gap-4 pt-4 border-t border-zinc-900/50">
               <div className="space-y-2">
-                <Label className="text-[10px] uppercase font-black tracking-widest text-zinc-500">Banco</Label>
+                <Label className="text-[11px] uppercase font-black tracking-widest text-zinc-500">Banco</Label>
                 <Input {...register('bank_info.bank')} placeholder="Ex: Nubank" className="h-11 bg-zinc-900 border-zinc-800 rounded-xl text-xs" />
               </div>
               <div className="space-y-2">
-                 <Label className="text-[10px] uppercase font-black tracking-widest text-zinc-500">Agência</Label>
+                 <Label className="text-[11px] uppercase font-black tracking-widest text-zinc-500">Agência</Label>
                  <Input {...register('bank_info.branch')} placeholder="0001" className="h-11 bg-zinc-900 border-zinc-800 rounded-xl text-xs" />
               </div>
             </div>
             <div className="space-y-2">
-               <Label className="text-[10px] uppercase font-black tracking-widest text-zinc-500">Conta Corrente</Label>
+               <Label className="text-[11px] uppercase font-black tracking-widest text-zinc-500">Conta Corrente</Label>
                <Input {...register('bank_info.account')} placeholder="0000000-0" className="h-11 bg-zinc-900 border-zinc-800 rounded-xl text-xs" />
             </div>
 
             <div className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-2xl flex gap-3">
                <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0" />
-               <p className="text-[10px] text-amber-200/60 leading-relaxed font-medium">
+               <p className="text-[11px] text-amber-200/60 leading-relaxed font-medium">
                   Certifique-se de que o titular da conta é o mesmo CNPJ/CPF cadastrado no CineHub para evitar atrasos no repasse automático.
                </p>
             </div>
@@ -131,7 +131,7 @@ export function FinancialSettings({ companyId, initialConfig }: { companyId: str
           </CardHeader>
           <CardContent className="p-8 space-y-6">
             <div className="space-y-2">
-              <Label className="text-[10px] uppercase font-black tracking-widest text-zinc-500">Regime Tributário</Label>
+              <Label className="text-[11px] uppercase font-black tracking-widest text-zinc-500">Regime Tributário</Label>
               <select 
                 {...register('fiscal_data.tax_regime')}
                 className="w-full h-12 bg-zinc-900 border-zinc-800 rounded-xl px-4 text-sm focus:ring-primary/20 appearance-none font-bold"
@@ -144,19 +144,19 @@ export function FinancialSettings({ companyId, initialConfig }: { companyId: str
 
             <div className="grid grid-cols-2 gap-4">
                <div className="space-y-2">
-                  <Label className="text-[10px] uppercase font-black tracking-widest text-zinc-500">Inscrição Estadual</Label>
+                  <Label className="text-[11px] uppercase font-black tracking-widest text-zinc-500">Inscrição Estadual</Label>
                   <Input {...register('fiscal_data.ie')} placeholder="Isento ou Nº" className="h-11 bg-zinc-900 border-zinc-800 rounded-xl" />
                </div>
                <div className="space-y-2">
-                  <Label className="text-[10px] uppercase font-black tracking-widest text-zinc-500">Inscrição Municipal</Label>
+                  <Label className="text-[11px] uppercase font-black tracking-widest text-zinc-500">Inscrição Municipal</Label>
                   <Input {...register('fiscal_data.im')} placeholder="Nº da Inscrição" className="h-11 bg-zinc-900 border-zinc-800 rounded-xl" />
                </div>
             </div>
 
             <div className="pt-6 border-t border-zinc-900/50">
                <div className="flex items-center gap-3 mb-4">
-                  <Building2 className="h-4 w-4 text-zinc-600" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Venda de Notas (NF-e)</span>
+                  <Building2 className="h-4 w-4 text-zinc-400" />
+                  <span className="text-[11px] font-black uppercase tracking-widest text-zinc-500">Venda de Notas (NF-e)</span>
                </div>
                <p className="text-xs text-zinc-500 leading-relaxed">
                   O CineHub utiliza estes dados para automatizar o preenchimento de faturas para seus locatários. Mantenha-os atualizados para evitar problemas contábeis.
@@ -182,7 +182,7 @@ export function FinancialSettings({ companyId, initialConfig }: { companyId: str
             </div>
             <div>
                <p className="text-sm font-bold text-zinc-200">Segurança de Dados</p>
-               <p className="text-[10px] text-zinc-500 font-medium">Seus dados são criptografados e protegidos por políticas RLS rigorosas.</p>
+               <p className="text-[11px] text-zinc-500 font-medium">Seus dados são criptografados e protegidos por políticas RLS rigorosas.</p>
             </div>
          </div>
          <Button 

@@ -87,7 +87,7 @@ function ProjectDateBar({ availableCount }: { availableCount: number }) {
                           cursor-pointer group">
           <Calendar className="w-3.5 h-3.5 text-primary shrink-0" />
           <div className="flex flex-col leading-none">
-            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-0.5">
+            <span className="text-[11px] font-black uppercase tracking-wider text-zinc-500 mb-0.5">
               Início
             </span>
             <input
@@ -101,7 +101,7 @@ function ProjectDateBar({ availableCount }: { availableCount: number }) {
           </div>
         </label>
 
-        <ArrowRight className="w-3.5 h-3.5 text-zinc-600 shrink-0" />
+        <ArrowRight className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
 
         {/* End */}
         <label className="flex items-center gap-2 bg-zinc-900/70 rounded-xl px-3 py-2
@@ -109,7 +109,7 @@ function ProjectDateBar({ availableCount }: { availableCount: number }) {
                           cursor-pointer group">
           <Calendar className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
           <div className="flex flex-col leading-none">
-            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-0.5">
+            <span className="text-[11px] font-black uppercase tracking-wider text-zinc-500 mb-0.5">
               Término
             </span>
             <input
@@ -126,14 +126,14 @@ function ProjectDateBar({ availableCount }: { availableCount: number }) {
         {/* Days pill */}
         <span className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-lg
                          bg-zinc-900/50 border border-zinc-800/40
-                         text-[9px] font-black uppercase tracking-widest text-zinc-500 shrink-0">
+                         text-[11px] font-black uppercase tracking-widest text-zinc-500 shrink-0">
           {totalDays} {totalDays === 1 ? 'diária' : 'diárias'}
         </span>
       </div>
 
       {/* ── Availability hint ── */}
       {availableCount > 0 && (
-        <span className="hidden lg:block text-[10px] font-black text-emerald-400 shrink-0">
+        <span className="hidden lg:block text-[11px] font-black text-emerald-400 shrink-0">
           {availableCount} disponíveis nas suas datas
         </span>
       )}
@@ -145,7 +145,7 @@ function ProjectDateBar({ availableCount }: { availableCount: number }) {
           whileTap={{ scale: 0.97 }}
           onClick={openDrawer}
           className="flex items-center gap-2 bg-primary text-white rounded-xl
-                     px-4 py-2.5 font-black uppercase tracking-widest text-[10px]
+                     px-4 py-2.5 font-black uppercase tracking-widest text-[11px]
                      shadow-lg shadow-primary/25 shrink-0 transition-colors hover:bg-primary/90"
         >
           <FolderOpen className="w-3.5 h-3.5" />
@@ -153,7 +153,7 @@ function ProjectDateBar({ availableCount }: { availableCount: number }) {
           <ChevronRight className="w-3 h-3" />
         </motion.button>
       ) : (
-        <span className="hidden md:block text-[10px] text-zinc-600 shrink-0">
+        <span className="hidden md:block text-[11px] text-zinc-400 shrink-0">
           Selecione as datas e adicione itens ao seu projeto →
         </span>
       )}
@@ -395,7 +395,7 @@ export default function Marketplace() {
             transition={{ delay: 0.05, duration: 0.5 }}
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-md mb-6"
           >
-            <span className="text-[9px] font-black uppercase tracking-[0.25em] text-primary">O Hub da sua produção</span>
+            <span className="text-[11px] font-black uppercase tracking-wider text-primary">O Hub da sua produção</span>
           </motion.div>
           {/* Headline */}
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-black tracking-tighter text-white mb-3 leading-[0.9]">
@@ -403,7 +403,7 @@ export default function Marketplace() {
             <span className="text-primary">perfeito</span> para o seu set.
           </h1>
           <p className="text-zinc-500 text-sm md:text-base font-medium mb-10 max-w-xl">
-            A maior infraestrutura cinematográfica do Brasil — tecnologia high-end e logística inteligente.
+            Alugue equipamentos de locadoras parceiras, com entrega e acompanhamento em tempo real.
           </p>
 
           {/* Search bar */}
@@ -454,7 +454,7 @@ export default function Marketplace() {
                     setSelectedBrand(undefined);
                     setSelectedSubCategory(undefined);
                   }}
-                  className="text-zinc-500 hover:text-white uppercase font-black tracking-widest text-[10px]"
+                  className="text-zinc-500 hover:text-white uppercase font-black tracking-widest text-[11px]"
                 >
                   Limpar Filtros
                 </Button>
@@ -481,7 +481,7 @@ export default function Marketplace() {
               {displayedEquipments.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-24 text-center">
                   <div className="h-20 w-20 rounded-3xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-6">
-                    <Package className="h-8 w-8 text-zinc-700" />
+                    <Package className="h-8 w-8 text-zinc-500" />
                   </div>
                   <h3 className="text-xl font-black uppercase tracking-tighter mb-2">Nenhum item encontrado</h3>
                   <p className="text-zinc-500 max-w-xs mb-8">Tente ajustar seus filtros ou busca para encontrar o que precisa.</p>
@@ -542,10 +542,10 @@ export default function Marketplace() {
       <div className="w-full max-w-7xl mx-auto px-6 mb-24 flex justify-center">
         <div className="relative overflow-hidden rounded-[40px] bg-zinc-950/40 border border-white/5 p-12 min-h-[380px] w-full max-w-4xl flex flex-col justify-between group cursor-pointer hover:border-emerald-500/20 transition-all duration-500 shadow-2xl">
           <div className="z-10 max-w-[280px]">
-            <div className="inline-block px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-black uppercase tracking-widest mb-6">Pro Lighting</div>
+            <div className="inline-block px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[11px] font-black uppercase tracking-widest mb-6">Pro Lighting</div>
             <h2 className="text-5xl font-display font-black text-white tracking-tighter uppercase mb-6 leading-[0.85]">Iluminação & Grip</h2>
             <p className="text-zinc-500 mb-8 font-medium leading-relaxed">Controle total da luz com acessórios profissionais e telões de LED de alta definição.</p>
-            <Button className="w-fit bg-emerald-600 hover:bg-emerald-500 text-white border-none rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-10 shadow-xl shadow-emerald-500/20 transition-all hover:-translate-y-1">
+            <Button className="w-fit bg-emerald-600 hover:bg-emerald-500 text-white border-none rounded-2xl font-black uppercase tracking-widest text-[11px] h-14 px-10 shadow-xl shadow-emerald-500/20 transition-all hover:-translate-y-1">
               Buscar <ChevronRight className="ml-2 h-4 w-4"/>
             </Button>
           </div>

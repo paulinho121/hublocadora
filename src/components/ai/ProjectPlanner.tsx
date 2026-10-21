@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -51,7 +52,7 @@ export function ProjectPlanner({ onResult }: ProjectPlannerProps) {
       throw new Error('coming_soon');
     } catch (error: any) {
       if (error?.message !== 'coming_soon') console.error('Project planning error:', error);
-      alert('Funcionalidade de planejamento por IA em desenvolvimento. Em breve disponível!');
+      toast.info('Funcionalidade de planejamento por IA em desenvolvimento. Em breve disponível!');
     } finally {
       setLoading(false);
     }

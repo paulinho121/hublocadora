@@ -175,7 +175,7 @@ export function HubSupplementRequest({ onSuccess }: HubSupplementRequestProps) {
           <div className="space-y-2">
             <Label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Quantidade</Label>
             <div className="relative">
-              <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
+              <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
               <Input 
                 type="number" 
                 className="pl-10 h-10 bg-zinc-950 border-zinc-800" 
@@ -188,7 +188,7 @@ export function HubSupplementRequest({ onSuccess }: HubSupplementRequestProps) {
           <div className="space-y-2">
             <Label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Início</Label>
             <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
+              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
               <Input 
                 type="date" 
                 className="pl-10 h-10 bg-zinc-950 border-zinc-800" 
@@ -203,7 +203,7 @@ export function HubSupplementRequest({ onSuccess }: HubSupplementRequestProps) {
            <div className="space-y-2">
             <Label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Término</Label>
             <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
+              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
               <Input 
                 type="date" 
                 className="pl-10 h-10 bg-zinc-950 border-zinc-800" 
@@ -249,7 +249,7 @@ export function HubSupplementRequest({ onSuccess }: HubSupplementRequestProps) {
             <div className="space-y-2">
               <Label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Endereço de Entrega *</Label>
               <div className="relative">
-                <MapPin className="absolute left-3 top-3 w-4 h-4 text-zinc-600" />
+                <MapPin className="absolute left-3 top-3 w-4 h-4 text-zinc-400" />
                 <Textarea
                   placeholder="Rua, número, complemento, bairro, cidade..."
                   className="pl-10 bg-zinc-950 border-zinc-800 min-h-[80px]"

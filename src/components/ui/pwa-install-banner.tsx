@@ -71,14 +71,14 @@ export function PWAInstallBanner() {
             Instalar CineHub
           </p>
           {ios ? (
-            <p className="text-zinc-400 text-[10px] leading-snug mt-0.5">
+            <p className="text-zinc-400 text-[11px] leading-snug mt-0.5">
               Toque em{' '}
               <Share className="inline w-3 h-3 mb-0.5 text-zinc-300" />
               {' '}e depois{' '}
               <span className="text-zinc-200 font-semibold">"Adicionar à Tela de Início"</span>
             </p>
           ) : (
-            <p className="text-zinc-400 text-[10px] leading-snug mt-0.5">
+            <p className="text-zinc-400 text-[11px] leading-snug mt-0.5">
               Acesso rápido sem abrir o navegador
             </p>
           )}
@@ -88,7 +88,7 @@ export function PWAInstallBanner() {
         {!ios && deferredPrompt ? (
           <button
             onClick={install}
-            className="shrink-0 flex items-center gap-1.5 bg-primary text-white px-3.5 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider shadow-lg shadow-primary/25 active:scale-95 transition-transform"
+            className="shrink-0 flex items-center gap-1.5 bg-primary text-white px-3.5 py-2 rounded-xl text-[11px] font-black uppercase tracking-wider shadow-lg shadow-primary/25 active:scale-95 transition-transform"
           >
             <Download className="w-3 h-3" />
             Instalar

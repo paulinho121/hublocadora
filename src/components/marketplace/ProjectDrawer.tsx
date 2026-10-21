@@ -269,7 +269,7 @@ export function ProjectDrawer() {
                   <Clapperboard className="w-4.5 h-4.5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-[9px] font-black uppercase tracking-[0.25em] text-zinc-500">Locação em conjunto</p>
+                  <p className="text-[11px] font-black uppercase tracking-wider text-zinc-500">Locação em conjunto</p>
                   <h2 className="text-sm font-black uppercase tracking-wider text-white leading-none mt-0.5">
                     Meu Pedido
                   </h2>
@@ -316,7 +316,7 @@ export function ProjectDrawer() {
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-bold text-white truncate">{r.name}</p>
                         {!r.success && (
-                          <p className="text-[10px] text-red-400 mt-0.5">{r.error ?? 'Erro desconhecido'}</p>
+                          <p className="text-[11px] text-red-400 mt-0.5">{r.error ?? 'Erro desconhecido'}</p>
                         )}
                       </div>
                     </div>
@@ -337,7 +337,7 @@ export function ProjectDrawer() {
 
                   {/* Project name */}
                   <div>
-                    <label className="block text-[9px] font-black uppercase tracking-[0.25em] text-zinc-500 mb-2">
+                    <label className="block text-[11px] font-black uppercase tracking-wider text-zinc-500 mb-2">
                       Nome da produção (opcional)
                     </label>
                     <input
@@ -345,7 +345,7 @@ export function ProjectDrawer() {
                       value={state.projectName}
                       onChange={e => setProjectName(e.target.value)}
                       placeholder="Ex: Curta-metragem, Comercial de Verão…"
-                      className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
+                      className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
                     />
                   </div>
 
@@ -353,13 +353,13 @@ export function ProjectDrawer() {
                   <div>
                     <div className="flex items-center gap-2 mb-3">
                       <CalendarDays className="w-3.5 h-3.5 text-primary" />
-                      <span className="text-[9px] font-black uppercase tracking-[0.25em] text-zinc-500">
+                      <span className="text-[11px] font-black uppercase tracking-wider text-zinc-500">
                         Período da locação
                       </span>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-[9px] font-black uppercase tracking-widest text-zinc-600 mb-1.5">
+                        <label className="block text-[11px] font-black uppercase tracking-widest text-zinc-400 mb-1.5">
                           Início
                         </label>
                         <input
@@ -371,7 +371,7 @@ export function ProjectDrawer() {
                         />
                       </div>
                       <div>
-                        <label className="block text-[9px] font-black uppercase tracking-widest text-zinc-600 mb-1.5">
+                        <label className="block text-[11px] font-black uppercase tracking-widest text-zinc-400 mb-1.5">
                           Devolução
                         </label>
                         <input
@@ -383,7 +383,7 @@ export function ProjectDrawer() {
                         />
                       </div>
                     </div>
-                    <p className="text-[10px] text-zinc-500 mt-2 font-semibold">
+                    <p className="text-[11px] text-zinc-500 mt-2 font-semibold">
                       {totalDays} {totalDays === 1 ? 'diária' : 'diárias'} ·{' '}
                       {format(parseISO(state.startDate), "d 'de' MMM", { locale: ptBR })}
                       {' → '}
@@ -396,14 +396,14 @@ export function ProjectDrawer() {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <Package className="w-3.5 h-3.5 text-primary" />
-                        <span className="text-[9px] font-black uppercase tracking-[0.25em] text-zinc-500">
+                        <span className="text-[11px] font-black uppercase tracking-wider text-zinc-500">
                           Equipamentos ({state.items.length})
                         </span>
                       </div>
                       {state.items.length > 0 && (
                         <button
                           onClick={() => { clearCart(); setResults(null); }}
-                          className="text-[9px] font-black uppercase tracking-widest text-zinc-600 hover:text-red-400 transition-colors"
+                          className="text-[11px] font-black uppercase tracking-widest text-zinc-400 hover:text-red-400 transition-colors"
                         >
                           Limpar tudo
                         </button>
@@ -412,12 +412,12 @@ export function ProjectDrawer() {
 
                     {state.items.length === 0 ? (
                       <div className="flex flex-col items-center justify-center py-10 border border-dashed border-zinc-800 rounded-2xl text-center gap-4 px-6">
-                        <FolderOpen className="w-10 h-10 text-zinc-700" />
+                        <FolderOpen className="w-10 h-10 text-zinc-500" />
                         <div>
                           <p className="text-xs font-black text-zinc-400 uppercase tracking-widest">
                             Pedido vazio
                           </p>
-                          <p className="text-[11px] text-zinc-600 mt-1.5 leading-relaxed">
+                          <p className="text-[11px] text-zinc-400 mt-1.5 leading-relaxed">
                             Volte ao marketplace e clique em{' '}
                             <span className="text-primary font-black">+ Pedido</span>{' '}
                             em cada equipamento que quiser locar.
@@ -425,7 +425,7 @@ export function ProjectDrawer() {
                         </div>
                         <button
                           onClick={closeDrawer}
-                          className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 rounded-xl px-5 py-2.5 text-[10px] font-black uppercase tracking-widest transition-all"
+                          className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 rounded-xl px-5 py-2.5 text-[11px] font-black uppercase tracking-widest transition-all"
                         >
                           <ShoppingBag className="w-3.5 h-3.5" />
                           Ir ao marketplace
@@ -458,20 +458,20 @@ export function ProjectDrawer() {
                               <div className="w-16 h-16 rounded-xl bg-zinc-800/60 overflow-hidden shrink-0 flex items-center justify-center">
                                 {img
                                   ? <img src={img} alt={item.equipment.name} className="w-full h-full object-contain p-1" />
-                                  : <Package className="w-6 h-6 text-zinc-600" />}
+                                  : <Package className="w-6 h-6 text-zinc-400" />}
                               </div>
 
                               {/* Info */}
                               <div className="flex-1 min-w-0 flex flex-col justify-between">
                                 <div>
-                                  <p className="text-[10px] font-black text-white uppercase tracking-wider leading-tight line-clamp-2">
+                                  <p className="text-[11px] font-black text-white uppercase tracking-wider leading-tight line-clamp-2">
                                     {item.equipment.name}
                                   </p>
 
                                   {/* Availability badge */}
                                   <div className="mt-1">
                                     {status === 'checking' && (
-                                      <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-zinc-500">
+                                      <span className="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-widest text-zinc-500">
                                         <Loader2 className="w-2.5 h-2.5 animate-spin" /> Verificando…
                                       </span>
                                     )}
@@ -524,7 +524,7 @@ export function ProjectDrawer() {
                               {/* Remove */}
                               <button
                                 onClick={() => removeItem(item.equipment.id)}
-                                className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-lg text-zinc-600 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                                className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-lg text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
                               >
                                 <Trash2 className="w-3 h-3" />
                               </button>
@@ -540,7 +540,7 @@ export function ProjectDrawer() {
                     <div>
                       <div className="flex items-center gap-2 mb-3">
                         <Truck className="w-3.5 h-3.5 text-primary" />
-                        <span className="text-[9px] font-black uppercase tracking-[0.25em] text-zinc-500">
+                        <span className="text-[11px] font-black uppercase tracking-wider text-zinc-500">
                           Retirada / Entrega
                         </span>
                       </div>
@@ -550,7 +550,7 @@ export function ProjectDrawer() {
                           <button
                             key={method}
                             onClick={() => setDeliveryMethod(method)}
-                            className={`py-2.5 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all ${
+                            className={`py-2.5 rounded-xl border text-[11px] font-black uppercase tracking-widest transition-all ${
                               deliveryMethod === method
                                 ? 'border-primary bg-primary/10 text-primary'
                                 : 'border-zinc-800 text-zinc-500 hover:border-zinc-600'
@@ -570,7 +570,7 @@ export function ProjectDrawer() {
                               value={deliveryAddress}
                               onChange={e => setDeliveryAddress(e.target.value)}
                               placeholder="Endereço de entrega"
-                              className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-9 pr-4 py-2.5 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-primary/50 transition-all"
+                              className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-9 pr-4 py-2.5 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-primary/50 transition-all"
                             />
                           </div>
                           <div className="relative">
@@ -580,7 +580,7 @@ export function ProjectDrawer() {
                               value={deliveryContact}
                               onChange={e => setDeliveryContact(e.target.value)}
                               placeholder="Responsável pelo recebimento"
-                              className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-9 pr-4 py-2.5 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-primary/50 transition-all"
+                              className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-9 pr-4 py-2.5 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-primary/50 transition-all"
                             />
                           </div>
                         </div>
@@ -597,13 +597,13 @@ export function ProjectDrawer() {
                 {/* Total */}
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <p className="text-[9px] font-black uppercase tracking-[0.25em] text-zinc-500">
+                    <p className="text-[11px] font-black uppercase tracking-wider text-zinc-500">
                       Total estimado
                     </p>
                     <p className="text-2xl font-display font-black text-white tracking-tighter">
                       {brl(estimatedTotal)}
                     </p>
-                    <p className="text-[10px] text-zinc-500 mt-0.5">
+                    <p className="text-[11px] text-zinc-500 mt-0.5">
                       {state.items.length} {state.items.length === 1 ? 'equipamento' : 'equipamentos'} · {totalDays} {totalDays === 1 ? 'diária' : 'diárias'}
                     </p>
                   </div>
@@ -611,13 +611,13 @@ export function ProjectDrawer() {
                   {hasConflict && (
                     <div className="flex items-center gap-1.5 text-red-400 bg-red-500/10 px-3 py-1.5 rounded-xl border border-red-500/20">
                       <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                      <span className="text-[9px] font-black uppercase tracking-widest">Conflito</span>
+                      <span className="text-[11px] font-black uppercase tracking-widest">Conflito</span>
                     </div>
                   )}
                   {allOk && !isChecking && (
                     <div className="flex items-center gap-1.5 text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20">
                       <Sparkles className="w-3.5 h-3.5 shrink-0" />
-                      <span className="text-[9px] font-black uppercase tracking-widest">Tudo livre</span>
+                      <span className="text-[11px] font-black uppercase tracking-widest">Tudo livre</span>
                     </div>
                   )}
                 </div>

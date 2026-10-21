@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { friendlyError } from '@/lib/errors';
+import { toast } from 'sonner';
 import { Package, Truck, Clock, MapPin, CheckCircle2, ShoppingBag, ArrowRight, Loader2, Phone, User, Hash, ShieldAlert, Navigation, RotateCcw, Building2, Eye, Info, Weight, Boxes, Ruler, MoreHorizontal, PhoneCall, History, Search, Filter, AlertCircle, ChevronRight, Gauge } from 'lucide-react';
 import { PaginationBar } from '@/components/ui/pagination-bar';
 import { Card, CardContent } from '@/components/ui/card';
@@ -20,6 +22,7 @@ import { cn } from '@/lib/utils';
 import { InventoryStatusReport } from './InventoryStatusReport';
 import { useTenant } from '@/contexts/TenantContext';
 import { DriverTrackingModal } from './DriverTrackingModal';
+import { confirmAction } from '@/components/ui/confirm-dialog';
 
 /**
  * Logística das entregas. Com `bookingId`, roda em modo embutido dentro do detalhe
@@ -159,7 +162,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                 return;
             } catch (error: any) {
                 console.error('Erro ao aceitar pedido:', error);
-                alert(`Erro ao aceitar: ${error.message}`);
+                toast.error(`Erro ao aceitar: ${friendlyError(error)}`);
                 return;
             } finally {
                 setUpdatingId(null);
@@ -196,7 +199,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
 
                 if (tokenError) throw tokenError;
                 if (!isValid) {
-                    alert('Token de segurança inválido! Solicite o código ao cliente no ato da entrega.');
+                    toast.error('Token de segurança inválido! Solicite o código ao cliente no ato da entrega.');
                     return;
                 }
                 
@@ -204,7 +207,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                 console.log("Entrega confirmada via token!");
                 return;
             } catch (err: any) {
-                alert(`Erro na validação: ${err.message}`);
+                toast.error(`Erro na validação: ${friendlyError(err)}`);
                 return;
             } finally {
                 setUpdatingId(null);
@@ -237,7 +240,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
             console.log("Logística atualizada com sucesso!");
         } catch (error: any) {
             console.error('Erro na logística:', error);
-            alert(`Erro ao atualizar logística: ${error.message || 'Erro desconhecido'}`);
+            toast.error(`Erro ao atualizar logística: ${friendlyError(error)}`);
         } finally {
             setUpdatingId(null);
             setSelectedBranchId(null);
@@ -246,7 +249,13 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
     };
 
     const handleDeleteBooking = async (bookingId: string) => {
-        if (!window.confirm('TEM CERTEZA? Isso excluirá o pedido e todas as entregas associadas permanentemente.')) return;
+        const ok = await confirmAction({
+            title: 'Excluir este pedido?',
+            description: 'O pedido e todas as entregas ligadas a ele serão apagados. Isso não pode ser desfeito.',
+            confirmLabel: 'Excluir pedido',
+            destructive: true,
+        });
+        if (!ok) return;
         
         setUpdatingId(`del-${bookingId}`);
         try {
@@ -257,10 +266,10 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
             if (error) throw error;
             
             queryClient.invalidateQueries({ queryKey: ['deliveries'] });
-            alert('Pedido excluído com sucesso!');
+            toast.success('Pedido excluído com sucesso!');
         } catch (error: any) {
             console.error('Erro ao excluir:', error);
-            alert(`Erro ao excluir: ${error.message}`);
+            toast.error(`Erro ao excluir: ${friendlyError(error)}`);
         } finally {
             setUpdatingId(null);
         }
@@ -268,7 +277,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
 
     const confirmBranchSelection = async () => {
         if (!selectedBranchId) {
-            alert('Por favor, selecione uma unidade de origem.');
+            toast.error('Por favor, selecione uma unidade de origem.');
             return;
         }
         setBranchModalOpen(false);
@@ -325,14 +334,14 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                     <div className="flex items-center justify-between border-b border-white/5 pb-6">
                         <div className="flex items-center gap-3">
                             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                            <span className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400">Fluxo Operacional</span>
+                            <span className="text-xs font-black uppercase tracking-wider text-zinc-400">Fluxo Operacional</span>
                         </div>
                         <Navigation className="h-5 w-5 text-zinc-800" />
                     </div>
 
                     <div className="space-y-6">
                         <div className="space-y-2">
-                            <p className="text-[10px] font-black uppercase text-zinc-600 tracking-[0.2em]">Próxima etapa</p>
+                            <p className="text-[11px] font-black uppercase text-zinc-400 tracking-wider">Próxima etapa</p>
                             <div className="flex items-center gap-4">
                                 <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
                                     {delivery.status === 'pending' && <ShoppingBag className="h-6 w-6 text-emerald-500" />}
@@ -359,9 +368,9 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                     {/* Token Visibility for Renter / Master */}
                     {canSeeToken && (delivery.status === 'shipped' || delivery.status === 'ready') && (
                         <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl text-center mb-4">
-                            <p className="text-[10px] font-black uppercase text-primary tracking-[0.2em] mb-1">Token de Segurança</p>
-                            <div className="text-2xl font-black text-white tracking-[0.3em]">{delivery.delivery_token || delivery.delivery_secrets?.[0]?.token || '----'}</div>
-                            <p className="text-[9px] text-zinc-500 font-medium mt-1">Forneça este código ao motorista para confirmar o recebimento.</p>
+                            <p className="text-[11px] font-black uppercase text-primary tracking-wider mb-1">Token de Segurança</p>
+                            <div className="text-2xl font-black text-white tracking-wider">{delivery.delivery_token || delivery.delivery_secrets?.[0]?.token || '----'}</div>
+                            <p className="text-[11px] text-zinc-500 font-medium mt-1">Forneça este código ao motorista para confirmar o recebimento.</p>
                         </div>
                     )}
 
@@ -381,13 +390,13 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                             {/* Token Input for Fulfiller during Delivery Confirmation */}
                             {delivery.status === 'shipped' && isFulfiller && (
                                 <div className="space-y-2">
-                                    <p className="text-[10px] font-black uppercase text-zinc-600 tracking-[0.2em]">Validar Token de Entrega</p>
+                                    <p className="text-[11px] font-black uppercase text-zinc-400 tracking-wider">Validar Token de Entrega</p>
                                     <Input 
                                         placeholder="0000"
                                         maxLength={4}
                                         value={tokenInputs[delivery.id] || ''}
                                         onChange={(e) => setTokenInputs(prev => ({ ...prev, [delivery.id]: e.target.value }))}
-                                        className="h-14 bg-black border-zinc-800 text-center text-xl font-black tracking-[0.5em] rounded-2xl focus:ring-primary/50"
+                                        className="h-14 bg-black border-zinc-800 text-center text-xl font-black tracking-wider rounded-2xl focus:ring-primary/50"
                                     />
                                 </div>
                             )}
@@ -395,7 +404,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                             {/* Serial Number Input during Separation */}
                             {delivery.status === 'picking' && isFulfiller && (
                                 <div className="space-y-2">
-                                    <p className="text-[10px] font-black uppercase text-zinc-600 tracking-[0.2em]">Vincular Serial</p>
+                                    <p className="text-[11px] font-black uppercase text-zinc-400 tracking-wider">Vincular Serial</p>
                                     <Input 
                                         placeholder="Número de série do item..."
                                         value={serialNumbers[delivery.id] || ''}
@@ -425,9 +434,9 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                         </div>
                     ) : (
                         <div className="p-6 bg-zinc-900/40 rounded-2xl border border-white/5 text-center">
-                            <p className="text-[10px] font-black uppercase text-zinc-600 tracking-widest mb-1">Status: {getStatusLabel(delivery.status)}</p>
+                            <p className="text-[11px] font-black uppercase text-zinc-400 tracking-widest mb-1">Status: {getStatusLabel(delivery.status)}</p>
                             <p className="text-[11px] text-zinc-500 font-medium leading-relaxed">
-                                {isMaster ? 'Modo Observador: Acompanhando performance de malha.' : 
+                                {isMaster ? 'Modo observador: você acompanha esta entrega, mas não altera.' : 
                                  isRenter ? 'O locador está preparando seu equipamento. O token de segurança aparecerá aqui em breve.' : 
                                  'Apenas a unidade responsável pode transitar este status.'}
                             </p>
@@ -440,7 +449,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                             variant="ghost"
                             onClick={() => handleDeleteBooking(delivery.booking_id)}
                             disabled={updatingId === `del-${delivery.booking_id}`}
-                            className="w-full text-[10px] font-black uppercase tracking-widest text-red-500/40 hover:text-red-500 hover:bg-red-500/10 h-12 rounded-xl mt-4 border border-dashed border-red-500/10"
+                            className="w-full text-[11px] font-black uppercase tracking-widest text-red-500/40 hover:text-red-500 hover:bg-red-500/10 h-12 rounded-xl mt-4 border border-dashed border-red-500/10"
                         >
                             {updatingId === `del-${delivery.booking_id}` ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -460,7 +469,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
         return (
             <div className="flex flex-col items-center justify-center py-20">
                 <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-                <p className="text-zinc-500 font-medium tracking-widest uppercase text-xs">Carregando Fluxo Logístico...</p>
+                <p className="text-zinc-500 font-medium tracking-widest uppercase text-xs">Carregando entregas...</p>
             </div>
         );
     }
@@ -475,7 +484,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                 </p>
                 <Button 
                     variant="outline" 
-                    className="mt-6 border-zinc-800 text-[10px] font-black uppercase tracking-widest"
+                    className="mt-6 border-zinc-800 text-[11px] font-black uppercase tracking-widest"
                     onClick={() => queryClient.invalidateQueries({ queryKey: ['deliveries'] })}
                 >
                     Tentar Novamente
@@ -490,19 +499,19 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
             <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-4 border-b border-white/5">
                 <div className="space-y-1">
                     <h2 className="text-4xl font-black tracking-tighter uppercase leading-none">Logística</h2>
-                    <p className="text-zinc-500 font-bold uppercase tracking-[0.3em] text-xs">Hub de Operações em Tempo Real</p>
+                    <p className="text-zinc-500 font-bold uppercase tracking-wider text-xs">Entregas e devoluções em tempo real</p>
                 </div>
 
                 <div className="flex overflow-x-auto no-scrollbar bg-zinc-950/60 p-1.5 rounded-[20px] border border-white/5 backdrop-blur-xl max-w-full">
                     {[
-                        { id: 'deliveries', label: 'Expedição' },
+                        { id: 'deliveries', label: 'Entregas' },
                         { id: 'reverse', label: 'Fluxo de Retorno' }
                     ].map((tab) => (
                         <button 
                             key={tab.id}
                             onClick={() => setActiveSubTab(tab.id as any)}
                             className={cn(
-                                "px-6 md:px-8 py-2.5 rounded-[14px] text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-500 whitespace-nowrap",
+                                "px-6 md:px-8 py-2.5 rounded-[14px] text-[11px] md:text-xs font-black uppercase tracking-widest transition-all duration-500 whitespace-nowrap",
                                 activeSubTab === tab.id 
                                     ? "bg-zinc-800 text-white shadow-2xl shadow-black/50" 
                                     : "text-zinc-400 hover:text-zinc-200"
@@ -521,7 +530,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                         <button
                             onClick={() => setLogisticsMode('to_send')}
                             className={cn(
-                                "flex-1 md:flex-none px-6 md:px-10 py-3.5 rounded-[18px] text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-700 whitespace-nowrap",
+                                "flex-1 md:flex-none px-6 md:px-10 py-3.5 rounded-[18px] text-[11px] font-black uppercase tracking-wider transition-all duration-700 whitespace-nowrap",
                                 logisticsMode === 'to_send' 
                                     ? "bg-zinc-800 text-white shadow-xl" 
                                     : "text-zinc-400 hover:text-zinc-200"
@@ -535,7 +544,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                         <button
                             onClick={() => setLogisticsMode('to_receive')}
                             className={cn(
-                                "flex-1 md:flex-none px-6 md:px-10 py-3.5 rounded-[18px] text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-700 whitespace-nowrap",
+                                "flex-1 md:flex-none px-6 md:px-10 py-3.5 rounded-[18px] text-[11px] font-black uppercase tracking-wider transition-all duration-700 whitespace-nowrap",
                                 logisticsMode === 'to_receive' 
                                     ? "bg-zinc-800 text-white shadow-xl" 
                                     : "text-zinc-400 hover:text-zinc-200"
@@ -561,8 +570,8 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                         <div className="absolute inset-0 bg-zinc-800 blur-2xl rounded-full opacity-20" />
                                         <Truck className="h-16 w-16 text-zinc-800 relative z-10 mx-auto" />
                                     </div>
-                                    <h3 className="text-2xl font-black uppercase tracking-tighter text-zinc-600">{embedded ? 'Entrega ainda não iniciada' : 'Silêncio na Malha'}</h3>
-                                    <p className="text-zinc-700 text-xs mt-3 font-bold uppercase tracking-widest">
+                                    <h3 className="text-2xl font-black uppercase tracking-tighter text-zinc-400">{embedded ? 'Entrega ainda não iniciada' : 'Nenhuma entrega agora'}</h3>
+                                    <p className="text-zinc-500 text-xs mt-3 font-bold uppercase tracking-widest">
                                         {embedded
                                             ? 'A logística começa quando a locadora aprovar o pedido.'
                                             : `Nenhum fluxo ${logisticsMode === 'to_send' ? 'de saída' : 'de entrada'} detectado.`}
@@ -595,24 +604,24 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                                     </div>
                                                                     <div className="space-y-2">
                                                                         <div className="flex items-center gap-3">
-                                                                            <Badge className="bg-emerald-500/10 text-emerald-500 border-none text-[9px] font-black uppercase tracking-widest px-3 py-1">Transferência de Suprimento</Badge>
-                                                                            <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">TRF-{transfer.id.slice(0, 8).toUpperCase()}</span>
+                                                                            <Badge className="bg-emerald-500/10 text-emerald-500 border-none text-[11px] font-black uppercase tracking-widest px-3 py-1">Transferência de Suprimento</Badge>
+                                                                            <span className="text-[11px] font-black text-zinc-400 uppercase tracking-widest">TRF-{transfer.id.slice(0, 8).toUpperCase()}</span>
                                                                         </div>
                                                                         <h3 className="text-2xl font-black uppercase tracking-tighter text-white">{transfer.equipment?.name}</h3>
-                                                                        <div className="flex items-center gap-2 text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                                                                        <div className="flex items-center gap-2 text-[11px] font-black text-zinc-500 uppercase tracking-widest">
                                                                             <MapPin className="h-3 w-3" /> ORIGEM: <span className="text-zinc-300">{transfer.source_branch?.name || 'Aguardando Liberação'}</span>
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                                 <div className="text-right">
-                                                                    <span className="text-[9px] font-black uppercase text-zinc-700 tracking-[0.4em] block mb-1">Status</span>
-                                                                    <Badge variant="outline" className="bg-zinc-900 text-zinc-400 border-white/5 font-black uppercase text-[10px] px-4 py-1.5">{transfer.status}</Badge>
+                                                                    <span className="text-[11px] font-black uppercase text-zinc-500 tracking-wider block mb-1">Status</span>
+                                                                    <Badge variant="outline" className="bg-zinc-900 text-zinc-400 border-white/5 font-black uppercase text-[11px] px-4 py-1.5">{transfer.status}</Badge>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                         <div className="w-full lg:w-[340px] bg-zinc-950/60 rounded-[32px] p-8 border border-white/5 flex flex-col items-center justify-center text-center gap-4">
                                                             <Truck className="h-8 w-8 text-emerald-500/20 mb-2" />
-                                                            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Fluxo Interno de Reposição</p>
+                                                            <p className="text-[11px] font-black uppercase tracking-widest text-zinc-500">Fluxo Interno de Reposição</p>
                                                             <p className="text-[11px] text-zinc-400 font-medium">Este item está sendo movimentado entre suas unidades.</p>
                                                         </div>
                                                     </div>
@@ -649,10 +658,10 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                                 
                                                                 <div className="flex-1 space-y-2 pt-1">
                                                                     <div className="flex items-center gap-3">
-                                                                        <Badge variant="outline" className="text-[10px] uppercase font-black bg-emerald-500/10 text-emerald-500 border-emerald-500/20 px-2 py-0.5 tracking-widest">
+                                                                        <Badge variant="outline" className="text-[11px] uppercase font-black bg-emerald-500/10 text-emerald-500 border-emerald-500/20 px-2 py-0.5 tracking-widest">
                                                                             ORD-{delivery.booking_id.slice(0, 8).toUpperCase()}
                                                                         </Badge>
-                                                                        <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest flex items-center gap-1.5">
+                                                                        <span className="text-[11px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
                                                                             <Clock className="h-3 w-3" /> {format(new Date(delivery.created_at), "dd/MM HH:mm")}
                                                                         </span>
                                                                     </div>
@@ -662,12 +671,12 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                                     <div className="flex flex-wrap gap-2 pt-1">
                                                                         <div className="flex items-center gap-1.5 bg-zinc-900/60 px-3 py-1 rounded-full border border-white/5">
                                                                             <div className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
-                                                                            <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Cliente</span>
+                                                                            <span className="text-[11px] font-black uppercase tracking-widest text-zinc-400">Cliente</span>
                                                                         </div>
                                                                         {delivery.fulfilling_company_id !== tenantId && (
                                                                             <div className="flex items-center gap-1.5 bg-amber-500/5 px-3 py-1 rounded-full border border-amber-500/10">
                                                                                 <Truck className="h-3 w-3 text-amber-500/50" />
-                                                                                <span className="text-[9px] font-black uppercase tracking-widest text-amber-500/80">Terceirizado</span>
+                                                                                <span className="text-[11px] font-black uppercase tracking-widest text-amber-500/80">Terceirizado</span>
                                                                             </div>
                                                                         )}
                                                                     </div>
@@ -677,8 +686,8 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                             {/* Localizações - Pills */}
                                                             <div className="space-y-2.5">
                                                                 <div className="flex items-center gap-3 bg-black/40 p-4 rounded-2xl border border-white/5 hover:border-white/10 transition-colors">
-                                                                    <MapPin className="h-4 w-4 text-zinc-600" />
-                                                                    <span className="text-[10px] font-black uppercase tracking-[0.1em] text-zinc-400">
+                                                                    <MapPin className="h-4 w-4 text-zinc-400" />
+                                                                    <span className="text-[11px] font-black uppercase tracking-[0.1em] text-zinc-400">
                                                                         {delivery.origin_branch?.name || 'HUB CENTRAL'}
                                                                     </span>
                                                                 </div>
@@ -686,10 +695,10 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                                     <div className="flex items-start gap-3 bg-primary/5 p-4 rounded-2xl border border-primary/20 hover:border-primary/30 transition-colors">
                                                                         <Truck className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                                                                         <div className="space-y-0.5 min-w-0">
-                                                                            <p className="text-[9px] font-black uppercase tracking-widest text-primary/70">Endereço de Entrega</p>
-                                                                            <p className="text-[10px] font-bold text-zinc-300 leading-snug">{delivery.booking.delivery_address}</p>
+                                                                            <p className="text-[11px] font-black uppercase tracking-widest text-primary/70">Endereço de Entrega</p>
+                                                                            <p className="text-[11px] font-bold text-zinc-300 leading-snug">{delivery.booking.delivery_address}</p>
                                                                             {delivery.booking?.delivery_contact && (
-                                                                                <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">
+                                                                                <p className="text-[11px] text-zinc-500 font-bold uppercase tracking-wider">
                                                                                     Responsável: {delivery.booking.delivery_contact}
                                                                                 </p>
                                                                             )}
@@ -698,7 +707,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                                 )}
                                                                 <div className="flex items-center gap-3 bg-black/40 p-4 rounded-2xl border border-white/5 hover:border-white/10 transition-colors">
                                                                     <RotateCcw className="h-4 w-4 text-emerald-500/50" />
-                                                                    <span className="text-[10px] font-black uppercase tracking-[0.1em] text-emerald-500/80">
+                                                                    <span className="text-[11px] font-black uppercase tracking-[0.1em] text-emerald-500/80">
                                                                         RETORNO: {delivery.booking?.renter?.company?.address_city || 'AV. IPIRANGA, 1097'}
                                                                     </span>
                                                                 </div>
@@ -707,16 +716,16 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                             {/* Status Logístico Principal */}
                                                             <div className="space-y-4">
                                                                 <div className="flex flex-col gap-2">
-                                                                    <p className="text-[10px] font-black uppercase text-zinc-600 tracking-[0.2em]">Status Logístico</p>
+                                                                    <p className="text-[11px] font-black uppercase text-zinc-400 tracking-wider">Status Logístico</p>
                                                                     <div className="w-fit bg-emerald-500/5 border border-emerald-500/20 px-6 py-3 rounded-2xl shadow-[0_0_30px_rgba(16,185,129,0.05)] flex items-center gap-3 group/status">
                                                                         <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)]" />
                                                                         <span className="text-xs font-black uppercase tracking-[0.1em] text-emerald-500">{getStatusLabel(delivery.status)}</span>
                                                                     </div>
                                                                 </div>
-                                                                <div className="text-[10px] font-black text-zinc-700 uppercase tracking-widest flex items-center gap-4">
+                                                                <div className="text-[11px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-4">
                                                                     <span>Volume: <span className="text-zinc-400 ml-1">{delivery.quantity || 1} UN</span></span>
                                                                     {delivery.fulfillment_type === 'subrental' && (
-                                                                        <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-[8px] font-black uppercase">Sub-locação</Badge>
+                                                                        <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-[11px] font-black uppercase">Sub-locação</Badge>
                                                                     )}
                                                                 </div>
                                                             </div>
@@ -729,9 +738,9 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                             {/* Linha do Tempo (Vertical) */}
                                                             <div className="space-y-8">
                                                                 <div className="flex items-center justify-between border-b border-white/5 pb-4">
-                                                                    <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-500">Linha do Tempo</h4>
+                                                                    <h4 className="text-[11px] font-black uppercase tracking-wider text-zinc-500">Linha do Tempo</h4>
                                                                     <div className="flex items-center gap-3">
-                                                                        <span className="text-[9px] font-black uppercase text-zinc-700">Exibir detalhes</span>
+                                                                        <span className="text-[11px] font-black uppercase text-zinc-500">Exibir detalhes</span>
                                                                         <div className="w-8 h-4 bg-emerald-500 rounded-full relative">
                                                                             <div className="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full" />
                                                                         </div>
@@ -780,10 +789,10 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                                                 </div>
                                                                                 <div className="space-y-1.5 py-1">
                                                                                     <div className="flex items-center gap-3">
-                                                                                        <p className={cn("text-[11px] font-black uppercase tracking-widest", isCompleted || isActive ? "text-zinc-100" : "text-zinc-700")}>{step.label}</p>
-                                                                                        {time && <p className="text-[9px] font-bold text-zinc-600">{time}</p>}
+                                                                                        <p className={cn("text-[11px] font-black uppercase tracking-widest", isCompleted || isActive ? "text-zinc-100" : "text-zinc-500")}>{step.label}</p>
+                                                                                        {time && <p className="text-[11px] font-bold text-zinc-400">{time}</p>}
                                                                                     </div>
-                                                                                    <p className="text-[10px] text-zinc-500 font-medium leading-relaxed max-w-xs">{step.desc}</p>
+                                                                                    <p className="text-[11px] text-zinc-500 font-medium leading-relaxed max-w-xs">{step.desc}</p>
                                                                                 </div>
                                                                             </div>
                                                                         );
@@ -805,7 +814,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                                 ) : (
                                                                     <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-6 text-center">
                                                                         <CheckCircle2 className="h-10 w-10 text-emerald-500 mx-auto mb-3" />
-                                                                        <p className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Fluxo Concluído</p>
+                                                                        <p className="text-[11px] font-black uppercase tracking-widest text-emerald-500">Fluxo Concluído</p>
                                                                     </div>
                                                                 )}
 
@@ -832,11 +841,11 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                                         },
                                                                     ].map((info, i) => (
                                                                         <div key={i} className="bg-white/5 rounded-2xl p-4 text-center space-y-2 border border-white/5 min-w-0">
-                                                                            <info.icon className="h-4 w-4 mx-auto text-zinc-600" />
+                                                                            <info.icon className="h-4 w-4 mx-auto text-zinc-400" />
                                                                             <div className="space-y-0.5">
-                                                                                <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">{info.label}</p>
+                                                                                <p className="text-[11px] font-black text-zinc-500 uppercase tracking-widest">{info.label}</p>
                                                                                 <p className="text-[11px] font-black text-zinc-100 uppercase truncate">{info.val}</p>
-                                                                                <p className="text-[9px] font-bold text-zinc-600 uppercase truncate">{info.sub}</p>
+                                                                                <p className="text-[11px] font-bold text-zinc-400 uppercase truncate">{info.sub}</p>
                                                                             </div>
                                                                         </div>
                                                                     ))}
@@ -874,20 +883,20 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                 <RotateCcw className="h-7 w-7 text-indigo-400" />
                             </div>
                             <div>
-                                <h3 className="text-xl font-black uppercase tracking-tighter">Reverse Hub</h3>
-                                <p className="text-[10px] text-indigo-400/60 font-bold uppercase tracking-[0.2em]">Monitoramento de Devoluções e Reentrada</p>
+                                <h3 className="text-xl font-black uppercase tracking-tighter">Devoluções</h3>
+                                <p className="text-[11px] text-indigo-400/60 font-bold uppercase tracking-wider">Monitoramento de Devoluções e Reentrada</p>
                             </div>
                         </div>
                         <div className="flex gap-4">
                             <div className="text-right">
-                                <p className="text-[9px] font-black uppercase text-indigo-500/40 tracking-widest">Coletas Pendentes</p>
+                                <p className="text-[11px] font-black uppercase text-indigo-500/40 tracking-widest">Coletas Pendentes</p>
                                 <p className="text-2xl font-black text-indigo-400">
                                     {deliveries?.filter(d => d.reverse_logistics_status === 'requested').length || 0}
                                 </p>
                             </div>
                             <div className="w-[1px] h-10 bg-indigo-500/10" />
                             <div className="text-right">
-                                <p className="text-[9px] font-black uppercase text-indigo-500/40 tracking-widest">Em Triagem Técnica</p>
+                                <p className="text-[11px] font-black uppercase text-indigo-500/40 tracking-widest">Em Triagem Técnica</p>
                                 <p className="text-2xl font-black text-indigo-400">
                                     {deliveries?.filter(d => d.reverse_logistics_status === 'returned').length || 0}
                                 </p>
@@ -898,14 +907,14 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                     <div className="grid grid-cols-1 gap-10">
                         {deliveries?.filter(d => d.reverse_logistics_status !== 'not_started').length === 0 ? (
                             <div className="bg-zinc-950/20 border border-dashed border-white/5 rounded-[40px] p-32 text-center backdrop-blur-md">
-                                <p className="text-zinc-700 text-[10px] font-black uppercase tracking-[0.4em]">Nenhum fluxo de retorno em andamento</p>
+                                <p className="text-zinc-500 text-[11px] font-black uppercase tracking-wider">Nenhum fluxo de retorno em andamento</p>
                             </div>
                         ) : (
                             deliveries?.filter(d => d.reverse_logistics_status !== 'not_started').map(delivery => (
                                 <motion.div key={`rev-${delivery.id}`} layout className="group">
                                     <Card className="bg-zinc-950/40 border-indigo-500/10 rounded-[40px] overflow-hidden hover:border-indigo-500/30 transition-all duration-700 shadow-2xl relative">
                                         <div className="absolute top-0 right-0 p-8">
-                                            <Badge className="bg-indigo-500 text-black font-black uppercase text-[10px] tracking-widest px-4 py-1.5 rounded-full shadow-lg shadow-indigo-500/20">REVERSA</Badge>
+                                            <Badge className="bg-indigo-500 text-black font-black uppercase text-[11px] tracking-widest px-4 py-1.5 rounded-full shadow-lg shadow-indigo-500/20">REVERSA</Badge>
                                         </div>
                                         <div className="p-12 flex flex-col lg:flex-row gap-12">
                                             <div className="flex-1 space-y-8">
@@ -918,14 +927,14 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                         )}
                                                     </div>
                                                     <div className="space-y-2">
-                                                        <p className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.2em]">Fluxo de Devolução · TRF-REV-{delivery.id.slice(0,6).toUpperCase()}</p>
+                                                        <p className="text-[11px] font-black text-indigo-500 uppercase tracking-wider">Fluxo de Devolução · TRF-REV-{delivery.id.slice(0,6).toUpperCase()}</p>
                                                         <h4 className="text-3xl font-black uppercase tracking-tighter text-white">{delivery.booking?.equipment?.name}</h4>
                                                         <div className="flex items-center gap-4 pt-2">
-                                                            <div className="flex items-center gap-2 text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                                                            <div className="flex items-center gap-2 text-[11px] font-black text-zinc-500 uppercase tracking-widest">
                                                                 <MapPin className="h-3.5 w-3.5 text-indigo-500" /> DE: <span className="text-zinc-300">{delivery.booking?.renter?.company?.city || 'Cliente'}</span>
                                                             </div>
-                                                            <ArrowRight className="h-3 w-3 text-zinc-700" />
-                                                            <div className="flex items-center gap-2 text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                                                            <ArrowRight className="h-3 w-3 text-zinc-500" />
+                                                            <div className="flex items-center gap-2 text-[11px] font-black text-zinc-500 uppercase tracking-widest">
                                                                 <Building2 className="h-3.5 w-3.5 text-indigo-500" /> PARA: <span className="text-zinc-300">{delivery.reverse_logistics_address?.split(',')[0] || 'Base Original'}</span>
                                                             </div>
                                                         </div>
@@ -942,7 +951,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                                         "h-2 w-2 rounded-full transition-all duration-500",
                                                                         isActive ? "bg-indigo-400 shadow-[0_0_10px_rgba(129,140,248,0.5)] scale-125" : "bg-zinc-800"
                                                                     )} />
-                                                                    <span className={cn("text-[8px] font-black uppercase tracking-widest", isActive ? "text-indigo-400" : "text-zinc-700")}>{step}</span>
+                                                                    <span className={cn("text-[11px] font-black uppercase tracking-widest", isActive ? "text-indigo-400" : "text-zinc-500")}>{step}</span>
                                                                 </div>
                                                             );
                                                         })}
@@ -963,7 +972,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                         {delivery.reverse_logistics_status === 'requested' ? <Clock className="h-6 w-6 text-indigo-400" /> : <ShieldAlert className="h-6 w-6 text-indigo-400" />}
                                                     </div>
                                                     <div>
-                                                        <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-1">{delivery.reverse_logistics_status}</p>
+                                                        <p className="text-[11px] font-black uppercase tracking-widest text-indigo-400 mb-1">{delivery.reverse_logistics_status}</p>
                                                         <p className="text-xs text-zinc-500 font-medium leading-relaxed">
                                                             {delivery.reverse_logistics_status === 'requested' ? 'Aguardando início da coleta no endereço do cliente.' : 'Item em processo de retorno e validação técnica.'}
                                                         </p>
@@ -973,7 +982,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                 {delivery.reverse_logistics_status === 'returned' && (
                                                     <div className="space-y-4 w-full">
                                                         <div className="p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl">
-                                                            <p className="text-[10px] text-indigo-400 font-black uppercase tracking-widest mb-1">Aguardando Conferência de Reentrada</p>
+                                                            <p className="text-[11px] text-indigo-400 font-black uppercase tracking-widest mb-1">Aguardando Conferência de Reentrada</p>
                                                             <p className="text-[11px] text-zinc-500">Valide o estado físico dos itens antes de liberar para o estoque.</p>
                                                         </div>
                                                         <Button
@@ -994,7 +1003,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                                     queryClient.invalidateQueries({ queryKey: ['bookings'] });
                                                                 }
                                                             }}
-                                                            className="w-full bg-white text-black font-black uppercase text-[10px] tracking-widest h-14 rounded-2xl shadow-xl flex items-center gap-2"
+                                                            className="w-full bg-white text-black font-black uppercase text-[11px] tracking-widest h-14 rounded-2xl shadow-xl flex items-center gap-2"
                                                         >
                                                             <CheckCircle2 className="h-4 w-4" /> Conferência OK - Guardar
                                                         </Button>
@@ -1009,7 +1018,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                     
                                                     if (isFulfiller) {
                                                         return (
-                                                            <div className="text-[9px] font-bold text-zinc-700 uppercase tracking-widest">
+                                                            <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">
                                                                 Token de Coleta: <span className="text-white font-black">{delivery.reverse_token}</span>
                                                             </div>
                                                         );
@@ -1082,7 +1091,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                             >
                                 <div>
                                     <p className="font-black uppercase tracking-tighter">{branch.name}</p>
-                                    <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">{branch.city} - {branch.state}</p>
+                                    <p className="text-[11px] text-zinc-500 font-bold uppercase tracking-widest">{branch.city} - {branch.state}</p>
                                 </div>
                                 {selectedBranchId === branch.id && <CheckCircle2 className="h-5 w-5 text-primary" />}
                             </button>

@@ -59,7 +59,7 @@ export function EditBookingModal({ booking, isOpen, onClose }: EditBookingModalP
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <p className="text-[10px] uppercase font-black text-zinc-500 tracking-widest">Retirada</p>
+                        <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest">Retirada</p>
                         <Input
                             type="date"
                             value={startDate}
@@ -68,7 +68,7 @@ export function EditBookingModal({ booking, isOpen, onClose }: EditBookingModalP
                         />
                     </div>
                     <div className="space-y-2">
-                        <p className="text-[10px] uppercase font-black text-zinc-500 tracking-widest">Devolução</p>
+                        <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest">Devolução</p>
                         <Input
                             type="date"
                             value={endDate}
@@ -81,7 +81,7 @@ export function EditBookingModal({ booking, isOpen, onClose }: EditBookingModalP
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <p className="text-[10px] uppercase font-black text-zinc-500 tracking-widest">Quantidade</p>
+                        <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest">Quantidade</p>
                         <Input
                             type="number"
                             min={1}
@@ -91,7 +91,7 @@ export function EditBookingModal({ booking, isOpen, onClose }: EditBookingModalP
                         />
                     </div>
                     <div className="space-y-2">
-                        <p className="text-[10px] uppercase font-black text-zinc-500 tracking-widest">Valor Total (R$)</p>
+                        <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest">Valor Total (R$)</p>
                         <Input
                             type="number"
                             min={0}
@@ -104,7 +104,7 @@ export function EditBookingModal({ booking, isOpen, onClose }: EditBookingModalP
                 </div>
 
                 <div className="space-y-2">
-                    <p className="text-[10px] uppercase font-black text-zinc-500 tracking-widest">Status</p>
+                    <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest">Status</p>
                     <select
                         value={status}
                         onChange={(e) => setStatus(e.target.value as Booking['status'])}
@@ -117,7 +117,7 @@ export function EditBookingModal({ booking, isOpen, onClose }: EditBookingModalP
                 </div>
 
                 <div className="space-y-2">
-                    <p className="text-[10px] uppercase font-black text-zinc-500 tracking-widest">Observações</p>
+                    <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest">Observações</p>
                     <Input
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}

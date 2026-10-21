@@ -40,6 +40,12 @@ import { Equipment } from '@/types/database';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
+// Rótulos dos detalhes técnicos (as chaves vêm em inglês do cadastro)
+const FEATURE_LABELS: Record<string, string> = {
+  brand: 'Marca', model: 'Modelo', weight: 'Peso', power: 'Potência', mount: 'Encaixe',
+  resolution: 'Resolução', sensor: 'Sensor', color_temperature: 'Temperatura de cor', battery: 'Bateria',
+};
+
 const brl = (v: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
 
@@ -120,7 +126,7 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
             ? `Seu pedido tem ${cartCount} equipamentos. Continue locando ou finalize para enviar às locadoras.`
             : 'Continue locando ou finalize o pedido para enviar à locadora.'}
         </p>
-        <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400 mb-6">
+        <p className="text-[11px] font-black uppercase tracking-widest text-emerald-400 mb-6">
           {format(parseISO(startDate), "d 'de' MMM", { locale: ptBR })}
           {' → '}
           {format(parseISO(endDate), "d 'de' MMM", { locale: ptBR })}
@@ -153,7 +159,7 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
         <div className="grid grid-cols-2 divide-x divide-zinc-800">
           {/* Start date */}
           <label className="flex flex-col gap-1 px-4 py-3.5 cursor-pointer hover:bg-zinc-900/60 transition-colors">
-            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500">
+            <span className="text-[11px] font-black uppercase tracking-wider text-zinc-500">
               Retirada
             </span>
             <input
@@ -168,7 +174,7 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
 
           {/* End date */}
           <label className="flex flex-col gap-1 px-4 py-3.5 cursor-pointer hover:bg-zinc-900/60 transition-colors">
-            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500">
+            <span className="text-[11px] font-black uppercase tracking-wider text-zinc-500">
               Devolução
             </span>
             <input
@@ -184,7 +190,7 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
 
         {/* Days count + availability */}
         <div className="flex items-center justify-between px-4 py-2.5 border-t border-zinc-800 bg-zinc-950/40">
-          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+          <span className="text-[11px] font-black uppercase tracking-widest text-zinc-500">
             {totalDays} {totalDays === 1 ? 'diária' : 'diárias'}
           </span>
           {loadingAvail ? (
@@ -192,7 +198,7 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
           ) : avail ? (
             <div className="flex items-center gap-1.5">
               <span className={`w-2 h-2 rounded-full ${avail.isAvailable ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
-              <span className={`text-[10px] font-black uppercase tracking-widest ${avail.isAvailable ? 'text-emerald-400' : 'text-red-400'}`}>
+              <span className={`text-[11px] font-black uppercase tracking-widest ${avail.isAvailable ? 'text-emerald-400' : 'text-red-400'}`}>
                 {avail.isAvailable
                   ? `${avail.available} disponíve${avail.available === 1 ? 'l' : 'is'}`
                   : 'Indisponível'}
@@ -207,7 +213,7 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
         onClick={() => setShowCal(v => !v)}
         className="w-full flex items-center justify-between px-4 py-3 rounded-2xl
                    bg-zinc-900/40 border border-zinc-800/60 hover:border-zinc-700
-                   text-[10px] font-black uppercase tracking-widest text-zinc-500
+                   text-[11px] font-black uppercase tracking-widest text-zinc-500
                    hover:text-zinc-300 transition-all"
       >
         <span className="flex items-center gap-2">
@@ -244,10 +250,10 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
         <div className="flex items-center justify-between px-4 py-3.5 rounded-2xl
                         bg-zinc-900/40 border border-zinc-800/60">
           <div className="flex flex-col">
-            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-0.5">
+            <span className="text-[11px] font-black uppercase tracking-wider text-zinc-500 mb-0.5">
               Quantidade
             </span>
-            <span className="text-[10px] text-zinc-600">
+            <span className="text-[11px] text-zinc-400">
               Máx {avail?.available ?? equipment.stock_quantity} unid.
             </span>
           </div>
@@ -280,10 +286,6 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
         <div className="flex items-center justify-between text-[11px] text-zinc-500">
           <span>{quantity}× · {brl(equipment.daily_rate)}/dia · {totalDays} {totalDays === 1 ? 'diária' : 'diárias'}</span>
           <span className="text-zinc-300 font-bold">{brl(totalAmount)}</span>
-        </div>
-        <div className="flex items-center justify-between text-[11px] text-zinc-500">
-          <span>Taxa de serviço HUB (15%)</span>
-          <span className="text-zinc-400">Incluso</span>
         </div>
         <div className="flex items-center justify-between pt-2 border-t border-zinc-800">
           <span className="text-xs font-black uppercase tracking-widest text-white">Total</span>
@@ -319,8 +321,8 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
 
       {/* ── Trust badges ──────────────────────────────────────────────────── */}
       <div className="flex items-center justify-center gap-4 pt-2">
-        <span className="text-[9px] font-black uppercase tracking-widest text-zinc-600 flex items-center gap-1">
-          <ShieldCheck className="w-3 h-3 text-emerald-600" /> Proteção HUB
+        <span className="text-[11px] font-black uppercase tracking-widest text-zinc-400 flex items-center gap-1">
+          <ShieldCheck className="w-3 h-3 text-emerald-600" /> Locadora verificada pelo CineHub
         </span>
       </div>
     </div>
@@ -392,8 +394,8 @@ export default function EquipmentDetails() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[80vh] gap-4">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="text-zinc-500 font-black uppercase tracking-widest text-[10px] animate-pulse">
-          Sincronizando com o Banco...
+        <p className="text-zinc-500 font-black uppercase tracking-widest text-[11px] animate-pulse">
+          Carregando equipamento...
         </p>
       </div>
     );
@@ -445,10 +447,6 @@ export default function EquipmentDetails() {
             <span className="text-sm font-bold uppercase tracking-tighter">Voltar</span>
           </button>
           <div className="flex items-center gap-3">
-            <span className="hidden sm:flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-zinc-600 bg-zinc-900/60 px-3 py-1.5 rounded-xl border border-zinc-800">
-              <ShieldCheck className="w-3 h-3 text-emerald-600" />
-              Seguro Ativo
-            </span>
           </div>
         </div>
       </div>
@@ -467,7 +465,7 @@ export default function EquipmentDetails() {
                   className="w-full h-full object-contain p-6 animate-in fade-in duration-500"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-zinc-700">
+                <div className="w-full h-full flex items-center justify-center text-zinc-500">
                   <Camera className="w-20 h-20" />
                 </div>
               )}
@@ -502,13 +500,13 @@ export default function EquipmentDetails() {
                 <span className={`px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest ${conditionColors[equipment.condition] ?? 'bg-zinc-800 text-zinc-400'}`}>
                   {conditionLabels[equipment.condition] ?? 'N/A'}
                 </span>
-                <div className="flex items-center gap-1.5 text-zinc-300 text-[10px] font-black uppercase tracking-wider bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-xl">
+                <div className="flex items-center gap-1.5 text-zinc-300 text-[11px] font-black uppercase tracking-wider bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-xl">
                   {equipment.company?.logo_url
                     ? <img src={equipment.company.logo_url} alt="" className="w-4 h-4 rounded-md object-cover shrink-0" />
                     : <Building2 className="w-3 h-3 text-primary shrink-0" />}
                   <span>{equipment.company?.name ?? 'Matriz'}</span>
                 </div>
-                <div className="flex items-center gap-1 text-zinc-300 text-[10px] font-black uppercase tracking-wider bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-xl">
+                <div className="flex items-center gap-1 text-zinc-300 text-[11px] font-black uppercase tracking-wider bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-xl">
                   <MapPin className="w-3 h-3 text-primary" />
                   <span>
                     {equipment.location_base ?? equipment.company?.address_city ?? 'Fortaleza'}
@@ -528,7 +526,7 @@ export default function EquipmentDetails() {
                     aria-expanded={showDescription}
                     className="w-full flex items-center justify-between px-4 py-3 rounded-2xl
                                bg-zinc-900/40 border border-zinc-800/60 hover:border-zinc-700
-                               text-[10px] font-black uppercase tracking-widest text-zinc-500
+                               text-[11px] font-black uppercase tracking-widest text-zinc-500
                                hover:text-zinc-300 transition-all"
                   >
                     <span className="flex items-center gap-2">
@@ -566,7 +564,7 @@ export default function EquipmentDetails() {
                 <div className="grid grid-cols-2 gap-3">
                   {Object.entries(equipment.features).map(([key, value]) => (
                     <div key={key} className="bg-zinc-900/30 p-4 rounded-2xl border border-zinc-800/50">
-                      <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest mb-1">{key}</p>
+                      <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest mb-1">{FEATURE_LABELS[key.toLowerCase()] ?? key}</p>
                       <p className="font-bold text-zinc-300">{String(value)}</p>
                     </div>
                   ))}
@@ -581,7 +579,7 @@ export default function EquipmentDetails() {
             {/* Price header */}
             <div className="flex items-end justify-between">
               <div>
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-1">
+                <p className="text-[11px] font-black uppercase tracking-wider text-zinc-500 mb-1">
                   Preço da Diária
                 </p>
                 <span className="text-4xl font-black tracking-tighter text-white">

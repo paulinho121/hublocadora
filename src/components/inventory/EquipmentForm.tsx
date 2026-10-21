@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { friendlyError } from '@/lib/errors';
+import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -122,7 +124,7 @@ export function EquipmentForm({ equipment, companyId: propCompanyId, onSuccess }
       setImages((prev) => [...prev, url]);
     } catch (error) {
       console.error('Error uploading image:', error);
-      alert('Erro ao carregar imagem');
+      toast.error('Erro ao carregar imagem');
     } finally {
       setUploading(false);
     }
@@ -142,7 +144,7 @@ export function EquipmentForm({ equipment, companyId: propCompanyId, onSuccess }
   const handleSmartFill = async () => {
     const name = watch('name');
     if (!name || name.length < 3) {
-      alert('Digite pelo menos o modelo (ex: Sony A7S III) para que a IA possa ajudar.');
+      toast.error('Digite pelo menos o modelo (ex: Sony A7S III) para que a IA possa ajudar.');
       return;
     }
 
@@ -160,7 +162,7 @@ export function EquipmentForm({ equipment, companyId: propCompanyId, onSuccess }
       }
     } catch (error) {
       console.error('AI Error:', error);
-      alert('Não foi possível completar os dados com IA no momento. Tente preencher manualmente.');
+      toast.error('Não foi possível completar os dados com IA no momento. Tente preencher manualmente.');
     } finally {
       setIsAiGenerating(false);
     }
@@ -168,12 +170,12 @@ export function EquipmentForm({ equipment, companyId: propCompanyId, onSuccess }
 
   const onSubmit = async (values: EquipmentFormValues) => {
     if (images.length === 0) {
-      alert('Por favor, adicione pelo menos uma foto do equipamento.');
+      toast.error('Por favor, adicione pelo menos uma foto do equipamento.');
       return;
     }
 
     if (!companyId) {
-      alert('Erro: Sua conta ainda não está vinculada a uma empresa. Por favor, complete seu cadastro de perfil primeiro.');
+      toast.error('Erro: Sua conta ainda não está vinculada a uma empresa. Por favor, complete seu cadastro de perfil primeiro.');
       return;
     }
 
@@ -203,7 +205,7 @@ export function EquipmentForm({ equipment, companyId: propCompanyId, onSuccess }
       console.error('Error saving equipment:', error);
       const errorMsg = error?.message || 'Erro ao salvar equipamento';
       const errorDetails = error?.details || '';
-      alert(`${errorMsg} ${errorDetails}`);
+      toast.error(friendlyError(error, 'Erro ao salvar equipamento.'));
     }
   };
 
@@ -269,12 +271,12 @@ export function EquipmentForm({ equipment, companyId: propCompanyId, onSuccess }
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label htmlFor="name">Nome do Equipamento {equipment?.master_item_id && <span className="text-[10px] text-primary">(Catálogo Oficial)</span>}</Label>
+            <Label htmlFor="name">Nome do Equipamento {equipment?.master_item_id && <span className="text-[11px] text-primary">(Catálogo Oficial)</span>}</Label>
             {/* <button
               type="button"
               onClick={handleSmartFill}
               disabled={isAiGenerating || !!equipment?.master_item_id}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-[10px] text-primary hover:bg-primary/20 transition-all disabled:opacity-50 border border-primary/20 animate-pulse-subtle"
+              className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-[11px] text-primary hover:bg-primary/20 transition-all disabled:opacity-50 border border-primary/20 animate-pulse-subtle"
               title="Preencher Marca, Categoria e Descrição com IA"
             >
               {isAiGenerating ? (
@@ -437,7 +439,7 @@ export function EquipmentForm({ equipment, companyId: propCompanyId, onSuccess }
                   <div className="h-10 w-10 rounded-full bg-zinc-900 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                     <Upload className="h-5 w-5 text-zinc-400 group-hover:text-primary transition-colors" />
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 group-hover:text-primary transition-colors">Nova Foto</span>
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 group-hover:text-primary transition-colors">Nova Foto</span>
                 </>
               )}
               <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" disabled={uploading} />

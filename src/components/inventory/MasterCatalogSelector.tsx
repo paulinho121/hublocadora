@@ -135,24 +135,24 @@ export function MasterCatalogSelector({ companyId, onSuccess }: MasterCatalogSel
                     if (fallback) fallback.classList.remove('hidden');
                   }} 
                 />
-                <div className="fallback-icon absolute inset-0 hidden flex flex-col items-center justify-center text-zinc-700 bg-zinc-900 z-0">
+                <div className="fallback-icon absolute inset-0 hidden flex flex-col items-center justify-center text-zinc-500 bg-zinc-900 z-0">
                   <ImageOff className="w-6 h-6 mb-1 opacity-50" />
-                  <span className="text-[8px] uppercase tracking-tighter font-bold opacity-30">Sem Foto</span>
+                  <span className="text-[11px] uppercase tracking-tighter font-bold opacity-30">Sem Foto</span>
                 </div>
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-[10px] font-black uppercase tracking-tighter bg-zinc-900 px-2 py-0.5 rounded text-zinc-400">
+                <span className="text-[11px] font-black uppercase tracking-tighter bg-zinc-900 px-2 py-0.5 rounded text-zinc-400">
                   {item.brand}
                 </span>
-                <span className="text-[10px] font-bold uppercase tracking-tighter text-primary">
+                <span className="text-[11px] font-bold uppercase tracking-tighter text-primary">
                   {item.category}
                 </span>
               </div>
               <h4 className="font-bold text-zinc-100 truncate tracking-tight">{item.name}</h4>
               <p className="text-xs text-zinc-500 line-clamp-1">{item.description}</p>
             </div>
-            <ChevronRight className={`w-5 h-5 ${selectedItem?.id === item.id ? 'text-primary' : 'text-zinc-700'}`} />
+            <ChevronRight className={`w-5 h-5 ${selectedItem?.id === item.id ? 'text-primary' : 'text-zinc-500'}`} />
           </motion.div>
         ))}
       </div>
@@ -180,7 +180,7 @@ export function MasterCatalogSelector({ companyId, onSuccess }: MasterCatalogSel
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2 col-span-2 md:col-span-1">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                <Label className="text-[11px] font-black uppercase tracking-widest text-zinc-500">
                   {existingItem ? 'Adicionar +' : 'Qtd no Estoque'}
                 </Label>
                 <div className="flex items-center gap-2">
@@ -205,7 +205,7 @@ export function MasterCatalogSelector({ companyId, onSuccess }: MasterCatalogSel
               </div>
 
               <div className="space-y-2 col-span-2 md:col-span-1">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Valor Diária (R$)</Label>
+                <Label className="text-[11px] font-black uppercase tracking-widest text-zinc-500">Valor Diária (R$)</Label>
                 <Input 
                   type="number"
                   value={dailyRate}
@@ -217,7 +217,7 @@ export function MasterCatalogSelector({ companyId, onSuccess }: MasterCatalogSel
               {!existingItem && (
                 <>
                   <div className="space-y-2 col-span-2 md:col-span-1 border-t border-zinc-800/50 pt-4 md:border-0 md:pt-0">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Nome da Base</Label>
+                    <Label className="text-[11px] font-black uppercase tracking-widest text-zinc-500">Nome da Base</Label>
                     <Input 
                       placeholder="Ex: Sede, Filial Zona Sul..."
                       value={locationBase}
@@ -226,7 +226,7 @@ export function MasterCatalogSelector({ companyId, onSuccess }: MasterCatalogSel
                     />
                   </div>
                   <div className="space-y-2 col-span-2 md:col-span-1 border-t border-zinc-800/50 pt-4 md:border-0 md:pt-0">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Estado (UF)</Label>
+                    <Label className="text-[11px] font-black uppercase tracking-widest text-zinc-500">Estado (UF)</Label>
                     <Select 
                       value={stateUf} 
                       onChange={(e: any) => setStateUf(e.target.value)}
@@ -247,7 +247,7 @@ export function MasterCatalogSelector({ companyId, onSuccess }: MasterCatalogSel
 
             <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-2xl flex gap-3">
               <Info className="w-5 h-5 text-amber-500 flex-shrink-0" />
-              <p className="text-[10px] text-amber-200/80 leading-relaxed font-medium">
+              <p className="text-[11px] text-amber-200/80 leading-relaxed font-medium">
                 Fotos e descrição serão importadas do catálogo oficial e <span className="font-bold underline text-amber-400">não poderão ser alteradas</span> posteriormente, garantindo a qualidade do marketplace.
               </p>
             </div>
@@ -274,9 +274,9 @@ export function MasterCatalogSelector({ companyId, onSuccess }: MasterCatalogSel
 
       {filteredCatalog?.length === 0 && (
         <div className="text-center py-20 border-2 border-dashed border-zinc-900 rounded-3xl">
-          <AlertCircle className="w-12 h-12 text-zinc-700 mx-auto mb-4" />
+          <AlertCircle className="w-12 h-12 text-zinc-500 mx-auto mb-4" />
           <h3 className="text-zinc-500 font-bold uppercase tracking-widest">Nenhum equipamento encontrado</h3>
-          <p className="text-zinc-600 text-sm mt-2">Tente buscar por termos como "LS 600" ou "Nova".</p>
+          <p className="text-zinc-400 text-sm mt-2">Tente buscar por termos como "LS 600" ou "Nova".</p>
         </div>
       )}
     </div>

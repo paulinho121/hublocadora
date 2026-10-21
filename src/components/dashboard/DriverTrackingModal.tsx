@@ -97,8 +97,8 @@ export function DriverTrackingModal({ delivery, onClose }: DriverTrackingModalPr
   return (
     <Dialog isOpen={!!delivery} onClose={onClose} title="Entrega em Andamento">
       <div className="space-y-4">
-        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
-          <Radio className={gpsError ? 'h-4 w-4 text-zinc-600' : 'h-4 w-4 text-emerald-500 animate-pulse'} />
+        <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest">
+          <Radio className={gpsError ? 'h-4 w-4 text-zinc-400' : 'h-4 w-4 text-emerald-500 animate-pulse'} />
           {gpsError
             ? <span className="text-zinc-500">GPS inativo</span>
             : <span className="text-emerald-500">
@@ -117,7 +117,7 @@ export function DriverTrackingModal({ delivery, onClose }: DriverTrackingModalPr
         </div>
 
         {address && (
-          <p className="text-xs text-zinc-400"><span className="font-black uppercase text-zinc-600 text-[10px] tracking-widest">Destino: </span>{address}</p>
+          <p className="text-xs text-zinc-400"><span className="font-black uppercase text-zinc-400 text-[11px] tracking-widest">Destino: </span>{address}</p>
         )}
 
         <p className="text-[11px] text-zinc-500 leading-relaxed">

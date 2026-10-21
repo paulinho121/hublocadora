@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { friendlyError } from '@/lib/errors';
+import { toast } from 'sonner';
 import { Plus, LayoutGrid, List, MapPin, Package, Phone, Building2, ExternalLink, Copy, CheckCircle2, Loader2, FileText, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -57,7 +59,7 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
         e.preventDefault();
         
         if (!tenantId) {
-            alert('Erro: ID da empresa não encontrado.');
+            toast.error('Erro: ID da empresa não encontrado.');
             return;
         }
 
@@ -88,13 +90,13 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
             resetForm();
         } catch (error: any) {
             console.error('Erro ao salvar sub-locadora:', error);
-            alert('Erro ao salvar: ' + (error.message || 'Erro desconhecido'));
+            toast.error('Erro ao salvar: ' + friendlyError(error));
         }
     };
 
     const copyInviteLink = (token: string, id: string) => {
         if (!token) {
-            alert('Token de convite não disponível. Tente recriar a unidade.');
+            toast.error('Token de convite não disponível. Tente recriar a unidade.');
             return;
         }
         const link = `${window.location.origin}/invite/${token}`;
@@ -105,7 +107,7 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
 
     const handleResendInvite = async (branch: Branch) => {
         if (!branch.manager_email) {
-            alert('Esta unidade não tem e-mail de gestor cadastrado.');
+            toast.error('Esta unidade não tem e-mail de gestor cadastrado.');
             return;
         }
         try {
@@ -113,7 +115,7 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
             setSentInviteId(branch.id);
             setTimeout(() => setSentInviteId(null), 3000);
         } catch (err: any) {
-            alert('Erro ao reenviar convite: ' + (err.message || 'Tente novamente.'));
+            toast.error('Erro ao reenviar convite: ' + friendlyError(err));
         }
     };
 
@@ -133,8 +135,8 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
                         <button 
                             onClick={() => setViewMode('grid')}
                             className={cn(
-                                "flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
-                                viewMode === 'grid' ? "bg-zinc-900 text-primary shadow-lg" : "text-zinc-600 hover:text-zinc-400"
+                                "flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all",
+                                viewMode === 'grid' ? "bg-zinc-900 text-primary shadow-lg" : "text-zinc-400 hover:text-zinc-400"
                             )}
                         >
                             <LayoutGrid className="w-4 h-4" /> Cards
@@ -142,8 +144,8 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
                         <button 
                             onClick={() => setViewMode('list')}
                             className={cn(
-                                "flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
-                                viewMode === 'list' ? "bg-zinc-900 text-primary shadow-lg" : "text-zinc-600 hover:text-zinc-400"
+                                "flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all",
+                                viewMode === 'list' ? "bg-zinc-900 text-primary shadow-lg" : "text-zinc-400 hover:text-zinc-400"
                             )}
                         >
                             <List className="w-4 h-4" /> Lista
@@ -184,7 +186,7 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
                          <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Nome da Unidade</label>
+                                    <label className="text-[11px] font-black uppercase tracking-widest text-zinc-500 ml-1">Nome da Unidade</label>
                                     <Input 
                                         placeholder="Ex: CineHub SP"
                                         value={name}
@@ -194,7 +196,7 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Email do Gestor</label>
+                                    <label className="text-[11px] font-black uppercase tracking-widest text-zinc-500 ml-1">Email do Gestor</label>
                                     <Input 
                                         type="email"
                                         placeholder="gestor@unidade.com"
@@ -205,7 +207,7 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Documento (CNPJ/CPF)</label>
+                                    <label className="text-[11px] font-black uppercase tracking-widest text-zinc-500 ml-1">Documento (CNPJ/CPF)</label>
                                     <Input 
                                         placeholder="00.000.000/0000-00"
                                         value={document}
@@ -218,7 +220,7 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
 
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                                 <div className="md:col-span-2 space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Endereço Completo</label>
+                                    <label className="text-[11px] font-black uppercase tracking-widest text-zinc-500 ml-1">Endereço Completo</label>
                                     <Input 
                                         placeholder="Rua, Número, Bairro"
                                         value={address}
@@ -228,7 +230,7 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Cidade</label>
+                                    <label className="text-[11px] font-black uppercase tracking-widest text-zinc-500 ml-1">Cidade</label>
                                     <Input 
                                         placeholder="São Paulo"
                                         value={city}
@@ -238,7 +240,7 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Estado (UF)</label>
+                                    <label className="text-[11px] font-black uppercase tracking-widest text-zinc-500 ml-1">Estado (UF)</label>
                                     <Input 
                                         placeholder="SP"
                                         value={state}
@@ -252,7 +254,7 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Telefone/WhatsApp</label>
+                                    <label className="text-[11px] font-black uppercase tracking-widest text-zinc-500 ml-1">Telefone/WhatsApp</label>
                                     <Input 
                                         placeholder="(11) 99999-9999"
                                         value={phone}
@@ -302,11 +304,11 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
                     <table className="w-full text-left border-collapse min-w-[800px]">
                         <thead>
                             <tr className="border-b border-zinc-900 bg-zinc-900/30">
-                                <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-zinc-500">Unidade</th>
-                                <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-zinc-500">Localização</th>
-                                <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-zinc-500">Itens</th>
-                                <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-zinc-500">Status</th>
-                                <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-zinc-500 text-right">Ações</th>
+                                <th className="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-zinc-500">Unidade</th>
+                                <th className="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-zinc-500">Localização</th>
+                                <th className="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-zinc-500">Itens</th>
+                                <th className="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-zinc-500">Status</th>
+                                <th className="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-zinc-500 text-right">Ações</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-zinc-900/50">
@@ -319,7 +321,7 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
                                             </div>
                                             <div>
                                                 <p className="text-sm font-black text-white uppercase tracking-tighter">{branch.name}</p>
-                                                <p className="text-[10px] text-zinc-500 font-medium">{branch.manager_email}</p>
+                                                <p className="text-[11px] text-zinc-500 font-medium">{branch.manager_email}</p>
                                             </div>
                                         </div>
                                     </td>
@@ -337,7 +339,7 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
                                     </td>
                                     <td className="px-6 py-4">
                                         <Badge className={cn(
-                                            "uppercase text-[9px] font-black tracking-widest",
+                                            "uppercase text-[11px] font-black tracking-widest",
                                             branch.status === 'active' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-amber-500/10 text-amber-500 border-amber-500/20"
                                         )}>
                                             {branch.status === 'active' ? 'Ativo' : 'Convite Pendente'}
@@ -378,7 +380,7 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
                                                             ? <CheckCircle2 className="h-3 w-3 text-emerald-400" />
                                                             : <Send className="h-3 w-3 text-amber-400" />
                                                     }
-                                                    <span className="text-[9px] font-black uppercase tracking-widest text-amber-400">
+                                                    <span className="text-[11px] font-black uppercase tracking-widest text-amber-400">
                                                         {sentInviteId === branch.id ? 'Enviado' : 'Reenviar'}
                                                     </span>
                                                 </Button>
@@ -388,7 +390,7 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
                                                     setSelectedBranch(branch);
                                                     setIsStockModalOpen(true);
                                                 }}
-                                                className="bg-zinc-100 text-black font-black uppercase text-[10px] tracking-widest rounded-xl px-4 h-9 shadow-lg"
+                                                className="bg-zinc-100 text-black font-black uppercase text-[11px] tracking-widest rounded-xl px-4 h-9 shadow-lg"
                                             >
                                                 <Package className="w-3 h-3 mr-2" /> Gerenciar
                                             </Button>

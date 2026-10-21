@@ -73,7 +73,7 @@ export class ErrorBoundary extends Component<Props, State> {
             {/* Detalhe do erro (apenas em dev) */}
             {import.meta.env.DEV && this.state.error && (
               <div className="bg-zinc-900 rounded-xl p-4 text-left border border-zinc-800">
-                <p className="text-[10px] uppercase font-black text-zinc-500 tracking-widest mb-2">
+                <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest mb-2">
                   Detalhe do Erro (dev only)
                 </p>
                 <code className="text-xs text-destructive break-all font-mono">

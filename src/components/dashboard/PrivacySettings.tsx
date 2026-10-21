@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
@@ -43,7 +44,7 @@ export function PrivacySettings() {
     };
 
     const handleExportData = () => {
-        alert('Seu relatório de dados (JSON) está sendo gerado e será enviado para o seu e-mail em instantes.');
+        toast.info('Seu relatório de dados (JSON) está sendo gerado e será enviado para o seu e-mail em instantes.');
     };
 
     return (
@@ -64,9 +65,9 @@ export function PrivacySettings() {
                             <h4 className="text-sm font-bold text-zinc-100 flex items-center gap-2">
                                 <Download className="h-4 w-4 text-primary" /> Portabilidade de Dados
                             </h4>
-                            <p className="text-[10px] text-zinc-500 font-medium">Baixe todos os seus dados pessoais em formato legível por máquina.</p>
+                            <p className="text-[11px] text-zinc-500 font-medium">Baixe todos os seus dados pessoais em formato legível por máquina.</p>
                         </div>
-                        <Button variant="outline" onClick={handleExportData} className="w-full md:w-auto rounded-xl border-zinc-800 text-[10px] uppercase font-black tracking-widest px-6">
+                        <Button variant="outline" onClick={handleExportData} className="w-full md:w-auto rounded-xl border-zinc-800 text-[11px] uppercase font-black tracking-widest px-6">
                             Exportar JSON
                         </Button>
                     </div>
@@ -77,13 +78,13 @@ export function PrivacySettings() {
                             <h4 className="text-sm font-bold text-red-500 flex items-center gap-2">
                                 <Trash2 className="h-4 w-4" /> Excluir Meus Dados Forever
                             </h4>
-                            <p className="text-[10px] text-red-900/60 font-medium">Isso irá anonimizar permanentemente seu perfil. Esta ação não pode ser desfeita.</p>
+                            <p className="text-[11px] text-red-900/60 font-medium">Isso irá anonimizar permanentemente seu perfil. Esta ação não pode ser desfeita.</p>
                         </div>
                         
                         <Button 
                             variant="destructive" 
                             onClick={() => setIsDialogOpen(true)}
-                            className="w-full md:w-auto rounded-xl text-[10px] uppercase font-black tracking-widest px-6 shadow-lg shadow-red-500/20"
+                            className="w-full md:w-auto rounded-xl text-[11px] uppercase font-black tracking-widest px-6 shadow-lg shadow-red-500/20"
                         >
                             Solicitar Exclusão
                         </Button>
@@ -115,14 +116,14 @@ export function PrivacySettings() {
                                         variant="destructive" 
                                         onClick={handleAnonymize}
                                         disabled={isDeleting}
-                                        className="w-full h-12 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl"
+                                        className="w-full h-12 rounded-xl font-black uppercase text-[11px] tracking-widest shadow-xl"
                                     >
                                         {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Confirmar Exclusão Definitiva'}
                                     </Button>
                                     <Button 
                                         variant="ghost" 
                                         onClick={() => setIsDialogOpen(false)}
-                                        className="w-full text-zinc-500 font-bold uppercase text-[10px]"
+                                        className="w-full text-zinc-500 font-bold uppercase text-[11px]"
                                     >
                                         Cancelar
                                     </Button>

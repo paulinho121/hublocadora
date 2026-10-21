@@ -97,7 +97,7 @@ function TrackingForm({
 
     return (
         <div className="mt-3 p-3 bg-emerald-500/5 rounded-xl border border-emerald-500/20 space-y-2">
-            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-400 flex items-center gap-1.5">
+            <p className="text-[11px] font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
                 <Truck className="w-3 h-3" />
                 Rastreio de envio — Locadora
             </p>
@@ -106,13 +106,13 @@ function TrackingForm({
                     value={carrier}
                     onChange={e => setCarrier(e.target.value)}
                     placeholder="Transportadora (ex: Correios)"
-                    className="col-span-2 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/50"
+                    className="col-span-2 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-emerald-500/50"
                 />
                 <input
                     value={code}
                     onChange={e => setCode(e.target.value)}
                     placeholder="Código de rastreio"
-                    className="bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/50"
+                    className="bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-emerald-500/50"
                 />
                 <input
                     type="date"
@@ -123,7 +123,7 @@ function TrackingForm({
                 />
             </div>
             <Button
-                className="w-full h-8 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase tracking-widest text-[10px]"
+                className="w-full h-8 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase tracking-widest text-[11px]"
                 onClick={handleSave}
                 disabled={update.isPending}
             >
@@ -176,7 +176,7 @@ function ReturnTrackingForm({
 
     return (
         <div className="mt-3 p-3 bg-red-500/5 rounded-xl border border-red-500/20 space-y-2">
-            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-red-400 flex items-center gap-1.5">
+            <p className="text-[11px] font-black uppercase tracking-wider text-red-400 flex items-center gap-1.5">
                 <ArrowUpFromLine className="w-3 h-3" />
                 Rastreio do retorno — Locatário
             </p>
@@ -185,13 +185,13 @@ function ReturnTrackingForm({
                     value={carrier}
                     onChange={e => setCarrier(e.target.value)}
                     placeholder="Transportadora (ex: Correios)"
-                    className="col-span-2 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-red-500/50"
+                    className="col-span-2 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-red-500/50"
                 />
                 <input
                     value={code}
                     onChange={e => setCode(e.target.value)}
                     placeholder="Código de rastreio"
-                    className="bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-red-500/50"
+                    className="bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-red-500/50"
                 />
                 <input
                     type="date"
@@ -202,7 +202,7 @@ function ReturnTrackingForm({
                 />
             </div>
             <Button
-                className="w-full h-8 rounded-lg bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-widest text-[10px]"
+                className="w-full h-8 rounded-lg bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-widest text-[11px]"
                 onClick={handleSave}
                 disabled={update.isPending}
             >
@@ -253,7 +253,7 @@ function CompanyGroup({
                     <div className="text-left">
                         <p className="text-xs font-black uppercase tracking-wider text-white">{companyName}</p>
                         {companyCity && (
-                            <p className="text-[9px] text-zinc-500 flex items-center gap-1 mt-0.5">
+                            <p className="text-[11px] text-zinc-500 flex items-center gap-1 mt-0.5">
                                 <MapPin className="w-2.5 h-2.5" />{companyCity}
                             </p>
                         )}
@@ -261,18 +261,18 @@ function CompanyGroup({
                 </div>
                 <div className="flex items-center gap-2">
                     {groupDelivered && (
-                        <span className="text-[9px] font-black uppercase tracking-widest text-emerald-400 flex items-center gap-1">
+                        <span className="text-[11px] font-black uppercase tracking-widest text-emerald-400 flex items-center gap-1">
                             <CheckCircle2 className="w-3 h-3" /> Entregue
                         </span>
                     )}
                     {groupInTransit && !groupDelivered && (
-                        <span className="text-[9px] font-black uppercase tracking-widest text-blue-400 flex items-center gap-1">
+                        <span className="text-[11px] font-black uppercase tracking-widest text-blue-400 flex items-center gap-1">
                             <Truck className="w-3 h-3" /> Em trânsito
                         </span>
                     )}
                     {expanded
-                        ? <ChevronUp   className="w-4 h-4 text-zinc-600" />
-                        : <ChevronDown className="w-4 h-4 text-zinc-600" />}
+                        ? <ChevronUp   className="w-4 h-4 text-zinc-400" />
+                        : <ChevronDown className="w-4 h-4 text-zinc-400" />}
                 </div>
             </button>
 
@@ -300,21 +300,21 @@ function CompanyGroup({
                                             <div className="w-14 h-14 rounded-xl bg-zinc-800/60 overflow-hidden shrink-0 flex items-center justify-center">
                                                 {eq?.images?.[0]
                                                     ? <img src={eq.images[0]} alt="" className="w-full h-full object-contain p-1" />
-                                                    : <Package className="w-5 h-5 text-zinc-600" />}
+                                                    : <Package className="w-5 h-5 text-zinc-400" />}
                                             </div>
 
                                             {/* Info */}
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-start justify-between gap-2">
-                                                    <p className="text-[10px] font-black uppercase tracking-wider text-white line-clamp-2">
+                                                    <p className="text-[11px] font-black uppercase tracking-wider text-white line-clamp-2">
                                                         {eq?.name ?? 'Equipamento'}
                                                     </p>
-                                                    <Badge className={`text-[8px] font-black uppercase tracking-widest border shrink-0 ${BOOKING_STATUS_COLOR[booking.status] ?? ''}`}>
+                                                    <Badge className={`text-[11px] font-black uppercase tracking-widest border shrink-0 ${BOOKING_STATUS_COLOR[booking.status] ?? ''}`}>
                                                         {BOOKING_STATUS_LABEL[booking.status] ?? booking.status}
                                                     </Badge>
                                                 </div>
 
-                                                <p className="text-[10px] text-zinc-500 mt-1">
+                                                <p className="text-[11px] text-zinc-500 mt-1">
                                                     {booking.quantity}× · {brl(booking.total_amount)}
                                                 </p>
 
@@ -322,11 +322,11 @@ function CompanyGroup({
                                                 {shipment && (
                                                     <div className="flex items-center gap-1.5 mt-1.5">
                                                         {shipmentIcon(shipSt, 'w-3 h-3')}
-                                                        <span className={`text-[9px] font-black uppercase tracking-widest ${SHIPMENT_STATUS_COLOR[shipSt]}`}>
+                                                        <span className={`text-[11px] font-black uppercase tracking-widest ${SHIPMENT_STATUS_COLOR[shipSt]}`}>
                                                             {SHIPMENT_STATUS_LABEL[shipSt]}
                                                         </span>
                                                         {shipment.tracking_code && (
-                                                            <span className="text-[9px] text-zinc-600 font-mono">
+                                                            <span className="text-[11px] text-zinc-400 font-mono">
                                                                 · {shipment.tracking_code}
                                                             </span>
                                                         )}
@@ -345,7 +345,7 @@ function CompanyGroup({
                                                 )}
 
                                                 {shipment?.estimated_arrival && (
-                                                    <p className="text-[9px] text-zinc-600 mt-0.5">
+                                                    <p className="text-[11px] text-zinc-400 mt-0.5">
                                                         Previsão:{' '}
                                                         {format(parseISO(shipment.estimated_arrival), "d 'de' MMM", { locale: ptBR })}
                                                     </p>
@@ -359,7 +359,7 @@ function CompanyGroup({
                                             {isOwner && booking.status === 'approved' && shipment && shipSt !== 'delivered' && (
                                                 <button
                                                     onClick={() => setShowTrackingId(isShowingTracking ? null : booking.id)}
-                                                    className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-emerald-500 hover:text-emerald-400 transition-colors"
+                                                    className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-emerald-500 hover:text-emerald-400 transition-colors"
                                                 >
                                                     <Edit3 className="w-3 h-3" />
                                                     {shipment.tracking_code ? 'Editar rastreio' : 'Adicionar rastreio'}
@@ -431,7 +431,7 @@ function ReturnCompanyGroup({
                     <div className="text-left">
                         <p className="text-xs font-black uppercase tracking-wider text-white">{companyName}</p>
                         {companyCity && (
-                            <p className="text-[9px] text-zinc-500 flex items-center gap-1 mt-0.5">
+                            <p className="text-[11px] text-zinc-500 flex items-center gap-1 mt-0.5">
                                 <MapPin className="w-2.5 h-2.5" />{companyCity}
                             </p>
                         )}
@@ -439,18 +439,18 @@ function ReturnCompanyGroup({
                 </div>
                 <div className="flex items-center gap-2">
                     {allReturned && (
-                        <span className="text-[9px] font-black uppercase tracking-widest text-emerald-400 flex items-center gap-1">
+                        <span className="text-[11px] font-black uppercase tracking-widest text-emerald-400 flex items-center gap-1">
                             <PackageCheck className="w-3 h-3" /> Recebido
                         </span>
                     )}
                     {anyInTransit && !allReturned && (
-                        <span className="text-[9px] font-black uppercase tracking-widest text-red-400 flex items-center gap-1">
+                        <span className="text-[11px] font-black uppercase tracking-widest text-red-400 flex items-center gap-1">
                             <Truck className="w-3 h-3" /> Retornando
                         </span>
                     )}
                     {expanded
-                        ? <ChevronUp   className="w-4 h-4 text-zinc-600" />
-                        : <ChevronDown className="w-4 h-4 text-zinc-600" />}
+                        ? <ChevronUp   className="w-4 h-4 text-zinc-400" />
+                        : <ChevronDown className="w-4 h-4 text-zinc-400" />}
                 </div>
             </button>
 
@@ -480,15 +480,15 @@ function ReturnCompanyGroup({
                                             <div className="w-14 h-14 rounded-xl bg-zinc-800/60 overflow-hidden shrink-0 flex items-center justify-center">
                                                 {eq?.images?.[0]
                                                     ? <img src={eq.images[0]} alt="" className="w-full h-full object-contain p-1" />
-                                                    : <Package className="w-5 h-5 text-zinc-600" />}
+                                                    : <Package className="w-5 h-5 text-zinc-400" />}
                                             </div>
 
                                             {/* Info */}
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-[10px] font-black uppercase tracking-wider text-white line-clamp-2">
+                                                <p className="text-[11px] font-black uppercase tracking-wider text-white line-clamp-2">
                                                     {eq?.name ?? 'Equipamento'}
                                                 </p>
-                                                <p className="text-[10px] text-zinc-500 mt-1">
+                                                <p className="text-[11px] text-zinc-500 mt-1">
                                                     {booking.quantity}× · {brl(booking.total_amount)}
                                                 </p>
 
@@ -496,11 +496,11 @@ function ReturnCompanyGroup({
                                                 {retShipment && (
                                                     <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
                                                         {shipmentIcon(retStatus, 'w-3 h-3')}
-                                                        <span className={`text-[9px] font-black uppercase tracking-widest ${statusCol}`}>
+                                                        <span className={`text-[11px] font-black uppercase tracking-widest ${statusCol}`}>
                                                             {statusLabel}
                                                         </span>
                                                         {retShipment.tracking_code && (
-                                                            <span className="text-[9px] text-zinc-600 font-mono">
+                                                            <span className="text-[11px] text-zinc-400 font-mono">
                                                                 · {retShipment.tracking_code}
                                                             </span>
                                                         )}
@@ -519,7 +519,7 @@ function ReturnCompanyGroup({
                                                 )}
 
                                                 {retShipment?.estimated_arrival && (
-                                                    <p className="text-[9px] text-zinc-600 mt-0.5">
+                                                    <p className="text-[11px] text-zinc-400 mt-0.5">
                                                         Previsão chegada:{' '}
                                                         {format(parseISO(retShipment.estimated_arrival), "d 'de' MMM", { locale: ptBR })}
                                                     </p>
@@ -533,7 +533,7 @@ function ReturnCompanyGroup({
                                             {isRenter && retShipment && retStatus === 'awaiting_approval' && (
                                                 <button
                                                     onClick={() => setShowReturnTrackingId(isShowingForm ? null : booking.id)}
-                                                    className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-red-400 hover:text-red-300 transition-colors"
+                                                    className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-red-400 hover:text-red-300 transition-colors"
                                                 >
                                                     <ArrowUpFromLine className="w-3 h-3" />
                                                     {retShipment.tracking_code ? 'Editar rastreio de retorno' : 'Informar envio'}
@@ -550,7 +550,7 @@ function ReturnCompanyGroup({
 
                                             {/* Completed indicator */}
                                             {retStatus === 'delivered' && (
-                                                <span className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-emerald-400">
+                                                <span className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-emerald-400">
                                                     <PackageCheck className="w-3 h-3" />
                                                     Recebido pela locadora
                                                 </span>
@@ -600,7 +600,7 @@ function ConfirmDeliveryButton({ shipmentId }: { shipmentId: string }) {
         <button
             onClick={handleConfirm}
             disabled={update.isPending}
-            className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
         >
             {update.isPending
                 ? <Loader2 className="w-3 h-3 animate-spin" />
@@ -635,7 +635,7 @@ function ConfirmReturnButton({
         <button
             onClick={handleConfirm}
             disabled={confirmReturn.isPending}
-            className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-emerald-400 hover:text-emerald-300 transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-emerald-400 hover:text-emerald-300 transition-colors disabled:opacity-50"
         >
             {confirmReturn.isPending
                 ? <Loader2 className="w-3 h-3 animate-spin" />
@@ -708,7 +708,7 @@ function ReturnSection({
             {/* Divider with label */}
             <div className="flex items-center gap-3 py-1">
                 <div className="flex-1 h-px bg-zinc-800" />
-                <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.25em] text-red-400">
+                <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-red-400">
                     <RotateCcw className="w-3 h-3" />
                     Logística Reversa
                 </div>
@@ -728,14 +728,14 @@ function ReturnSection({
                     <p className="text-sm font-black uppercase tracking-wider text-white mb-1">
                         Todos os itens foram entregues!
                     </p>
-                    <p className="text-[10px] text-zinc-500 mb-5 leading-relaxed">
+                    <p className="text-[11px] text-zinc-500 mb-5 leading-relaxed">
                         Quando estiver pronto, inicie a devolução dos equipamentos
                         às locadoras e informe o código de rastreio de cada envio.
                     </p>
                     <Button
                         onClick={handleInitiateReturn}
                         disabled={initiateReturn.isPending}
-                        className="bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-widest text-[10px] h-10 px-8 rounded-xl shadow-lg shadow-red-500/20"
+                        className="bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-widest text-[11px] h-10 px-8 rounded-xl shadow-lg shadow-red-500/20"
                     >
                         {initiateReturn.isPending
                             ? <Loader2 className="w-4 h-4 animate-spin" />
@@ -752,7 +752,7 @@ function ReturnSection({
                         <p className="text-xs font-black uppercase tracking-wider text-emerald-400">
                             Aguardando devolução pelo locatário
                         </p>
-                        <p className="text-[10px] text-zinc-500 mt-0.5">
+                        <p className="text-[11px] text-zinc-500 mt-0.5">
                             Todos os itens foram entregues. O locatário ainda não iniciou a devolução.
                         </p>
                     </div>
@@ -767,7 +767,7 @@ function ReturnSection({
                         <p className="text-xs font-black uppercase tracking-wider text-emerald-400">
                             Todos os itens devolvidos com sucesso
                         </p>
-                        <p className="text-[10px] text-zinc-500 mt-0.5">
+                        <p className="text-[11px] text-zinc-500 mt-0.5">
                             Projeto concluído. As locações foram finalizadas.
                         </p>
                     </div>
@@ -877,7 +877,7 @@ export function ProjectDetailModal({ project, isOpen, onClose }: Props) {
                             <Clapperboard className="w-4.5 h-4.5 text-primary" />
                         </div>
                         <div>
-                            <p className="text-[9px] font-black uppercase tracking-[0.25em] text-zinc-500">
+                            <p className="text-[11px] font-black uppercase tracking-wider text-zinc-500">
                                 Projeto
                             </p>
                             <h2 className="text-sm font-black uppercase tracking-wider text-white leading-none mt-0.5">
@@ -886,7 +886,7 @@ export function ProjectDetailModal({ project, isOpen, onClose }: Props) {
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <Badge className={`text-[9px] font-black uppercase tracking-widest border ${statusColor}`}>
+                        <Badge className={`text-[11px] font-black uppercase tracking-widest border ${statusColor}`}>
                             {statusLabel}
                         </Badge>
                         <button
@@ -905,7 +905,7 @@ export function ProjectDetailModal({ project, isOpen, onClose }: Props) {
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div className="bg-zinc-900/40 rounded-2xl p-4 border border-zinc-800/50">
                             <CalendarDays className="w-4 h-4 text-primary mb-2" />
-                            <p className="text-[9px] text-zinc-500 font-black uppercase tracking-widest">Período</p>
+                            <p className="text-[11px] text-zinc-500 font-black uppercase tracking-widest">Período</p>
                             {bookings[0] && (
                                 <p className="text-xs font-black text-white mt-1">
                                     {format(parseISO(bookings[0].start_date), "d MMM", { locale: ptBR })}
@@ -913,14 +913,14 @@ export function ProjectDetailModal({ project, isOpen, onClose }: Props) {
                                     {format(parseISO(bookings[0].end_date), "d MMM", { locale: ptBR })}
                                 </p>
                             )}
-                            <p className="text-[10px] text-zinc-500 mt-0.5">{days} {days === 1 ? 'diária' : 'diárias'}</p>
+                            <p className="text-[11px] text-zinc-500 mt-0.5">{days} {days === 1 ? 'diária' : 'diárias'}</p>
                         </div>
 
                         <div className="bg-zinc-900/40 rounded-2xl p-4 border border-zinc-800/50">
                             <Package className="w-4 h-4 text-primary mb-2" />
-                            <p className="text-[9px] text-zinc-500 font-black uppercase tracking-widest">Itens</p>
+                            <p className="text-[11px] text-zinc-500 font-black uppercase tracking-widest">Itens</p>
                             <p className="text-lg font-black text-white mt-1">{bookings.length}</p>
-                            <p className="text-[10px] text-zinc-500">
+                            <p className="text-[11px] text-zinc-500">
                                 {isReturning
                                     ? `${returnedCount} devolvidos`
                                     : `${deliveredCount} entregues`}
@@ -928,16 +928,16 @@ export function ProjectDetailModal({ project, isOpen, onClose }: Props) {
                         </div>
 
                         <div className="bg-zinc-900/40 rounded-2xl p-4 border border-zinc-800/50">
-                            <p className="text-[9px] text-zinc-500 font-black uppercase tracking-widest mb-2">Total</p>
+                            <p className="text-[11px] text-zinc-500 font-black uppercase tracking-widest mb-2">Total</p>
                             <p className="text-sm font-black text-white tabular-nums">{brl(total)}</p>
-                            <p className="text-[10px] text-zinc-500 mt-0.5">{brl(total / Math.max(1, days))}/dia</p>
+                            <p className="text-[11px] text-zinc-500 mt-0.5">{brl(total / Math.max(1, days))}/dia</p>
                         </div>
                     </div>
 
                     {/* Progress bar */}
                     {bookings.length > 0 && progressPct > 0 && (
                         <div>
-                            <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-2">
+                            <div className="flex justify-between text-[11px] font-black uppercase tracking-widest text-zinc-500 mb-2">
                                 <span>{progressLabel}</span>
                                 <span>{progressCurrent}/{bookings.length} itens</span>
                             </div>
@@ -954,7 +954,7 @@ export function ProjectDetailModal({ project, isOpen, onClose }: Props) {
 
                     {/* ── Outbound: Grouped by company ─────────────────────────── */}
                     <div>
-                        <p className="text-[9px] font-black uppercase tracking-[0.25em] text-zinc-500 mb-3">
+                        <p className="text-[11px] font-black uppercase tracking-wider text-zinc-500 mb-3">
                             Equipamentos por locadora
                         </p>
                         <div className="space-y-3">
@@ -988,7 +988,7 @@ export function ProjectDetailModal({ project, isOpen, onClose }: Props) {
                     {/* Delivery address */}
                     {project.delivery_method === 'delivery' && project.delivery_address && (
                         <div className="bg-zinc-900/40 rounded-2xl p-4 border border-zinc-800/50">
-                            <p className="text-[9px] font-black uppercase tracking-[0.25em] text-zinc-500 mb-2">
+                            <p className="text-[11px] font-black uppercase tracking-wider text-zinc-500 mb-2">
                                 Endereço de entrega
                             </p>
                             <p className="text-xs text-white flex items-start gap-2">
@@ -996,7 +996,7 @@ export function ProjectDetailModal({ project, isOpen, onClose }: Props) {
                                 {project.delivery_address}
                             </p>
                             {project.delivery_contact && (
-                                <p className="text-[10px] text-zinc-500 mt-1.5">
+                                <p className="text-[11px] text-zinc-500 mt-1.5">
                                     Responsável: {project.delivery_contact}
                                 </p>
                             )}

@@ -142,7 +142,7 @@ export function EquipmentCard({
           {/* Availability pills: disponíveis + locados hoje */}
           <div className="flex flex-wrap items-center gap-1.5">
           <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full
-            backdrop-blur-md text-[9px] font-black uppercase tracking-widest border
+            backdrop-blur-md text-[11px] font-black uppercase tracking-widest border
             ${isFullyRented
               ? 'bg-zinc-950/90 border-red-500/30  text-red-400'
               : 'bg-zinc-950/80 border-emerald-500/25 text-emerald-400'}`}>
@@ -154,7 +154,7 @@ export function EquipmentCard({
               : `${availableQty} ${availableQty === 1 ? 'disponível' : 'disponíveis'}`}
           </div>
           {rentedQuantity > 0 && !isFullyRented && (
-            <div className="flex items-center px-2.5 py-1.5 rounded-full backdrop-blur-md text-[9px] font-black uppercase tracking-widest border bg-zinc-950/80 border-amber-500/25 text-amber-400">
+            <div className="flex items-center px-2.5 py-1.5 rounded-full backdrop-blur-md text-[11px] font-black uppercase tracking-widest border bg-zinc-950/80 border-amber-500/25 text-amber-400">
               {rentedQuantity} {rentedQuantity === 1 ? 'locado' : 'locados'}
             </div>
           )}
@@ -169,7 +169,7 @@ export function EquipmentCard({
         {/* ── Date availability chip (only when project dates set) ── */}
         {isAvailableForDates !== null && (
           <div className={`absolute z-10 flex items-center gap-1 px-2 py-1 rounded-full
-            backdrop-blur-md text-[8px] font-black uppercase tracking-widest border
+            backdrop-blur-md text-[11px] font-black uppercase tracking-widest border
             transition-all duration-300 animate-in fade-in
             ${isAvailableForDates === true
               ? 'top-[2.75rem] left-3 bg-emerald-950/80 border-emerald-500/20 text-emerald-400'
@@ -194,7 +194,7 @@ export function EquipmentCard({
         {/* ── Bottom overlay: price + location ── */}
         <div className="absolute bottom-0 inset-x-0 z-10 px-4 py-3 flex items-end justify-between">
           <div className="flex flex-col leading-none">
-            <span className="text-[8px] uppercase text-white/40 font-black tracking-[0.2em] mb-1">
+            <span className="text-[11px] uppercase text-white/40 font-black tracking-wider mb-1">
               por diária
             </span>
             <span className="text-[1.35rem] font-display font-black text-white tracking-tight leading-none">
@@ -206,7 +206,7 @@ export function EquipmentCard({
             <div className="flex items-center gap-1 bg-white/8 backdrop-blur-sm
                             border border-white/8 px-2 py-1 rounded-lg">
               <MapPin className="w-2.5 h-2.5 text-white/50" />
-              <span className="text-[8px] font-black text-white/60 uppercase tracking-widest">
+              <span className="text-[11px] font-black text-white/60 uppercase tracking-widest">
                 {item.state_uf}
               </span>
             </div>
@@ -231,7 +231,7 @@ export function EquipmentCard({
         {rentedQuantity > 0 && (
           <div className="flex items-center gap-1.5 mb-1.5">
             <Clock className="w-3 h-3 text-amber-500/70 shrink-0" />
-            <span className="text-[10px] text-amber-500/80 font-bold uppercase tracking-wider leading-none">
+            <span className="text-[11px] text-amber-500/80 font-bold uppercase tracking-wider leading-none">
               {totalStock > 1
                 ? `${rentedQuantity} ${rentedQuantity === 1 ? 'locado' : 'locados'} agora`
                 : 'Locado agora'}
@@ -242,7 +242,7 @@ export function EquipmentCard({
         {upcomingQuantity > 0 && (
           <div className="flex items-center gap-1.5 mb-2">
             <CalendarClock className="w-3 h-3 text-zinc-500 shrink-0" />
-            <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider leading-none">
+            <span className="text-[11px] text-zinc-500 font-bold uppercase tracking-wider leading-none">
               {upcomingQuantity} {upcomingQuantity === 1 ? 'reservado' : 'reservados'}
               {formattedUpcoming && ` a partir de ${formattedUpcoming}`}
             </span>
@@ -260,7 +260,7 @@ export function EquipmentCard({
             onClick={handleToggleProject}
             disabled={isFullyRented || isAvailableForDates === false}
             title={isAvailableForDates === false ? 'Indisponível nas suas datas' : undefined}
-            className={`flex-1 h-9 text-[9px] font-black uppercase tracking-widest gap-1.5 rounded-xl
+            className={`flex-1 h-9 text-[11px] font-black uppercase tracking-widest gap-1.5 rounded-xl
               transition-all duration-200
               ${inCart
                 ? 'bg-primary/10 text-primary border border-primary/25 hover:bg-red-500/8 hover:text-red-400 hover:border-red-500/25'

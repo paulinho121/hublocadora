@@ -41,10 +41,10 @@ export function CategoryManagement() {
   return (
     <div className="space-y-8 py-4">
       <div className="space-y-4">
-        <Label className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500">Adicionar Nova Categoria</Label>
+        <Label className="text-xs font-black uppercase tracking-wider text-zinc-500">Adicionar Nova Categoria</Label>
         <div className="flex gap-2">
           <div className="relative flex-1">
-            <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
+            <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
             <Input 
               placeholder="Ex: Energia, Estabilização..." 
               value={newName}
@@ -65,12 +65,12 @@ export function CategoryManagement() {
       </div>
 
       <div className="space-y-4">
-        <Label className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500">Categorias Atuais</Label>
+        <Label className="text-xs font-black uppercase tracking-wider text-zinc-500">Categorias Atuais</Label>
         <div className="flex flex-wrap gap-3">
           {isLoading ? (
-            <div className="flex items-center gap-2 text-zinc-600">
+            <div className="flex items-center gap-2 text-zinc-400">
               <Loader2 className="w-4 h-4 animate-spin" />
-              <span className="text-xs font-bold uppercase tracking-widest">Sincronizando...</span>
+              <span className="text-xs font-bold uppercase tracking-widest">Carregando...</span>
             </div>
           ) : (
             categories?.map((cat) => (
@@ -88,8 +88,8 @@ export function CategoryManagement() {
       </div>
 
       <div className="p-4 rounded-2xl border border-zinc-900 bg-zinc-950/50 flex gap-4">
-        <AlertCircle className="w-5 h-5 text-zinc-700 flex-shrink-0" />
-        <p className="text-[10px] text-zinc-500 leading-relaxed font-medium">
+        <AlertCircle className="w-5 h-5 text-zinc-500 flex-shrink-0" />
+        <p className="text-[11px] text-zinc-500 leading-relaxed font-medium">
           Apenas usuários com nível de <span className="text-primary font-bold">Admin</span> podem visualizar e gerenciar as categorias globais do sistema CineHub.
         </p>
       </div>

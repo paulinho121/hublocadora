@@ -389,13 +389,13 @@ export default function Admin() {
                 </div>
                 GESTÃO HUB
               </h1>
-              <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-[0.3em] mt-0.5 ml-9">Torre de Controle</p>
+              <p className="text-[11px] text-zinc-500 font-bold uppercase tracking-wider mt-0.5 ml-9">Painel administrativo</p>
             </div>
             <div className="hidden lg:flex items-center gap-4 border-l border-zinc-800 pl-6">
               <div className="flex items-center gap-1.5 text-xs text-emerald-500 font-bold">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Online
               </div>
-              <span className="text-[10px] text-zinc-600 font-bold uppercase">{activeCompanies.length} parceiros ativos</span>
+              <span className="text-[11px] text-zinc-400 font-bold uppercase">{activeCompanies.length} parceiros ativos</span>
             </div>
           </div>
 
@@ -406,7 +406,7 @@ export default function Admin() {
                 <button
                   key={r}
                   onClick={() => setDateRange(r)}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${dateRange === r ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'}`}
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all ${dateRange === r ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'}`}
                 >
                   {r === 'all' ? 'Tudo' : r}
                 </button>
@@ -414,7 +414,7 @@ export default function Admin() {
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/5 border border-emerald-500/10 rounded-full">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-              <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Admin Verificado</span>
+              <span className="text-[11px] font-black text-emerald-500 uppercase tracking-widest">Admin Verificado</span>
             </div>
           </div>
         </div>
@@ -445,12 +445,12 @@ export default function Admin() {
             </div>
             <div className="flex gap-2">
               {pendingCompanies.length > 0 && (
-                <Button size="sm" onClick={() => setActiveTab('companies')} className="bg-amber-500 hover:bg-amber-400 text-black font-black uppercase text-[9px] tracking-widest rounded-lg h-8 px-4">
+                <Button size="sm" onClick={() => setActiveTab('companies')} className="bg-amber-500 hover:bg-amber-400 text-black font-black uppercase text-[11px] tracking-widest rounded-lg h-8 px-4">
                   Ver Empresas
                 </Button>
               )}
               {urgentPendingBookings.length > 0 && (
-                <Button size="sm" onClick={() => setActiveTab('bookings')} className="bg-zinc-800 hover:bg-zinc-700 text-white font-black uppercase text-[9px] tracking-widest rounded-lg h-8 px-4">
+                <Button size="sm" onClick={() => setActiveTab('bookings')} className="bg-zinc-800 hover:bg-zinc-700 text-white font-black uppercase text-[11px] tracking-widest rounded-lg h-8 px-4">
                   Ver Pedidos
                 </Button>
               )}
@@ -468,12 +468,12 @@ export default function Admin() {
           ].map((kpi, i) => (
             <div key={i} className={`rounded-2xl p-6 border flex flex-col justify-between min-h-[120px] ${kpi.highlight ? 'bg-primary/5 border-primary/20' : 'bg-zinc-950 border-zinc-900'}`}>
               <div className="flex justify-between items-start mb-3">
-                <p className={`text-[9px] font-black uppercase tracking-widest ${kpi.highlight ? 'text-primary' : 'text-zinc-500'}`}>{kpi.label}</p>
+                <p className={`text-[11px] font-black uppercase tracking-widest ${kpi.highlight ? 'text-primary' : 'text-zinc-500'}`}>{kpi.label}</p>
                 <kpi.icon className={`h-4 w-4 ${kpi.color} opacity-60`} />
               </div>
               <div>
                 <h3 className={`text-2xl font-black tracking-tighter ${kpi.highlight ? 'text-primary' : 'text-white'}`}>{kpi.value}</h3>
-                <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mt-1">{kpi.sub}</p>
+                <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mt-1">{kpi.sub}</p>
               </div>
             </div>
           ))}
@@ -492,7 +492,7 @@ export default function Admin() {
                 <s.icon className={`h-5 w-5 ${s.color}`} />
               </div>
               <div>
-                <p className="text-[9px] font-black uppercase text-zinc-500 tracking-widest">{s.label}</p>
+                <p className="text-[11px] font-black uppercase text-zinc-500 tracking-widest">{s.label}</p>
                 <h4 className="text-xl font-black tracking-tight">{s.value}</h4>
               </div>
             </div>
@@ -512,12 +512,12 @@ export default function Admin() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`pb-4 flex items-center gap-2 font-black uppercase text-[10px] tracking-[0.15em] transition-all relative whitespace-nowrap ${activeTab === tab.id ? 'text-primary' : 'text-zinc-600 hover:text-zinc-400'}`}
+              className={`pb-4 flex items-center gap-2 font-black uppercase text-[11px] tracking-[0.15em] transition-all relative whitespace-nowrap ${activeTab === tab.id ? 'text-primary' : 'text-zinc-400 hover:text-zinc-400'}`}
             >
               <tab.icon className="h-3.5 w-3.5" />
               {tab.label}
               {!!tab.badge && (
-                <span className="bg-primary text-white text-[8px] px-1.5 py-0.5 rounded-full font-black ml-1">{tab.badge}</span>
+                <span className="bg-primary text-white text-[11px] px-1.5 py-0.5 rounded-full font-black ml-1">{tab.badge}</span>
               )}
               {activeTab === tab.id && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />}
             </button>
@@ -533,15 +533,15 @@ export default function Admin() {
               <CardHeader className="p-8 pb-0 flex flex-row items-center justify-between">
                 <div>
                   <CardTitle className="text-xl font-black tracking-tighter uppercase">Receita Real por Mês</CardTitle>
-                  <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">HUB (15%) vs Parceiros (85%) — últimos 6 meses</p>
+                  <p className="text-[11px] text-zinc-500 font-bold uppercase tracking-widest mt-1">HUB (15%) vs Parceiros (85%) — últimos 6 meses</p>
                 </div>
                 {monthlyRevenue.length === 0 && (
-                  <Badge className="bg-zinc-800 text-zinc-500 border-none text-[9px]">Sem dados</Badge>
+                  <Badge className="bg-zinc-800 text-zinc-500 border-none text-[11px]">Sem dados</Badge>
                 )}
               </CardHeader>
               <CardContent className="p-8 h-[340px]">
                 {monthlyRevenue.length === 0 ? (
-                  <div className="h-full flex items-center justify-center text-zinc-700">
+                  <div className="h-full flex items-center justify-center text-zinc-500">
                     <div className="text-center">
                       <Package className="h-10 w-10 mx-auto mb-3 opacity-30" />
                       <p className="text-xs font-black uppercase tracking-widest">Nenhuma transação registrada ainda</p>
@@ -581,7 +581,7 @@ export default function Admin() {
             <Card className="col-span-12 lg:col-span-4 bg-zinc-950 border-zinc-900 rounded-[32px] overflow-hidden">
               <CardHeader className="p-8 pb-4">
                 <CardTitle className="text-xs font-black text-zinc-500 uppercase tracking-widest">Funil de Conversão</CardTitle>
-                <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest">{conversion.total} pedidos no período</p>
+                <p className="text-[11px] text-zinc-400 font-bold uppercase tracking-widest">{conversion.total} pedidos no período</p>
               </CardHeader>
               <CardContent className="px-8 pb-8 space-y-5">
                 {[
@@ -591,8 +591,8 @@ export default function Admin() {
                 ].map((m, i) => (
                   <div key={i} className="space-y-1.5">
                     <div className="flex justify-between items-end">
-                      <span className="text-[10px] font-black uppercase text-zinc-400 tracking-widest">{m.label}</span>
-                      <span className="text-sm font-black text-white">{m.value} <span className="text-[10px] text-zinc-600">({m.pct.toFixed(0)}%)</span></span>
+                      <span className="text-[11px] font-black uppercase text-zinc-400 tracking-widest">{m.label}</span>
+                      <span className="text-sm font-black text-white">{m.value} <span className="text-[11px] text-zinc-400">({m.pct.toFixed(0)}%)</span></span>
                     </div>
                     <div className="w-full bg-zinc-900 h-2 rounded-full overflow-hidden">
                       <div className={`h-full ${m.color} transition-all duration-700`} style={{ width: `${Math.max(m.pct, 2)}%` }} />
@@ -602,7 +602,7 @@ export default function Admin() {
 
                 {/* Equipment status pie */}
                 <div className="pt-4 border-t border-zinc-900">
-                  <p className="text-[9px] font-black uppercase text-zinc-600 tracking-widest mb-4">Status da Frota</p>
+                  <p className="text-[11px] font-black uppercase text-zinc-400 tracking-widest mb-4">Status da Frota</p>
                   <div className="h-[130px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
@@ -617,7 +617,7 @@ export default function Admin() {
                     {statusData.map((s, i) => (
                       <div key={i} className="flex items-center gap-1.5">
                         <div className="w-2 h-2 rounded-full" style={{ backgroundColor: s.color }} />
-                        <span className="text-[9px] font-black uppercase text-zinc-600">{s.name}</span>
+                        <span className="text-[11px] font-black uppercase text-zinc-400">{s.name}</span>
                       </div>
                     ))}
                   </div>
@@ -637,15 +637,15 @@ export default function Admin() {
                     <Radio className="h-3.5 w-3.5 text-emerald-400" /> Operações ao Vivo
                   </CardTitle>
                 </div>
-                <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">
+                <span className="text-[11px] font-black text-zinc-400 uppercase tracking-widest">
                   {liveEvents.length} eventos
                 </span>
               </CardHeader>
               <CardContent className="px-6 pb-6">
                 {liveEvents.length === 0 ? (
-                  <div className="py-10 flex flex-col items-center justify-center gap-3 text-zinc-700">
+                  <div className="py-10 flex flex-col items-center justify-center gap-3 text-zinc-500">
                     <Radio className="h-8 w-8 opacity-30" />
-                    <p className="text-[10px] font-black uppercase tracking-widest text-center">
+                    <p className="text-[11px] font-black uppercase tracking-widest text-center">
                       Aguardando operações em tempo real...
                     </p>
                   </div>
@@ -669,12 +669,12 @@ export default function Admin() {
                           <span className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 ${c.dot}`} />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between gap-1">
-                              <span className={`text-[9px] font-black uppercase tracking-widest ${c.color}`}>{c.label}</span>
-                              <span className="text-[8px] text-zinc-600 font-bold shrink-0">{agoStr}</span>
+                              <span className={`text-[11px] font-black uppercase tracking-widest ${c.color}`}>{c.label}</span>
+                              <span className="text-[11px] text-zinc-400 font-bold shrink-0">{agoStr}</span>
                             </div>
-                            <p className="text-[9px] text-zinc-400 font-bold truncate">{ev.equipment}</p>
+                            <p className="text-[11px] text-zinc-400 font-bold truncate">{ev.equipment}</p>
                             {ev.amount > 0 && (
-                              <p className="text-[9px] text-zinc-500 font-bold">{BRL2(ev.amount)}</p>
+                              <p className="text-[11px] text-zinc-500 font-bold">{BRL2(ev.amount)}</p>
                             )}
                           </div>
                         </div>
@@ -691,18 +691,18 @@ export default function Admin() {
                 <CardTitle className="text-xs font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
                   <Zap className="h-4 w-4 text-primary" /> Top Parceiros por Receita Gerada
                 </CardTitle>
-                <span className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest">{dateRange === 'all' ? 'Todos os tempos' : `Últimos ${dateRange}`}</span>
+                <span className="text-[11px] text-zinc-400 font-bold uppercase tracking-widest">{dateRange === 'all' ? 'Todos os tempos' : `Últimos ${dateRange}`}</span>
               </CardHeader>
               <CardContent className="p-8">
                 {topPartners.length === 0 ? (
-                  <div className="py-10 text-center text-zinc-700">
+                  <div className="py-10 text-center text-zinc-500">
                     <p className="text-xs font-black uppercase tracking-widest">Sem dados no período selecionado</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {topPartners.map((p, i) => (
                       <div key={i} className="flex items-center gap-4">
-                        <span className="text-[10px] font-black text-zinc-600 w-4">{i + 1}</span>
+                        <span className="text-[11px] font-black text-zinc-400 w-4">{i + 1}</span>
                         <div className="h-8 w-8 bg-zinc-900 rounded-xl flex items-center justify-center font-black text-zinc-400 text-xs border border-zinc-800">
                           {p.name.charAt(0)}
                         </div>
@@ -710,7 +710,7 @@ export default function Admin() {
                           <div className="flex justify-between items-center mb-1">
                             <span className="text-xs font-black uppercase tracking-tight text-zinc-200">{p.name}</span>
                             <div className="flex items-center gap-4">
-                              <span className="text-[10px] text-zinc-500 font-bold">{p.count} pedido{p.count > 1 ? 's' : ''}</span>
+                              <span className="text-[11px] text-zinc-500 font-bold">{p.count} pedido{p.count > 1 ? 's' : ''}</span>
                               <span className="text-sm font-black text-white">{BRL(p.total)}</span>
                             </div>
                           </div>
@@ -744,7 +744,7 @@ export default function Admin() {
               ].map((s, i) => (
                 <div key={i} className="bg-zinc-950 border border-zinc-900 rounded-2xl p-5 flex items-center gap-4">
                   <div>
-                    <p className="text-[9px] font-black uppercase text-zinc-500 tracking-widest">{s.label}</p>
+                    <p className="text-[11px] font-black uppercase text-zinc-500 tracking-widest">{s.label}</p>
                     <h4 className={`text-2xl font-black tracking-tight ${s.color}`}>{s.value}</h4>
                   </div>
                 </div>
@@ -754,11 +754,11 @@ export default function Admin() {
             {/* Filters */}
             <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
               <div className="relative w-full max-w-lg">
-                <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600" />
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                 <input
                   type="text"
                   placeholder="Buscar locadora ou CNPJ..."
-                  className="w-full bg-zinc-950 border border-zinc-900 rounded-2xl py-3.5 pl-12 pr-5 text-sm font-bold text-white focus:outline-none focus:border-primary/50 transition-all placeholder:text-zinc-700"
+                  className="w-full bg-zinc-950 border border-zinc-900 rounded-2xl py-3.5 pl-12 pr-5 text-sm font-bold text-white focus:outline-none focus:border-primary/50 transition-all placeholder:text-zinc-500"
                   value={networkSearch}
                   onChange={e => setNetworkSearch(e.target.value)}
                 />
@@ -768,7 +768,7 @@ export default function Admin() {
                   <button
                     key={f}
                     onClick={() => setNetworkStatusFilter(f)}
-                    className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
+                    className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all border ${
                       networkStatusFilter === f
                         ? 'bg-primary/10 border-primary/30 text-primary'
                         : 'bg-zinc-950 border-zinc-900 text-zinc-500 hover:text-white'
@@ -788,7 +788,7 @@ export default function Admin() {
                 <thead className="bg-zinc-900/40">
                   <tr>
                     {['Locadora', 'Status', 'Itens', 'Pedidos', 'Volume Gerado', 'Repasse HUB (15%)', 'Cadastro', 'Ações'].map((h, i) => (
-                      <th key={i} className="p-5 text-[9px] font-black uppercase text-zinc-500 tracking-widest whitespace-nowrap">{h}</th>
+                      <th key={i} className="p-5 text-[11px] font-black uppercase text-zinc-500 tracking-widest whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -796,7 +796,7 @@ export default function Admin() {
                   {companiesLoading ? (
                     <tr><td colSpan={8} className="p-16 text-center"><Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" /></td></tr>
                   ) : networkCompanies.length === 0 ? (
-                    <tr><td colSpan={8} className="p-16 text-center text-zinc-600 font-black uppercase tracking-widest text-xs">Nenhuma locadora encontrada.</td></tr>
+                    <tr><td colSpan={8} className="p-16 text-center text-zinc-400 font-black uppercase tracking-widest text-xs">Nenhuma locadora encontrada.</td></tr>
                   ) : networkCompanies.map((company: any) => {
                     const companyBookings = (bookings || []).filter(b => b.company_id === company.id);
                     const companyVolume = companyBookings.reduce((s, b) => s + (b.total_amount || 0), 0);
@@ -810,12 +810,12 @@ export default function Admin() {
                             </div>
                             <div>
                               <p className="text-xs font-black text-zinc-200 group-hover:text-primary transition-colors">{company.name}</p>
-                              <p className="text-[9px] text-zinc-600 font-bold">{company.document}</p>
+                              <p className="text-[11px] text-zinc-400 font-bold">{company.document}</p>
                             </div>
                           </div>
                         </td>
                         <td className="p-5">
-                          <Badge className={`text-[8px] font-black uppercase border-none px-2 ${
+                          <Badge className={`text-[11px] font-black uppercase border-none px-2 ${
                             company.status === 'approved' || company.status === 'active' ? 'bg-emerald-500/10 text-emerald-500' :
                             company.status === 'pending' ? 'bg-amber-500/10 text-amber-500' :
                             company.status === 'suspended' ? 'bg-red-500/10 text-red-500' :
@@ -828,7 +828,7 @@ export default function Admin() {
                         <td className="p-5 text-sm font-black text-zinc-300">{companyBookings.length}</td>
                         <td className="p-5 text-sm font-black text-zinc-200">{BRL(companyVolume)}</td>
                         <td className="p-5 text-sm font-black text-emerald-400">{BRL(companyVolume * 0.15)}</td>
-                        <td className="p-5 text-[10px] text-zinc-500 font-medium whitespace-nowrap">
+                        <td className="p-5 text-[11px] text-zinc-500 font-medium whitespace-nowrap">
                           {new Date(company.created_at).toLocaleDateString('pt-BR')}
                         </td>
                         <td className="p-5">
@@ -838,7 +838,7 @@ export default function Admin() {
                                 size="sm"
                                 onClick={() => updateCompanyStatus.mutate({ id: company.id, status: 'approved' })}
                                 disabled={updatingCompanyId === company.id}
-                                className="bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase text-[9px] tracking-widest h-7 px-3 rounded-lg"
+                                className="bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase text-[11px] tracking-widest h-7 px-3 rounded-lg"
                               >
                                 {updatingCompanyId === company.id ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Aprovar'}
                               </Button>
@@ -893,16 +893,16 @@ export default function Admin() {
           <div className="space-y-6 animate-in fade-in duration-500">
             <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
               <div className="relative w-full max-w-lg">
-                <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600" />
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                 <input
                   type="text"
                   placeholder="Buscar empresa ou CNPJ..."
-                  className="w-full bg-zinc-950 border border-zinc-900 rounded-2xl py-3.5 pl-12 pr-5 text-sm font-bold text-white focus:outline-none focus:border-primary/50 transition-all placeholder:text-zinc-700"
+                  className="w-full bg-zinc-950 border border-zinc-900 rounded-2xl py-3.5 pl-12 pr-5 text-sm font-bold text-white focus:outline-none focus:border-primary/50 transition-all placeholder:text-zinc-500"
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
                 />
               </div>
-              <div className="flex gap-2 text-[10px] font-black uppercase text-zinc-500 tracking-widest">
+              <div className="flex gap-2 text-[11px] font-black uppercase text-zinc-500 tracking-widest">
                 <span className="bg-zinc-900 px-3 py-1.5 rounded-lg">{activeCompanies.length} ativas</span>
                 {pendingCompanies.length > 0 && (
                   <span className="bg-amber-500/10 text-amber-500 px-3 py-1.5 rounded-lg">{pendingCompanies.length} aguardando KYC</span>
@@ -916,7 +916,7 @@ export default function Admin() {
               ) : filteredCompanies.length === 0 ? (
                 <div className="py-32 text-center">
                   <XCircle className="h-10 w-10 text-zinc-800 mx-auto mb-3" />
-                  <p className="text-zinc-600 font-black uppercase tracking-widest text-xs">Nenhuma empresa encontrada.</p>
+                  <p className="text-zinc-400 font-black uppercase tracking-widest text-xs">Nenhuma empresa encontrada.</p>
                 </div>
               ) : filteredCompanies.map((company: any) => (
                 <div key={company.id} className="group bg-zinc-950 border border-zinc-900 hover:border-zinc-700 rounded-2xl p-5 transition-all flex flex-col md:flex-row items-center justify-between gap-4">
@@ -927,7 +927,7 @@ export default function Admin() {
                     <div>
                       <div className="flex items-center gap-2 mb-0.5">
                         <h3 className="font-black uppercase tracking-tight group-hover:text-primary transition-colors">{company.name}</h3>
-                        <Badge className={`text-[8px] font-black uppercase border-none px-2 ${
+                        <Badge className={`text-[11px] font-black uppercase border-none px-2 ${
                           company.status === 'approved' || company.status === 'active' ? 'bg-emerald-500/10 text-emerald-500' :
                           company.status === 'pending' ? 'bg-amber-500/10 text-amber-500' :
                           'bg-red-500/10 text-red-500'
@@ -936,9 +936,9 @@ export default function Admin() {
                         </Badge>
                       </div>
                       <div className="flex flex-wrap gap-x-4 gap-y-0.5">
-                        <p className="text-[10px] text-zinc-500 font-bold">{company.document}</p>
-                        <p className="text-[10px] text-zinc-600 font-bold">Owner: <span className="text-zinc-400">{company.owner?.full_name}</span></p>
-                        <p className="text-[10px] text-zinc-600 font-bold flex items-center gap-1">
+                        <p className="text-[11px] text-zinc-500 font-bold">{company.document}</p>
+                        <p className="text-[11px] text-zinc-400 font-bold">Owner: <span className="text-zinc-400">{company.owner?.full_name}</span></p>
+                        <p className="text-[11px] text-zinc-400 font-bold flex items-center gap-1">
                           <Clock className="h-2.5 w-2.5" /> {new Date(company.created_at).toLocaleDateString('pt-BR')}
                         </p>
                       </div>
@@ -947,15 +947,15 @@ export default function Admin() {
 
                   <div className="hidden lg:flex items-center gap-6 px-6 border-x border-zinc-900">
                     <div className="text-center">
-                      <p className="text-[9px] text-zinc-600 font-black uppercase mb-0.5">Itens</p>
+                      <p className="text-[11px] text-zinc-400 font-black uppercase mb-0.5">Itens</p>
                       <p className="text-sm font-black">{equipments?.filter((e: any) => e.company_id === company.id).length || 0}</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-[9px] text-zinc-600 font-black uppercase mb-0.5">Pedidos</p>
+                      <p className="text-[11px] text-zinc-400 font-black uppercase mb-0.5">Pedidos</p>
                       <p className="text-sm font-black">{filteredBookings.filter(b => b.company_id === company.id).length}</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-[9px] text-zinc-600 font-black uppercase mb-0.5">Volume</p>
+                      <p className="text-[11px] text-zinc-400 font-black uppercase mb-0.5">Volume</p>
                       <p className="text-sm font-black text-emerald-400">
                         {BRL(filteredBookings.filter(b => b.company_id === company.id).reduce((s, b) => s + (b.total_amount || 0), 0))}
                       </p>
@@ -967,7 +967,7 @@ export default function Admin() {
                       <Button
                         onClick={() => updateCompanyStatus.mutate({ id: company.id, status: 'approved' })}
                         disabled={updatingCompanyId === company.id}
-                        className="flex-1 md:flex-none h-10 px-6 bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase text-[9px] tracking-widest rounded-xl"
+                        className="flex-1 md:flex-none h-10 px-6 bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase text-[11px] tracking-widest rounded-xl"
                       >
                         {updatingCompanyId === company.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Aprovar KYC'}
                       </Button>
@@ -999,7 +999,7 @@ export default function Admin() {
                 { label: 'Ticket Médio', value: BRL2(avgTicket), highlight: false },
               ].map((c, i) => (
                 <div key={i} className={`rounded-2xl p-6 border ${c.highlight ? 'bg-primary/5 border-primary/20' : 'bg-zinc-950 border-zinc-900'}`}>
-                  <p className={`text-[9px] font-black uppercase tracking-widest mb-3 ${c.highlight ? 'text-primary' : 'text-zinc-500'}`}>{c.label}</p>
+                  <p className={`text-[11px] font-black uppercase tracking-widest mb-3 ${c.highlight ? 'text-primary' : 'text-zinc-500'}`}>{c.label}</p>
                   <h4 className={`text-xl font-black tracking-tight ${c.highlight ? 'text-primary' : 'text-white'}`}>{c.value}</h4>
                 </div>
               ))}
@@ -1011,14 +1011,14 @@ export default function Admin() {
                 <h2 className="text-sm font-black uppercase tracking-tight flex items-center gap-2">
                   <Activity className="h-4 w-4 text-primary" /> Fluxo Operacional
                 </h2>
-                <span className="text-[10px] text-zinc-500 font-bold uppercase">{filteredBookings.length} registros</span>
+                <span className="text-[11px] text-zinc-500 font-bold uppercase">{filteredBookings.length} registros</span>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead className="bg-zinc-900/40">
                     <tr>
                       {['Transação', 'Status', 'Parceiro', 'Período', 'Repasse (85%)', 'HUB (15%)', 'Total', ''].map((h, i) => (
-                        <th key={i} className="p-5 text-[9px] font-black uppercase text-zinc-500 tracking-widest whitespace-nowrap">{h}</th>
+                        <th key={i} className="p-5 text-[11px] font-black uppercase text-zinc-500 tracking-widest whitespace-nowrap">{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -1026,15 +1026,15 @@ export default function Admin() {
                     {bookingsLoading ? (
                       <tr><td colSpan={8} className="p-16 text-center"><Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" /></td></tr>
                     ) : filteredBookings.length === 0 ? (
-                      <tr><td colSpan={8} className="p-16 text-center text-zinc-600 font-black uppercase tracking-widest text-xs">Sem operações no período.</td></tr>
+                      <tr><td colSpan={8} className="p-16 text-center text-zinc-400 font-black uppercase tracking-widest text-xs">Sem operações no período.</td></tr>
                     ) : filteredBookings.map(booking => (
                       <tr key={booking.id} className="hover:bg-white/[0.015] transition-colors">
                         <td className="p-5">
                           <p className="text-xs font-black tracking-tighter">REQ-{booking.id.split('-')[0].toUpperCase()}</p>
-                          <p className="text-[9px] text-zinc-500">{new Date(booking.created_at).toLocaleDateString('pt-BR')}</p>
+                          <p className="text-[11px] text-zinc-500">{new Date(booking.created_at).toLocaleDateString('pt-BR')}</p>
                         </td>
                         <td className="p-5">
-                          <Badge className={`text-[8px] font-black uppercase border-none px-2 ${
+                          <Badge className={`text-[11px] font-black uppercase border-none px-2 ${
                             booking.status === 'approved' || booking.status === 'active' ? 'bg-emerald-500/10 text-emerald-500' :
                             booking.status === 'completed' ? 'bg-blue-500/10 text-blue-400' :
                             booking.status === 'pending' ? 'bg-amber-500/10 text-amber-500' :
@@ -1043,9 +1043,9 @@ export default function Admin() {
                         </td>
                         <td className="p-5">
                           <p className="text-xs font-bold text-zinc-300">{booking.company?.name || '---'}</p>
-                          <p className="text-[9px] text-zinc-500 truncate max-w-[120px]">{booking.equipment?.name}</p>
+                          <p className="text-[11px] text-zinc-500 truncate max-w-[120px]">{booking.equipment?.name}</p>
                         </td>
-                        <td className="p-5 text-[10px] text-zinc-500 font-bold whitespace-nowrap">
+                        <td className="p-5 text-[11px] text-zinc-500 font-bold whitespace-nowrap">
                           {new Date(booking.start_date + 'T00:00').toLocaleDateString('pt-BR')} → {new Date(booking.end_date + 'T00:00').toLocaleDateString('pt-BR')}
                         </td>
                         <td className="p-5 text-right text-zinc-400 font-bold text-xs">{BRL2(booking.total_amount * 0.85)}</td>
@@ -1057,7 +1057,7 @@ export default function Admin() {
                               size="sm"
                               onClick={() => approveBooking.mutate(booking.id)}
                               disabled={approveBooking.isPending}
-                              className="bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase text-[9px] tracking-widest h-7 px-3 rounded-lg"
+                              className="bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase text-[11px] tracking-widest h-7 px-3 rounded-lg"
                             >
                               {approveBooking.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Aprovar'}
                             </Button>
@@ -1089,7 +1089,7 @@ export default function Admin() {
                     <k.icon className={`h-5 w-5 ${k.color === 'text-primary' ? 'text-primary' : k.color === 'text-emerald-400' ? 'text-emerald-400' : 'text-zinc-400'}`} />
                   </div>
                   <div>
-                    <p className="text-[9px] font-black uppercase text-zinc-500 tracking-widest">{k.label}</p>
+                    <p className="text-[11px] font-black uppercase text-zinc-500 tracking-widest">{k.label}</p>
                     <h4 className={`text-xl font-black tracking-tight ${k.color}`}>{k.value}</h4>
                   </div>
                 </div>
@@ -1102,20 +1102,20 @@ export default function Admin() {
                 <h2 className="text-sm font-black uppercase tracking-tight flex items-center gap-2">
                   <Camera className="h-4 w-4 text-primary" /> Transações por Equipamento
                 </h2>
-                <span className="text-[10px] text-zinc-500 font-bold uppercase">{equipmentStats.length} equipamentos com movimentação</span>
+                <span className="text-[11px] text-zinc-500 font-bold uppercase">{equipmentStats.length} equipamentos com movimentação</span>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead className="bg-zinc-900/40">
                     <tr>
                       {['Equipamento', 'Locadora', 'Categoria', 'Locações', 'Concluídas', 'Canceladas', 'Receita Gerada', 'Taxa HUB (15%)', 'Última Locação'].map((h, i) => (
-                        <th key={i} className="p-5 text-[9px] font-black uppercase text-zinc-500 tracking-widest whitespace-nowrap">{h}</th>
+                        <th key={i} className="p-5 text-[11px] font-black uppercase text-zinc-500 tracking-widest whitespace-nowrap">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-900">
                     {equipmentStats.length === 0 ? (
-                      <tr><td colSpan={9} className="p-16 text-center text-zinc-600 font-black uppercase tracking-widest text-xs">Nenhuma transação registrada.</td></tr>
+                      <tr><td colSpan={9} className="p-16 text-center text-zinc-400 font-black uppercase tracking-widest text-xs">Nenhuma transação registrada.</td></tr>
                     ) : equipmentStats.map(eq => {
                       const convRate = eq.bookingCount > 0 ? ((eq.completedCount / eq.bookingCount) * 100).toFixed(0) : '0';
                       return (
@@ -1128,21 +1128,21 @@ export default function Admin() {
                               <p className="text-[11px] font-black text-zinc-200 group-hover:text-primary transition-colors max-w-[160px] truncate">{eq.name}</p>
                             </div>
                           </td>
-                          <td className="p-5 text-[10px] font-bold text-zinc-400 max-w-[100px] truncate">{eq.company}</td>
+                          <td className="p-5 text-[11px] font-bold text-zinc-400 max-w-[100px] truncate">{eq.company}</td>
                           <td className="p-5">
-                            <span className="text-[8px] font-black uppercase text-zinc-500 bg-zinc-900 px-2 py-1 rounded-lg">{eq.category}</span>
+                            <span className="text-[11px] font-black uppercase text-zinc-500 bg-zinc-900 px-2 py-1 rounded-lg">{eq.category}</span>
                           </td>
                           <td className="p-5 text-sm font-black text-white">{eq.bookingCount}</td>
                           <td className="p-5">
                             <div className="flex items-center gap-1.5">
                               <span className="text-sm font-black text-emerald-400">{eq.completedCount}</span>
-                              <span className="text-[9px] text-zinc-600">({convRate}%)</span>
+                              <span className="text-[11px] text-zinc-400">({convRate}%)</span>
                             </div>
                           </td>
                           <td className="p-5 text-sm font-black text-red-400/70">{eq.cancelledCount}</td>
                           <td className="p-5 text-sm font-black text-white">{BRL2(eq.totalRevenue)}</td>
                           <td className="p-5 text-sm font-black text-primary">{BRL2(eq.hubFee)}</td>
-                          <td className="p-5 text-[10px] text-zinc-500 font-medium whitespace-nowrap">
+                          <td className="p-5 text-[11px] text-zinc-500 font-medium whitespace-nowrap">
                             {eq.lastBookingDate ? new Date(eq.lastBookingDate).toLocaleDateString('pt-BR') : '—'}
                           </td>
                         </tr>
@@ -1161,10 +1161,10 @@ export default function Admin() {
                 </h3>
                 {equipmentStats.slice(0, 5).sort((a,b) => b.bookingCount - a.bookingCount).map((eq, i) => (
                   <div key={eq.id} className="flex items-center gap-3">
-                    <span className="text-[10px] font-black text-zinc-600 w-4">{i + 1}</span>
+                    <span className="text-[11px] font-black text-zinc-400 w-4">{i + 1}</span>
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-center mb-1">
-                        <span className="text-[10px] font-black text-zinc-200 truncate">{eq.name}</span>
+                        <span className="text-[11px] font-black text-zinc-200 truncate">{eq.name}</span>
                         <span className="text-xs font-black text-white ml-2 shrink-0">{eq.bookingCount} locações</span>
                       </div>
                       <div className="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden">
@@ -1182,10 +1182,10 @@ export default function Admin() {
                 </h3>
                 {equipmentStats.slice(0, 5).map((eq, i) => (
                   <div key={eq.id} className="flex items-center gap-3">
-                    <span className="text-[10px] font-black text-zinc-600 w-4">{i + 1}</span>
+                    <span className="text-[11px] font-black text-zinc-400 w-4">{i + 1}</span>
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-center mb-1">
-                        <span className="text-[10px] font-black text-zinc-200 truncate">{eq.name}</span>
+                        <span className="text-[11px] font-black text-zinc-200 truncate">{eq.name}</span>
                         <span className="text-xs font-black text-primary ml-2 shrink-0">{BRL(eq.totalRevenue)}</span>
                       </div>
                       <div className="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden">
@@ -1213,15 +1213,15 @@ export default function Admin() {
                     <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
                   </span>
                   <Wifi className="h-4 w-4 text-emerald-400" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Online Agora</span>
+                  <span className="text-[11px] font-black uppercase tracking-widest text-emerald-400">Online Agora</span>
                 </div>
-                <span className="text-[10px] font-black bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full">
+                <span className="text-[11px] font-black bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full">
                   {Object.keys(onlineUsers).length}
                 </span>
               </div>
 
               {Object.keys(onlineUsers).length === 0 ? (
-                <p className="text-[10px] text-zinc-600 font-medium">Nenhum usuário online no momento.</p>
+                <p className="text-[11px] text-zinc-400 font-medium">Nenhum usuário online no momento.</p>
               ) : (
                 <div className="flex flex-wrap gap-2">
                   {Object.entries(onlineUsers).map(([uid, info]) => {
@@ -1234,14 +1234,14 @@ export default function Admin() {
                     return (
                       <div key={uid} className="flex items-center gap-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl px-3 py-2">
                         <div className="relative">
-                          <div className="h-7 w-7 bg-emerald-500/10 border border-emerald-500/30 rounded-lg flex items-center justify-center font-black text-emerald-400 text-[10px]">
+                          <div className="h-7 w-7 bg-emerald-500/10 border border-emerald-500/30 rounded-lg flex items-center justify-center font-black text-emerald-400 text-[11px]">
                             {initial}
                           </div>
                           <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 bg-emerald-500 rounded-full border border-zinc-950" />
                         </div>
                         <div className="leading-none">
-                          <p className="text-[10px] font-black text-white">{name}</p>
-                          <p className="text-[9px] text-zinc-500 mt-0.5">Login: {lastLogin}</p>
+                          <p className="text-[11px] font-black text-white">{name}</p>
+                          <p className="text-[11px] text-zinc-500 mt-0.5">Login: {lastLogin}</p>
                         </div>
                       </div>
                     );
@@ -1253,16 +1253,16 @@ export default function Admin() {
             {/* Barra de busca e filtros */}
             <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
               <div className="relative w-full max-w-lg">
-                <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600" />
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                 <input
                   type="text"
                   placeholder="Buscar por nome ou e-mail..."
-                  className="w-full bg-zinc-950 border border-zinc-900 rounded-2xl py-3.5 pl-12 pr-5 text-sm font-bold text-white focus:outline-none focus:border-primary/50 transition-all placeholder:text-zinc-700"
+                  className="w-full bg-zinc-950 border border-zinc-900 rounded-2xl py-3.5 pl-12 pr-5 text-sm font-bold text-white focus:outline-none focus:border-primary/50 transition-all placeholder:text-zinc-500"
                   value={userSearch}
                   onChange={e => setUserSearch(e.target.value)}
                 />
               </div>
-              <div className="flex gap-2 text-[10px] font-black uppercase tracking-widest">
+              <div className="flex gap-2 text-[11px] font-black uppercase tracking-widest">
                 {['admin', 'rental_house', 'branch_manager'].map(role => (
                   <span key={role} className="bg-zinc-900 text-zinc-500 px-3 py-1.5 rounded-lg">
                     {ROLE_LABELS[role]}: {profiles?.filter((p: any) => p.role === role).length || 0}
@@ -1279,7 +1279,7 @@ export default function Admin() {
                 <thead className="bg-zinc-900/40">
                   <tr>
                     {['Usuário', 'E-mail', 'Perfil', 'Empresa', 'Cadastro', 'Último Login'].map((h, i) => (
-                      <th key={i} className="p-5 text-[9px] font-black uppercase text-zinc-500 tracking-widest">{h}</th>
+                      <th key={i} className="p-5 text-[11px] font-black uppercase text-zinc-500 tracking-widest">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -1287,7 +1287,7 @@ export default function Admin() {
                   {profilesLoading ? (
                     <tr><td colSpan={6} className="p-16 text-center"><Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" /></td></tr>
                   ) : filteredProfiles.length === 0 ? (
-                    <tr><td colSpan={6} className="p-16 text-center text-zinc-600 font-black uppercase tracking-widest text-xs">Nenhum usuário encontrado.</td></tr>
+                    <tr><td colSpan={6} className="p-16 text-center text-zinc-400 font-black uppercase tracking-widest text-xs">Nenhum usuário encontrado.</td></tr>
                   ) : filteredProfiles.map((p: any) => {
                     const isOnline = !!onlineUsers[p.id];
                     const presenceInfo = onlineUsers[p.id];
@@ -1312,27 +1312,27 @@ export default function Admin() {
                             <p className="text-xs font-black text-zinc-200">{p.full_name || 'Sem nome'}</p>
                           </div>
                         </td>
-                        <td className="p-5 text-[10px] text-zinc-400 font-medium">{p.email}</td>
+                        <td className="p-5 text-[11px] text-zinc-400 font-medium">{p.email}</td>
                         <td className="p-5">
-                          <Badge className={`text-[8px] font-black uppercase border-none px-2 ${
+                          <Badge className={`text-[11px] font-black uppercase border-none px-2 ${
                             p.role === 'admin' ? 'bg-primary/10 text-primary' :
                             p.role === 'rental_house' ? 'bg-blue-500/10 text-blue-400' :
                             p.role === 'branch_manager' ? 'bg-amber-500/10 text-amber-400' :
                             'bg-zinc-800 text-zinc-400'
                           }`}>{ROLE_LABELS[p.role] || p.role}</Badge>
                         </td>
-                        <td className="p-5 text-[10px] text-zinc-400 font-medium">{p.company?.name || '—'}</td>
-                        <td className="p-5 text-[10px] text-zinc-500 font-medium">
+                        <td className="p-5 text-[11px] text-zinc-400 font-medium">{p.company?.name || '—'}</td>
+                        <td className="p-5 text-[11px] text-zinc-500 font-medium">
                           {p.created_at ? new Date(p.created_at).toLocaleDateString('pt-BR') : '—'}
                         </td>
                         <td className="p-5">
                           {isOnline ? (
-                            <span className="flex items-center gap-1.5 text-[10px] font-black text-emerald-400">
+                            <span className="flex items-center gap-1.5 text-[11px] font-black text-emerald-400">
                               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
                               Online agora
                             </span>
                           ) : (
-                            <span className="text-[10px] text-zinc-500 font-medium">{lastLogin}</span>
+                            <span className="text-[11px] text-zinc-500 font-medium">{lastLogin}</span>
                           )}
                         </td>
                       </tr>
@@ -1358,8 +1358,8 @@ export default function Admin() {
               <div>
                 <h3 className="text-lg font-black uppercase tracking-tight">{selectedCompanyForDetail.name}</h3>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[10px] text-zinc-500 font-bold">{selectedCompanyForDetail.document}</span>
-                  <Badge className={`text-[8px] font-black uppercase border-none px-2 ${
+                  <span className="text-[11px] text-zinc-500 font-bold">{selectedCompanyForDetail.document}</span>
+                  <Badge className={`text-[11px] font-black uppercase border-none px-2 ${
                     selectedCompanyForDetail.status === 'suspended' ? 'bg-red-500/10 text-red-500' : 'bg-emerald-500/10 text-emerald-500'
                   }`}>
                     {selectedCompanyForDetail.status === 'suspended' ? 'Suspenso' : 'Ativo'}
@@ -1376,7 +1376,7 @@ export default function Admin() {
                 { label: 'ID', value: selectedCompanyForDetail.id.slice(0, 8) + '...' },
               ].map((item, i) => (
                 <div key={i} className="p-4 bg-zinc-900/30 border border-zinc-800/40 rounded-xl">
-                  <p className="text-[9px] text-zinc-500 font-black uppercase mb-1">{item.label}</p>
+                  <p className="text-[11px] text-zinc-500 font-black uppercase mb-1">{item.label}</p>
                   <p className="text-xs font-bold text-zinc-200 truncate">{item.value}</p>
                 </div>
               ))}
@@ -1384,15 +1384,15 @@ export default function Admin() {
 
             <div className="grid grid-cols-3 gap-3 p-4 bg-zinc-900/30 border border-zinc-800/40 rounded-xl">
               <div className="text-center">
-                <p className="text-[9px] text-zinc-500 font-black uppercase mb-1">Itens</p>
+                <p className="text-[11px] text-zinc-500 font-black uppercase mb-1">Itens</p>
                 <p className="font-black">{equipments?.filter((e: any) => e.company_id === selectedCompanyForDetail.id).length || 0}</p>
               </div>
               <div className="text-center border-x border-zinc-800">
-                <p className="text-[9px] text-zinc-500 font-black uppercase mb-1">Pedidos</p>
+                <p className="text-[11px] text-zinc-500 font-black uppercase mb-1">Pedidos</p>
                 <p className="font-black">{(bookings || []).filter(b => b.company_id === selectedCompanyForDetail.id).length}</p>
               </div>
               <div className="text-center">
-                <p className="text-[9px] text-zinc-500 font-black uppercase mb-1">Volume</p>
+                <p className="text-[11px] text-zinc-500 font-black uppercase mb-1">Volume</p>
                 <p className="font-black text-emerald-400 text-sm">
                   {BRL((bookings || []).filter(b => b.company_id === selectedCompanyForDetail.id).reduce((s, b) => s + (b.total_amount || 0), 0))}
                 </p>
@@ -1413,7 +1413,7 @@ export default function Admin() {
                     setSelectedCompanyForDetail((p: any) => ({ ...p, status: 'approved' }));
                   }}
                   disabled={updatingCompanyId === selectedCompanyForDetail.id}
-                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase text-[9px] tracking-widest h-11 rounded-xl flex items-center justify-center gap-2"
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase text-[11px] tracking-widest h-11 rounded-xl flex items-center justify-center gap-2"
                 >
                   {updatingCompanyId === selectedCompanyForDetail.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <><CheckCircle2 className="h-3.5 w-3.5" /> Reativar Parceiro</>}
                 </Button>
@@ -1424,7 +1424,7 @@ export default function Admin() {
                     setSelectedCompanyForDetail((p: any) => ({ ...p, status: 'suspended' }));
                   }}
                   disabled={updatingCompanyId === selectedCompanyForDetail.id}
-                  className="w-full bg-red-600 hover:bg-red-500 text-white font-black uppercase text-[9px] tracking-widest h-11 rounded-xl flex items-center justify-center gap-2"
+                  className="w-full bg-red-600 hover:bg-red-500 text-white font-black uppercase text-[11px] tracking-widest h-11 rounded-xl flex items-center justify-center gap-2"
                 >
                   {updatingCompanyId === selectedCompanyForDetail.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <><Ban className="h-3.5 w-3.5" /> Suspender Parceiro</>}
                 </Button>

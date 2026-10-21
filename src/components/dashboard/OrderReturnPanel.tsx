@@ -188,10 +188,10 @@ export function OrderReturnPanel({ order }: { order: any }) {
             </div>
           ) : (
             <div className="flex gap-2 justify-end">
-              <Button disabled={busy} variant="ghost" onClick={() => run(() => supabase.rpc('decide_booking_extension', { p_extension_id: pendingExt.id, p_approve: false }), 'Prorrogação recusada.')} className="h-11 text-destructive font-black uppercase text-[10px] tracking-widest">
+              <Button disabled={busy} variant="ghost" onClick={() => run(() => supabase.rpc('decide_booking_extension', { p_extension_id: pendingExt.id, p_approve: false }), 'Prorrogação recusada.')} className="h-11 text-destructive font-black uppercase text-[11px] tracking-widest">
                 Recusar
               </Button>
-              <Button disabled={busy} onClick={() => run(() => supabase.rpc('decide_booking_extension', { p_extension_id: pendingExt.id, p_approve: true }), 'Prorrogação aprovada.')} className="h-11 bg-emerald-600 hover:bg-emerald-500 font-black uppercase text-[10px] tracking-widest rounded-xl px-6">
+              <Button disabled={busy} onClick={() => run(() => supabase.rpc('decide_booking_extension', { p_extension_id: pendingExt.id, p_approve: true }), 'Prorrogação aprovada.')} className="h-11 bg-emerald-600 hover:bg-emerald-500 font-black uppercase text-[11px] tracking-widest rounded-xl px-6">
                 Aprovar
               </Button>
             </div>
@@ -263,7 +263,7 @@ export function OrderReturnPanel({ order }: { order: any }) {
                 value={address}
                 onChange={e => setAddress(e.target.value)}
                 placeholder="Endereço completo para a coleta"
-                className="w-full h-12 bg-zinc-950 border border-zinc-800 rounded-xl pl-9 pr-3 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-primary/50"
+                className="w-full h-12 bg-zinc-950 border border-zinc-800 rounded-xl pl-9 pr-3 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-primary/50"
               />
             </div>
           )}

@@ -117,7 +117,7 @@ export default function AcceptInvite() {
         return (
             <div className="min-h-screen flex items-center justify-center bg-zinc-950 p-4">
                 <Card className="w-full max-w-md bg-zinc-900 border-zinc-800 p-8 text-center">
-                    <Building2 className="h-12 w-12 text-zinc-700 mx-auto mb-4" />
+                    <Building2 className="h-12 w-12 text-zinc-500 mx-auto mb-4" />
                     <h2 className="text-xl font-black uppercase text-zinc-100 mb-2">Convite Indisponível</h2>
                     <p className="text-zinc-500 text-sm">{error}</p>
                     <Button onClick={() => navigate('/')} className="mt-6 w-full font-black uppercase tracking-widest bg-zinc-800 text-white hover:bg-zinc-700">
@@ -148,7 +148,7 @@ export default function AcceptInvite() {
                 <CardContent>
                     <form onSubmit={handleAccept} className="space-y-4">
                         <div className="space-y-2 mb-6">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">E-mail de Acesso (Fixo)</label>
+                            <label className="text-[11px] font-black uppercase tracking-widest text-zinc-500 ml-1">E-mail de Acesso (Fixo)</label>
                             <Input
                                 type="email"
                                 value={branchData?.manager_email}
@@ -179,7 +179,7 @@ export default function AcceptInvite() {
                         
                         {error && (
                             <div className="bg-red-500/10 border border-red-500/20 p-3 rounded-xl text-center mt-4">
-                                <p className="text-[10px] text-red-400 font-bold uppercase tracking-widest">{error}</p>
+                                <p className="text-[11px] text-red-400 font-bold uppercase tracking-widest">{error}</p>
                             </div>
                         )}
                         

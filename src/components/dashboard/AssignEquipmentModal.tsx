@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { friendlyError } from '@/lib/errors';
+import { toast } from 'sonner';
 import { useBranches } from '@/hooks/useBranches';
 import { useUpdateEquipment } from '@/hooks/useEquipments';
 import { supabase } from '@/lib/supabase';
@@ -91,11 +93,11 @@ export function AssignEquipmentModal({ equipment, isOpen, onClose }: AssignEquip
                     updated_at: new Date().toISOString()
                 }, { onConflict: 'branch_id,equipment_id' });
             
-            alert(`Sucesso! ${quantity} unidade(s) de "${equipment.name}" foram atribuídas a ${branch.name}.`);
+            toast.success(`Sucesso! ${quantity} unidade(s) de "${equipment.name}" foram atribuídas a ${branch.name}.`);
             onClose();
         } catch (error: any) {
             console.error('Erro na atribuição:', error);
-            alert(`Erro ao atribuir: ${error.message || 'Erro desconhecido'}`);
+            toast.error(`Erro ao atribuir: ${friendlyError(error)}`);
         } finally {
             setLoading(false);
         }
@@ -110,11 +112,11 @@ export function AssignEquipmentModal({ equipment, isOpen, onClose }: AssignEquip
             <div className="space-y-6 py-2">
                 <div className="p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800 flex items-center justify-between">
                     <div>
-                        <p className="text-[10px] uppercase font-black text-zinc-500 tracking-widest mb-1">Equipamento Selecionado</p>
+                        <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest mb-1">Equipamento Selecionado</p>
                         <p className="text-sm font-black text-zinc-100 uppercase">{equipment?.name}</p>
                     </div>
                     <div className="text-right">
-                        <p className="text-[10px] uppercase font-black text-zinc-500 tracking-widest mb-1">Qtd. a Enviar</p>
+                        <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest mb-1">Qtd. a Enviar</p>
                         <input 
                             type="number" 
                             value={quantity}
@@ -148,8 +150,8 @@ export function AssignEquipmentModal({ equipment, isOpen, onClose }: AssignEquip
                                 <div>
                                     <p className="font-black uppercase tracking-tighter text-zinc-200">{branch.name}</p>
                                     <div className="flex items-center gap-2 mt-0.5">
-                                        <MapPin className="h-3 w-3 text-zinc-600" />
-                                        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest truncate">
+                                        <MapPin className="h-3 w-3 text-zinc-400" />
+                                        <p className="text-[11px] text-zinc-500 font-bold uppercase tracking-widest truncate">
                                             {branch.city} - {branch.state} {branch.is_main && '(Sede)'}
                                         </p>
                                     </div>
@@ -168,7 +170,7 @@ export function AssignEquipmentModal({ equipment, isOpen, onClose }: AssignEquip
                     <Button 
                         variant="ghost" 
                         onClick={onClose}
-                        className="flex-1 text-zinc-500 font-bold uppercase tracking-widest text-[10px]"
+                        className="flex-1 text-zinc-500 font-bold uppercase tracking-widest text-[11px]"
                     >
                         Cancelar
                     </Button>

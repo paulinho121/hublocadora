@@ -7,15 +7,15 @@ interface AnimatedGlowingSearchBarProps {
   placeholder?: string;
 }
 
+// Sugestões genéricas (por tipo/marca): exemplos de modelos específicos que não estão
+// no catálogo frustram quem busca
 const PLACEHOLDERS = [
-  'Câmera Sony A7S III...',
-  'Lente Sigma 24-70mm f/2.8...',
-  'Drone DJI Mavic 3 Pro...',
-  'Gimbal DJI RS 3...',
-  'Monitor de campo Atomos...',
-  'Painel LED bi-color...',
-  'Microfone Sennheiser MKH 416...',
-  'Steadicam Tiffen Flyer...',
+  'Busque por nome ou marca...',
+  'Painel de LED...',
+  'Aputure...',
+  'Iluminação...',
+  'Tripés e suportes...',
+  'Áudio e microfones...',
 ];
 
 const AnimatedGlowingSearchBar = ({

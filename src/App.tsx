@@ -13,6 +13,7 @@ import { TenantProvider, useTenant } from '@/contexts/TenantContext';
 import { ProjectProvider, useProject } from '@/contexts/ProjectContext';
 import { ProjectDrawer } from '@/components/marketplace/ProjectDrawer';
 import { RealtimeSync } from '@/components/RealtimeSync';
+import { ConfirmHost } from '@/components/ui/confirm-dialog';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AdminRoute } from '@/components/auth/AdminRoute';
 import { queryClient } from '@/lib/react-query';
@@ -56,13 +57,13 @@ function ProjectNavButton() {
   return (
     <button
       onClick={openDrawer}
-      className="relative flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-all"
+      className="relative flex items-center gap-2 text-xs font-black uppercase tracking-wider text-muted-foreground hover:text-foreground transition-all"
       title="Meu Pedido"
     >
       <FolderOpen className="h-4 w-4" />
       <span className="hidden lg:inline">Pedido</span>
       {count > 0 && (
-        <span className="absolute -top-1.5 -right-2 lg:static lg:ml-0 w-4 h-4 lg:w-auto lg:h-auto lg:px-1.5 lg:py-0.5 bg-primary text-white text-[9px] font-black rounded-full flex items-center justify-center leading-none">
+        <span className="absolute -top-1.5 -right-2 lg:static lg:ml-0 w-4 h-4 lg:w-auto lg:h-auto lg:px-1.5 lg:py-0.5 bg-primary text-white text-[11px] font-black rounded-full flex items-center justify-center leading-none">
           {count}
         </span>
       )}
@@ -92,8 +93,8 @@ function Navbar() {
           <Link to="/" className="flex items-center transition-transform hover:scale-105 active:scale-95">
             <CineHubLogo />
           </Link>
-          <nav className="hidden md:flex items-center space-x-8 text-xs font-black text-muted-foreground uppercase tracking-[0.2em]">
-            <NavLink to="/dashboard" className={({isActive}) => isActive ? "text-primary" : "hover:text-foreground transition-all"}>Locadora</NavLink>
+          <nav className="hidden md:flex items-center space-x-8 text-xs font-black text-muted-foreground uppercase tracking-wider">
+            <NavLink to="/dashboard" className={({isActive}) => isActive ? "text-primary" : "hover:text-foreground transition-all"}>Meu painel</NavLink>
             <ProjectNavButton />
             {profile?.role === 'admin' && (
               <NavLink to="/admin" className={({isActive}) => isActive ? "text-primary" : "hover:text-foreground transition-all"}>Gestão HUB</NavLink>
@@ -113,7 +114,7 @@ function Navbar() {
                   <span className="text-[11px] font-black uppercase tracking-widest text-white/90">
                     {profile?.full_name ?? user.email?.split('@')[0]}
                   </span>
-                  <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-emerald-500">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-emerald-500">
                     Online
                   </span>
                 </div>
@@ -128,14 +129,14 @@ function Navbar() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-primary hover:bg-transparent hidden md:flex"
+                className="text-xs font-black uppercase tracking-wider text-muted-foreground hover:text-primary hover:bg-transparent hidden md:flex"
                 onClick={() => navigate('/register')}
               >
                 criar conta
               </Button>
               <Button
                 size="sm"
-                className="bg-primary text-white hover:bg-primary/90 px-8 rounded-xl text-xs h-11 font-black uppercase tracking-[0.2em] shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5 active:translate-y-0"
+                className="bg-primary text-white hover:bg-primary/90 px-8 rounded-xl text-xs h-11 font-black uppercase tracking-wider shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5 active:translate-y-0"
                 onClick={() => navigate('/login')}
               >
                 Entrar
@@ -163,12 +164,12 @@ function ProjectBottomButton() {
     >
       <FolderOpen className="w-4 h-4 shrink-0" />
       {isActive && (
-        <span className="text-[10px] font-black uppercase tracking-wider whitespace-nowrap ml-1.5 animate-in fade-in slide-in-from-left-2 duration-300">
+        <span className="text-[11px] font-black uppercase tracking-wider whitespace-nowrap ml-1.5 animate-in fade-in slide-in-from-left-2 duration-300">
           Pedido
         </span>
       )}
       {count > 0 && !isActive && (
-        <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-primary text-white text-[8px] font-black rounded-full flex items-center justify-center">
+        <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-primary text-white text-[11px] font-black rounded-full flex items-center justify-center">
           {count}
         </span>
       )}
@@ -227,7 +228,7 @@ function DashboardBottomNav() {
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-3 px-1">
-              <span className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-500">Mais opções</span>
+              <span className="text-[11px] font-black uppercase tracking-wider text-zinc-500">Mais opções</span>
               <button onClick={() => setMoreOpen(false)} className="h-10 w-10 -mr-2 flex items-center justify-center rounded-xl text-zinc-500" aria-label="Fechar">
                 <X className="w-5 h-5" />
               </button>
@@ -269,12 +270,12 @@ function DashboardBottomNav() {
           {DASHBOARD_PRIMARY_TABS.map(({ id, label, icon: Icon }) => (
             <button key={id} onClick={() => goTo(id)} className={itemClass(currentTab === id && !moreOpen)}>
               <Icon className="w-5 h-5 shrink-0" />
-              <span className="text-[10px] font-bold leading-none">{label}</span>
+              <span className="text-[11px] font-bold leading-none">{label}</span>
             </button>
           ))}
           <button onClick={() => setMoreOpen(v => !v)} className={itemClass(moreOpen || isMoreActive)} aria-expanded={moreOpen}>
             <LayoutGrid className="w-5 h-5 shrink-0" />
-            <span className="text-[10px] font-bold leading-none">Mais</span>
+            <span className="text-[11px] font-bold leading-none">Mais</span>
           </button>
         </nav>
       </div>
@@ -297,7 +298,7 @@ function BottomNav() {
   // Non-dashboard pages (e.g. Marketplace, details)
   const navItems = [
     { to: '/', label: 'Market', icon: ShoppingBag },
-    { to: '/dashboard', label: 'Locadora', icon: LayoutDashboard },
+    { to: '/dashboard', label: 'Painel', icon: LayoutDashboard },
     ...(profile?.role === 'admin' ? [{ to: '/admin', label: 'Admin', icon: Settings }] : []),
   ];
 
@@ -312,13 +313,13 @@ function BottomNav() {
               to={to}
               className={`flex items-center justify-center transition-all duration-300 rounded-xl ${
                 isActive 
-                  ? 'bg-primary text-white px-4 py-2.5 shadow-lg shadow-primary/20 scale-105 font-black uppercase text-[10px] tracking-wider' 
+                  ? 'bg-primary text-white px-4 py-2.5 shadow-lg shadow-primary/20 scale-105 font-black uppercase text-[11px] tracking-wider' 
                   : 'text-zinc-500 hover:text-zinc-300 p-2.5'
               }`}
             >
               <Icon className={`w-4.5 h-4.5 shrink-0 transition-transform ${isActive ? 'scale-110 mr-1.5' : 'scale-100'}`} />
               {isActive && (
-                <span className="text-[10px] font-black uppercase tracking-wider whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-300">
+                <span className="text-[11px] font-black uppercase tracking-wider whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-300">
                   {label}
                 </span>
               )}
@@ -343,6 +344,7 @@ function MainLayout() {
       <ProfessionalBackground />
       {/* Pedidos, entregas e prorrogações em tempo real para quem está logado */}
       <RealtimeSync />
+      <ConfirmHost />
       {!isAuthPage && <Navbar />}
       {!isAuthPage && <ProjectDrawer />}
       <ErrorBoundary>
@@ -405,7 +407,8 @@ export default function App() {
             <Router>
               <MainLayout />
             </Router>
-            <Toaster position="bottom-right" richColors theme="dark" />
+            {/* No celular, acima da barra de navegação inferior */}
+            <Toaster position="bottom-right" richColors theme="dark" mobileOffset={{ bottom: 'calc(env(safe-area-inset-bottom) + 96px)' }} />
           </ProjectProvider>
         </TenantProvider>
       </AuthProvider>

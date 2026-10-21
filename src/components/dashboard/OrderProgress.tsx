@@ -83,7 +83,7 @@ export function OrderProgress({ bookingStatus, deliveryStatus, compact = false }
                 {filled && i === step && <span className="h-2 w-2 rounded-full bg-white" />}
               </span>
               <span className={`mt-2 text-[11px] font-bold text-center leading-tight px-1 ${
-                isCurrent ? 'text-white' : filled ? 'text-zinc-300' : 'text-zinc-600'
+                isCurrent ? 'text-white' : filled ? 'text-zinc-300' : 'text-zinc-400'
               }`}>
                 {label}
               </span>

@@ -115,21 +115,21 @@ export function OrderHistoryTab() {
             <Button 
               variant={filterStatus === 'all' ? 'secondary' : 'ghost'} 
               onClick={() => setFilterStatus('all')}
-              className="h-9 rounded-lg text-[10px] font-black uppercase px-4"
+              className="h-9 rounded-lg text-[11px] font-black uppercase px-4"
             >
               Todos
             </Button>
             <Button 
               variant={filterStatus === 'completed' ? 'secondary' : 'ghost'} 
               onClick={() => setFilterStatus('completed')}
-              className="h-9 rounded-lg text-[10px] font-black uppercase px-4"
+              className="h-9 rounded-lg text-[11px] font-black uppercase px-4"
             >
               Concluídos
             </Button>
             <Button 
               variant={filterStatus === 'cancelled' ? 'secondary' : 'ghost'} 
               onClick={() => setFilterStatus('cancelled')}
-              className="h-9 rounded-lg text-[10px] font-black uppercase px-4"
+              className="h-9 rounded-lg text-[11px] font-black uppercase px-4"
             >
               Cancelados
             </Button>
@@ -145,8 +145,8 @@ export function OrderHistoryTab() {
       ) : filteredBookings.length === 0 ? (
         <div className="py-20 text-center border-2 border-dashed border-zinc-900 rounded-3xl">
           <History className="h-12 w-12 text-zinc-800 mx-auto mb-4" />
-          <h3 className="text-xl font-black text-zinc-700 uppercase tracking-tighter">Nenhum registro encontrado</h3>
-          <p className="text-zinc-600 font-medium max-w-xs mx-auto mt-2">
+          <h3 className="text-xl font-black text-zinc-500 uppercase tracking-tighter">Nenhum registro encontrado</h3>
+          <p className="text-zinc-400 font-medium max-w-xs mx-auto mt-2">
             O histórico aparecerá aqui quando houver pedidos finalizados ou cancelados.
           </p>
         </div>
@@ -181,12 +181,12 @@ export function OrderHistoryTab() {
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <p className="text-lg font-black text-zinc-100 uppercase truncate tracking-tight">{booking.equipment?.name}</p>
-                          <Badge className={`text-[8px] uppercase font-black tracking-widest h-4 px-2 border-none ${getStatusColor(booking.status)}`}>
+                          <Badge className={`text-[11px] uppercase font-black tracking-widest h-4 px-2 border-none ${getStatusColor(booking.status)}`}>
                             <span className="mr-1">{getStatusIcon(booking.status)}</span>
                             {booking.status}
                           </Badge>
                         </div>
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] uppercase font-bold text-zinc-500 tracking-widest">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] uppercase font-bold text-zinc-500 tracking-widest">
                           <span className="flex items-center gap-1">
                             <CalendarDays className="h-3 w-3 text-primary" />
                             {format(new Date(booking.start_date + 'T00:00'), "dd/MM/yy")} - {format(new Date(booking.end_date + 'T00:00'), "dd/MM/yy")}
@@ -208,7 +208,7 @@ export function OrderHistoryTab() {
                           return formatCurrency(amount);
                         })()}
                       </div>
-                      <p className="text-[10px] uppercase font-black text-zinc-600 tracking-[0.2em]">Valor Final</p>
+                      <p className="text-[11px] uppercase font-black text-zinc-400 tracking-wider">Valor Final</p>
                     </div>
                   </div>
                 </CardContent>

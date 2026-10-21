@@ -48,13 +48,13 @@ export function BranchCard({ branch, onManageStock, onCopyInvite, onResendInvite
                                     {branch.name}
                                 </h3>
                                 <Badge className={cn(
-                                    "text-[8px] px-1.5 h-4 uppercase font-black",
+                                    "text-[11px] px-1.5 h-4 uppercase font-black",
                                     branch.status === 'active' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-amber-500/10 text-amber-500 border-amber-500/20"
                                 )}>
                                     {branch.status === 'invited' ? 'Pendente' : 'Ativo'}
                                 </Badge>
                             </div>
-                            <div className="flex items-center gap-1.5 text-zinc-500 text-[10px] font-bold uppercase tracking-wider">
+                            <div className="flex items-center gap-1.5 text-zinc-500 text-[11px] font-bold uppercase tracking-wider">
                                 <MapPin className="h-3 w-3" />
                                 <span>{branch.city} - {branch.state}</span>
                             </div>
@@ -70,7 +70,7 @@ export function BranchCard({ branch, onManageStock, onCopyInvite, onResendInvite
                     <div className="flex gap-3 mb-6">
                         <div className="flex items-center gap-2 bg-zinc-900/40 px-3 py-1 rounded-full border border-zinc-800/50">
                             <Package className="h-3 w-3 text-primary" />
-                            <span className="text-[9px] font-black uppercase text-zinc-400">{totalItems} ITENS</span>
+                            <span className="text-[11px] font-black uppercase text-zinc-400">{totalItems} ITENS</span>
                         </div>
                     </div>
                 )}
@@ -87,20 +87,20 @@ export function BranchCard({ branch, onManageStock, onCopyInvite, onResendInvite
                                 <div className="grid grid-cols-1 gap-2 bg-zinc-900/30 p-4 rounded-2xl border border-zinc-800/50">
                                     <div className="flex items-center gap-3 text-zinc-400">
                                         <FileText className="h-3.5 w-3.5 text-primary/60" />
-                                        <span className="text-[10px] font-bold uppercase tracking-wider">{branch.document || 'Sem documento'}</span>
+                                        <span className="text-[11px] font-bold uppercase tracking-wider">{branch.document || 'Sem documento'}</span>
                                     </div>
                                     <div className="flex items-center gap-3 text-zinc-400">
                                         <Phone className="h-3.5 w-3.5 text-primary/60" />
-                                        <span className="text-[10px] font-bold uppercase tracking-wider">{branch.phone || 'Sem telefone'}</span>
+                                        <span className="text-[11px] font-bold uppercase tracking-wider">{branch.phone || 'Sem telefone'}</span>
                                     </div>
                                     <div className="flex items-center gap-3 text-zinc-400">
                                         <MapPin className="h-3.5 w-3.5 text-primary/60" />
-                                        <span className="text-[10px] font-bold uppercase tracking-wider">{branch.address}, {branch.city}-{branch.state}</span>
+                                        <span className="text-[11px] font-bold uppercase tracking-wider">{branch.address}, {branch.city}-{branch.state}</span>
                                     </div>
                                 </div>
 
                                 <div className="pt-4 border-t border-zinc-900/50">
-                                    <h4 className="text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-3">Estoque Local</h4>
+                                    <h4 className="text-[11px] font-black uppercase tracking-widest text-zinc-500 mb-3">Estoque Local</h4>
                                     {isLoading ? (
                                         <div className="flex justify-center py-6">
                                             <Loader2 className="h-5 w-5 animate-spin text-primary opacity-50" />
@@ -114,22 +114,22 @@ export function BranchCard({ branch, onManageStock, onCopyInvite, onResendInvite
                                                             <img src={item.equipment.images[0]} className="h-10 w-10 rounded-lg object-cover border border-zinc-800" alt="" />
                                                         ) : (
                                                             <div className="h-10 w-10 rounded-lg bg-zinc-800 flex items-center justify-center">
-                                                                <Package className="h-4 w-4 text-zinc-600" />
+                                                                <Package className="h-4 w-4 text-zinc-400" />
                                                             </div>
                                                         )}
                                                         <div>
-                                                            <p className="text-[10px] font-black uppercase text-zinc-200 leading-tight">{item.equipment?.name}</p>
-                                                            <p className="text-[8px] text-zinc-500 uppercase font-bold">{item.equipment?.category}</p>
+                                                            <p className="text-[11px] font-black uppercase text-zinc-200 leading-tight">{item.equipment?.name}</p>
+                                                            <p className="text-[11px] text-zinc-500 uppercase font-bold">{item.equipment?.category}</p>
                                                         </div>
                                                     </div>
-                                                    <Badge className="bg-zinc-800 text-zinc-400 border-zinc-700 text-[10px] font-black">
+                                                    <Badge className="bg-zinc-800 text-zinc-400 border-zinc-700 text-[11px] font-black">
                                                         {item.quantity}
                                                     </Badge>
                                                 </div>
                                             ))}
                                         </div>
                                     ) : (
-                                        <p className="text-[9px] text-zinc-600 uppercase font-black text-center py-4">Sem estoque atribuído</p>
+                                        <p className="text-[11px] text-zinc-400 uppercase font-black text-center py-4">Sem estoque atribuído</p>
                                     )}
                                 </div>
                             </div>
@@ -143,7 +143,7 @@ export function BranchCard({ branch, onManageStock, onCopyInvite, onResendInvite
                         onClick={() => branch.status === 'invited' ? onResendInvite(branch) : onCopyInvite(branch.invite_token, branch.id)}
                         disabled={isResending}
                         className={cn(
-                            "h-10 text-[9px] uppercase font-black tracking-widest rounded-xl flex-1",
+                            "h-10 text-[11px] uppercase font-black tracking-widest rounded-xl flex-1",
                             branch.status === 'invited'
                                 ? "border-amber-500/30 bg-amber-500/5 text-amber-400 hover:bg-amber-500/10"
                                 : "border-zinc-800 bg-zinc-900/50"
@@ -159,13 +159,13 @@ export function BranchCard({ branch, onManageStock, onCopyInvite, onResendInvite
                     <Button 
                         variant="outline"
                         onClick={onEdit}
-                        className="h-10 text-[9px] uppercase font-black tracking-widest rounded-xl border-zinc-800 bg-zinc-900/50 flex-1"
+                        className="h-10 text-[11px] uppercase font-black tracking-widest rounded-xl border-zinc-800 bg-zinc-900/50 flex-1"
                     >
                         Editar
                     </Button>
                     <Button 
                         onClick={onManageStock}
-                        className="h-10 bg-zinc-100 text-black text-[9px] uppercase font-black tracking-widest rounded-xl flex-1"
+                        className="h-10 bg-zinc-100 text-black text-[11px] uppercase font-black tracking-widest rounded-xl flex-1"
                     >
                         <Globe className="h-3 w-3 mr-2" /> Gerenciar
                     </Button>

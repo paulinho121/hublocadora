@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { friendlyError } from '@/lib/errors';
+import { toast } from 'sonner';
 import { useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
@@ -449,7 +451,7 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ['deliveries'] });
     } catch (error) {
       console.error('Erro ao atualizar status:', error);
-      alert('Não foi possível atualizar o pedido. Tente novamente.');
+      toast.error('Não foi possível atualizar o pedido. Tente novamente.');
     } finally {
       setUpdatingId(null);
       setFulfillmentModal(null);
@@ -465,7 +467,7 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ['deliveries'] });
     } catch (e) {
       console.error(e);
-      alert('Não foi possível aceitar a sub-locação.');
+      toast.error('Não foi possível aceitar a sub-locação.');
     } finally {
       setUpdatingId(null);
     }
@@ -483,7 +485,7 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
       queryClient.invalidateQueries({ queryKey: ['deliveries'] });
     } catch (error: any) {
-      alert(`Não foi possível confirmar: ${error.message || 'tente novamente'}`);
+      toast.error(`Não foi possível confirmar: ${friendlyError(error)}`);
     } finally {
       setUpdatingId(null);
     }
@@ -545,7 +547,7 @@ export default function Dashboard() {
            </div>
            
            <div className="hidden md:block">
-              <h1 className="text-sm font-black uppercase tracking-[0.3em] text-zinc-500">Área de Gestão</h1>
+              <h1 className="text-sm font-black uppercase tracking-wider text-zinc-500">Área de Gestão</h1>
            </div>
 
            <div className="flex items-center gap-3">
@@ -594,7 +596,7 @@ export default function Dashboard() {
                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
                     <Card className="clay-card">
                        <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
-                          <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-[0.2em]">Ganhos Líquidos</CardTitle>
+                          <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-wider">Ganhos Líquidos</CardTitle>
                           <TrendingUp className="h-4 w-4 text-emerald-500" />
                        </CardHeader>
                        <CardContent className="p-6 pt-0">
@@ -607,7 +609,7 @@ export default function Dashboard() {
                                 + {formatCurrency(pendingRevenue)} a confirmar
                               </p>
                             )}
-                            <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">
+                            <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest">
                               {thisMonthRevenue > 0
                                 ? `${formatCurrency(thisMonthRevenue)} este mês`
                                 : completedRevenue > 0
@@ -620,7 +622,7 @@ export default function Dashboard() {
 
                     <Card className="clay-card">
                        <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
-                          <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-[0.2em]">Débitos Operacionais</CardTitle>
+                          <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-wider">Débitos Operacionais</CardTitle>
                           <AlertCircle className="h-4 w-4 text-red-500" />
                        </CardHeader>
                        <CardContent className="p-6 pt-0">
@@ -628,11 +630,11 @@ export default function Dashboard() {
                              {formatCurrency(totalDebt)}
                           </div>
                           <div className="flex flex-col gap-0.5">
-                            <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">
+                            <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest">
                               Taxa HUB (15%): {formatCurrency(hubFee)}
                             </p>
                             {partnerDebt > 0 && (
-                              <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">
+                              <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest">
                                 Parceiros: {formatCurrency(partnerDebt)}
                               </p>
                             )}
@@ -642,8 +644,8 @@ export default function Dashboard() {
 
                     <Card className="clay-card">
                        <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
-                          <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-[0.2em]">Reservas Ativas</CardTitle>
-                          <CalendarDays className="h-4 w-4 text-zinc-600" />
+                          <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-wider">Reservas Ativas</CardTitle>
+                          <CalendarDays className="h-4 w-4 text-zinc-400" />
                        </CardHeader>
                        <CardContent className="p-6 pt-0">
                           <div className="text-2xl font-black tracking-tighter text-zinc-100 mb-1">{activeBookings}</div>
@@ -653,7 +655,7 @@ export default function Dashboard() {
                                 {pendingBookingsCount} aguardando aprovação
                               </p>
                             )}
-                            <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">
+                            <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest">
                               {completedBookings > 0 ? `${completedBookings} concluídas` : 'Nenhuma concluída'}
                             </p>
                           </div>
@@ -662,12 +664,12 @@ export default function Dashboard() {
 
                     <Card className="clay-card">
                        <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
-                          <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-[0.2em]">Frota Estocada</CardTitle>
-                          <Package className="h-4 w-4 text-zinc-600" />
+                          <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-wider">Frota Estocada</CardTitle>
+                          <Package className="h-4 w-4 text-zinc-400" />
                        </CardHeader>
                        <CardContent className="p-6 pt-0">
                           <div className="text-2xl font-black tracking-tighter text-zinc-100 mb-1">{equipments?.length || 0}</div>
-                          <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">
+                          <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest">
                             {maintenanceCount > 0
                               ? `${(equipments?.length || 0) - maintenanceCount} disponíveis`
                               : 'Todos disponíveis'}
@@ -677,12 +679,12 @@ export default function Dashboard() {
 
                     <Card className="clay-card">
                        <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
-                          <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-[0.2em]">Em Manutenção</CardTitle>
+                          <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-wider">Em Manutenção</CardTitle>
                           <AlertCircle className="h-4 w-4 text-destructive" />
                        </CardHeader>
                        <CardContent className="p-6 pt-0">
                           <div className="text-2xl font-black tracking-tighter text-destructive mb-1">{maintenanceCount}</div>
-                          <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">Atenção requerida</p>
+                          <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest">Atenção requerida</p>
                        </CardContent>
                     </Card>
                  </div>
@@ -691,11 +693,11 @@ export default function Dashboard() {
                    <Card className="xl:col-span-2 bg-zinc-950 border-zinc-900 rounded-3xl">
                       <CardHeader className="p-8 border-b border-zinc-900 flex flex-row items-center justify-between">
                          <CardTitle className="text-xl font-black tracking-tighter uppercase">Pedidos Recentes</CardTitle>
-                         <Button variant="ghost" onClick={() => setActiveTab('bookings')} className="h-10 text-[10px] uppercase font-black tracking-widest text-zinc-500 hover:text-white">Ver Todos</Button>
+                         <Button variant="ghost" onClick={() => setActiveTab('bookings')} className="h-10 text-[11px] uppercase font-black tracking-widest text-zinc-500 hover:text-white">Ver Todos</Button>
                       </CardHeader>
                       <CardContent className="p-0">
                          {recentOrders.length === 0 ? (
-                           <div className="p-12 text-center text-zinc-600">Nenhum pedido recente.</div>
+                           <div className="p-12 text-center text-zinc-400">Nenhum pedido recente.</div>
                          ) : (
                            <div className="divide-y divide-zinc-900/50">
                               {recentOrders.map((booking: any) => {
@@ -716,7 +718,7 @@ export default function Dashboard() {
                                               {booking.equipment?.images?.[0] ? (
                                                 <img src={booking.equipment.images[0]} alt="" className="w-full h-full object-cover group-hover/item:scale-110 transition-transform" />
                                               ) : (
-                                                <Package className="h-4 w-4 text-zinc-700" />
+                                                <Package className="h-4 w-4 text-zinc-500" />
                                               )}
                                            </div>
                                            <div className={`absolute -bottom-1 -right-1 h-5 w-5 rounded-full border-2 border-zinc-950 flex items-center justify-center shadow-xl ${isRequested ? 'bg-amber-500' : 'bg-emerald-500'}`}>
@@ -726,11 +728,11 @@ export default function Dashboard() {
                                         <div className="min-w-0">
                                            <div className="flex items-center gap-2 mb-0.5">
                                               <p className="text-sm font-black text-zinc-100 uppercase truncate">{(booking as any).equipment?.name}</p>
-                                              <Badge variant="outline" className={`text-[7px] h-3.5 px-1.5 font-black uppercase tracking-[0.1em] border-none ${isRequested ? 'bg-amber-500/10 text-amber-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
+                                              <Badge variant="outline" className={`text-[11px] h-3.5 px-1.5 font-black uppercase tracking-[0.1em] border-none ${isRequested ? 'bg-amber-500/10 text-amber-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
                                                  {isRequested ? 'Saída' : 'Entrada'}
                                               </Badge>
                                            </div>
-                                           <p className="text-[10px] uppercase text-zinc-500 font-bold tracking-widest truncate">
+                                           <p className="text-[11px] uppercase text-zinc-500 font-bold tracking-widest truncate">
                                               {isRequested ? 'Destino: Seu Estoque' : `Solicitante: ${booking.renter?.company?.name || booking.renter?.full_name || 'Desconhecido'}`}
                                            </p>
                                         </div>
@@ -738,7 +740,7 @@ export default function Dashboard() {
                                      
                                      <div className="flex items-center gap-8">
                                         <div className="text-right hidden sm:block">
-                                           <p className="text-[8px] uppercase font-black text-zinc-600 tracking-[0.2em] mb-1">Previsão Retorno</p>
+                                           <p className="text-[11px] uppercase font-black text-zinc-400 tracking-wider mb-1">Previsão Retorno</p>
                                            <div className="flex items-center justify-end gap-1.5 text-[11px] font-black text-zinc-400 uppercase tracking-tighter">
                                               <CalendarDays className="h-3 w-3 text-primary" />
                                               {/* 'T00:00' = meia-noite local; só a data seria lida como UTC e cairia no dia anterior */}
@@ -754,9 +756,9 @@ export default function Dashboard() {
                                                  return formatCurrency(amount);
                                               })()}
                                            </div>
-                                           <p className="text-[9px] uppercase font-black text-zinc-500 tracking-widest">{ORDER_STATUS[booking.status]?.label || booking.status}</p>
+                                           <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest">{ORDER_STATUS[booking.status]?.label || booking.status}</p>
                                         </div>
-                                        <ChevronRight className="h-4 w-4 text-zinc-600 shrink-0 hidden sm:block" />
+                                        <ChevronRight className="h-4 w-4 text-zinc-400 shrink-0 hidden sm:block" />
                                      </div>
                                   </button>
                                 );
@@ -772,7 +774,7 @@ export default function Dashboard() {
                       </CardHeader>
                       <CardContent className="p-8 space-y-6 text-center">
                          <div className="p-6 bg-zinc-900/50 rounded-2xl border border-dashed border-zinc-800">
-                            <Package className="h-8 w-8 text-zinc-700 mx-auto mb-3" />
+                            <Package className="h-8 w-8 text-zinc-500 mx-auto mb-3" />
                             <p className="text-xs text-zinc-500 leading-relaxed font-medium">
                                Seus itens mais alugados aparecerão aqui em breve.
                             </p>
@@ -820,11 +822,11 @@ export default function Dashboard() {
              };
              const statusBadge = (o: any) => {
                const st = ORDER_STATUS[o.status] || { label: o.status, className: '' };
-               return <Badge className={`text-[10px] uppercase font-black tracking-wide ${st.className}`}>{st.label}</Badge>;
+               return <Badge className={`text-[11px] uppercase font-black tracking-wide ${st.className}`}>{st.label}</Badge>;
              };
              const directionBadge = (o: any) => o._direction === 'received'
-               ? <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-emerald-400"><Inbox className="h-3 w-3" /> Recebido</span>
-               : <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-sky-400"><Send className="h-3 w-3" /> Enviado</span>;
+               ? <span className="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-widest text-emerald-400"><Inbox className="h-3 w-3" /> Recebido</span>
+               : <span className="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-widest text-sky-400"><Send className="h-3 w-3" /> Enviado</span>;
              const shortDate = (d: string) => format(new Date(d + 'T00:00'), 'dd/MM');
 
              // Ações rápidas de aprovação (locadora) e aceite de sub-locação
@@ -836,9 +838,9 @@ export default function Dashboard() {
                if (d?.subrental_status === 'pending' && isFulfiller && !isOwner) {
                  return (
                    <div className="flex flex-wrap items-center justify-end gap-3">
-                     <p className="flex-1 text-[10px] text-amber-500 font-black uppercase tracking-widest">Aguardando seu aceite</p>
-                     <Button variant="ghost" size="sm" onClick={() => handleUpdateStatus(o.id, 'rejected')} className="h-10 text-destructive font-black uppercase text-[10px] hover:bg-destructive/5 tracking-widest">Recusar</Button>
-                     <Button size="sm" disabled={updatingId === d.id} onClick={() => handleAcceptSubrental(d.id)} className="h-10 bg-amber-500 text-black hover:bg-amber-400 font-black uppercase text-[10px] tracking-widest rounded-lg px-6">
+                     <p className="flex-1 text-[11px] text-amber-500 font-black uppercase tracking-widest">Aguardando seu aceite</p>
+                     <Button variant="ghost" size="sm" onClick={() => handleUpdateStatus(o.id, 'rejected')} className="h-10 text-destructive font-black uppercase text-[11px] hover:bg-destructive/5 tracking-widest">Recusar</Button>
+                     <Button size="sm" disabled={updatingId === d.id} onClick={() => handleAcceptSubrental(d.id)} className="h-10 bg-amber-500 text-black hover:bg-amber-400 font-black uppercase text-[11px] tracking-widest rounded-lg px-6">
                        {updatingId === d.id ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Aceitar Sub-locação'}
                      </Button>
                    </div>
@@ -863,8 +865,8 @@ export default function Dashboard() {
                if (o._direction === 'received' && o.status === 'pending') {
                  return (
                    <div className="flex justify-end gap-3">
-                     <Button variant="ghost" size="sm" onClick={() => handleUpdateStatus(o.id, 'rejected')} className="h-10 text-destructive font-black uppercase text-[10px] hover:bg-destructive/5 tracking-widest">Recusar</Button>
-                     <Button size="sm" disabled={updatingId === o.id} onClick={() => handleApproveBooking(o)} className="h-10 bg-emerald-600 hover:bg-emerald-500 font-black uppercase text-[10px] tracking-widest rounded-lg px-6">
+                     <Button variant="ghost" size="sm" onClick={() => handleUpdateStatus(o.id, 'rejected')} className="h-10 text-destructive font-black uppercase text-[11px] hover:bg-destructive/5 tracking-widest">Recusar</Button>
+                     <Button size="sm" disabled={updatingId === o.id} onClick={() => handleApproveBooking(o)} className="h-10 bg-emerald-600 hover:bg-emerald-500 font-black uppercase text-[11px] tracking-widest rounded-lg px-6">
                        {updatingId === o.id ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Aprovar agora'}
                      </Button>
                    </div>
@@ -897,7 +899,7 @@ export default function Dashboard() {
                          <div className="h-16 w-16 md:h-20 md:w-20 rounded-2xl bg-zinc-900 border border-zinc-800 overflow-hidden shrink-0 flex items-center justify-center">
                            {order.equipment?.images?.[0]
                              ? <img src={order.equipment.images[0]} alt="" className="h-full w-full object-cover" />
-                             : <Package className="h-6 w-6 text-zinc-700" />}
+                             : <Package className="h-6 w-6 text-zinc-500" />}
                          </div>
                          <div className="min-w-0 flex-1 space-y-1.5">
                            <div className="flex flex-wrap items-center gap-3">{directionBadge(order)}{statusBadge(order)}</div>
@@ -919,7 +921,7 @@ export default function Dashboard() {
                            { label: 'Entrega', value: order.delivery_method === 'delivery' ? 'Receber no local' : 'Retirada' },
                          ].map(info => (
                            <div key={info.label} className="bg-zinc-950/60 border border-zinc-800/60 rounded-2xl p-4 min-w-0">
-                             <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-1">{info.label}</p>
+                             <p className="text-[11px] font-black uppercase tracking-widest text-zinc-500 mb-1">{info.label}</p>
                              <p className="text-sm font-black text-zinc-100 truncate">{info.value}</p>
                            </div>
                          ))}
@@ -987,7 +989,7 @@ export default function Dashboard() {
                              <div className="h-12 w-12 rounded-2xl bg-zinc-900 border border-zinc-800 overflow-hidden shrink-0 flex items-center justify-center">
                                {o.equipment?.images?.[0]
                                  ? <img src={o.equipment.images[0]} alt="" className="h-full w-full object-cover" />
-                                 : <Package className="h-5 w-5 text-zinc-700" />}
+                                 : <Package className="h-5 w-5 text-zinc-500" />}
                              </div>
                              <div className="min-w-0 flex-1 space-y-1">
                                {directionBadge(o)}
@@ -1012,7 +1014,7 @@ export default function Dashboard() {
                                <p className="text-base md:text-lg font-black text-zinc-100">{formatCurrency(orderAmount(o))}</p>
                                {statusBadge(o)}
                              </div>
-                             <ChevronRight className="h-5 w-5 text-zinc-600 shrink-0 hidden sm:block" />
+                             <ChevronRight className="h-5 w-5 text-zinc-400 shrink-0 hidden sm:block" />
                            </button>
                            {actions && <div className="px-4 md:px-6 py-3 bg-zinc-900/50 border-t border-zinc-800">{actions}</div>}
                          </Card>
@@ -1167,7 +1169,7 @@ function FavoritesTabContent({ onSelect }: { onSelect: (eq: any) => void }) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-zinc-500 font-black uppercase text-[10px] tracking-widest">Sincronizando Favoritos...</p>
+        <p className="text-zinc-500 font-black uppercase text-[11px] tracking-widest">Carregando favoritos...</p>
       </div>
     );
   }
@@ -1176,7 +1178,7 @@ function FavoritesTabContent({ onSelect }: { onSelect: (eq: any) => void }) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
         <div className="h-20 w-20 rounded-3xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-6">
-          <Heart className="h-8 w-8 text-zinc-700" />
+          <Heart className="h-8 w-8 text-zinc-500" />
         </div>
         <h3 className="text-xl font-black uppercase tracking-tighter mb-2">Lista Vazia</h3>
         <p className="text-zinc-500 max-w-xs mb-8">Você ainda não salvou nenhum equipamento como favorito.</p>

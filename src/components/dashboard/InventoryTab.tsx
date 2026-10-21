@@ -174,7 +174,7 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
       ) : equipments.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 bg-zinc-950/20 border border-dashed border-zinc-800 rounded-3xl text-center space-y-6 animate-in zoom-in-95 duration-500">
           <div className="w-24 h-24 rounded-full bg-zinc-900 flex items-center justify-center shadow-inner">
-             <Package className="h-10 w-10 text-zinc-700" />
+             <Package className="h-10 w-10 text-zinc-500" />
           </div>
           <div className="space-y-2 max-w-sm">
             <h3 className="text-xl font-bold">Nenhum item encontrado</h3>

@@ -106,7 +106,7 @@ export function AvailabilityCalendar({
     available: 'bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/30 cursor-pointer',
     partial: 'bg-amber-500/15 text-amber-400 hover:bg-amber-500/30 cursor-pointer',
     blocked: 'bg-red-500/10 text-red-500/50 line-through cursor-not-allowed opacity-60',
-    past: 'text-zinc-700 cursor-not-allowed',
+    past: 'text-zinc-500 cursor-not-allowed',
   };
 
   return (
@@ -139,7 +139,7 @@ export function AvailabilityCalendar({
           {/* Week day headers */}
           <div className="grid grid-cols-7">
             {WEEK_DAYS.map(d => (
-              <div key={d} className="text-center text-[9px] font-black uppercase text-zinc-600 tracking-widest py-1">
+              <div key={d} className="text-center text-[11px] font-black uppercase text-zinc-400 tracking-widest py-1">
                 {d}
               </div>
             ))}
@@ -196,20 +196,20 @@ export function AvailabilityCalendar({
       <div className="flex items-center justify-center gap-4 pt-3 border-t border-zinc-800/70">
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded bg-emerald-500/40" />
-          <span className="text-[9px] font-black uppercase text-zinc-500">Disponível</span>
+          <span className="text-[11px] font-black uppercase text-zinc-500">Disponível</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded bg-amber-500/40" />
-          <span className="text-[9px] font-black uppercase text-zinc-500">Parcial</span>
+          <span className="text-[11px] font-black uppercase text-zinc-500">Parcial</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded bg-red-500/30" />
-          <span className="text-[9px] font-black uppercase text-zinc-500">Ocupado</span>
+          <span className="text-[11px] font-black uppercase text-zinc-500">Ocupado</span>
         </div>
       </div>
 
       {onRangeChange && (
-        <p className="text-center text-[10px] text-zinc-600 font-medium">
+        <p className="text-center text-[11px] text-zinc-400 font-medium">
           {!pendingStart || selectedEnd
             ? 'Clique em uma data para iniciar a seleção'
             : 'Clique em outra data para definir o período'}

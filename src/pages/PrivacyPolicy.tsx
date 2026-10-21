@@ -65,7 +65,7 @@ export default function PrivacyPolicy() {
             </ul>
           </section>
 
-          <footer className="pt-10 border-t border-zinc-900 text-sm text-zinc-600">
+          <footer className="pt-10 border-t border-zinc-900 text-sm text-zinc-400">
             <p>Dúvidas sobre seus dados? Entre em contato com nosso DPO em: privacidade@moving.pro</p>
           </footer>
         </motion.div>

@@ -61,7 +61,7 @@ export default function TermsOfUse() {
             </p>
           </section>
 
-          <footer className="pt-10 border-t border-zinc-900 text-sm text-zinc-600">
+          <footer className="pt-10 border-t border-zinc-900 text-sm text-zinc-400">
             <p>Ao clicar em "Confirmar Reserva" no checkout, você ratifica sua concordância integral com estes termos.</p>
           </footer>
         </motion.div>

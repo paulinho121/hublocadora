@@ -197,7 +197,7 @@ export function NetworkReportModal({ isOpen, onClose, branches, tenantId }: Netw
           <Button 
             onClick={handlePrint}
             disabled={isLoading}
-            className="shrink-0 bg-primary hover:bg-primary/90 text-black font-black uppercase tracking-wider text-[10px] h-10 px-5 rounded-xl flex items-center gap-2"
+            className="shrink-0 bg-primary hover:bg-primary/90 text-black font-black uppercase tracking-wider text-[11px] h-10 px-5 rounded-xl flex items-center gap-2"
           >
             <Printer className="w-3.5 h-3.5" /> Imprimir Relatório
           </Button>
@@ -206,7 +206,7 @@ export function NetworkReportModal({ isOpen, onClose, branches, tenantId }: Netw
         {isLoading ? (
           <div className="py-20 flex flex-col items-center justify-center gap-3">
             <Loader2 className="h-10 w-10 animate-spin text-primary" />
-            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+            <p className="text-[11px] font-black uppercase tracking-widest text-zinc-500">
               Consolidando dados da rede...
             </p>
           </div>
@@ -216,37 +216,37 @@ export function NetworkReportModal({ isOpen, onClose, branches, tenantId }: Netw
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 print-network-card-grid">
               <Card className="bg-zinc-950/40 border border-zinc-900 print-network-card">
                 <CardContent className="p-4">
-                  <p className="text-[8px] uppercase font-black text-zinc-500 tracking-[0.2em] mb-1">Unidades</p>
+                  <p className="text-[11px] uppercase font-black text-zinc-500 tracking-wider mb-1">Unidades</p>
                   <div className="flex items-baseline gap-1.5">
                     <span className="text-2xl font-black text-zinc-100">{networkMetrics.totalUnits}</span>
-                    <span className="text-[9px] text-zinc-600 font-bold uppercase">locadoras</span>
+                    <span className="text-[11px] text-zinc-400 font-bold uppercase">locadoras</span>
                   </div>
                 </CardContent>
               </Card>
 
               <Card className="bg-zinc-950/40 border border-zinc-900 print-network-card">
                 <CardContent className="p-4">
-                  <p className="text-[8px] uppercase font-black text-zinc-500 tracking-[0.2em] mb-1">Estoque da Rede</p>
+                  <p className="text-[11px] uppercase font-black text-zinc-500 tracking-wider mb-1">Estoque da Rede</p>
                   <div className="flex items-baseline gap-1.5">
                     <span className="text-2xl font-black text-zinc-100">{networkMetrics.totalItems}</span>
-                    <span className="text-[9px] text-zinc-600 font-bold uppercase">itens</span>
+                    <span className="text-[11px] text-zinc-400 font-bold uppercase">itens</span>
                   </div>
                 </CardContent>
               </Card>
 
               <Card className="bg-zinc-950/40 border border-zinc-900 print-network-card">
                 <CardContent className="p-4">
-                  <p className="text-[8px] uppercase font-black text-zinc-500 tracking-[0.2em] mb-1">Total de Pedidos</p>
+                  <p className="text-[11px] uppercase font-black text-zinc-500 tracking-wider mb-1">Total de Pedidos</p>
                   <div className="flex items-baseline gap-1.5">
                     <span className="text-2xl font-black text-zinc-100">{networkMetrics.totalBookings}</span>
-                    <span className="text-[9px] text-zinc-600 font-bold uppercase">vezes</span>
+                    <span className="text-[11px] text-zinc-400 font-bold uppercase">vezes</span>
                   </div>
                 </CardContent>
               </Card>
 
               <Card className="bg-zinc-950/40 border border-zinc-900 print-network-card">
                 <CardContent className="p-4">
-                  <p className="text-[8px] uppercase font-black text-zinc-500 tracking-[0.2em] mb-1">Fat. Consolidado</p>
+                  <p className="text-[11px] uppercase font-black text-zinc-500 tracking-wider mb-1">Fat. Consolidado</p>
                   <div className="flex items-baseline gap-1.5">
                     <span className="text-xl font-black text-emerald-500">{formatBRL(networkMetrics.totalRevenue)}</span>
                   </div>
@@ -259,13 +259,13 @@ export function NetworkReportModal({ isOpen, onClose, branches, tenantId }: Netw
               <Table className="print-network-table min-w-[700px]">
                 <TableHeader className="bg-zinc-900/40">
                   <TableRow className="border-zinc-900">
-                    <TableHead className="text-[9px] uppercase font-black tracking-widest text-zinc-500 py-4 px-6">Unidade</TableHead>
-                    <TableHead className="text-[9px] uppercase font-black tracking-widest text-zinc-500 py-4">Localização</TableHead>
-                    <TableHead className="text-[9px] uppercase font-black tracking-widest text-zinc-500 py-4 text-center">Itens</TableHead>
-                    <TableHead className="text-[9px] uppercase font-black tracking-widest text-zinc-500 py-4 text-center">Pedidos</TableHead>
-                    <TableHead className="text-[9px] uppercase font-black tracking-widest text-zinc-500 py-4 text-right">Faturamento</TableHead>
-                    <TableHead className="text-[9px] uppercase font-black tracking-widest text-zinc-500 py-4 text-right">Faturamento Pendente</TableHead>
-                    <TableHead className="text-[9px] uppercase font-black tracking-widest text-zinc-500 py-4 text-right">Status</TableHead>
+                    <TableHead className="text-[11px] uppercase font-black tracking-widest text-zinc-500 py-4 px-6">Unidade</TableHead>
+                    <TableHead className="text-[11px] uppercase font-black tracking-widest text-zinc-500 py-4">Localização</TableHead>
+                    <TableHead className="text-[11px] uppercase font-black tracking-widest text-zinc-500 py-4 text-center">Itens</TableHead>
+                    <TableHead className="text-[11px] uppercase font-black tracking-widest text-zinc-500 py-4 text-center">Pedidos</TableHead>
+                    <TableHead className="text-[11px] uppercase font-black tracking-widest text-zinc-500 py-4 text-right">Faturamento</TableHead>
+                    <TableHead className="text-[11px] uppercase font-black tracking-widest text-zinc-500 py-4 text-right">Faturamento Pendente</TableHead>
+                    <TableHead className="text-[11px] uppercase font-black tracking-widest text-zinc-500 py-4 text-right">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -276,14 +276,14 @@ export function NetworkReportModal({ isOpen, onClose, branches, tenantId }: Netw
                           <Building2 className="h-4 w-4 text-zinc-500 shrink-0 no-print" />
                           <div>
                             <span className="text-zinc-100 font-bold text-xs uppercase tracking-tight">{branch.name}</span>
-                            <span className="block text-[8px] text-zinc-500 uppercase no-print mt-0.5">{branch.manager_email}</span>
+                            <span className="block text-[11px] text-zinc-500 uppercase no-print mt-0.5">{branch.manager_email}</span>
                           </div>
                         </div>
                       </td>
                       <td className="py-4">
                         <div className="flex items-center gap-1 text-zinc-400">
                           <MapPin className="h-3 w-3 shrink-0 no-print" />
-                          <span className="text-[10px] font-medium">{branch.city}, {branch.state}</span>
+                          <span className="text-[11px] font-medium">{branch.city}, {branch.state}</span>
                         </div>
                       </td>
                       <td className="py-4 text-center">
@@ -308,8 +308,8 @@ export function NetworkReportModal({ isOpen, onClose, branches, tenantId }: Netw
                         <div className="no-print">
                           <Badge className={
                             branch.status === 'active' 
-                              ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20 uppercase text-[8px] font-black tracking-widest px-2 py-0.5" 
-                              : "bg-amber-500/10 text-amber-500 border-amber-500/20 uppercase text-[8px] font-black tracking-widest px-2 py-0.5"
+                              ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20 uppercase text-[11px] font-black tracking-widest px-2 py-0.5" 
+                              : "bg-amber-500/10 text-amber-500 border-amber-500/20 uppercase text-[11px] font-black tracking-widest px-2 py-0.5"
                           }>
                             {branch.status === 'active' ? 'Ativo' : 'Pendente'}
                           </Badge>

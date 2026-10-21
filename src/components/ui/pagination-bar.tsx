@@ -18,7 +18,7 @@ export function PaginationBar({ page, totalPages, totalItems, pageSize, onPageCh
 
   return (
     <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-zinc-900 ${className}`}>
-      <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-600">
+      <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">
         Exibindo <span className="text-zinc-400">{from}–{to}</span> de <span className="text-zinc-400">{totalItems}</span> registros
       </p>
 
@@ -54,7 +54,7 @@ export function PaginationBar({ page, totalPages, totalItems, pageSize, onPageCh
             }, [])
             .map((item, idx) =>
               item === 'ellipsis' ? (
-                <span key={`ellipsis-${idx}`} className="text-zinc-700 text-xs px-1">…</span>
+                <span key={`ellipsis-${idx}`} className="text-zinc-500 text-xs px-1">…</span>
               ) : (
                 <button
                   key={item}

@@ -129,7 +129,7 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
                                 {project.name}
                             </h3>
                             {startDate && endDate ? (
-                                <p className="text-[10px] text-zinc-500 font-semibold mt-0.5 flex items-center gap-1">
+                                <p className="text-[11px] text-zinc-500 font-semibold mt-0.5 flex items-center gap-1">
                                     <CalendarDays className="w-2.5 h-2.5 shrink-0" />
                                     {format(parseISO(startDate), "d MMM", { locale: ptBR })}
                                     {' → '}
@@ -137,11 +137,11 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
                                     {' · '}{days} {days === 1 ? 'diária' : 'diárias'}
                                 </p>
                             ) : (
-                                <p className="text-[10px] text-zinc-600 mt-0.5">Datas não definidas</p>
+                                <p className="text-[11px] text-zinc-400 mt-0.5">Datas não definidas</p>
                             )}
                         </div>
                     </div>
-                    <Badge className={`text-[8px] font-black uppercase tracking-widest border shrink-0 ${statusColor}`}>
+                    <Badge className={`text-[11px] font-black uppercase tracking-widest border shrink-0 ${statusColor}`}>
                         {statusLabel}
                     </Badge>
                 </div>
@@ -149,7 +149,7 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
                 {/* ── Progress bar ── */}
                 {showProgress && (
                     <div>
-                        <div className="flex justify-between text-[9px] font-black uppercase tracking-widest mb-1.5">
+                        <div className="flex justify-between text-[11px] font-black uppercase tracking-widest mb-1.5">
                             <span className={`flex items-center gap-1 ${isReturning ? 'text-orange-400/80' : 'text-zinc-500'}`}>
                                 {isReturning && <RotateCcw className="w-2.5 h-2.5" />}
                                 {progressLabel}
@@ -183,7 +183,7 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
                                                     overflow-hidden flex items-center justify-center">
                                         {img
                                             ? <img src={img} alt="" loading="lazy" className="w-full h-full object-contain p-1" />
-                                            : <Package className="w-3.5 h-3.5 text-zinc-600" />}
+                                            : <Package className="w-3.5 h-3.5 text-zinc-400" />}
                                     </div>
                                     <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full
                                                     bg-zinc-950 flex items-center justify-center">
@@ -195,12 +195,12 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
                         {bookings.length > 5 && (
                             <div className="w-9 h-9 rounded-lg bg-zinc-800/40 border border-zinc-700/30
                                             flex items-center justify-center">
-                                <span className="text-[9px] font-black text-zinc-500">+{bookings.length - 5}</span>
+                                <span className="text-[11px] font-black text-zinc-500">+{bookings.length - 5}</span>
                             </div>
                         )}
                         <div className="ml-auto flex items-center gap-1.5 shrink-0">
-                            <Building2 className="w-3 h-3 text-zinc-600" />
-                            <span className="text-[10px] text-zinc-500 font-semibold">
+                            <Building2 className="w-3 h-3 text-zinc-400" />
+                            <span className="text-[11px] text-zinc-500 font-semibold">
                                 {companies.length} {companies.length === 1 ? 'locadora' : 'locadoras'}
                             </span>
                         </div>
@@ -212,14 +212,14 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
                 {/* ── Footer ── */}
                 <div className="flex items-center justify-between pt-3 border-t border-zinc-800/60">
                     <div className="flex flex-col gap-0.5">
-                        <span className="text-[8px] uppercase font-black tracking-[0.15em] text-zinc-600">
+                        <span className="text-[11px] uppercase font-black tracking-[0.15em] text-zinc-400">
                             Total do projeto
                         </span>
                         <span className="text-base font-black text-white tabular-nums leading-none">
                             {brl(total)}
                         </span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest
+                    <div className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest
                                     text-zinc-500 group-hover:text-primary transition-colors">
                         Ver detalhes
                         <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
@@ -245,9 +245,9 @@ function KpiCard({ label, value, sub, icon: Icon, accent }: {
                 <Icon className="w-4 h-4 text-white/70" />
             </div>
             <div className="min-w-0">
-                <p className="text-[9px] uppercase font-black tracking-[0.2em] text-zinc-500 mb-0.5">{label}</p>
+                <p className="text-[11px] uppercase font-black tracking-wider text-zinc-500 mb-0.5">{label}</p>
                 <p className="text-lg font-black text-white leading-none tabular-nums">{value}</p>
-                {sub && <p className="text-[9px] text-zinc-600 mt-0.5 truncate">{sub}</p>}
+                {sub && <p className="text-[11px] text-zinc-400 mt-0.5 truncate">{sub}</p>}
             </div>
         </div>
     );
@@ -305,13 +305,13 @@ export function ProjectsTab() {
                     </p>
                     <p className="text-xs text-zinc-500 leading-relaxed">
                         Não foi possível buscar seus projetos. Verifique sua conexão ou execute a migração{' '}
-                        <code className="text-primary font-mono text-[10px]">V30_FIX_PROJECTS_RLS.sql</code>{' '}
+                        <code className="text-primary font-mono text-[11px]">V30_FIX_PROJECTS_RLS.sql</code>{' '}
                         no painel do Supabase.
                     </p>
                 </div>
                 <Button
                     variant="outline"
-                    className="border-zinc-700 text-zinc-300 font-black uppercase text-[10px] tracking-widest rounded-xl"
+                    className="border-zinc-700 text-zinc-300 font-black uppercase text-[11px] tracking-widest rounded-xl"
                     onClick={() => window.location.reload()}
                 >
                     Tentar novamente
@@ -335,7 +335,7 @@ export function ProjectsTab() {
                 <Button
                     variant="ghost"
                     size="sm"
-                    className="shrink-0 text-[10px] font-black uppercase tracking-widest text-zinc-500
+                    className="shrink-0 text-[11px] font-black uppercase tracking-widest text-zinc-500
                                hover:text-primary hover:bg-primary/5 rounded-xl border border-zinc-800
                                hover:border-primary/30 transition-all"
                     onClick={() => window.location.href = '/'}
@@ -389,7 +389,7 @@ export function ProjectsTab() {
                             <button
                                 key={f}
                                 onClick={() => setFilter(f)}
-                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[10px]
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px]
                                            font-black uppercase tracking-widest transition-all duration-200
                                            ${filter === f
                                                ? 'bg-primary border-primary/50 text-white shadow-lg shadow-primary/20'
@@ -397,7 +397,7 @@ export function ProjectsTab() {
                                            }`}
                             >
                                 {FILTER_LABELS[f]}
-                                <span className={`text-[8px] font-black px-1 py-0.5 rounded-full
+                                <span className={`text-[11px] font-black px-1 py-0.5 rounded-full
                                     ${filter === f ? 'bg-white/20 text-white' : 'bg-zinc-800 text-zinc-500'}`}>
                                     {count}
                                 </span>
@@ -417,13 +417,13 @@ export function ProjectsTab() {
                 >
                     <div className="w-20 h-20 rounded-3xl bg-zinc-900 border border-zinc-800
                                     flex items-center justify-center">
-                        <FolderOpen className="w-9 h-9 text-zinc-700" />
+                        <FolderOpen className="w-9 h-9 text-zinc-500" />
                     </div>
                     <div>
                         <p className="text-sm font-black uppercase tracking-widest text-zinc-400 mb-2">
                             Nenhum projeto ainda
                         </p>
-                        <p className="text-xs text-zinc-600 leading-relaxed max-w-xs mx-auto">
+                        <p className="text-xs text-zinc-400 leading-relaxed max-w-xs mx-auto">
                             Vá ao marketplace, adicione equipamentos com{' '}
                             <span className="text-primary font-black">+ Projeto</span>{' '}
                             e confirme a locação em conjunto pelo carrinho.
@@ -431,7 +431,7 @@ export function ProjectsTab() {
                     </div>
                     <Button
                         className="bg-primary hover:bg-primary/90 text-white font-black uppercase
-                                   text-[10px] tracking-widest rounded-xl shadow-lg shadow-primary/20"
+                                   text-[11px] tracking-widest rounded-xl shadow-lg shadow-primary/20"
                         onClick={() => window.location.href = '/'}
                     >
                         Explorar Marketplace <ArrowRight className="w-3.5 h-3.5 ml-2" />
@@ -442,12 +442,12 @@ export function ProjectsTab() {
             {/* ── No results for filter ── */}
             {hasProjects && filtered.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-20 text-center gap-3">
-                    <p className="text-sm font-black uppercase tracking-widest text-zinc-600">
+                    <p className="text-sm font-black uppercase tracking-widest text-zinc-400">
                         Nenhum projeto com status "{FILTER_LABELS[filter]}"
                     </p>
                     <button
                         onClick={() => setFilter('all')}
-                        className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline"
+                        className="text-[11px] font-black uppercase tracking-widest text-primary hover:underline"
                     >
                         Ver todos
                     </button>

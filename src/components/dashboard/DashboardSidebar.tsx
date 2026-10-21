@@ -118,7 +118,7 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
               </h2>
               <div className="flex items-center gap-1.5 shrink-0">
                  <div className="h-1 w-1 rounded-full bg-emerald-500" />
-                 <span className="text-[9px] font-black uppercase text-zinc-500 tracking-[0.2em] truncate">Locadora Verificada</span>
+                 <span className="text-[11px] font-black uppercase text-zinc-500 tracking-wider truncate">Locadora Verificada</span>
               </div>
             </div>
           )}
@@ -146,7 +146,7 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
               key={item.id}
               onClick={() => onTabChange(item.id)}
               className={cn(
-                "group transition-all duration-300 relative flex items-center rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-[0.1em]",
+                "group transition-all duration-300 relative flex items-center rounded-2xl text-[11px] sm:text-xs font-black uppercase tracking-[0.1em]",
                 isCollapsed 
                   ? "w-12 h-12 justify-center mx-auto" 
                   : "w-full justify-between px-4 py-3.5",
@@ -218,7 +218,7 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
               <p className="text-[11px] font-black text-zinc-100 truncate leading-none mb-1 group-hover:text-white transition-colors">
                 {displayName}
               </p>
-              <p className="text-[9px] uppercase font-black text-zinc-500 tracking-widest truncate leading-none">
+              <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest truncate leading-none">
                 {roleLabel}
               </p>
             </div>
@@ -226,7 +226,7 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
 
           {/* Edit hint — appears on hover */}
           {!isCollapsed && (
-            <Pencil className="h-3 w-3 text-zinc-600 group-hover:text-zinc-400 transition-all opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 shrink-0" />
+            <Pencil className="h-3 w-3 text-zinc-400 group-hover:text-zinc-400 transition-all opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 shrink-0" />
           )}
         </button>
         
@@ -236,7 +236,7 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
           onClick={handleRefresh}
           disabled={isRefreshing}
           className={cn(
-            "text-[10px] sm:text-xs uppercase font-black tracking-widest text-zinc-600 hover:text-emerald-400 hover:bg-emerald-500/5 h-10 rounded-xl transition-all duration-300 mb-1",
+            "text-[11px] sm:text-xs uppercase font-black tracking-widest text-zinc-400 hover:text-emerald-400 hover:bg-emerald-500/5 h-10 rounded-xl transition-all duration-300 mb-1",
             isCollapsed ? "w-12 h-12 justify-center mx-auto p-0" : "w-full justify-start"
           )}
           title={isCollapsed ? "Atualizar aplicativo" : undefined}
@@ -253,7 +253,7 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
           variant="ghost"
           onClick={() => signOut()}
           className={cn(
-            "text-[10px] sm:text-xs uppercase font-black tracking-widest text-zinc-600 hover:text-destructive hover:bg-destructive/5 h-10 rounded-xl transition-all duration-300",
+            "text-[11px] sm:text-xs uppercase font-black tracking-widest text-zinc-400 hover:text-destructive hover:bg-destructive/5 h-10 rounded-xl transition-all duration-300",
             isCollapsed ? "w-12 h-12 justify-center mx-auto p-0" : "w-full justify-start"
           )}
           title={isCollapsed ? "Sair da Plataforma" : undefined}
