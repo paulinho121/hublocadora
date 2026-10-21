@@ -45,7 +45,8 @@ import { EquipmentForm } from '@/components/inventory/EquipmentForm';
 import { CompanySetup } from '@/components/auth/CompanySetup';
 import { HubSupplementRequest } from '@/components/inventory/HubSupplementRequest';
 import { MasterCatalogSelector } from '@/components/inventory/MasterCatalogSelector';
-import { DeliveryMap } from '@/components/DeliveryMap';
+import { OrderLiveLocation } from '@/components/DeliveryMap';
+import { OrderReturnPanel } from '@/components/dashboard/OrderReturnPanel';
 
 // New Professional Components
 import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar';
@@ -104,6 +105,18 @@ export default function Dashboard() {
 
   const { data: bookingsRequested } = useBookings({
     renterId: user?.id
+  });
+
+  // Prorrogações aguardando resposta (selo na lista de pedidos). Sem a V41 a tabela
+  // não existe: a consulta falha e a lista só fica sem o selo.
+  const { data: pendingExtensionIds } = useQuery({
+    queryKey: ['booking-extensions-pending'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('booking_extensions').select('booking_id').eq('status', 'pending');
+      if (error) return new Set<string>();
+      return new Set((data || []).map((e: any) => e.booking_id as string));
+    },
+    staleTime: 30_000,
   });
 
   // Pagamentos aprovados confirmados para este tenant
@@ -830,7 +843,6 @@ export default function Dashboard() {
                    </div>
                  );
                }
-               const d = getDelivery(order);
                const actions = approvalActions(order);
                return (
                  <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
@@ -895,19 +907,15 @@ export default function Dashboard() {
                    </Card>
 
                    {/* Localização ao vivo: visível para a locadora e para o cliente */}
-                   {d?.status === 'shipped' && (
-                     <div className="space-y-3">
-                       <h3 className="text-lg font-black uppercase tracking-tighter flex items-center gap-2"><MapPin className="h-4 w-4 text-primary" /> Localização do equipamento</h3>
-                       <div className="h-80 md:h-96 rounded-3xl overflow-hidden border border-zinc-800">
-                         <DeliveryMap bookingId={order.id} />
-                       </div>
-                     </div>
-                   )}
+                   <OrderLiveLocation bookingId={order.id} />
 
                    <div className="space-y-3">
                      <h3 className="text-lg font-black uppercase tracking-tighter flex items-center gap-2"><Truck className="h-4 w-4 text-primary" /> Entrega</h3>
                      <LogisticsTab tenantId={tenantId || ''} bookingId={order.id} />
                    </div>
+
+                   {/* Logística reversa: devolução e prorrogação */}
+                   <OrderReturnPanel order={order} />
                  </div>
                );
              }
@@ -942,6 +950,17 @@ export default function Dashboard() {
                                <p className="text-xs text-zinc-500 truncate">
                                  {counterpart(o)} · {shortDate(o.start_date)} → {shortDate(o.end_date)} · {o.quantity || 1} un.
                                </p>
+                               {(() => {
+                                 const rev = getDelivery(o)?.reverse_logistics_status;
+                                 const tags: string[] = [];
+                                 if (pendingExtensionIds?.has(o.id)) tags.push('Prorrogação pendente');
+                                 if (rev === 'requested') tags.push('Devolução pedida');
+                                 if (rev === 'collecting' || rev === 'in_transit') tags.push('Coleta em andamento');
+                                 if (rev === 'returned') tags.push('Devolvido · em conferência');
+                                 return tags.length > 0 && (
+                                   <p className="text-[11px] font-bold text-amber-400 truncate">{tags.join(' · ')}</p>
+                                 );
+                               })()}
                              </div>
                              <div className="text-right shrink-0 space-y-1.5">
                                <p className="text-base md:text-lg font-black text-zinc-100">{formatCurrency(orderAmount(o))}</p>

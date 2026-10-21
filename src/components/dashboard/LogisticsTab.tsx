@@ -865,7 +865,8 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                 </div>
             )}
 
-            {(activeSubTab === 'reverse' || (embedded && deliveries?.some((d: any) => d.reverse_logistics_status && d.reverse_logistics_status !== 'not_started'))) && (
+            {/* No detalhe do pedido a devolução fica no OrderReturnPanel */}
+            {!embedded && activeSubTab === 'reverse' && (
                 <div className="space-y-10 animate-in fade-in slide-in-from-top-4 duration-700">
                     <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-indigo-500/5 p-6 rounded-[32px] border border-indigo-500/10 backdrop-blur-xl">
                         <div className="flex items-center gap-4">
