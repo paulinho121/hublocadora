@@ -189,7 +189,7 @@ export function OrderHistoryTab() {
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] uppercase font-bold text-zinc-500 tracking-widest">
                           <span className="flex items-center gap-1">
                             <CalendarDays className="h-3 w-3 text-primary" />
-                            {format(new Date(booking.start_date), "dd/MM/yy")} - {format(new Date(booking.end_date), "dd/MM/yy")}
+                            {format(new Date(booking.start_date + 'T00:00'), "dd/MM/yy")} - {format(new Date(booking.end_date + 'T00:00'), "dd/MM/yy")}
                           </span>
                           <span className="text-zinc-800">•</span>
                           <span>

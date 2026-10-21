@@ -71,7 +71,7 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
       if (b.status === 'approved' || b.status === 'active') return true;
       // Bookings 'completed' com end_date no futuro ainda estão em locação ativa
       if (b.status === 'completed' && b.end_date) {
-        const endDate = new Date(b.end_date);
+        const endDate = new Date(b.end_date + 'T00:00'); // meia-noite local, não UTC
         endDate.setHours(0, 0, 0, 0);
         return endDate >= today;
       }

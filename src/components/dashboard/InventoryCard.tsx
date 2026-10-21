@@ -130,7 +130,7 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId, onAssign, acti
               </p>
               <p className="text-[11px] font-bold text-zinc-100">
                 <span className="text-zinc-500 uppercase text-[9px] mr-1">Retorno:</span>
-                {format(new Date(activeBooking.end_date), "dd/MM/yyyy", { locale: ptBR })}
+                {format(new Date(activeBooking.end_date + 'T00:00'), "dd/MM/yyyy", { locale: ptBR })}
               </p>
             </div>
           </div>

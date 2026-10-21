@@ -1046,7 +1046,7 @@ export default function Admin() {
                           <p className="text-[9px] text-zinc-500 truncate max-w-[120px]">{booking.equipment?.name}</p>
                         </td>
                         <td className="p-5 text-[10px] text-zinc-500 font-bold whitespace-nowrap">
-                          {new Date(booking.start_date).toLocaleDateString('pt-BR')} → {new Date(booking.end_date).toLocaleDateString('pt-BR')}
+                          {new Date(booking.start_date + 'T00:00').toLocaleDateString('pt-BR')} → {new Date(booking.end_date + 'T00:00').toLocaleDateString('pt-BR')}
                         </td>
                         <td className="p-5 text-right text-zinc-400 font-bold text-xs">{BRL2(booking.total_amount * 0.85)}</td>
                         <td className="p-5 text-right text-emerald-400 font-black text-xs">{BRL2(booking.total_amount * 0.15)}</td>

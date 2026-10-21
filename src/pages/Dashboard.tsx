@@ -673,7 +673,7 @@ export default function Dashboard() {
                    <Card className="xl:col-span-2 bg-zinc-950 border-zinc-900 rounded-3xl">
                       <CardHeader className="p-8 border-b border-zinc-900 flex flex-row items-center justify-between">
                          <CardTitle className="text-xl font-black tracking-tighter uppercase">Pedidos Recentes</CardTitle>
-                         <Button variant="ghost" className="text-[10px] uppercase font-black tracking-widest text-zinc-500">Ver Todos</Button>
+                         <Button variant="ghost" onClick={() => setActiveTab('bookings')} className="h-10 text-[10px] uppercase font-black tracking-widest text-zinc-500 hover:text-white">Ver Todos</Button>
                       </CardHeader>
                       <CardContent className="p-0">
                          {recentOrders.length === 0 ? (
@@ -687,7 +687,11 @@ export default function Dashboard() {
                                 const isOwner = booking.company_id === tenantId;
                                 
                                 return (
-                                  <div key={booking.id} className="p-6 flex items-center justify-between hover:bg-zinc-900/30 transition-all group/item">
+                                  <button
+                                    key={booking.id}
+                                    onClick={() => openOrder(booking.id)}
+                                    className="w-full text-left p-4 md:p-6 flex items-center justify-between gap-3 hover:bg-zinc-900/30 transition-all group/item"
+                                  >
                                      <div className="flex gap-4 items-center min-w-0 flex-1">
                                         <div className="relative">
                                            <div className="h-12 w-12 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold text-zinc-400 overflow-hidden shrink-0">
@@ -719,7 +723,8 @@ export default function Dashboard() {
                                            <p className="text-[8px] uppercase font-black text-zinc-600 tracking-[0.2em] mb-1">Previsão Retorno</p>
                                            <div className="flex items-center justify-end gap-1.5 text-[11px] font-black text-zinc-400 uppercase tracking-tighter">
                                               <CalendarDays className="h-3 w-3 text-primary" />
-                                              {format(new Date(booking.end_date), "dd 'DE' MMM", { locale: ptBR })}
+                                              {/* 'T00:00' = meia-noite local; só a data seria lida como UTC e cairia no dia anterior */}
+                                              {format(new Date(booking.end_date + 'T00:00'), "dd 'DE' MMM", { locale: ptBR })}
                                            </div>
                                         </div>
                                         <div className="text-right shrink-0 min-w-[100px]">
@@ -731,10 +736,11 @@ export default function Dashboard() {
                                                  return formatCurrency(amount);
                                               })()}
                                            </div>
-                                           <p className="text-[8px] uppercase font-black text-zinc-600 tracking-widest">{booking.status}</p>
+                                           <p className="text-[9px] uppercase font-black text-zinc-500 tracking-widest">{ORDER_STATUS[booking.status]?.label || booking.status}</p>
                                         </div>
+                                        <ChevronRight className="h-4 w-4 text-zinc-600 shrink-0 hidden sm:block" />
                                      </div>
-                                  </div>
+                                  </button>
                                 );
                               })}
                            </div>
