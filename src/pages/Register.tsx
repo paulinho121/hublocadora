@@ -13,17 +13,13 @@ export default function Register() {
     const fromState = location.state?.from;
     const from: string | undefined = fromState?.pathname ? fromState.pathname + (fromState.search || '') : undefined;
     const isBookingIntent = location.state?.intent === 'booking';
-    const [fullName, setFullName] = useState('');
-    const [companyName, setCompanyName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
     const [termsAccepted, setTermsAccepted] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -31,20 +27,8 @@ export default function Register() {
         setError(null);
         setSuccessMessage(null);
 
-        if (!fullName.trim() || fullName.trim().length < 3) {
-            setError('Digite seu nome completo (mínimo 3 caracteres)');
-            setLoading(false);
-            return;
-        }
-
-        if (!companyName.trim() || companyName.trim().length < 3) {
-            setError('Digite o nome da sua locadora ou empresa (mínimo 3 caracteres)');
-            setLoading(false);
-            return;
-        }
-
-        if (password !== confirmPassword) {
-            setError('As senhas não coincidem');
+        if (password.length < 6) {
+            setError('A senha precisa ter pelo menos 6 caracteres');
             setLoading(false);
             return;
         }
@@ -53,10 +37,6 @@ export default function Register() {
             email,
             password,
             options: {
-                data: {
-                    full_name: fullName.trim(),
-                    company_name: companyName.trim(),
-                },
                 // O link de confirmação do e-mail traz o usuário de volta, já logado
                 emailRedirectTo: window.location.origin + (from || '/dashboard'),
             }
@@ -137,39 +117,20 @@ export default function Register() {
                             cinehub
                         </span>
                     </div>
-                    <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tight">Novo no Hub</CardTitle>
+                    <CardTitle className="text-xl md:text-2xl font-bold tracking-tight">Criar conta</CardTitle>
                     <CardDescription className="text-xs md:text-sm font-medium">
                         {isBookingIntent
                             ? 'Crie sua conta grátis para concluir a reserva. Seus dados da reserva ficam salvos.'
-                            : 'Junte-se ao maior ecossistema audiovisual.'}
+                            : 'Só e-mail e senha. Os dados da empresa você completa depois.'}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleRegister} className="space-y-4">
                         <div className="space-y-1.5">
                             <Input
-                                type="text"
-                                placeholder="Nome completo do responsável *"
-                                className="h-12 bg-zinc-900/50 border-zinc-800 focus:border-primary/50 transition-all font-medium"
-                                value={fullName}
-                                onChange={(e) => setFullName(e.target.value)}
-                                required
-                            />
-                        </div>
-                        <div className="space-y-1.5">
-                            <Input
-                                type="text"
-                                placeholder="Nome da locadora / empresa *"
-                                className="h-12 bg-zinc-900/50 border-zinc-800 focus:border-primary/50 transition-all font-medium"
-                                value={companyName}
-                                onChange={(e) => setCompanyName(e.target.value)}
-                                required
-                            />
-                        </div>
-                        <div className="space-y-1.5">
-                            <Input
                                 type="email"
-                                placeholder="Seu melhor email"
+                                placeholder="Seu e-mail"
+                                autoComplete="email"
                                 className="h-12 bg-zinc-900/50 border-zinc-800 focus:border-primary/50 transition-all font-medium"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -179,7 +140,9 @@ export default function Register() {
                         <div className="space-y-1.5 relative">
                             <Input
                                 type={showPassword ? "text" : "password"}
-                                placeholder="Crie uma senha de acesso"
+                                placeholder="Crie uma senha"
+                                autoComplete="new-password"
+                                minLength={6}
                                 className="h-12 bg-zinc-900/50 border-zinc-800 focus:border-primary/50 transition-all font-medium pr-10"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -189,27 +152,12 @@ export default function Register() {
                                 type="button"
                                 className="absolute right-1 top-[50%] -translate-y-[50%] h-10 w-10 flex items-center justify-center rounded-lg text-zinc-500 hover:text-zinc-300 focus:outline-none"
                                 onClick={() => setShowPassword(!showPassword)}
+                                aria-label={showPassword ? 'Esconder senha' : 'Mostrar senha'}
                             >
                                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                             </button>
                         </div>
-                        <div className="space-y-1.5 relative">
-                            <Input
-                                type={showConfirmPassword ? "text" : "password"}
-                                placeholder="Confirme sua senha"
-                                className="h-12 bg-zinc-900/50 border-zinc-800 focus:border-primary/50 transition-all font-medium pr-10"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                required
-                            />
-                            <button
-                                type="button"
-                                className="absolute right-1 top-[50%] -translate-y-[50%] h-10 w-10 flex items-center justify-center rounded-lg text-zinc-500 hover:text-zinc-300 focus:outline-none"
-                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                            >
-                                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                            </button>
-                        </div>
+                        <p className="text-xs text-zinc-500 -mt-2 px-1">Mínimo de 6 caracteres.</p>
                         {error && (
                             <div className="space-y-2 mt-2">
                                 <p className="text-xs text-red-400 font-bold text-center">{error}</p>
@@ -251,12 +199,12 @@ export default function Register() {
                         </div>
 
                         <Button
-                            className="w-full h-12 bg-primary hover:bg-primary/90 font-black uppercase tracking-tighter text-lg mt-2 shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full h-12 bg-primary hover:bg-primary/90 font-bold text-base mt-2 shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
                             type="submit"
                             disabled={loading || !termsAccepted}
                         >
                             {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
-                            {loading ? 'Criando sua conta...' : 'Cadastrar agora'}
+                            {loading ? 'Criando sua conta...' : 'Criar conta'}
                         </Button>
 
                         <div className="relative flex items-center py-2 shrink-0">
@@ -268,7 +216,7 @@ export default function Register() {
                         <Button 
                             type="button" 
                             variant="outline" 
-                            className="w-full h-12 border-zinc-700 bg-white hover:bg-zinc-200 text-black font-bold uppercase tracking-wider transition-colors mt-2" 
+                            className="w-full h-12 border-zinc-700 bg-white hover:bg-zinc-200 text-black font-semibold transition-colors mt-2" 
                             onClick={handleGoogleLogin} 
                             disabled={loading}
                         >

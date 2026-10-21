@@ -68,6 +68,8 @@ export function ProjectDrawer() {
   const [deliveryMethod, setDeliveryMethod] = useState<'pickup' | 'delivery'>('pickup');
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [deliveryContact, setDeliveryContact] = useState('');
+  const [showDetails, setShowDetails] = useState(false);
+  const [notes, setNotes] = useState('');
 
   // ── auto-fill company address when switching to delivery ───────────────────
   useEffect(() => {
@@ -193,7 +195,7 @@ export function ProjectDrawer() {
           delivery_method:      deliveryMethod,
           delivery_address:     deliveryMethod === 'delivery' ? deliveryAddress.trim() : null,
           delivery_contact:     deliveryMethod === 'delivery' ? deliveryContact.trim() : null,
-          notes:                `Projeto: ${projectLabel}`,
+          notes:                [`Projeto: ${projectLabel}`, notes.trim()].filter(Boolean).join('\n'),
           subrental_company_id: null,
           origin_branch_id:     null,
         });
@@ -228,7 +230,7 @@ export function ProjectDrawer() {
     setResults(out);
     setIsSubmitting(false);
 
-    if (fail === 0) clearCart();
+    if (fail === 0) { clearCart(); setNotes(''); setShowDetails(false); }
   };
 
   const allOk = Object.values(availMap).length > 0 &&
@@ -288,16 +290,30 @@ export function ProjectDrawer() {
               {/* Success screen */}
               {results && (
                 <div className="p-6 flex flex-col gap-4">
-                  <div className="text-center py-6">
+                  <div className="text-center pt-6 pb-2">
                     <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-4">
                       <CheckCircle2 className="w-8 h-8 text-emerald-400" />
                     </div>
-                    <h3 className="text-lg font-black uppercase tracking-tight text-white">
-                      Pedido enviado!
+                    <h3 className="text-xl font-bold tracking-tight text-white">
+                      {results.every(r => r.success) ? 'Pedido enviado!' : 'Pedido enviado em parte'}
                     </h3>
-                    <p className="text-zinc-500 text-xs mt-1">
-                      Acompanhe as reservas no seu painel
-                    </p>
+                  </div>
+
+                  {/* O que acontece agora */}
+                  <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4">
+                    <p className="text-sm font-semibold text-white mb-3">O que acontece agora</p>
+                    <ol className="flex flex-col gap-3">
+                      {[
+                        'A locadora analisa e aprova o seu pedido.',
+                        'Você recebe uma notificação assim que ela responder.',
+                        'Depois é só acompanhar a separação e a entrega em Meus pedidos.',
+                      ].map((text, i) => (
+                        <li key={i} className="flex gap-3 text-sm text-zinc-400 leading-snug">
+                          <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0">{i + 1}</span>
+                          {text}
+                        </li>
+                      ))}
+                    </ol>
                   </div>
 
                   {results.map((r) => (
@@ -321,74 +337,27 @@ export function ProjectDrawer() {
                     </div>
                   ))}
 
-                  <Button
-                    className="w-full h-12 rounded-2xl bg-primary text-white font-semibold text-xs mt-2"
-                    onClick={() => { setResults(null); closeDrawer(); }}
-                  >
-                    Fechar
-                  </Button>
+                  <div className="flex flex-col gap-2 mt-2">
+                    <Button
+                      className="w-full h-12 rounded-2xl bg-primary text-white font-semibold text-sm"
+                      onClick={() => { setResults(null); closeDrawer(); navigate('/dashboard?tab=bookings'); }}
+                    >
+                      Ver meus pedidos <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full h-12 rounded-2xl text-zinc-300 font-semibold text-sm"
+                      onClick={() => { setResults(null); closeDrawer(); }}
+                    >
+                      Continuar locando
+                    </Button>
+                  </div>
                 </div>
               )}
 
               {/* Main form */}
               {!results && (
                 <div className="p-6 flex flex-col gap-6">
-
-                  {/* Project name */}
-                  <div>
-                    <label className="block text-[11px] font-semibold text-zinc-500 mb-2">
-                      Nome da produção (opcional)
-                    </label>
-                    <input
-                      type="text"
-                      value={state.projectName}
-                      onChange={e => setProjectName(e.target.value)}
-                      placeholder="Ex: Curta-metragem, Comercial de Verão…"
-                      className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
-                    />
-                  </div>
-
-                  {/* Period */}
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <CalendarDays className="w-3.5 h-3.5 text-primary" />
-                      <span className="text-[11px] font-semibold text-zinc-500">
-                        Período da locação
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-[11px] font-semibold text-zinc-400 mb-1.5">
-                          Início
-                        </label>
-                        <input
-                          type="date"
-                          value={state.startDate}
-                          min={format(new Date(), 'yyyy-MM-dd')}
-                          onChange={e => handleStartDateChange(e.target.value)}
-                          className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[11px] font-semibold text-zinc-400 mb-1.5">
-                          Devolução
-                        </label>
-                        <input
-                          type="date"
-                          value={state.endDate}
-                          min={format(addDays(parseISO(state.startDate), 1), 'yyyy-MM-dd')}
-                          onChange={e => handleEndDateChange(e.target.value)}
-                          className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
-                        />
-                      </div>
-                    </div>
-                    <p className="text-[11px] text-zinc-500 mt-2 font-semibold">
-                      {totalDays} {totalDays === 1 ? 'diária' : 'diárias'} ·{' '}
-                      {format(parseISO(state.startDate), "d 'de' MMM", { locale: ptBR })}
-                      {' → '}
-                      {format(parseISO(state.endDate), "d 'de' MMM", { locale: ptBR })}
-                    </p>
-                  </div>
 
                   {/* Items list */}
                   <div>
@@ -418,7 +387,7 @@ export function ProjectDrawer() {
                           </p>
                           <p className="text-[11px] text-zinc-400 mt-1.5 leading-relaxed">
                             Volte ao marketplace e clique em{' '}
-                            <span className="text-primary font-black">+ Pedido</span>{' '}
+                            <span className="text-primary font-bold">Adicionar ao pedido</span>{' '}
                             em cada equipamento que quiser locar.
                           </p>
                         </div>
@@ -534,6 +503,50 @@ export function ProjectDrawer() {
                     )}
                   </div>
 
+                  {/* Period */}
+                  {state.items.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <CalendarDays className="w-3.5 h-3.5 text-primary" />
+                      <span className="text-[11px] font-semibold text-zinc-500">
+                        Período da locação
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-zinc-400 mb-1.5">
+                          Início
+                        </label>
+                        <input
+                          type="date"
+                          value={state.startDate}
+                          min={format(new Date(), 'yyyy-MM-dd')}
+                          onChange={e => handleStartDateChange(e.target.value)}
+                          className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-zinc-400 mb-1.5">
+                          Devolução
+                        </label>
+                        <input
+                          type="date"
+                          value={state.endDate}
+                          min={format(addDays(parseISO(state.startDate), 1), 'yyyy-MM-dd')}
+                          onChange={e => handleEndDateChange(e.target.value)}
+                          className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
+                        />
+                      </div>
+                    </div>
+                    <p className="text-[11px] text-zinc-500 mt-2 font-semibold">
+                      {totalDays} {totalDays === 1 ? 'diária' : 'diárias'} ·{' '}
+                      {format(parseISO(state.startDate), "d 'de' MMM", { locale: ptBR })}
+                      {' → '}
+                      {format(parseISO(state.endDate), "d 'de' MMM", { locale: ptBR })}
+                    </p>
+                  </div>
+                  )}
+
                   {/* Delivery */}
                   {state.items.length > 0 && (
                     <div>
@@ -580,6 +593,54 @@ export function ProjectDrawer() {
                               onChange={e => setDeliveryContact(e.target.value)}
                               placeholder="Responsável pelo recebimento"
                               className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-9 pr-4 py-2.5 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-primary/50 transition-all"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Detalhes opcionais */}
+                  {state.items.length > 0 && (
+                    <div className="border-t border-zinc-800/80 pt-4">
+                      <button
+                        type="button"
+                        onClick={() => setShowDetails(v => !v)}
+                        aria-expanded={showDetails}
+                        className="w-full flex items-center justify-between text-sm font-semibold text-zinc-300 hover:text-white transition-colors"
+                      >
+                        <span className="flex items-center gap-2">
+                          <Plus className={`w-4 h-4 text-primary transition-transform ${showDetails ? 'rotate-45' : ''}`} />
+                          Adicionar detalhes (opcional)
+                        </span>
+                        {!showDetails && (state.projectName || notes) && (
+                          <span className="text-[11px] text-zinc-500 font-medium">preenchido</span>
+                        )}
+                      </button>
+                      {showDetails && (
+                        <div className="flex flex-col gap-3 mt-3">
+                          <div>
+                            <label className="block text-[11px] font-semibold text-zinc-500 mb-1.5">
+                              Nome da produção
+                            </label>
+                            <input
+                              type="text"
+                              value={state.projectName}
+                              onChange={e => setProjectName(e.target.value)}
+                              placeholder="Ex: Curta-metragem, Comercial de Verão…"
+                              className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] font-semibold text-zinc-500 mb-1.5">
+                              Observações para a locadora
+                            </label>
+                            <textarea
+                              value={notes}
+                              onChange={e => setNotes(e.target.value)}
+                              rows={3}
+                              placeholder="Ex: horário de retirada, acessórios que precisa…"
+                              className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all resize-none"
                             />
                           </div>
                         </div>
