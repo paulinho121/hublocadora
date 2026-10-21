@@ -14,6 +14,8 @@ import { ProjectProvider, useProject } from '@/contexts/ProjectContext';
 import { ProjectDrawer } from '@/components/marketplace/ProjectDrawer';
 import { RealtimeSync } from '@/components/RealtimeSync';
 import { ConfirmHost } from '@/components/ui/confirm-dialog';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { applyTheme, useTheme } from '@/lib/theme';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AdminRoute } from '@/components/auth/AdminRoute';
 import { queryClient } from '@/lib/react-query';
@@ -102,7 +104,8 @@ function Navbar() {
           </nav>
         </div>
 
-        <div className="flex items-center space-x-6">
+        <div className="flex items-center gap-3 md:gap-6">
+          <ThemeToggle />
           {user ? (
             <div className="flex items-center gap-4">
               <div className="hidden lg:flex items-center gap-2.5">
@@ -394,10 +397,9 @@ function MainLayout() {
 
 
 export default function App() {
-  // Force dark mode for this prototype
-  useEffect(() => {
-    document.documentElement.classList.add('dark');
-  }, []);
+  // Tema claro (padrão) ou escuro, escolhido pelo usuário — ver src/lib/theme.ts
+  const { theme } = useTheme();
+  useEffect(() => { applyTheme(theme); }, [theme]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -408,7 +410,7 @@ export default function App() {
               <MainLayout />
             </Router>
             {/* No celular, acima da barra de navegação inferior */}
-            <Toaster position="bottom-right" richColors theme="dark" mobileOffset={{ bottom: 'calc(env(safe-area-inset-bottom) + 96px)' }} />
+            <Toaster position="bottom-right" richColors theme={theme} mobileOffset={{ bottom: 'calc(env(safe-area-inset-bottom) + 96px)' }} />
           </ProjectProvider>
         </TenantProvider>
       </AuthProvider>

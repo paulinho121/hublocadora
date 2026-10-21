@@ -120,11 +120,11 @@ const AnimatedGlowingSearchBar = ({
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder=""
-            className="bg-[#010201] border-none w-full h-[52px] md:h-[56px] rounded-lg text-white px-[52px] md:px-[60px] text-sm md:text-base focus:outline-none"
+            className="bg-zinc-950 border-none w-full h-[52px] md:h-[56px] rounded-lg text-white px-[52px] md:px-[60px] text-sm md:text-base focus:outline-none"
           />
 
           {/* Fade para o botão de filtro — só no lado direito */}
-          <div className="pointer-events-none absolute top-0 right-[50px] h-full w-[40px] bg-gradient-to-l from-[#010201] to-transparent" />
+          <div className="pointer-events-none absolute top-0 right-[50px] h-full w-[40px] bg-gradient-to-l from-zinc-950 to-transparent" />
 
           <div className="pointer-events-none w-[30px] h-[20px] absolute bg-[#D81545] top-[10px] left-[5px] blur-2xl opacity-80 transition-all duration-[2000ms] group-hover:opacity-0" />
 
@@ -138,11 +138,11 @@ const AnimatedGlowingSearchBar = ({
           <button
             type="button"
             onClick={onSearch}
-            className="absolute top-[6px] right-[6px] md:top-2 md:right-2 flex items-center justify-center z-[2] h-[38px] w-[34px] md:max-h-10 md:max-w-[38px] md:h-full md:w-full [isolation:isolate] overflow-hidden rounded-lg bg-gradient-to-b from-[#1a0808] via-black to-[#1a0808] border border-transparent"
+            className="absolute top-[6px] right-[6px] md:top-2 md:right-2 flex items-center justify-center z-[2] h-[38px] w-[34px] md:max-h-10 md:max-w-[38px] md:h-full md:w-full [isolation:isolate] overflow-hidden rounded-lg bg-gradient-to-b from-zinc-900 via-zinc-950 to-zinc-900 border border-transparent text-zinc-300"
             aria-label="Buscar"
           >
             <svg preserveAspectRatio="none" height="24" width="24" viewBox="4.8 4.56 14.832 15.408" fill="none">
-              <path d="M8.16 6.65002H15.83C16.47 6.65002 16.99 7.17002 16.99 7.81002V9.09002C16.99 9.56002 16.7 10.14 16.41 10.43L13.91 12.64C13.56 12.93 13.33 13.51 13.33 13.98V16.48C13.33 16.83 13.1 17.29 12.81 17.47L12 17.98C11.24 18.45 10.2 17.92 10.2 16.99V13.91C10.2 13.5 9.97 12.98 9.73 12.69L7.52 10.36C7.23 10.08 7 9.55002 7 9.20002V7.87002C7 7.17002 7.52 6.65002 8.16 6.65002Z" stroke="#d6d6e6" strokeWidth="1" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M8.16 6.65002H15.83C16.47 6.65002 16.99 7.17002 16.99 7.81002V9.09002C16.99 9.56002 16.7 10.14 16.41 10.43L13.91 12.64C13.56 12.93 13.33 13.51 13.33 13.98V16.48C13.33 16.83 13.1 17.29 12.81 17.47L12 17.98C11.24 18.45 10.2 17.92 10.2 16.99V13.91C10.2 13.5 9.97 12.98 9.73 12.69L7.52 10.36C7.23 10.08 7 9.55002 7 9.20002V7.87002C7 7.17002 7.52 6.65002 8.16 6.65002Z" stroke="currentColor" strokeWidth="1" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
 

@@ -260,3 +260,80 @@
     font-size: 16px;
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TEMA CLARO (padrão) — ver src/lib/theme.ts
+   O app foi desenhado no escuro com as classes do Tailwind. No claro, em vez de
+   trocar ~2.200 classes, invertemos a escala de cinzas e o preto/branco, e
+   escurecemos os tons de destaque para continuarem legíveis sobre fundo claro.
+   ══════════════════════════════════════════════════════════════════════════ */
+:root[data-theme="light"] {
+  --color-zinc-50:  oklch(14.1% 0.005 285.823);
+  --color-zinc-100: oklch(21% 0.006 285.885);
+  --color-zinc-200: oklch(27.4% 0.006 286.033);
+  --color-zinc-300: oklch(37% 0.013 285.805);
+  --color-zinc-400: oklch(44.2% 0.017 285.786);
+  --color-zinc-500: oklch(52% 0.016 285.938);
+  --color-zinc-600: oklch(62% 0.015 286.067);
+  --color-zinc-700: oklch(87.1% 0.006 286.286);
+  --color-zinc-800: oklch(92% 0.004 286.32);
+  --color-zinc-900: oklch(96.7% 0.001 286.375);
+  --color-zinc-950: oklch(98.5% 0 0);
+  --color-black: #ffffff;
+  --color-white: #09090b;
+
+  /* Destaques: tons claros (feitos para o preto) viram tons escuros */
+  --color-emerald-300: oklch(50.8% 0.118 165.612);
+  --color-emerald-400: oklch(50.8% 0.118 165.612);
+  --color-emerald-500: oklch(50.8% 0.118 165.612);
+  --color-emerald-950: oklch(97.9% 0.021 166.113);
+  --color-red-300: oklch(57.7% 0.245 27.325);
+  --color-red-400: oklch(57.7% 0.245 27.325);
+  --color-red-500: oklch(57.7% 0.245 27.325);
+  --color-red-950: oklch(97.1% 0.013 17.38);
+  --color-amber-200: oklch(55.5% 0.163 48.998);
+  --color-amber-300: oklch(55.5% 0.163 48.998);
+  --color-amber-400: oklch(55.5% 0.163 48.998);
+  --color-amber-500: oklch(55.5% 0.163 48.998);
+  --color-indigo-100: oklch(39.8% 0.195 277.366);
+  --color-indigo-400: oklch(51.1% 0.262 276.966);
+  --color-indigo-500: oklch(51.1% 0.262 276.966);
+  --color-blue-400: oklch(48.8% 0.243 264.376);
+  --color-blue-500: oklch(48.8% 0.243 264.376);
+  --color-sky-400: oklch(50% 0.134 242.749);
+  --color-sky-500: oklch(50% 0.134 242.749);
+  --color-green-400: oklch(52.7% 0.154 150.069);
+  --color-green-500: oklch(52.7% 0.154 150.069);
+  --color-orange-400: oklch(55.3% 0.195 38.402);
+  --color-yellow-500: oklch(55.4% 0.135 66.442);
+  --color-violet-400: oklch(49.1% 0.27 292.581);
+  --color-purple-400: oklch(49.6% 0.265 301.924);
+  --color-cyan-400: oklch(52% 0.105 223.128);
+}
+
+/* Botões e selos com fundo colorido mantêm o texto claro */
+:root[data-theme="light"] :is(.bg-primary, .bg-red-500, .bg-red-600, .bg-emerald-500, .bg-emerald-600,
+  .bg-amber-500, .bg-sky-500, .bg-indigo-500, .bg-indigo-600, .bg-rose-500, .bg-orange-500, .bg-green-500) {
+  --color-white: #ffffff;
+  --color-black: #09090b;
+}
+
+/* Áreas que já são claras por natureza (o mapa) mantêm a paleta original */
+:root[data-theme="light"] .palette-original {
+  --color-zinc-50:  oklch(98.5% 0 0);
+  --color-zinc-100: oklch(96.7% 0.001 286.375);
+  --color-zinc-200: oklch(92% 0.004 286.32);
+  --color-zinc-300: oklch(87.1% 0.006 286.286);
+  --color-zinc-400: oklch(70.5% 0.015 286.067);
+  --color-zinc-500: oklch(55.2% 0.016 285.938);
+  --color-zinc-600: oklch(44.2% 0.017 285.786);
+  --color-zinc-700: oklch(37% 0.013 285.805);
+  --color-zinc-800: oklch(27.4% 0.006 286.033);
+  --color-zinc-900: oklch(21% 0.006 285.885);
+  --color-zinc-950: oklch(14.1% 0.005 285.823);
+  --color-black: #000000;
+  --color-white: #ffffff;
+}
+
+/* Elementos só do tema escuro (ex.: vinheta do fundo) */
+:root[data-theme="light"] .only-dark { display: none; }

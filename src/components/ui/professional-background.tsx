@@ -4,7 +4,7 @@ import React from 'react';
 
 export default function ProfessionalBackground() {
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none bg-[#050505]">
+    <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none bg-zinc-950">
       {/* Technical Grid Overlay */}
       <div 
         className="absolute inset-0 opacity-[0.03]" 
@@ -21,7 +21,7 @@ export default function ProfessionalBackground() {
       
       {/* Radial Vignette for Depth */}
       <div 
-        className="absolute inset-0" 
+        className="absolute inset-0 only-dark" 
         style={{ 
           background: 'radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%)' 
         }} 

@@ -375,7 +375,7 @@ export default function Admin() {
   const hasUrgentActions = urgentPendingBookings.length > 0 || pendingCompanies.length > 0;
 
   return (
-    <div className="min-h-screen bg-[#020202] text-white font-sans">
+    <div className="min-h-screen bg-zinc-950 text-white font-sans">
 
       {/* TOPBAR */}
       {/* Gruda abaixo do Navbar do app (h-16 / md:h-20 + safe area) */}

@@ -50,6 +50,7 @@ import { MasterCatalogSelector } from '@/components/inventory/MasterCatalogSelec
 import { OrderLiveLocation } from '@/components/DeliveryMap';
 import { OrderReturnPanel } from '@/components/dashboard/OrderReturnPanel';
 import { OrderProgress } from '@/components/dashboard/OrderProgress';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 // New Professional Components
 import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar';
@@ -561,7 +562,8 @@ export default function Dashboard() {
                 <RefreshCw className={`h-4 w-4 transition-transform duration-700 ${isRefreshing ? 'animate-spin text-emerald-400' : ''}`} />
               </button>
 
-              {/* No desktop o sino fica na barra lateral, que some no celular */}
+              {/* No celular o menu do topo some no painel: tema e sino ficam aqui */}
+              <ThemeToggle className="md:hidden" />
               <div className="md:hidden">
                  <NotificationCenter />
               </div>

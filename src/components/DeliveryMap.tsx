@@ -122,7 +122,7 @@ export function TrackingMap({ position, destination, waitingMessage, title = 'Se
 
   if (!position) {
     return (
-      <div className="h-full w-full bg-[#eef0f3] flex flex-col items-center justify-center gap-3 text-center px-6">
+      <div className="palette-original h-full w-full bg-[#eef0f3] flex flex-col items-center justify-center gap-3 text-center px-6">
         <div className="h-12 w-12 rounded-full bg-white shadow-md flex items-center justify-center">
           <MapPin className="h-5 w-5 text-primary" />
         </div>
@@ -135,7 +135,7 @@ export function TrackingMap({ position, destination, waitingMessage, title = 'Se
   const minutes = route ? Math.max(1, Math.round(route.durationMin)) : null;
 
   return (
-    <div className="relative h-full w-full z-0">
+    <div className="palette-original relative h-full w-full z-0">
       <MapContainer
         center={[position.lat, position.lng]}
         zoom={16}
