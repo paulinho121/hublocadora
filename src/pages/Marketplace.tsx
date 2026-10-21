@@ -1,162 +1,34 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useEquipments } from '@/hooks/useEquipments';
-import { Card, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import AnimatedGlowingSearchBar from '@/components/ui/animated-glowing-search-bar';
-import {
-  MapPin,
-  ChevronRight,
-  Video,
-  Loader2,
-  Package,
-  Search,
-  Sparkles,
-  Aperture,
-  Zap,
-  Mic2,
-  Layers,
-  BoxSelect,
-  Wrench,
-  LayoutGrid,
-  Calendar,
-  ArrowRight,
-  FolderOpen,
-} from 'lucide-react';
-import { format, addDays, differenceInDays, parseISO } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { BrandMarquee } from '@/components/home/BrandMarquee';
+import { MapPin, Package, Calendar } from 'lucide-react';
+import { format, addDays, parseISO } from 'date-fns';
 import { Equipment } from '@/types/database';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { EquipmentCard } from '@/components/marketplace/EquipmentCard';
 import { useProject } from '@/contexts/ProjectContext';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
-
-const brl = (v: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
 
 /** Returns true if booking [bStart, bEnd] overlaps with project window [pStart, pEnd] */
 function dateOverlaps(bStart: string, bEnd: string, pStart: string, pEnd: string) {
   return bStart <= pEnd && bEnd >= pStart;
 }
 
-// ─── Sticky project date bar ───────────────────────────────────────────────────
-
-function ProjectDateBar({ availableCount }: { availableCount: number }) {
-  const { state, setDates, openDrawer, estimatedTotal } = useProject();
-  const itemCount  = state.items.length;
-  const today      = new Date().toISOString().split('T')[0];
-  const totalDays  = Math.max(
-    1,
-    differenceInDays(parseISO(state.endDate), parseISO(state.startDate)),
-  );
-
-  const handleStart = (val: string) => {
-    if (!val) return;
-    const newEnd = val >= state.endDate
-      ? format(addDays(parseISO(val), 1), 'yyyy-MM-dd')
-      : state.endDate;
-    setDates(val, newEnd);
-  };
-
-  const handleEnd = (val: string) => {
-    if (!val || val <= state.startDate) return;
-    setDates(state.startDate, val);
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="sticky top-[72px] md:top-[88px] z-40 w-full bg-zinc-950/95 border border-zinc-800/70 backdrop-blur-xl rounded-2xl px-4 py-3 mb-6 flex items-center gap-3 flex-wrap shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
-    >
-      {/* ── Date inputs ── */}
-      <div className="flex items-center gap-2 flex-1 min-w-0">
-        {/* Start */}
-        <label className="flex items-center gap-2 bg-zinc-900/70 rounded-xl px-3 py-2 border border-zinc-800/60 hover:border-primary/40 transition-colors cursor-pointer group">
-          <Calendar className="w-3.5 h-3.5 text-primary shrink-0" />
-          <div className="flex flex-col leading-none">
-            <span className="text-[11px] font-semibold text-zinc-500 mb-0.5">
-              Início
-            </span>
-            <input
-              type="date"
-              value={state.startDate}
-              min={today}
-              onChange={e => handleStart(e.target.value)}
-              className="bg-transparent text-[11px] font-black text-white focus:outline-none cursor-pointer [color-scheme:dark] w-[96px]"
-            />
-          </div>
-        </label>
-
-        <ArrowRight className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-
-        {/* End */}
-        <label className="flex items-center gap-2 bg-zinc-900/70 rounded-xl px-3 py-2 border border-zinc-800/60 hover:border-primary/40 transition-colors cursor-pointer group">
-          <Calendar className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
-          <div className="flex flex-col leading-none">
-            <span className="text-[11px] font-semibold text-zinc-500 mb-0.5">
-              Término
-            </span>
-            <input
-              type="date"
-              value={state.endDate}
-              min={state.startDate}
-              onChange={e => handleEnd(e.target.value)}
-              className="bg-transparent text-[11px] font-black text-white focus:outline-none cursor-pointer [color-scheme:dark] w-[96px]"
-            />
-          </div>
-        </label>
-
-        {/* Days pill */}
-        <span className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-lg bg-zinc-900/50 border border-zinc-800/40 text-[11px] font-semibold text-zinc-500 shrink-0">
-          {totalDays} {totalDays === 1 ? 'diária' : 'diárias'}
-        </span>
-      </div>
-
-      {/* ── Availability hint ── */}
-      {availableCount > 0 && (
-        <span className="hidden lg:block text-[11px] font-black text-emerald-400 shrink-0">
-          {availableCount} disponíveis nas suas datas
-        </span>
-      )}
-
-      {/* ── Cart CTA / empty hint ── */}
-      {itemCount > 0 ? (
-        <motion.button
-          whileHover={{ scale: 1.03, y: -1 }}
-          whileTap={{ scale: 0.97 }}
-          onClick={openDrawer}
-          className="flex items-center gap-2 bg-primary text-white rounded-xl px-4 py-2.5 font-semibold text-[11px] shadow-lg shadow-primary/25 shrink-0 transition-colors hover:bg-primary/90"
-        >
-          <FolderOpen className="w-3.5 h-3.5" />
-          {itemCount} {itemCount === 1 ? 'item' : 'itens'} · {brl(estimatedTotal)}
-          <ChevronRight className="w-3 h-3" />
-        </motion.button>
-      ) : (
-        <span className="hidden md:block text-[11px] text-zinc-400 shrink-0">
-          Selecione as datas e adicione itens ao seu projeto →
-        </span>
-      )}
-    </motion.div>
-  );
-}
-
-
 export default function Marketplace() {
   const navigate = useNavigate();
-  const { state: projectState } = useProject();
+  const { state: projectState, setDates } = useProject();
   const [search, setSearch] = useState('');
+  // Filtros da barra de descoberta
+  const [city, setCity] = useState<string>('');
+  const [sortBy, setSortBy] = useState<'available' | 'price-asc' | 'price-desc'>('available');
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>();
   const [selectedBrand, setSelectedBrand] = useState<string | undefined>();
   const [selectedSubCategory, setSelectedSubCategory] = useState<string | undefined>();
-  const [showAll, setShowAll] = useState(false);
-  const [shuffledDefaultItems, setShuffledDefaultItems] = useState<Equipment[]>([]);
   
   const { data: rawEquipmentsPage, isLoading } = useEquipments({
     searchQuery: search,
@@ -267,22 +139,49 @@ export default function Marketplace() {
     [availabilityMap],
   );
 
-  // Randomiza e muda de lugar os equipamentos em destaque a cada atualização do acervo
+  // Datas guardadas no carrinho podem ter ficado no passado: volta para hoje → amanhã
   useEffect(() => {
-    if (equipments.length > 0) {
-      const shuffled = [...equipments];
-      for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-      }
-      setShuffledDefaultItems(shuffled.slice(0, 8));
-    }
-  }, [rawEquipments]);
+    if (projectState.startDate < today) setDates(today, format(addDays(parseISO(today), 1), 'yyyy-MM-dd'));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const isDefaultView = !search && !selectedCategory && !showAll;
-  const displayedEquipments = isDefaultView 
-    ? (shuffledDefaultItems.length > 0 ? shuffledDefaultItems : equipments.slice(0, 8)) 
-    : equipments;
+  // Cidades reais do catálogo (para o filtro "Onde?")
+  const cityKey = (e: Equipment) => [e.location_base?.trim(), e.state_uf?.trim()].filter(Boolean).join(' · ');
+  const cities = useMemo(
+    () => [...new Set(equipments.map(cityKey).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR')),
+    [equipments],
+  );
+
+  // Lista em ordem fixa (antes era embaralhada a cada visita e limitada a 8)
+  const displayedEquipments = useMemo(() => {
+    const list = city ? equipments.filter(e => cityKey(e) === city) : [...equipments];
+    if (sortBy === 'price-asc') return list.sort((a, b) => a.daily_rate - b.daily_rate);
+    if (sortBy === 'price-desc') return list.sort((a, b) => b.daily_rate - a.daily_rate);
+    // Disponíveis nas datas primeiro; depois por nome
+    return list.sort((a, b) => {
+      const av = availabilityMap.get(a.id) === false ? 1 : 0;
+      const bv = availabilityMap.get(b.id) === false ? 1 : 0;
+      return av - bv || a.name.localeCompare(b.name, 'pt-BR');
+    });
+  }, [equipments, city, sortBy, availabilityMap]);
+
+  const hasFilters = !!(search || city || selectedCategory);
+  const clearFilters = () => {
+    setSearch('');
+    setCity('');
+    setSelectedCategory(undefined);
+    setSelectedBrand(undefined);
+    setSelectedSubCategory(undefined);
+  };
+
+  const handleStartDate = (val: string) => {
+    if (!val) return;
+    const end = val >= projectState.endDate ? format(addDays(parseISO(val), 1), 'yyyy-MM-dd') : projectState.endDate;
+    setDates(val, end);
+  };
+  const handleEndDate = (val: string) => {
+    if (!val || val <= projectState.startDate) return;
+    setDates(projectState.startDate, val);
+  };
 
   const handleSearch = () => {
     if (equipments && equipments.length === 1) {
@@ -292,260 +191,157 @@ export default function Marketplace() {
     }
   };
 
-  const categories = [
-    /* Ocultado temporariamente a pedido do usuário
-    { 
-      name: 'Câmeras', 
-      value: 'Câmeras', 
-      icon: <Video className="w-3.5 h-3.5" />,
-      types: ['Cinema', 'Mirrorless', 'Action', 'Broadcasting'],
-      brands: ['ARRI', 'RED', 'Sony', 'Canon', 'Blackmagic']
-    },
-    */
-    { 
-      name: 'Lentes', 
-      value: 'Lentes', 
-      icon: <Aperture className="w-3.5 h-3.5" />,
-      types: ['Prime', 'Zoom', 'Anamórfica', 'Macro'],
-      brands: ['Zeiss', 'Cooke', 'Angénieux', 'Leica', 'Fujinon']
-    },
-    { 
-      name: 'Modificadores', 
-      value: 'Modificadores', 
-      icon: <BoxSelect className="w-3.5 h-3.5" />,
-      types: ['Softbox', 'Octabank', 'Lantern', 'Grid', 'Flag'],
-      brands: ['Chimera', 'DoPchoice', 'Aputure', 'Nanlite']
-    },
-    { 
-      name: 'Iluminação', 
-      value: 'Iluminação', 
-      icon: <Zap className="w-3.5 h-3.5" />,
-      types: ['LED Panel', 'COB', 'Fresnel', 'Tubo LED'],
-      brands: ['Arri', 'Aputure', 'Nanlite', 'Astera']
-    },
-    {
-      name: 'Todos',
-      value: '__all__',
-      icon: <LayoutGrid className="w-3.5 h-3.5" />,
-      types: [],
-      brands: []
-    },
-    { 
-      name: 'Áudio', 
-      value: 'Áudio', 
-      icon: <Mic2 className="w-3.5 h-3.5" />,
-      types: ['Gravadores', 'Microfones', 'Wireless', 'Monitoração'],
-      brands: ['Sennheiser', 'Sound Devices', 'Zaxcom', 'Rode']
-    },
-    { 
-      name: 'Tripés', 
-      value: 'Tripés', 
-      icon: <Layers className="w-3.5 h-3.5" />,
-      types: ['Tripés', 'Sliders', 'Dollies', 'Gruas'],
-      brands: ['Matthews', 'Kupo', 'Avenger', 'Sachtler']
-    },
-    { 
-      name: 'Acessórios', 
-      value: 'Acessórios', 
-      icon: <Wrench className="w-3.5 h-3.5" />,
-      types: ['Cabos', 'Baterias', 'Cartões de Memória', 'Filtros', 'Monitores'],
-      brands: ['Teradek', 'SmallHD', 'SanDisk', 'REVOLT', 'Anton Bauer']
-    },
-  ];
-
-  const activeCategory = categories.find(c => c.value === selectedCategory);
 
   return (
     <div className="flex flex-col items-center pb-8 w-full">
 
-      {/* ── Hero Search Section ─────────────────────────────────────────────── */}
+      {/* ── Topo: título + busca ─────────────────────────────────────────── */}
       <div className="relative w-full flex flex-col items-center overflow-hidden">
-        {/* Ambient background glow */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-primary/8 rounded-full blur-[120px] opacity-60" />
-          <div className="absolute top-20 left-1/4 w-[300px] h-[300px] bg-red-900/10 rounded-full blur-[80px]" />
-          <div className="absolute top-10 right-1/4 w-[200px] h-[200px] bg-rose-800/8 rounded-full blur-[60px]" />
         </div>
 
-        {/* ── Central Search Block ── */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
-          className="w-full max-w-7xl mx-auto px-6 pt-8 pb-6 flex flex-col items-center text-center relative z-10"
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+          className="w-full max-w-7xl mx-auto px-4 md:px-6 pt-6 md:pt-10 pb-4 flex flex-col items-center text-center relative z-10"
         >
-          {/* Tagline badge */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.05, duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-md mb-6"
-          >
-            <span className="text-[11px] font-semibold text-primary">O Hub da sua produção</span>
-          </motion.div>
-          {/* Headline */}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight text-white mb-3 leading-[0.9]">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-black tracking-tighter text-white mb-3 leading-[0.95]">
             Encontre o equipamento<br />
             <span className="text-primary">perfeito</span> para o seu set.
           </h1>
-          <p className="text-zinc-500 text-sm md:text-base font-medium mb-10 max-w-xl">
+          <p className="text-zinc-500 text-sm md:text-base font-medium mb-6 md:mb-8 max-w-xl">
             Alugue equipamentos de locadoras parceiras, com entrega e acompanhamento em tempo real.
           </p>
 
-          {/* Search bar */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.35, duration: 0.6 }}
-            className="w-full max-w-3xl"
-          >
+          <div className="w-full max-w-3xl">
             <AnimatedGlowingSearchBar
               value={search}
               onChange={setSearch}
               onSearch={handleSearch}
-              placeholder="Qual equipamento você precisa para seu set hoje?"
+              placeholder="Qual equipamento você precisa?"
             />
-          </motion.div>
+          </div>
 
-          {/* ── Category pills e Sub-filters (Removidos a pedido do usuário) ── */}
+          {/* ── Barra de descoberta: Quando? Onde? Ordenar ── */}
+          <div className="w-full max-w-3xl mt-3 grid grid-cols-2 md:grid-cols-[1.4fr_1fr_1fr] gap-2 text-left">
+            <div className="col-span-2 md:col-span-1 grid grid-cols-2 gap-2">
+              <label className="flex flex-col gap-0.5 bg-zinc-900/60 border border-zinc-800 rounded-xl px-3 py-2 cursor-pointer hover:border-zinc-700 transition-colors">
+                <span className="text-[11px] font-semibold text-zinc-500 flex items-center gap-1"><Calendar className="w-3 h-3 text-primary" /> Retirada</span>
+                <input
+                  type="date"
+                  value={projectState.startDate}
+                  min={today}
+                  onChange={e => handleStartDate(e.target.value)}
+                  className="bg-transparent text-sm font-semibold text-white focus:outline-none cursor-pointer w-full"
+                />
+              </label>
+              <label className="flex flex-col gap-0.5 bg-zinc-900/60 border border-zinc-800 rounded-xl px-3 py-2 cursor-pointer hover:border-zinc-700 transition-colors">
+                <span className="text-[11px] font-semibold text-zinc-500 flex items-center gap-1"><Calendar className="w-3 h-3 text-zinc-500" /> Devolução</span>
+                <input
+                  type="date"
+                  value={projectState.endDate}
+                  min={projectState.startDate}
+                  onChange={e => handleEndDate(e.target.value)}
+                  className="bg-transparent text-sm font-semibold text-white focus:outline-none cursor-pointer w-full"
+                />
+              </label>
+            </div>
+
+            <label className="flex flex-col gap-0.5 bg-zinc-900/60 border border-zinc-800 rounded-xl px-3 py-2 hover:border-zinc-700 transition-colors">
+              <span className="text-[11px] font-semibold text-zinc-500 flex items-center gap-1"><MapPin className="w-3 h-3" /> Onde?</span>
+              <select
+                value={city}
+                onChange={e => setCity(e.target.value)}
+                className="bg-transparent text-sm font-semibold text-white focus:outline-none cursor-pointer w-full"
+              >
+                <option value="">Todas</option>
+                {cities.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </label>
+
+            <label className="flex flex-col gap-0.5 bg-zinc-900/60 border border-zinc-800 rounded-xl px-3 py-2 hover:border-zinc-700 transition-colors">
+              <span className="text-[11px] font-semibold text-zinc-500">Ordenar</span>
+              <select
+                value={sortBy}
+                onChange={e => setSortBy(e.target.value as typeof sortBy)}
+                className="bg-transparent text-sm font-semibold text-white focus:outline-none cursor-pointer w-full"
+              >
+                <option value="available">Disponíveis</option>
+                <option value="price-asc">Menor preço</option>
+                <option value="price-desc">Maior preço</option>
+              </select>
+            </label>
+          </div>
         </motion.div>
-
-        {/* Divider glow line */}
-        <div className="w-full max-w-7xl mx-auto px-6 pb-8">
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-white/8 to-transparent" />
-        </div>
       </div>
 
-      {/* Results section wrapper */}
-      <div className="w-full max-w-7xl mx-auto px-6 mb-20">
+      {/* ── Resultados ───────────────────────────────────────────────────── */}
+      <div className="w-full max-w-7xl mx-auto px-4 md:px-6 mb-20 mt-6">
         <div id="results-section" className="w-full scroll-mt-24">
 
-          {/* ── Project date bar — oculto temporariamente ── */}
-          {/* <ProjectDateBar availableCount={availableCount} /> */}
-
-          <div className="flex items-center justify-between mb-10">
+          <div className="flex items-end justify-between gap-4 mb-6">
             <div className="flex flex-col gap-1">
-              <h3 className="text-2xl md:text-3xl font-display font-black tracking-tighter uppercase">
-                {selectedCategory ? `Resultados em ${categories.find(c => c.value === selectedCategory)?.name}` : 'Equipamentos em Destaque'}
+              <h3 className="text-xl md:text-2xl font-display font-black tracking-tighter uppercase">
+                {hasFilters ? 'Resultados' : 'Equipamentos'}
               </h3>
-              <div className="h-1 w-12 bg-primary rounded-full" />
+              <p className="text-sm text-zinc-500 font-medium">
+                {isLoading
+                  ? 'Carregando...'
+                  : `${displayedEquipments.length} ${displayedEquipments.length === 1 ? 'equipamento' : 'equipamentos'}${city ? ` em ${city}` : ''}`}
+              </p>
             </div>
-            <div className="flex items-center gap-2">
-              {selectedCategory && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setSelectedCategory(undefined);
-                    setSelectedBrand(undefined);
-                    setSelectedSubCategory(undefined);
-                  }}
-                  className="text-zinc-500 hover:text-white font-semibold text-[11px]"
-                >
-                  Limpar Filtros
+            {hasFilters && (
+              <Button variant="ghost" size="sm" onClick={clearFilters} className="h-10 text-zinc-500 hover:text-white font-semibold text-xs">
+                Limpar filtros
+              </Button>
+            )}
+          </div>
+
+          {isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-[360px] rounded-2xl bg-zinc-900/40 border border-zinc-800 animate-pulse" />
+              ))}
+            </div>
+          ) : displayedEquipments.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="h-16 w-16 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-5">
+                <Package className="h-7 w-7 text-zinc-500" />
+              </div>
+              <h3 className="text-lg font-bold mb-1">Nenhum equipamento encontrado</h3>
+              <p className="text-sm text-zinc-500 max-w-xs mb-6">Tente outra busca, outra cidade ou limpe os filtros.</p>
+              {hasFilters && (
+                <Button variant="outline" onClick={clearFilters} className="rounded-xl h-11 px-6 border-zinc-800 text-zinc-300">
+                  Limpar filtros
                 </Button>
               )}
             </div>
-          </div>
-          
-          {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {[...Array(8)].map((_, i) => (
-                <div key={i} className="h-[380px] rounded-2xl bg-zinc-900/40 border border-white/5 animate-pulse overflow-hidden relative">
-                   <div className="h-48 bg-zinc-800/50" />
-                   <div className="p-6 space-y-4">
-                      <div className="h-4 w-3/4 bg-zinc-800/50 rounded-full" />
-                      <div className="h-3 w-1/2 bg-zinc-800/30 rounded-full" />
-                      <div className="mt-8 h-12 w-full bg-zinc-800/20 rounded-2xl" />
-                   </div>
-                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
-                </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+              {displayedEquipments.map((item) => (
+                <EquipmentCard
+                  key={item.id}
+                  item={item}
+                  rentedQuantity={(item as any).rentedQuantity ?? 0}
+                  nextReturnDate={(item as any).nextReturnDate ?? null}
+                  upcomingQuantity={(item as any).upcomingQuantity ?? 0}
+                  nextUpcomingStart={(item as any).nextUpcomingStart ?? null}
+                  isAvailableForDates={availabilityMap.get(item.id) ?? null}
+                  projectDates={
+                    projectState.startDate && projectState.endDate
+                      ? { start: projectState.startDate, end: projectState.endDate }
+                      : null
+                  }
+                  onClick={() => navigate(`/equipment/${item.id}`)}
+                />
               ))}
             </div>
-          ) : (
-            <>
-              {displayedEquipments.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-24 text-center">
-                  <div className="h-20 w-20 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-6">
-                    <Package className="h-8 w-8 text-zinc-500" />
-                  </div>
-                  <h3 className="text-xl font-black uppercase tracking-tighter mb-2">Nenhum item encontrado</h3>
-                  <p className="text-zinc-500 max-w-xs mb-8">Tente ajustar seus filtros ou busca para encontrar o que precisa.</p>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => {
-                      setSearch('');
-                      setSelectedCategory(undefined);
-                      setSelectedBrand(undefined);
-                      setSelectedSubCategory(undefined);
-                    }}
-                    className="rounded-xl h-10 px-6 border-zinc-800 text-zinc-400"
-                  >
-                    Limpar Tudo
-                  </Button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {displayedEquipments.map((item) => (
-                    <EquipmentCard
-                      key={item.id}
-                      item={item}
-                      rentedQuantity={(item as any).rentedQuantity ?? 0}
-                      nextReturnDate={(item as any).nextReturnDate ?? null}
-                      upcomingQuantity={(item as any).upcomingQuantity ?? 0}
-                      nextUpcomingStart={(item as any).nextUpcomingStart ?? null}
-                      isAvailableForDates={availabilityMap.get(item.id) ?? null}
-                      projectDates={
-                        projectState.startDate && projectState.endDate
-                          ? { start: projectState.startDate, end: projectState.endDate }
-                          : null
-                      }
-                      onClick={() => navigate(`/equipment/${item.id}`)}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {isDefaultView && equipments && equipments.length > 8 && !showAll && (
-                <div className="mt-20 w-full flex justify-center">
-                  <Button 
-                    variant="outline" 
-                    size="lg" 
-                    onClick={() => setShowAll(true)} 
-                    className="rounded-2xl border-white/5 bg-zinc-950/50 text-zinc-400 hover:text-white hover:bg-zinc-900 border-2 px-12 h-16 font-semibold text-xs transition-all hover:scale-105 active:scale-95 shadow-2xl"
-                  >
-                    Ver Catálogo Completo
-                  </Button>
-                </div>
-              )}
-            </>
           )}
         </div>
       </div>
 
-      {/* Featured Banners - Ocultado temporariamente a pedido do usuário */}
-      {/* 
-      <div className="w-full max-w-7xl mx-auto px-6 mb-24 flex justify-center">
-        <div className="relative overflow-hidden rounded-2xl bg-zinc-950/40 border border-white/5 p-6 min-h-[380px] w-full max-w-4xl flex flex-col justify-between group cursor-pointer hover:border-emerald-500/20 transition-all duration-500 shadow-2xl">
-          <div className="z-10 max-w-[280px]">
-            <div className="inline-block px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[11px] font-semibold mb-6">Pro Lighting</div>
-            <h2 className="text-5xl font-display font-black text-white tracking-tighter uppercase mb-6 leading-[0.85]">Iluminação & Grip</h2>
-            <p className="text-zinc-500 mb-8 font-medium leading-relaxed">Controle total da luz com acessórios profissionais e telões de LED de alta definição.</p>
-            <Button className="w-fit bg-emerald-600 hover:bg-emerald-500 text-white border-none rounded-2xl font-semibold text-[11px] h-14 px-10 shadow-xl shadow-emerald-500/20 transition-all hover:-translate-y-1">
-              Buscar <ChevronRight className="ml-2 h-4 w-4"/>
-            </Button>
-          </div>
-          <div className="absolute right-[-5%] bottom-[-5%] w-[55%] h-full pointer-events-none opacity-40 group-hover:opacity-60 group-hover:scale-110 transition-all duration-1000">
-            <img 
-              src="https://images.unsplash.com/photo-1527011045974-436f32dba597?q=80&w=800&auto=format&fit=crop" 
-              alt="Iluminação"
-              className="w-full h-full object-contain mix-blend-screen" 
-              referrerPolicy="no-referrer"
-            />
-          </div>
-        </div>
-      </div>
-      */}
 
     </div>
   );

@@ -166,7 +166,7 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
               value={startDate}
               min={today}
               onChange={e => handleStart(e.target.value)}
-              className="bg-transparent text-sm font-black text-white focus:outline-none cursor-pointer [color-scheme:dark] w-full"
+              className="bg-transparent text-sm font-black text-white focus:outline-none cursor-pointer w-full"
             />
           </label>
 
@@ -180,7 +180,7 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
               value={endDate}
               min={startDate || tomorrow}
               onChange={e => setEndDate(e.target.value)}
-              className="bg-transparent text-sm font-black text-white focus:outline-none cursor-pointer [color-scheme:dark] w-full"
+              className="bg-transparent text-sm font-black text-white focus:outline-none cursor-pointer w-full"
             />
           </label>
         </div>

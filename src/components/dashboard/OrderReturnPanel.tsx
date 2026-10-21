@@ -291,7 +291,7 @@ export function OrderReturnPanel({ order }: { order: any }) {
             value={newEnd}
             min={format(addDays(parseISO(order.end_date), 1), 'yyyy-MM-dd')}
             onChange={e => e.target.value && setNewEnd(e.target.value)}
-            className="w-full sm:w-64 h-12 bg-zinc-950 border border-zinc-800 rounded-xl px-3 text-sm text-white [color-scheme:dark] focus:outline-none focus:border-primary/50"
+            className="w-full sm:w-64 h-12 bg-zinc-950 border border-zinc-800 rounded-xl px-3 text-sm text-white focus:outline-none focus:border-primary/50"
           />
           {extraDays > 0 && (
             <p className="text-sm text-zinc-300">
