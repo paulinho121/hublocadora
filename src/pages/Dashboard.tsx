@@ -590,28 +590,28 @@ export default function Dashboard() {
                {activeTab === 'overview' && (
                  <div className="space-y-10">
                 <header>
-                   <h2 className="text-4xl font-black tracking-tighter uppercase mb-2">Visão Geral</h2>
-                   <p className="text-zinc-500 font-medium">O pulso financeiro e operacional da sua locadora hoje.</p>
+                   <h2 className="text-2xl md:text-3xl font-black tracking-tighter uppercase mb-1">Visão Geral</h2>
+                   <p className="text-sm text-zinc-500 font-medium">Resumo da sua locadora hoje.</p>
                 </header>
 
                 {/* Stats Grid */}
-                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+                 <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
                     <Card className="clay-card">
-                       <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
-                          <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-wider">Ganhos Líquidos</CardTitle>
-                          <TrendingUp className="h-4 w-4 text-emerald-500" />
+                       <CardHeader className="p-4 pb-1 flex flex-row items-start justify-between gap-2 space-y-0">
+                          <CardTitle className="text-xs font-semibold text-zinc-500 leading-tight">Ganhos Líquidos</CardTitle>
+                          <TrendingUp className="h-4 w-4 shrink-0 text-emerald-500" />
                        </CardHeader>
-                       <CardContent className="p-6 pt-0">
-                          <div className="text-2xl font-black tracking-tighter text-zinc-100 mb-1">
+                       <CardContent className="p-4 pt-0">
+                          <div className="text-xl md:text-2xl font-bold tracking-tight text-zinc-100 mb-1">
                              {formatCurrency(totalRevenue)}
                           </div>
                           <div className="flex flex-col gap-0.5">
                             {pendingRevenue > 0 && (
-                              <p className="text-xs text-amber-500/80 font-bold uppercase tracking-widest">
+                              <p className="text-xs text-amber-500/80 font-medium">
                                 + {formatCurrency(pendingRevenue)} a confirmar
                               </p>
                             )}
-                            <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest">
+                            <p className="text-xs text-zinc-400 font-medium">
                               {thisMonthRevenue > 0
                                 ? `${formatCurrency(thisMonthRevenue)} este mês`
                                 : completedRevenue > 0
@@ -623,20 +623,20 @@ export default function Dashboard() {
                     </Card>
 
                     <Card className="clay-card">
-                       <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
-                          <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-wider">Débitos Operacionais</CardTitle>
-                          <AlertCircle className="h-4 w-4 text-red-500" />
+                       <CardHeader className="p-4 pb-1 flex flex-row items-start justify-between gap-2 space-y-0">
+                          <CardTitle className="text-xs font-semibold text-zinc-500 leading-tight">Taxas e repasses</CardTitle>
+                          <AlertCircle className="h-4 w-4 shrink-0 text-red-500" />
                        </CardHeader>
-                       <CardContent className="p-6 pt-0">
-                          <div className={`text-2xl font-black tracking-tighter mb-1 ${totalDebt > 0 ? 'text-red-400' : 'text-zinc-100'}`}>
+                       <CardContent className="p-4 pt-0">
+                          <div className={`text-xl md:text-2xl font-bold tracking-tight mb-1 ${totalDebt > 0 ? 'text-red-400' : 'text-zinc-100'}`}>
                              {formatCurrency(totalDebt)}
                           </div>
                           <div className="flex flex-col gap-0.5">
-                            <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest">
-                              Taxa HUB (15%): {formatCurrency(hubFee)}
+                            <p className="text-xs text-zinc-400 font-medium">
+                              Taxa CineHub (15%): {formatCurrency(hubFee)}
                             </p>
                             {partnerDebt > 0 && (
-                              <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest">
+                              <p className="text-xs text-zinc-400 font-medium">
                                 Parceiros: {formatCurrency(partnerDebt)}
                               </p>
                             )}
@@ -645,19 +645,19 @@ export default function Dashboard() {
                     </Card>
 
                     <Card className="clay-card">
-                       <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
-                          <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-wider">Reservas Ativas</CardTitle>
-                          <CalendarDays className="h-4 w-4 text-zinc-400" />
+                       <CardHeader className="p-4 pb-1 flex flex-row items-start justify-between gap-2 space-y-0">
+                          <CardTitle className="text-xs font-semibold text-zinc-500 leading-tight">Pedidos ativos</CardTitle>
+                          <CalendarDays className="h-4 w-4 shrink-0 text-zinc-400" />
                        </CardHeader>
-                       <CardContent className="p-6 pt-0">
-                          <div className="text-2xl font-black tracking-tighter text-zinc-100 mb-1">{activeBookings}</div>
+                       <CardContent className="p-4 pt-0">
+                          <div className="text-xl md:text-2xl font-bold tracking-tight text-zinc-100 mb-1">{activeBookings}</div>
                           <div className="flex flex-col gap-0.5">
                             {pendingBookingsCount > 0 && (
-                              <p className="text-xs text-amber-500/80 font-bold uppercase tracking-widest">
+                              <p className="text-xs text-amber-500/80 font-medium">
                                 {pendingBookingsCount} aguardando aprovação
                               </p>
                             )}
-                            <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest">
+                            <p className="text-xs text-zinc-400 font-medium">
                               {completedBookings > 0 ? `${completedBookings} concluídas` : 'Nenhuma concluída'}
                             </p>
                           </div>
@@ -665,13 +665,13 @@ export default function Dashboard() {
                     </Card>
 
                     <Card className="clay-card">
-                       <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
-                          <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-wider">Frota Estocada</CardTitle>
-                          <Package className="h-4 w-4 text-zinc-400" />
+                       <CardHeader className="p-4 pb-1 flex flex-row items-start justify-between gap-2 space-y-0">
+                          <CardTitle className="text-xs font-semibold text-zinc-500 leading-tight">Equipamentos</CardTitle>
+                          <Package className="h-4 w-4 shrink-0 text-zinc-400" />
                        </CardHeader>
-                       <CardContent className="p-6 pt-0">
-                          <div className="text-2xl font-black tracking-tighter text-zinc-100 mb-1">{equipments?.length || 0}</div>
-                          <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest">
+                       <CardContent className="p-4 pt-0">
+                          <div className="text-xl md:text-2xl font-bold tracking-tight text-zinc-100 mb-1">{equipments?.length || 0}</div>
+                          <p className="text-xs text-zinc-400 font-medium">
                             {maintenanceCount > 0
                               ? `${(equipments?.length || 0) - maintenanceCount} disponíveis`
                               : 'Todos disponíveis'}
@@ -680,21 +680,22 @@ export default function Dashboard() {
                     </Card>
 
                     <Card className="clay-card">
-                       <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
-                          <CardTitle className="text-xs uppercase font-black text-zinc-500 tracking-wider">Em Manutenção</CardTitle>
-                          <AlertCircle className="h-4 w-4 text-destructive" />
+                       <CardHeader className="p-4 pb-1 flex flex-row items-start justify-between gap-2 space-y-0">
+                          <CardTitle className="text-xs font-semibold text-zinc-500 leading-tight">Em Manutenção</CardTitle>
+                          <AlertCircle className={`h-4 w-4 shrink-0 ${maintenanceCount > 0 ? 'text-destructive' : 'text-zinc-400'}`} />
                        </CardHeader>
-                       <CardContent className="p-6 pt-0">
-                          <div className="text-2xl font-black tracking-tighter text-destructive mb-1">{maintenanceCount}</div>
-                          <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest">Atenção requerida</p>
+                       <CardContent className="p-4 pt-0">
+                          {/* Só alerta quando há equipamento parado; zero é bom sinal */}
+                          <div className={`text-xl md:text-2xl font-bold tracking-tight mb-1 ${maintenanceCount > 0 ? 'text-destructive' : 'text-zinc-100'}`}>{maintenanceCount}</div>
+                          <p className="text-xs text-zinc-400 font-medium">{maintenanceCount > 0 ? 'Precisam de atenção' : 'Nenhum parado'}</p>
                        </CardContent>
                     </Card>
                  </div>
 
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                   <Card className="xl:col-span-2 bg-zinc-950 border-zinc-900 rounded-3xl">
-                      <CardHeader className="p-8 border-b border-zinc-900 flex flex-row items-center justify-between">
-                         <CardTitle className="text-xl font-black tracking-tighter uppercase">Pedidos Recentes</CardTitle>
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6">
+                   <Card className="xl:col-span-2 bg-zinc-950 border-zinc-900 rounded-2xl">
+                      <CardHeader className="p-4 md:p-6 border-b border-zinc-900 flex flex-row items-center justify-between">
+                         <CardTitle className="text-lg font-black tracking-tighter uppercase">Pedidos Recentes</CardTitle>
                          <Button variant="ghost" onClick={() => setActiveTab('bookings')} className="h-10 text-[11px] uppercase font-black tracking-widest text-zinc-500 hover:text-white">Ver Todos</Button>
                       </CardHeader>
                       <CardContent className="p-0">
