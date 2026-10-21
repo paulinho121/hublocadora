@@ -61,6 +61,8 @@ export function ProjectDrawer() {
 
   // ── local UI state ──────────────────────────────────────────────────────────
   const [availMap, setAvailMap]         = useState<AvailMap>({});
+  // Unidades livres de cada item em todo o período escolhido
+  const [freeMap, setFreeMap]           = useState<Record<string, number>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [results, setResults]           = useState<BookingResult[] | null>(null);
   const [deliveryMethod, setDeliveryMethod] = useState<'pickup' | 'delivery'>('pickup');
@@ -96,14 +98,14 @@ export function ProjectDrawer() {
     await Promise.all(
       state.items.map(async (item) => {
         try {
-          const ok = await BookingService.checkAvailability(
+          const free = await BookingService.getFreeUnits(
             item.equipment.id,
             state.startDate,
             state.endDate,
-            item.quantity,
             item.equipment.stock_quantity,
           );
-          setAvailMap(prev => ({ ...prev, [item.equipment.id]: ok ? 'ok' : 'conflict' }));
+          setFreeMap(prev => ({ ...prev, [item.equipment.id]: free }));
+          setAvailMap(prev => ({ ...prev, [item.equipment.id]: item.quantity <= free ? 'ok' : 'conflict' }));
         } catch {
           setAvailMap(prev => ({ ...prev, [item.equipment.id]: 'conflict' }));
         }
@@ -433,6 +435,7 @@ export function ProjectDrawer() {
                       <div className="flex flex-col gap-3">
                         {state.items.map((item) => {
                           const status = availMap[item.equipment.id] ?? 'idle';
+                          const free = freeMap[item.equipment.id];
                           const img    = item.equipment.images?.[0];
                           const subtotal = item.equipment.daily_rate * item.quantity * totalDays;
 
@@ -473,13 +476,19 @@ export function ProjectDrawer() {
                                       </span>
                                     )}
                                     {status === 'ok' && (
-                                      <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-emerald-400">
-                                        <CheckCircle2 className="w-2.5 h-2.5" /> Disponível
+                                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400">
+                                        <CheckCircle2 className="w-3 h-3" />
+                                        {free !== undefined
+                                          ? `${free} de ${item.equipment.stock_quantity} disponíve${free === 1 ? 'l' : 'is'} no período`
+                                          : 'Disponível'}
                                       </span>
                                     )}
                                     {status === 'conflict' && (
-                                      <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-red-400">
-                                        <AlertCircle className="w-2.5 h-2.5" /> Indisponível neste período
+                                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-red-400">
+                                        <AlertCircle className="w-3 h-3" />
+                                        {free
+                                          ? `Só ${free} disponíve${free === 1 ? 'l' : 'is'} no período — diminua a quantidade`
+                                          : 'Indisponível neste período'}
                                       </span>
                                     )}
                                   </div>
@@ -491,7 +500,7 @@ export function ProjectDrawer() {
                                     <button
                                       onClick={() => updateQuantity(item.equipment.id, item.quantity - 1)}
                                       disabled={item.quantity <= 1}
-                                      className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-zinc-700 disabled:opacity-30 transition-all text-white"
+                                      className="w-9 h-9 flex items-center justify-center rounded-md hover:bg-zinc-700 disabled:opacity-30 transition-all text-white"
                                     >
                                       <Minus className="w-3 h-3" />
                                     </button>
@@ -500,8 +509,8 @@ export function ProjectDrawer() {
                                     </span>
                                     <button
                                       onClick={() => updateQuantity(item.equipment.id, item.quantity + 1)}
-                                      disabled={item.quantity >= item.equipment.stock_quantity}
-                                      className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-zinc-700 disabled:opacity-30 transition-all text-white"
+                                      disabled={item.quantity >= (free ?? item.equipment.stock_quantity)}
+                                      className="w-9 h-9 flex items-center justify-center rounded-md hover:bg-zinc-700 disabled:opacity-30 transition-all text-white"
                                     >
                                       <Plus className="w-3 h-3" />
                                     </button>

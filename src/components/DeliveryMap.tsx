@@ -195,12 +195,13 @@ export function TrackingMap({ position, destination, waitingMessage, title = 'Se
 }
 
 /**
- * Bloco "Localização do equipamento" do detalhe do pedido. Acompanha a entrega em
- * tempo real (Realtime) e aparece sozinho, para a locadora e para o cliente, assim que
- * o pedido é despachado — sem depender da lista de pedidos ser recarregada.
+ * "Acompanhe sua entrega" no detalhe do pedido. Acompanha a entrega em tempo real
+ * (Realtime) e aparece sozinho, para a locadora e para o cliente, assim que o pedido é
+ * despachado. O mapa fica recolhido e abre no botão "Ver no mapa".
  */
 export function OrderLiveLocation({ bookingId, title }: { bookingId: string; title?: string }) {
   const { delivery } = useDeliveryTracking(bookingId);
+  const [open, setOpen] = useState(false);
   if (!delivery || delivery.status !== 'shipped') return null;
 
   const position = delivery.current_lat != null && delivery.current_lng != null
@@ -209,15 +210,39 @@ export function OrderLiveLocation({ bookingId, title }: { bookingId: string; tit
   const destination = delivery.dest_lat != null && delivery.dest_lng != null
     ? { lat: Number(delivery.dest_lat), lng: Number(delivery.dest_lng) }
     : null;
+  const eta = delivery.estimated_arrival
+    ? new Date(delivery.estimated_arrival).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    : null;
 
   return (
-    <div className="space-y-3">
-      <h3 className="text-lg font-black uppercase tracking-tighter flex items-center gap-2">
-        <MapPin className="h-4 w-4 text-primary" /> Localização do equipamento
-      </h3>
-      <div className="h-96 md:h-[28rem] rounded-3xl overflow-hidden border border-zinc-800">
-        <TrackingMap position={position} destination={destination} title={title} waitingMessage="Aguardando sinal GPS do veículo..." />
-      </div>
+    <div className="rounded-3xl border border-zinc-800 overflow-hidden bg-zinc-900/30">
+      <button
+        onClick={() => setOpen(v => !v)}
+        aria-expanded={open}
+        className="w-full flex items-center gap-4 p-4 md:p-5 text-left hover:bg-zinc-900/60 transition-colors"
+      >
+        <span className="relative h-12 w-12 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+          <span className="absolute inset-0 rounded-full bg-primary/20 animate-ping" />
+          <Car className="relative h-5 w-5 text-primary" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-base font-black text-white">Acompanhe sua entrega</span>
+          <span className="block text-sm text-zinc-400 truncate">
+            {position
+              ? eta ? `Em trânsito · chegada prevista às ${eta}` : 'Em trânsito agora'
+              : 'Em trânsito · aguardando o GPS do veículo'}
+          </span>
+        </span>
+        <span className="shrink-0 h-11 px-4 rounded-xl bg-white text-zinc-900 text-[11px] font-black uppercase tracking-widest flex items-center gap-2">
+          <MapPin className="h-4 w-4" /> {open ? 'Fechar' : 'Ver no mapa'}
+        </span>
+      </button>
+
+      {open && (
+        <div className="h-96 md:h-[28rem] border-t border-zinc-800">
+          <TrackingMap position={position} destination={destination} title={title} waitingMessage="Aguardando sinal GPS do veículo..." />
+        </div>
+      )}
     </div>
   );
 }

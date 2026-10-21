@@ -47,6 +47,7 @@ import { HubSupplementRequest } from '@/components/inventory/HubSupplementReques
 import { MasterCatalogSelector } from '@/components/inventory/MasterCatalogSelector';
 import { OrderLiveLocation } from '@/components/DeliveryMap';
 import { OrderReturnPanel } from '@/components/dashboard/OrderReturnPanel';
+import { OrderProgress } from '@/components/dashboard/OrderProgress';
 
 // New Professional Components
 import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar';
@@ -471,6 +472,23 @@ export default function Dashboard() {
   };
 
   // Ao clicar "Aprovar agora": busca sub-locadoras que têm o item para o master escolher
+  // Cliente confirma que recebeu o equipamento: entrega "confirmada" e pedido "em andamento"
+  const handleConfirmReceipt = async (booking: any, delivery: any) => {
+    setUpdatingId(delivery.id);
+    try {
+      const { error } = await supabase.from('deliveries').update({ status: 'confirmed' }).eq('id', delivery.id);
+      if (error) throw error;
+      const { error: bookingError } = await supabase.from('bookings').update({ status: 'active' }).eq('id', booking.id);
+      if (bookingError) throw bookingError;
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['deliveries'] });
+    } catch (error: any) {
+      alert(`Não foi possível confirmar: ${error.message || 'tente novamente'}`);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
   const handleApproveBooking = async (booking: any) => {
     await handleUpdateStatus(booking.id, 'approved', null);
   };
@@ -826,6 +844,22 @@ export default function Dashboard() {
                    </div>
                  );
                }
+               // Cliente: o equipamento chegou → confirma o recebimento e o pedido fica "em andamento"
+               if (o._direction === 'sent' && d?.status === 'delivered') {
+                 return (
+                   <div className="flex flex-wrap items-center justify-end gap-3">
+                     <p className="flex-1 min-w-[180px] text-sm text-zinc-300">O equipamento foi entregue. Confira e confirme o recebimento.</p>
+                     <Button
+                       size="sm"
+                       disabled={updatingId === d.id}
+                       onClick={() => handleConfirmReceipt(o, d)}
+                       className="h-11 bg-emerald-600 hover:bg-emerald-500 font-black uppercase text-[11px] tracking-widest rounded-xl px-6"
+                     >
+                       {updatingId === d.id ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Recebi — confirmar e aceitar'}
+                     </Button>
+                   </div>
+                 );
+               }
                if (o._direction === 'received' && o.status === 'pending') {
                  return (
                    <div className="flex justify-end gap-3">
@@ -874,6 +908,8 @@ export default function Dashboard() {
                            </p>
                          </div>
                        </div>
+
+                       <OrderProgress bookingStatus={order.status} deliveryStatus={getDelivery(order)?.status} />
 
                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                          {[
@@ -959,6 +995,7 @@ export default function Dashboard() {
                                <p className="text-xs text-zinc-500 truncate">
                                  {counterpart(o)} · {shortDate(o.start_date)} → {shortDate(o.end_date)} · {o.quantity || 1} un.
                                </p>
+                               <OrderProgress compact bookingStatus={o.status} deliveryStatus={getDelivery(o)?.status} />
                                {(() => {
                                  const rev = getDelivery(o)?.reverse_logistics_status;
                                  const tags: string[] = [];

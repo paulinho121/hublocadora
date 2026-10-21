@@ -17,6 +17,20 @@ export class BookingService {
     }
 
     /**
+     * Quantas unidades estão livres em TODO o período (o dia mais cheio define o limite)
+     */
+    static async getFreeUnits(equipmentId: string, startDate: string, endDate: string, totalStock: number) {
+        const occupied = await this.getOccupiedDates(equipmentId);
+        let free = totalStock;
+        for (let day = parseISO(startDate); day <= parseISO(endDate); day = addDays(day, 1)) {
+            const booked = occupied.reduce((acc, b) =>
+                isWithinInterval(day, { start: parseISO(b.start_date), end: parseISO(b.end_date) }) ? acc + b.quantity : acc, 0);
+            free = Math.min(free, totalStock - booked);
+        }
+        return Math.max(0, free);
+    }
+
+    /**
      * Verifica se um equipamento tem disponibilidade para um determinado range e quantidade
      */
     static async checkAvailability(
