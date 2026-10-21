@@ -41,16 +41,16 @@ export function PixPaymentModal({ isOpen, onClose, bookingId, amount, onSuccess 
         <h3 className="text-4xl font-black uppercase tracking-tighter text-zinc-100">
           {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(amount)}
         </h3>
-        <div className="bg-white rounded-3xl p-6 shadow-2xl flex items-center justify-center aspect-square">
+        <div className="bg-white rounded-2xl p-6 shadow-2xl flex items-center justify-center aspect-square">
           {loading ? <Loader2 className="h-10 w-10 animate-spin text-zinc-900" /> : <QrCode className="h-40 w-40 text-zinc-900" />}
         </div>
-        <Button onClick={copyToClipboard} variant="outline" className="w-full h-12 uppercase text-[11px] font-black tracking-widest rounded-xl">
+        <Button onClick={copyToClipboard} variant="outline" className="w-full h-12 text-[11px] font-semibold rounded-xl">
            {copied ? "PIX Copiado!" : "Copiar Código PIX"}
         </Button>
-        <Button onClick={onSuccess} className="w-full h-12 bg-emerald-500 hover:bg-emerald-600 text-white uppercase text-[11px] font-black tracking-widest rounded-xl mt-2">
+        <Button onClick={onSuccess} className="w-full h-12 bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-semibold rounded-xl mt-2">
            Simular Pagamento Concluído
         </Button>
-        <p className="text-[11px] uppercase font-black text-zinc-400 tracking-widest">Pagamento Seguro via HUB PAY</p>
+        <p className="text-[11px] font-semibold text-zinc-400 ">Pagamento Seguro via HUB PAY</p>
       </div>
     </Dialog>
   );

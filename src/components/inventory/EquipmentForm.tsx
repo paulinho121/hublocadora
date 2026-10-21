@@ -258,7 +258,7 @@ export function EquipmentForm({ equipment, companyId: propCompanyId, onSuccess }
         <MasterCatalogSelector companyId={companyId} onSuccess={onSuccess} />
         <div className="mt-8 pt-6 border-t border-zinc-800/50 text-center">
           <p className="text-sm text-zinc-500 mb-4">Não encontrou o que procurava?</p>
-          <Button variant="outline" onClick={() => setStep('manual_form')} className="uppercase font-bold tracking-widest text-xs h-12 px-8 rounded-xl">
+          <Button variant="outline" onClick={() => setStep('manual_form')} className="font-bold text-xs h-12 px-8 rounded-xl">
             Cadastrar do Zero
           </Button>
         </div>
@@ -439,7 +439,7 @@ export function EquipmentForm({ equipment, companyId: propCompanyId, onSuccess }
                   <div className="h-10 w-10 rounded-full bg-zinc-900 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                     <Upload className="h-5 w-5 text-zinc-400 group-hover:text-primary transition-colors" />
                   </div>
-                  <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 group-hover:text-primary transition-colors">Nova Foto</span>
+                  <span className="text-[11px] font-bold text-zinc-500 group-hover:text-primary transition-colors">Nova Foto</span>
                 </>
               )}
               <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" disabled={uploading} />
@@ -454,7 +454,7 @@ export function EquipmentForm({ equipment, companyId: propCompanyId, onSuccess }
             type="button" 
             onClick={() => setStep('selection')}
             disabled={isSubmitting || uploading}
-            className="uppercase font-bold tracking-widest text-xs px-4 text-zinc-500 hover:text-zinc-300 transition-colors"
+            className="font-bold text-xs px-4 text-zinc-500 hover:text-zinc-300 transition-colors"
           >
             Voltar
           </button>

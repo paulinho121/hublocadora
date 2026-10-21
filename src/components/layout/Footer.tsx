@@ -17,7 +17,7 @@ export function Footer() {
         </div>
 
         <div className="space-y-6">
-          <h4 className="text-[11px] uppercase font-black text-zinc-400 tracking-wider flex items-center gap-2">
+          <h4 className="text-[11px] font-semibold text-zinc-400 flex items-center gap-2">
             <ShieldCheck className="h-3.5 w-3.5" /> Transparência
           </h4>
           <nav className="flex flex-col md:gap-3">
@@ -28,7 +28,7 @@ export function Footer() {
         </div>
 
         <div className="space-y-6">
-          <h4 className="text-[11px] uppercase font-black text-zinc-400 tracking-wider flex items-center gap-2">
+          <h4 className="text-[11px] font-semibold text-zinc-400 flex items-center gap-2">
             <HelpCircle className="h-3.5 w-3.5" /> Central Hub
           </h4>
           <p className="text-sm text-zinc-500 font-medium leading-relaxed">
@@ -37,16 +37,16 @@ export function Footer() {
           </p>
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/5 border border-emerald-500/10 w-fit">
              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-             <span className="text-[11px] font-black uppercase text-emerald-500/80 tracking-wider">Sistema online</span>
+             <span className="text-[11px] font-semibold text-emerald-500/80 ">Sistema online</span>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto mt-20 pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
-        <p className="text-[11px] text-zinc-400 font-black uppercase tracking-wider">
+        <p className="text-[11px] text-zinc-400 font-semibold ">
           © 2026 Moving Technologies · Enterprise Solution
         </p>
-        <div className="flex gap-8 text-[11px] text-zinc-400 font-black uppercase tracking-wider">
+        <div className="flex gap-8 text-[11px] text-zinc-400 font-semibold ">
            <span className="flex items-center gap-2 hover:text-white transition-colors cursor-default">
              <div className="w-1 h-1 rounded-full bg-zinc-800" /> v2.4.0-Stable
            </span>

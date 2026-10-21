@@ -75,7 +75,7 @@ export function FinancialSettings({ companyId, initialConfig }: { companyId: str
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* REPASSE & PAGAMENTOS */}
-        <Card className="bg-zinc-950 border-zinc-900 rounded-3xl overflow-hidden shadow-2xl">
+        <Card className="bg-zinc-950 border-zinc-900 rounded-2xl overflow-hidden shadow-2xl">
           <CardHeader className="p-8 border-b border-zinc-900 bg-zinc-900/40">
             <CardTitle className="text-xl font-black uppercase flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center">
@@ -86,7 +86,7 @@ export function FinancialSettings({ companyId, initialConfig }: { companyId: str
           </CardHeader>
           <CardContent className="p-8 space-y-6">
             <div className="space-y-2">
-              <Label className="text-[11px] uppercase font-black tracking-widest text-zinc-500">Chave PIX Principal</Label>
+              <Label className="text-[11px] font-semibold text-zinc-500">Chave PIX Principal</Label>
               <Input 
                 {...register('pix_key')}
                 placeholder="CNPJ, E-mail ou Celular" 
@@ -97,16 +97,16 @@ export function FinancialSettings({ companyId, initialConfig }: { companyId: str
 
             <div className="grid grid-cols-2 gap-4 pt-4 border-t border-zinc-900/50">
               <div className="space-y-2">
-                <Label className="text-[11px] uppercase font-black tracking-widest text-zinc-500">Banco</Label>
+                <Label className="text-[11px] font-semibold text-zinc-500">Banco</Label>
                 <Input {...register('bank_info.bank')} placeholder="Ex: Nubank" className="h-11 bg-zinc-900 border-zinc-800 rounded-xl text-xs" />
               </div>
               <div className="space-y-2">
-                 <Label className="text-[11px] uppercase font-black tracking-widest text-zinc-500">Agência</Label>
+                 <Label className="text-[11px] font-semibold text-zinc-500">Agência</Label>
                  <Input {...register('bank_info.branch')} placeholder="0001" className="h-11 bg-zinc-900 border-zinc-800 rounded-xl text-xs" />
               </div>
             </div>
             <div className="space-y-2">
-               <Label className="text-[11px] uppercase font-black tracking-widest text-zinc-500">Conta Corrente</Label>
+               <Label className="text-[11px] font-semibold text-zinc-500">Conta Corrente</Label>
                <Input {...register('bank_info.account')} placeholder="0000000-0" className="h-11 bg-zinc-900 border-zinc-800 rounded-xl text-xs" />
             </div>
 
@@ -120,7 +120,7 @@ export function FinancialSettings({ companyId, initialConfig }: { companyId: str
         </Card>
 
         {/* DADOS FISCAIS */}
-        <Card className="bg-zinc-950 border-zinc-900 rounded-3xl overflow-hidden shadow-2xl">
+        <Card className="bg-zinc-950 border-zinc-900 rounded-2xl overflow-hidden shadow-2xl">
           <CardHeader className="p-8 border-b border-zinc-900 bg-zinc-900/40">
             <CardTitle className="text-xl font-black uppercase flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-zinc-800 flex items-center justify-center">
@@ -131,7 +131,7 @@ export function FinancialSettings({ companyId, initialConfig }: { companyId: str
           </CardHeader>
           <CardContent className="p-8 space-y-6">
             <div className="space-y-2">
-              <Label className="text-[11px] uppercase font-black tracking-widest text-zinc-500">Regime Tributário</Label>
+              <Label className="text-[11px] font-semibold text-zinc-500">Regime Tributário</Label>
               <select 
                 {...register('fiscal_data.tax_regime')}
                 className="w-full h-12 bg-zinc-900 border-zinc-800 rounded-xl px-4 text-sm focus:ring-primary/20 appearance-none font-bold"
@@ -144,11 +144,11 @@ export function FinancialSettings({ companyId, initialConfig }: { companyId: str
 
             <div className="grid grid-cols-2 gap-4">
                <div className="space-y-2">
-                  <Label className="text-[11px] uppercase font-black tracking-widest text-zinc-500">Inscrição Estadual</Label>
+                  <Label className="text-[11px] font-semibold text-zinc-500">Inscrição Estadual</Label>
                   <Input {...register('fiscal_data.ie')} placeholder="Isento ou Nº" className="h-11 bg-zinc-900 border-zinc-800 rounded-xl" />
                </div>
                <div className="space-y-2">
-                  <Label className="text-[11px] uppercase font-black tracking-widest text-zinc-500">Inscrição Municipal</Label>
+                  <Label className="text-[11px] font-semibold text-zinc-500">Inscrição Municipal</Label>
                   <Input {...register('fiscal_data.im')} placeholder="Nº da Inscrição" className="h-11 bg-zinc-900 border-zinc-800 rounded-xl" />
                </div>
             </div>
@@ -156,7 +156,7 @@ export function FinancialSettings({ companyId, initialConfig }: { companyId: str
             <div className="pt-6 border-t border-zinc-900/50">
                <div className="flex items-center gap-3 mb-4">
                   <Building2 className="h-4 w-4 text-zinc-400" />
-                  <span className="text-[11px] font-black uppercase tracking-widest text-zinc-500">Venda de Notas (NF-e)</span>
+                  <span className="text-[11px] font-semibold text-zinc-500">Venda de Notas (NF-e)</span>
                </div>
                <p className="text-xs text-zinc-500 leading-relaxed">
                   O CineHub utiliza estes dados para automatizar o preenchimento de faturas para seus locatários. Mantenha-os atualizados para evitar problemas contábeis.
@@ -175,7 +175,7 @@ export function FinancialSettings({ companyId, initialConfig }: { companyId: str
         </div>
       )}
 
-      <div className="flex items-center justify-between p-8 bg-zinc-900/40 border border-zinc-900 rounded-3xl">
+      <div className="flex items-center justify-between p-8 bg-zinc-900/40 border border-zinc-900 rounded-2xl">
          <div className="flex items-center gap-4">
             <div className="h-10 w-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
                <CheckCircle2 className="h-5 w-5 text-emerald-500" />

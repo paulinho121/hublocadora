@@ -38,18 +38,18 @@ export function InventoryStatusReport({ companyId }: InventoryStatusReportProps)
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'available': return <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 px-3 py-1 font-black uppercase tracking-widest text-[11px]">Disponível</Badge>;
-      case 'unavailable': return <Badge className="bg-zinc-500/10 text-zinc-400 border-white/5 px-3 py-1 font-black uppercase tracking-widest text-[11px]">Aluguel Externo</Badge>;
-      case 'maintenance': return <Badge className="bg-destructive/10 text-destructive border-destructive/20 px-3 py-1 font-black uppercase tracking-widest text-[11px]">Manutenção</Badge>;
-      case 'rented': return <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 px-3 py-1 font-black uppercase tracking-widest text-[11px]">Locado HUB</Badge>;
-      default: return <Badge variant="outline" className="font-black uppercase tracking-widest text-[11px]">{status}</Badge>;
+      case 'available': return <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 px-3 py-1 font-semibold text-[11px]">Disponível</Badge>;
+      case 'unavailable': return <Badge className="bg-zinc-500/10 text-zinc-400 border-white/5 px-3 py-1 font-semibold text-[11px]">Aluguel Externo</Badge>;
+      case 'maintenance': return <Badge className="bg-destructive/10 text-destructive border-destructive/20 px-3 py-1 font-semibold text-[11px]">Manutenção</Badge>;
+      case 'rented': return <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 px-3 py-1 font-semibold text-[11px]">Locado HUB</Badge>;
+      default: return <Badge variant="outline" className="font-semibold text-[11px]">{status}</Badge>;
     }
   };
 
   if (isLoading) return (
     <div className="py-20 flex flex-col items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-        <p className="text-[11px] font-black uppercase tracking-wider text-zinc-400">Compilando Dados de Disponibilidade...</p>
+        <p className="text-[11px] font-semibold text-zinc-400">Compilando Dados de Disponibilidade...</p>
     </div>
   );
 
@@ -61,20 +61,20 @@ export function InventoryStatusReport({ companyId }: InventoryStatusReportProps)
         </div>
         <div>
           <h2 className="text-2xl font-black uppercase tracking-tighter">Histórico de Disponibilidade</h2>
-          <p className="text-[11px] text-zinc-500 font-black uppercase tracking-wider">Auditoria de Fluxo de Equipamentos</p>
+          <p className="text-[11px] text-zinc-500 font-semibold ">Auditoria de Fluxo de Equipamentos</p>
         </div>
       </div>
 
-      <div className="bg-zinc-950/40 border border-white/5 rounded-[32px] overflow-hidden backdrop-blur-3xl shadow-2xl">
+      <div className="bg-zinc-950/40 border border-white/5 rounded-2xl overflow-hidden backdrop-blur-3xl shadow-2xl">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader className="bg-black/40">
               <TableRow className="border-white/5 hover:bg-transparent">
-                <TableHead className="text-[11px] uppercase font-black tracking-wider py-6 px-8 text-zinc-500 whitespace-nowrap">Equipamento</TableHead>
-                <TableHead className="text-[11px] uppercase font-black tracking-wider py-6 text-zinc-500 whitespace-nowrap">Status Operacional</TableHead>
-                <TableHead className="text-[11px] uppercase font-black tracking-wider py-6 text-center text-zinc-500 whitespace-nowrap">Cronologia</TableHead>
-                <TableHead className="text-[11px] uppercase font-black tracking-wider py-6 text-center text-zinc-500 whitespace-nowrap">Tempo de Atividade</TableHead>
-                <TableHead className="text-[11px] uppercase font-black tracking-wider py-6 px-8 text-zinc-500 whitespace-nowrap">Observações</TableHead>
+                <TableHead className="text-[11px] font-semibold py-6 px-8 text-zinc-500 whitespace-nowrap">Equipamento</TableHead>
+                <TableHead className="text-[11px] font-semibold py-6 text-zinc-500 whitespace-nowrap">Status Operacional</TableHead>
+                <TableHead className="text-[11px] font-semibold py-6 text-center text-zinc-500 whitespace-nowrap">Cronologia</TableHead>
+                <TableHead className="text-[11px] font-semibold py-6 text-center text-zinc-500 whitespace-nowrap">Tempo de Atividade</TableHead>
+                <TableHead className="text-[11px] font-semibold py-6 px-8 text-zinc-500 whitespace-nowrap">Observações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -83,7 +83,7 @@ export function InventoryStatusReport({ companyId }: InventoryStatusReportProps)
                   <TableCell colSpan={5} className="py-32 text-center">
                     <div className="flex flex-col items-center gap-4">
                       <Clock className="h-10 w-10 text-zinc-800" />
-                      <p className="text-[11px] font-black uppercase tracking-widest text-zinc-500">Nenhum registro de log detectado.</p>
+                      <p className="text-[11px] font-semibold text-zinc-500">Nenhum registro de log detectado.</p>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -98,24 +98,24 @@ export function InventoryStatusReport({ companyId }: InventoryStatusReportProps)
                     </TableCell>
                     <TableCell className="py-6 text-center whitespace-nowrap">
                       <div className="flex flex-col items-center gap-1">
-                        <div className="flex items-center gap-1.5 text-[11px] font-black text-zinc-300 uppercase tracking-widest">
+                        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-zinc-300 ">
                           <Calendar className="h-3 w-3 text-zinc-400" />
                           {new Date(log.started_at).toLocaleDateString('pt-BR')}
                         </div>
-                        <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+                        <div className="text-[11px] font-bold text-zinc-400 ">
                           {new Date(log.started_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       </div>
                     </TableCell>
                     <TableCell className="py-6 text-center whitespace-nowrap">
                       {log.ended_at ? (
-                        <div className="flex items-center justify-center gap-2 text-emerald-500 font-black text-[11px] uppercase tracking-widest">
+                        <div className="flex items-center justify-center gap-2 text-emerald-500 font-semibold text-[11px] ">
                           <Clock className="h-3 w-3" />
                           {formatDistance(new Date(log.started_at), new Date(log.ended_at), { locale: ptBR })}
                         </div>
                       ) : (
                         <div className="flex items-center justify-center">
-                          <Badge className="bg-primary text-black font-black uppercase tracking-widest text-[11px] animate-pulse rounded-full shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)] px-3">Ativo</Badge>
+                          <Badge className="bg-primary text-black font-semibold text-[11px] animate-pulse rounded-full shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)] px-3">Ativo</Badge>
                         </div>
                       )}
                     </TableCell>

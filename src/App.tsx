@@ -59,7 +59,7 @@ function ProjectNavButton() {
   return (
     <button
       onClick={openDrawer}
-      className="relative flex items-center gap-2 text-xs font-black uppercase tracking-wider text-muted-foreground hover:text-foreground transition-all"
+      className="relative flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-all"
       title="Meu Pedido"
     >
       <FolderOpen className="h-4 w-4" />
@@ -95,7 +95,7 @@ function Navbar() {
           <Link to="/" className="flex items-center transition-transform hover:scale-105 active:scale-95">
             <CineHubLogo />
           </Link>
-          <nav className="hidden md:flex items-center space-x-8 text-xs font-black text-muted-foreground uppercase tracking-wider">
+          <nav className="hidden md:flex items-center space-x-8 text-xs font-semibold text-muted-foreground ">
             <NavLink to="/dashboard" className={({isActive}) => isActive ? "text-primary" : "hover:text-foreground transition-all"}>Meu painel</NavLink>
             <ProjectNavButton />
             {profile?.role === 'admin' && (
@@ -114,15 +114,15 @@ function Navbar() {
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                 </span>
                 <div className="flex flex-col leading-none">
-                  <span className="text-[11px] font-black uppercase tracking-widest text-white/90">
+                  <span className="text-[11px] font-semibold text-white/90">
                     {profile?.full_name ?? user.email?.split('@')[0]}
                   </span>
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-emerald-500">
+                  <span className="text-[11px] font-semibold text-emerald-500">
                     Online
                   </span>
                 </div>
               </div>
-              <Button size="sm" variant="ghost" onClick={handleLogout} className="text-muted-foreground hover:text-destructive h-10 px-4 rounded-xl font-black uppercase text-xs tracking-widest">
+              <Button size="sm" variant="ghost" onClick={handleLogout} className="text-muted-foreground hover:text-destructive h-10 px-4 rounded-xl font-semibold text-xs ">
                 <LogOut className="h-4 w-4 mr-2" />
                 Sair
               </Button>
@@ -132,14 +132,14 @@ function Navbar() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-xs font-black uppercase tracking-wider text-muted-foreground hover:text-primary hover:bg-transparent hidden md:flex"
+                className="text-xs font-semibold text-muted-foreground hover:text-primary hover:bg-transparent hidden md:flex"
                 onClick={() => navigate('/register')}
               >
-                criar conta
+                Criar conta
               </Button>
               <Button
                 size="sm"
-                className="bg-primary text-white hover:bg-primary/90 px-8 rounded-xl text-xs h-11 font-black uppercase tracking-wider shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5 active:translate-y-0"
+                className="bg-primary text-white hover:bg-primary/90 px-8 rounded-xl text-xs h-11 font-semibold shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5 active:translate-y-0"
                 onClick={() => navigate('/login')}
               >
                 Entrar
@@ -167,7 +167,7 @@ function ProjectBottomButton() {
     >
       <FolderOpen className="w-4 h-4 shrink-0" />
       {isActive && (
-        <span className="text-[11px] font-black uppercase tracking-wider whitespace-nowrap ml-1.5 animate-in fade-in slide-in-from-left-2 duration-300">
+        <span className="text-[11px] font-semibold whitespace-nowrap ml-1.5 animate-in fade-in slide-in-from-left-2 duration-300">
           Pedido
         </span>
       )}
@@ -226,12 +226,12 @@ function DashboardBottomNav() {
         <div className="md:hidden fixed inset-0 z-[60]" onClick={() => setMoreOpen(false)}>
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           <div
-            className="absolute left-3 right-3 bg-zinc-950 border border-zinc-800 rounded-3xl p-4 shadow-[0_-20px_60px_rgba(0,0,0,0.8)] animate-in slide-in-from-bottom-4 fade-in duration-200"
+            className="absolute left-3 right-3 bg-zinc-950 border border-zinc-800 rounded-2xl p-4 shadow-[0_-20px_60px_rgba(0,0,0,0.8)] animate-in slide-in-from-bottom-4 fade-in duration-200"
             style={{ bottom: 'calc(env(safe-area-inset-bottom) + 88px)' }}
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-3 px-1">
-              <span className="text-[11px] font-black uppercase tracking-wider text-zinc-500">Mais opções</span>
+              <span className="text-[11px] font-semibold text-zinc-500">Mais opções</span>
               <button onClick={() => setMoreOpen(false)} className="h-10 w-10 -mr-2 flex items-center justify-center rounded-xl text-zinc-500" aria-label="Fechar">
                 <X className="w-5 h-5" />
               </button>
@@ -316,13 +316,13 @@ function BottomNav() {
               to={to}
               className={`flex items-center justify-center transition-all duration-300 rounded-xl ${
                 isActive 
-                  ? 'bg-primary text-white px-4 py-2.5 shadow-lg shadow-primary/20 scale-105 font-black uppercase text-[11px] tracking-wider' 
+                  ? 'bg-primary text-white px-4 py-2.5 shadow-lg shadow-primary/20 scale-105 font-semibold text-[11px] ' 
                   : 'text-zinc-500 hover:text-zinc-300 p-2.5'
               }`}
             >
               <Icon className={`w-4.5 h-4.5 shrink-0 transition-transform ${isActive ? 'scale-110 mr-1.5' : 'scale-100'}`} />
               {isActive && (
-                <span className="text-[11px] font-black uppercase tracking-wider whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-300">
+                <span className="text-[11px] font-semibold whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-300">
                   {label}
                 </span>
               )}

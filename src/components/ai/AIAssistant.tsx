@@ -90,7 +90,7 @@ export function AIAssistant() {
             animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
             exit={{ opacity: 0, y: 30, scale: 0.9, filter: 'blur(10px)' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="mb-4 w-[450px] overflow-hidden rounded-3xl border border-white/10 bg-zinc-950/80 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] backdrop-blur-3xl"
+            className="mb-4 w-[450px] overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/80 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] backdrop-blur-3xl"
           >
             {/* Header com Gradiente */}
             <div className="relative flex items-center justify-between overflow-hidden border-b border-white/5 bg-gradient-to-r from-zinc-900 to-zinc-950 p-5">
@@ -103,7 +103,7 @@ export function AIAssistant() {
                     CineHub AI Assistant
                     <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                   </h3>
-                  <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">
+                  <p className="text-[11px] font-medium text-zinc-500">
                     Modo Ativo: <span className="text-zinc-300">{getModeLabel(mode)}</span>
                   </p>
                 </div>
@@ -217,7 +217,7 @@ export function AIAssistant() {
                   <Send size={18} />
                 </button>
               </div>
-              <p className="mt-3 text-center text-[11px] font-medium uppercase tracking-widest text-zinc-400">
+              <p className="mt-3 text-center text-[11px] font-medium text-zinc-400">
                 CineHub AI · Em Breve
               </p>
             </div>

@@ -37,7 +37,7 @@ export function ConfirmDeleteModal({
           <Button 
             variant="ghost" 
             onClick={onClose}
-            className="flex-1 h-12 rounded-xl font-bold uppercase text-xs tracking-widest text-zinc-400 hover:text-zinc-100"
+            className="flex-1 h-12 rounded-xl font-bold text-xs text-zinc-400 hover:text-zinc-100"
             disabled={loading}
           >
             Cancelar
@@ -45,7 +45,7 @@ export function ConfirmDeleteModal({
           <Button 
             variant="destructive" 
             onClick={onConfirm}
-            className="flex-1 h-12 rounded-xl font-black uppercase text-xs tracking-widest bg-red-600 hover:bg-red-500 shadow-[0_0_20px_rgba(220,38,38,0.2)]"
+            className="flex-1 h-12 rounded-xl font-semibold text-xs bg-red-600 hover:bg-red-500 shadow-[0_0_20px_rgba(220,38,38,0.2)]"
             disabled={loading}
           >
             {loading ? "Excluindo..." : "Confirmar"}

@@ -67,7 +67,7 @@ export function PWAInstallBanner() {
 
         {/* Texto */}
         <div className="flex-1 min-w-0">
-          <p className="text-white text-[12px] font-black uppercase tracking-widest leading-tight">
+          <p className="text-white text-[12px] font-semibold leading-tight">
             Instalar CineHub
           </p>
           {ios ? (
@@ -88,7 +88,7 @@ export function PWAInstallBanner() {
         {!ios && deferredPrompt ? (
           <button
             onClick={install}
-            className="shrink-0 flex items-center gap-1.5 bg-primary text-white px-3.5 py-2 rounded-xl text-[11px] font-black uppercase tracking-wider shadow-lg shadow-primary/25 active:scale-95 transition-transform"
+            className="shrink-0 flex items-center gap-1.5 bg-primary text-white px-3.5 py-2 rounded-xl text-[11px] font-semibold shadow-lg shadow-primary/25 active:scale-95 transition-transform"
           >
             <Download className="w-3 h-3" />
             Instalar

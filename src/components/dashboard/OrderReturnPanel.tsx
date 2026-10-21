@@ -140,10 +140,10 @@ export function OrderReturnPanel({ order }: { order: any }) {
     if (reverse === 'requested' && pickup) {
       return (
         <div className="flex flex-col sm:flex-row gap-2">
-          <Button disabled={busy} onClick={() => advanceReturn('collecting', 'Coleta iniciada.')} className="h-12 rounded-xl font-black uppercase text-[11px] tracking-widest gap-2">
+          <Button disabled={busy} onClick={() => advanceReturn('collecting', 'Coleta iniciada.')} className="h-12 rounded-xl font-semibold text-[11px] gap-2">
             <Truck className="h-4 w-4" /> Saí para coletar
           </Button>
-          <Button disabled={busy} variant="outline" onClick={() => advanceReturn('returned', 'Recebimento confirmado.')} className="h-12 rounded-xl border-zinc-700 font-black uppercase text-[11px] tracking-widest">
+          <Button disabled={busy} variant="outline" onClick={() => advanceReturn('returned', 'Recebimento confirmado.')} className="h-12 rounded-xl border-zinc-700 font-semibold text-[11px] ">
             Já recebi o equipamento
           </Button>
         </div>
@@ -151,14 +151,14 @@ export function OrderReturnPanel({ order }: { order: any }) {
     }
     if (reverse === 'requested' || reverse === 'collecting' || reverse === 'in_transit') {
       return (
-        <Button disabled={busy} onClick={() => advanceReturn('returned', 'Recebimento confirmado.')} className="h-12 rounded-xl font-black uppercase text-[11px] tracking-widest gap-2">
+        <Button disabled={busy} onClick={() => advanceReturn('returned', 'Recebimento confirmado.')} className="h-12 rounded-xl font-semibold text-[11px] gap-2">
           <PackageCheck className="h-4 w-4" /> Confirmar recebimento
         </Button>
       );
     }
     if (reverse === 'returned') {
       return (
-        <Button disabled={busy} onClick={() => advanceReturn('completed', 'Locação encerrada.')} className="h-12 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-black uppercase text-[11px] tracking-widest gap-2">
+        <Button disabled={busy} onClick={() => advanceReturn('completed', 'Locação encerrada.')} className="h-12 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-semibold text-[11px] gap-2">
           <CheckCircle2 className="h-4 w-4" /> Conferido — encerrar locação
         </Button>
       );
@@ -188,10 +188,10 @@ export function OrderReturnPanel({ order }: { order: any }) {
             </div>
           ) : (
             <div className="flex gap-2 justify-end">
-              <Button disabled={busy} variant="ghost" onClick={() => run(() => supabase.rpc('decide_booking_extension', { p_extension_id: pendingExt.id, p_approve: false }), 'Prorrogação recusada.')} className="h-11 text-destructive font-black uppercase text-[11px] tracking-widest">
+              <Button disabled={busy} variant="ghost" onClick={() => run(() => supabase.rpc('decide_booking_extension', { p_extension_id: pendingExt.id, p_approve: false }), 'Prorrogação recusada.')} className="h-11 text-destructive font-semibold text-[11px] ">
                 Recusar
               </Button>
-              <Button disabled={busy} onClick={() => run(() => supabase.rpc('decide_booking_extension', { p_extension_id: pendingExt.id, p_approve: true }), 'Prorrogação aprovada.')} className="h-11 bg-emerald-600 hover:bg-emerald-500 font-black uppercase text-[11px] tracking-widest rounded-xl px-6">
+              <Button disabled={busy} onClick={() => run(() => supabase.rpc('decide_booking_extension', { p_extension_id: pendingExt.id, p_approve: true }), 'Prorrogação aprovada.')} className="h-11 bg-emerald-600 hover:bg-emerald-500 font-semibold text-[11px] rounded-xl px-6">
                 Aprovar
               </Button>
             </div>
@@ -224,12 +224,12 @@ export function OrderReturnPanel({ order }: { order: any }) {
       {isRenter && mode === 'idle' && (canReturn || canExtend) && (
         <div className="flex flex-col sm:flex-row gap-2">
           {canReturn && (
-            <Button onClick={() => setMode('return')} className="h-12 rounded-xl font-black uppercase text-[11px] tracking-widest gap-2">
+            <Button onClick={() => setMode('return')} className="h-12 rounded-xl font-semibold text-[11px] gap-2">
               <RotateCcw className="h-4 w-4" /> Devolver equipamento
             </Button>
           )}
           {canExtend && (
-            <Button variant="outline" onClick={() => setMode('extend')} className="h-12 rounded-xl border-zinc-700 font-black uppercase text-[11px] tracking-widest gap-2">
+            <Button variant="outline" onClick={() => setMode('extend')} className="h-12 rounded-xl border-zinc-700 font-semibold text-[11px] gap-2">
               <CalendarPlus className="h-4 w-4" /> Prorrogar locação
             </Button>
           )}
@@ -272,7 +272,7 @@ export function OrderReturnPanel({ order }: { order: any }) {
             <Button
               disabled={busy || (method === 'pickup' && !address.trim())}
               onClick={() => run(() => supabase.rpc('request_booking_return', { p_booking_id: order.id, p_method: method, p_address: method === 'pickup' ? address.trim() : null }), 'Devolução solicitada. A locadora foi avisada.')}
-              className="h-11 rounded-xl font-black uppercase text-[11px] tracking-widest px-6"
+              className="h-11 rounded-xl font-semibold text-[11px] px-6"
             >
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Confirmar devolução'}
             </Button>
@@ -304,7 +304,7 @@ export function OrderReturnPanel({ order }: { order: any }) {
             <Button
               disabled={busy || extraDays <= 0}
               onClick={() => run(() => supabase.rpc('request_booking_extension', { p_booking_id: order.id, p_new_end_date: newEnd }), 'Pedido de prorrogação enviado à locadora.')}
-              className="h-11 rounded-xl font-black uppercase text-[11px] tracking-widest px-6"
+              className="h-11 rounded-xl font-semibold text-[11px] px-6"
             >
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Pedir prorrogação'}
             </Button>

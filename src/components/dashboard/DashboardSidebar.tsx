@@ -118,7 +118,7 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
               </h2>
               <div className="flex items-center gap-1.5 shrink-0">
                  <div className="h-1 w-1 rounded-full bg-emerald-500" />
-                 <span className="text-[11px] font-black uppercase text-zinc-500 tracking-wider truncate">Locadora Verificada</span>
+                 <span className="text-[11px] font-semibold text-zinc-500 truncate">Locadora Verificada</span>
               </div>
             </div>
           )}
@@ -218,7 +218,7 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
               <p className="text-[11px] font-black text-zinc-100 truncate leading-none mb-1 group-hover:text-white transition-colors">
                 {displayName}
               </p>
-              <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest truncate leading-none">
+              <p className="text-[11px] font-semibold text-zinc-500 truncate leading-none">
                 {roleLabel}
               </p>
             </div>

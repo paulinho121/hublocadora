@@ -111,7 +111,7 @@ export default function Login() {
                         </div>
                         <div className="space-y-1.5 flex flex-col">
                             <div className="flex justify-between items-center mb-1">
-                                <span className="text-xs text-zinc-400 font-bold uppercase tracking-widest pl-1">Senha</span>
+                                <span className="text-xs text-zinc-400 font-bold pl-1">Senha</span>
                                 <Button 
                                   variant="link" 
                                   type="button" 
@@ -139,8 +139,8 @@ export default function Login() {
                                 </button>
                             </div>
                         </div>
-                        {message && <p className="text-xs text-green-400 font-bold uppercase tracking-widest text-center mt-2">{message}</p>}
-                        {error && <p className="text-xs text-red-400 font-bold uppercase tracking-widest text-center mt-2">{error}</p>}
+                        {message && <p className="text-xs text-green-400 font-bold text-center mt-2">{message}</p>}
+                        {error && <p className="text-xs text-red-400 font-bold text-center mt-2">{error}</p>}
                         
                         <div className="flex flex-col gap-2 mt-6">
                             <Button className="w-full h-12 bg-primary hover:bg-primary/90 font-black uppercase tracking-tighter text-lg shadow-lg shadow-primary/20" type="submit" disabled={loading}>
@@ -149,7 +149,7 @@ export default function Login() {
                             </Button>
                             <div className="relative flex items-center py-2 shrink-0">
                                 <div className="flex-grow border-t border-zinc-800"></div>
-                                <span className="flex-shrink-0 mx-4 text-zinc-500 text-xs uppercase font-bold tracking-widest">ou</span>
+                                <span className="flex-shrink-0 mx-4 text-zinc-500 text-xs font-bold ">ou</span>
                                 <div className="flex-grow border-t border-zinc-800"></div>
                             </div>
 
@@ -172,7 +172,7 @@ export default function Login() {
                     </form>
                 </CardContent>
                 <CardFooter className="flex flex-col space-y-4 text-center pb-8">
-                    <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">
+                    <p className="text-xs text-muted-foreground font-bold ">
                         Novo na produção?{' '}
                         <Button variant="link" className="px-2 py-3 -my-3 h-auto text-primary font-black uppercase underline underline-offset-4" onClick={() => navigate('/register', { state: location.state })}>
                             Criar Conta

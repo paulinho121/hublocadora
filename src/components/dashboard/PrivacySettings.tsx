@@ -49,7 +49,7 @@ export function PrivacySettings() {
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <Card className="bg-zinc-950 border-zinc-900 rounded-3xl overflow-hidden shadow-2xl">
+            <Card className="bg-zinc-950 border-zinc-900 rounded-2xl overflow-hidden shadow-2xl">
                 <CardHeader className="p-8 border-b border-zinc-900 bg-zinc-900/40">
                     <CardTitle className="text-xl font-black uppercase flex items-center gap-3">
                         <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center">
@@ -67,7 +67,7 @@ export function PrivacySettings() {
                             </h4>
                             <p className="text-[11px] text-zinc-500 font-medium">Baixe todos os seus dados pessoais em formato legível por máquina.</p>
                         </div>
-                        <Button variant="outline" onClick={handleExportData} className="w-full md:w-auto rounded-xl border-zinc-800 text-[11px] uppercase font-black tracking-widest px-6">
+                        <Button variant="outline" onClick={handleExportData} className="w-full md:w-auto rounded-xl border-zinc-800 text-[11px] font-semibold px-6">
                             Exportar JSON
                         </Button>
                     </div>
@@ -84,7 +84,7 @@ export function PrivacySettings() {
                         <Button 
                             variant="destructive" 
                             onClick={() => setIsDialogOpen(true)}
-                            className="w-full md:w-auto rounded-xl text-[11px] uppercase font-black tracking-widest px-6 shadow-lg shadow-red-500/20"
+                            className="w-full md:w-auto rounded-xl text-[11px] font-semibold px-6 shadow-lg shadow-red-500/20"
                         >
                             Solicitar Exclusão
                         </Button>
@@ -116,14 +116,14 @@ export function PrivacySettings() {
                                         variant="destructive" 
                                         onClick={handleAnonymize}
                                         disabled={isDeleting}
-                                        className="w-full h-12 rounded-xl font-black uppercase text-[11px] tracking-widest shadow-xl"
+                                        className="w-full h-12 rounded-xl font-semibold text-[11px] shadow-xl"
                                     >
                                         {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Confirmar Exclusão Definitiva'}
                                     </Button>
                                     <Button 
                                         variant="ghost" 
                                         onClick={() => setIsDialogOpen(false)}
-                                        className="w-full text-zinc-500 font-bold uppercase text-[11px]"
+                                        className="w-full text-zinc-500 font-bold text-[11px]"
                                     >
                                         Cancelar
                                     </Button>

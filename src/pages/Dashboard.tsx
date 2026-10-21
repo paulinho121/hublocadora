@@ -291,7 +291,7 @@ export default function Dashboard() {
         <div className="max-w-md space-y-6 animate-in fade-in zoom-in duration-700">
            <div className="relative">
               <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full" />
-              <div className="relative bg-zinc-900 w-24 h-24 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-zinc-800 shadow-2xl">
+              <div className="relative bg-zinc-900 w-24 h-24 rounded-2xl flex items-center justify-center mx-auto mb-8 border border-zinc-800 shadow-2xl">
                 <Loader2 className="h-10 w-10 animate-spin text-primary" />
               </div>
            </div>
@@ -519,7 +519,7 @@ export default function Dashboard() {
                </div>
                <div className="pl-4 py-2">
                  <h3 className="text-black font-black uppercase tracking-widest text-lg leading-none mb-1">Novo Pedido Recebido!</h3>
-                 <p className="text-emerald-950 text-[11px] font-bold uppercase tracking-tighter">O Hub acaba de direcionar um pedido para sua unidade.</p>
+                 <p className="text-emerald-950 text-[11px] font-bold tracking-tighter">O Hub acaba de direcionar um pedido para sua unidade.</p>
                </div>
             </motion.div>
          )}
@@ -696,11 +696,11 @@ export default function Dashboard() {
                    <Card className="xl:col-span-2 bg-zinc-950 border-zinc-900 rounded-2xl">
                       <CardHeader className="p-4 md:p-6 border-b border-zinc-900 flex flex-row items-center justify-between">
                          <CardTitle className="text-lg font-black tracking-tighter uppercase">Pedidos Recentes</CardTitle>
-                         <Button variant="ghost" onClick={() => setActiveTab('bookings')} className="h-10 text-[11px] uppercase font-black tracking-widest text-zinc-500 hover:text-white">Ver Todos</Button>
+                         <Button variant="ghost" onClick={() => setActiveTab('bookings')} className="h-10 text-[11px] font-semibold text-zinc-500 hover:text-white">Ver Todos</Button>
                       </CardHeader>
                       <CardContent className="p-0">
                          {recentOrders.length === 0 ? (
-                           <div className="p-12 text-center text-zinc-400">Nenhum pedido recente.</div>
+                           <div className="p-6 text-center text-zinc-400">Nenhum pedido recente.</div>
                          ) : (
                            <div className="divide-y divide-zinc-900/50">
                               {recentOrders.map((booking: any) => {
@@ -731,11 +731,11 @@ export default function Dashboard() {
                                         <div className="min-w-0">
                                            <div className="flex items-center gap-2 mb-0.5">
                                               <p className="text-sm font-black text-zinc-100 uppercase truncate">{(booking as any).equipment?.name}</p>
-                                              <Badge variant="outline" className={`text-[11px] h-3.5 px-1.5 font-black uppercase tracking-[0.1em] border-none ${isRequested ? 'bg-amber-500/10 text-amber-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
+                                              <Badge variant="outline" className={`text-[11px] h-3.5 px-1.5 font-semibold border-none ${isRequested ? 'bg-amber-500/10 text-amber-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
                                                  {isRequested ? 'Saída' : 'Entrada'}
                                               </Badge>
                                            </div>
-                                           <p className="text-[11px] uppercase text-zinc-500 font-bold tracking-widest truncate">
+                                           <p className="text-[11px] text-zinc-500 font-bold truncate">
                                               {isRequested ? 'Destino: Seu Estoque' : `Solicitante: ${booking.renter?.company?.name || booking.renter?.full_name || 'Desconhecido'}`}
                                            </p>
                                         </div>
@@ -743,8 +743,8 @@ export default function Dashboard() {
                                      
                                      <div className="flex items-center gap-8">
                                         <div className="text-right hidden sm:block">
-                                           <p className="text-[11px] uppercase font-black text-zinc-400 tracking-wider mb-1">Previsão Retorno</p>
-                                           <div className="flex items-center justify-end gap-1.5 text-[11px] font-black text-zinc-400 uppercase tracking-tighter">
+                                           <p className="text-[11px] font-semibold text-zinc-400 mb-1">Previsão Retorno</p>
+                                           <div className="flex items-center justify-end gap-1.5 text-[11px] font-semibold text-zinc-400 tracking-tighter">
                                               <CalendarDays className="h-3 w-3 text-primary" />
                                               {/* 'T00:00' = meia-noite local; só a data seria lida como UTC e cairia no dia anterior */}
                                               {format(new Date(booking.end_date + 'T00:00'), "dd 'DE' MMM", { locale: ptBR })}
@@ -759,7 +759,7 @@ export default function Dashboard() {
                                                  return formatCurrency(amount);
                                               })()}
                                            </div>
-                                           <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest">{ORDER_STATUS[booking.status]?.label || booking.status}</p>
+                                           <p className="text-[11px] font-semibold text-zinc-500 ">{ORDER_STATUS[booking.status]?.label || booking.status}</p>
                                         </div>
                                         <ChevronRight className="h-4 w-4 text-zinc-400 shrink-0 hidden sm:block" />
                                      </div>
@@ -771,7 +771,7 @@ export default function Dashboard() {
                       </CardContent>
                    </Card>
 
-                   <Card className="bg-zinc-950 border-zinc-900 rounded-3xl">
+                   <Card className="bg-zinc-950 border-zinc-900 rounded-2xl">
                       <CardHeader className="p-8 border-b border-zinc-900">
                          <CardTitle className="text-xl font-black tracking-tighter uppercase">Destaques</CardTitle>
                       </CardHeader>
@@ -782,7 +782,7 @@ export default function Dashboard() {
                                Seus itens mais alugados aparecerão aqui em breve.
                             </p>
                          </div>
-                         <Button onClick={() => setActiveTab('inventory')} className="w-full rounded-xl font-black h-12 uppercase text-xs tracking-widest group">
+                         <Button onClick={() => setActiveTab('inventory')} className="w-full rounded-xl font-semibold h-12 text-xs group">
                             Gerenciar Inventário <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                          </Button>
                       </CardContent>
@@ -825,11 +825,11 @@ export default function Dashboard() {
              };
              const statusBadge = (o: any) => {
                const st = ORDER_STATUS[o.status] || { label: o.status, className: '' };
-               return <Badge className={`text-[11px] uppercase font-black tracking-wide ${st.className}`}>{st.label}</Badge>;
+               return <Badge className={`text-[11px] font-semibold tracking-wide ${st.className}`}>{st.label}</Badge>;
              };
              const directionBadge = (o: any) => o._direction === 'received'
-               ? <span className="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-widest text-emerald-400"><Inbox className="h-3 w-3" /> Recebido</span>
-               : <span className="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-widest text-sky-400"><Send className="h-3 w-3" /> Enviado</span>;
+               ? <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400"><Inbox className="h-3 w-3" /> Recebido</span>
+               : <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-400"><Send className="h-3 w-3" /> Enviado</span>;
              const shortDate = (d: string) => format(new Date(d + 'T00:00'), 'dd/MM');
 
              // Ações rápidas de aprovação (locadora) e aceite de sub-locação
@@ -841,9 +841,9 @@ export default function Dashboard() {
                if (d?.subrental_status === 'pending' && isFulfiller && !isOwner) {
                  return (
                    <div className="flex flex-wrap items-center justify-end gap-3">
-                     <p className="flex-1 text-[11px] text-amber-500 font-black uppercase tracking-widest">Aguardando seu aceite</p>
-                     <Button variant="ghost" size="sm" onClick={() => handleUpdateStatus(o.id, 'rejected')} className="h-10 text-destructive font-black uppercase text-[11px] hover:bg-destructive/5 tracking-widest">Recusar</Button>
-                     <Button size="sm" disabled={updatingId === d.id} onClick={() => handleAcceptSubrental(d.id)} className="h-10 bg-amber-500 text-black hover:bg-amber-400 font-black uppercase text-[11px] tracking-widest rounded-lg px-6">
+                     <p className="flex-1 text-[11px] text-amber-500 font-semibold ">Aguardando seu aceite</p>
+                     <Button variant="ghost" size="sm" onClick={() => handleUpdateStatus(o.id, 'rejected')} className="h-10 text-destructive font-semibold text-[11px] hover:bg-destructive/5 ">Recusar</Button>
+                     <Button size="sm" disabled={updatingId === d.id} onClick={() => handleAcceptSubrental(d.id)} className="h-10 bg-amber-500 text-black hover:bg-amber-400 font-semibold text-[11px] rounded-lg px-6">
                        {updatingId === d.id ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Aceitar Sub-locação'}
                      </Button>
                    </div>
@@ -858,7 +858,7 @@ export default function Dashboard() {
                        size="sm"
                        disabled={updatingId === d.id}
                        onClick={() => handleConfirmReceipt(o, d)}
-                       className="h-11 bg-emerald-600 hover:bg-emerald-500 font-black uppercase text-[11px] tracking-widest rounded-xl px-6"
+                       className="h-11 bg-emerald-600 hover:bg-emerald-500 font-semibold text-[11px] rounded-xl px-6"
                      >
                        {updatingId === d.id ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Recebi — confirmar e aceitar'}
                      </Button>
@@ -868,8 +868,8 @@ export default function Dashboard() {
                if (o._direction === 'received' && o.status === 'pending') {
                  return (
                    <div className="flex justify-end gap-3">
-                     <Button variant="ghost" size="sm" onClick={() => handleUpdateStatus(o.id, 'rejected')} className="h-10 text-destructive font-black uppercase text-[11px] hover:bg-destructive/5 tracking-widest">Recusar</Button>
-                     <Button size="sm" disabled={updatingId === o.id} onClick={() => handleApproveBooking(o)} className="h-10 bg-emerald-600 hover:bg-emerald-500 font-black uppercase text-[11px] tracking-widest rounded-lg px-6">
+                     <Button variant="ghost" size="sm" onClick={() => handleUpdateStatus(o.id, 'rejected')} className="h-10 text-destructive font-semibold text-[11px] hover:bg-destructive/5 ">Recusar</Button>
+                     <Button size="sm" disabled={updatingId === o.id} onClick={() => handleApproveBooking(o)} className="h-10 bg-emerald-600 hover:bg-emerald-500 font-semibold text-[11px] rounded-lg px-6">
                        {updatingId === o.id ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Aprovar agora'}
                      </Button>
                    </div>
@@ -896,7 +896,7 @@ export default function Dashboard() {
                      <span className="text-sm font-bold uppercase tracking-tighter">Pedidos</span>
                    </button>
 
-                   <Card className="bg-zinc-900/30 border-zinc-900 rounded-3xl overflow-hidden">
+                   <Card className="bg-zinc-900/30 border-zinc-900 rounded-2xl overflow-hidden">
                      <div className="p-5 md:p-8 space-y-6">
                        <div className="flex gap-4 items-start">
                          <div className="h-16 w-16 md:h-20 md:w-20 rounded-2xl bg-zinc-900 border border-zinc-800 overflow-hidden shrink-0 flex items-center justify-center">
@@ -924,7 +924,7 @@ export default function Dashboard() {
                            { label: 'Entrega', value: order.delivery_method === 'delivery' ? 'Receber no local' : 'Retirada' },
                          ].map(info => (
                            <div key={info.label} className="bg-zinc-950/60 border border-zinc-800/60 rounded-2xl p-4 min-w-0">
-                             <p className="text-[11px] font-black uppercase tracking-widest text-zinc-500 mb-1">{info.label}</p>
+                             <p className="text-[11px] font-semibold text-zinc-500 mb-1">{info.label}</p>
                              <p className="text-sm font-black text-zinc-100 truncate">{info.value}</p>
                            </div>
                          ))}
@@ -979,7 +979,7 @@ export default function Dashboard() {
                  </header>
 
                  {orders.length === 0 ? (
-                   <div className="border border-dashed border-zinc-800 rounded-3xl p-12 text-center">
+                   <div className="border border-dashed border-zinc-800 rounded-2xl p-6 text-center">
                      <p className="text-zinc-500 font-bold">Nenhum pedido ainda.</p>
                    </div>
                  ) : (
@@ -1172,7 +1172,7 @@ function FavoritesTabContent({ onSelect }: { onSelect: (eq: any) => void }) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-zinc-500 font-black uppercase text-[11px] tracking-widest">Carregando favoritos...</p>
+        <p className="text-zinc-500 font-semibold text-[11px] ">Carregando favoritos...</p>
       </div>
     );
   }
@@ -1180,7 +1180,7 @@ function FavoritesTabContent({ onSelect }: { onSelect: (eq: any) => void }) {
   if (!favoriteIds || favoriteIds.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
-        <div className="h-20 w-20 rounded-3xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-6">
+        <div className="h-20 w-20 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-6">
           <Heart className="h-8 w-8 text-zinc-500" />
         </div>
         <h3 className="text-xl font-black uppercase tracking-tighter mb-2">Lista Vazia</h3>

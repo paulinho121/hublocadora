@@ -329,19 +329,19 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
         const canSeeToken = isRenter && logisticsMode === 'to_receive' && !isMaster;
 
         return (
-            <div className="h-full bg-zinc-950/80 rounded-[32px] p-8 sm:p-10 border border-white/5 flex flex-col justify-between gap-10 backdrop-blur-3xl relative overflow-hidden shadow-2xl min-h-[440px]">
+            <div className="h-full bg-zinc-950/80 rounded-2xl p-8 sm:p-8 border border-white/5 flex flex-col justify-between gap-10 backdrop-blur-3xl relative overflow-hidden shadow-2xl min-h-[440px]">
                 <div className="space-y-8 relative z-10">
                     <div className="flex items-center justify-between border-b border-white/5 pb-6">
                         <div className="flex items-center gap-3">
                             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                            <span className="text-xs font-black uppercase tracking-wider text-zinc-400">Fluxo Operacional</span>
+                            <span className="text-xs font-semibold text-zinc-400">Fluxo Operacional</span>
                         </div>
                         <Navigation className="h-5 w-5 text-zinc-800" />
                     </div>
 
                     <div className="space-y-6">
                         <div className="space-y-2">
-                            <p className="text-[11px] font-black uppercase text-zinc-400 tracking-wider">Próxima etapa</p>
+                            <p className="text-[11px] font-semibold text-zinc-400 ">Próxima etapa</p>
                             <div className="flex items-center gap-4">
                                 <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
                                     {delivery.status === 'pending' && <ShoppingBag className="h-6 w-6 text-emerald-500" />}
@@ -368,7 +368,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                     {/* Token Visibility for Renter / Master */}
                     {canSeeToken && (delivery.status === 'shipped' || delivery.status === 'ready') && (
                         <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl text-center mb-4">
-                            <p className="text-[11px] font-black uppercase text-primary tracking-wider mb-1">Token de Segurança</p>
+                            <p className="text-[11px] font-semibold text-primary mb-1">Token de Segurança</p>
                             <div className="text-2xl font-black text-white tracking-wider">{delivery.delivery_token || delivery.delivery_secrets?.[0]?.token || '----'}</div>
                             <p className="text-[11px] text-zinc-500 font-medium mt-1">Forneça este código ao motorista para confirmar o recebimento.</p>
                         </div>
@@ -381,7 +381,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                 <Button
                                     variant="outline"
                                     onClick={() => setTrackingDelivery(delivery)}
-                                    className="w-full h-14 rounded-2xl border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/10 font-black uppercase text-xs tracking-widest gap-2"
+                                    className="w-full h-14 rounded-2xl border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/10 font-semibold text-xs gap-2"
                                 >
                                     <Navigation className="h-4 w-4" /> Abrir Mapa da Entrega
                                 </Button>
@@ -390,7 +390,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                             {/* Token Input for Fulfiller during Delivery Confirmation */}
                             {delivery.status === 'shipped' && isFulfiller && (
                                 <div className="space-y-2">
-                                    <p className="text-[11px] font-black uppercase text-zinc-400 tracking-wider">Validar Token de Entrega</p>
+                                    <p className="text-[11px] font-semibold text-zinc-400 ">Validar Token de Entrega</p>
                                     <Input 
                                         placeholder="0000"
                                         maxLength={4}
@@ -404,7 +404,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                             {/* Serial Number Input during Separation */}
                             {delivery.status === 'picking' && isFulfiller && (
                                 <div className="space-y-2">
-                                    <p className="text-[11px] font-black uppercase text-zinc-400 tracking-wider">Vincular Serial</p>
+                                    <p className="text-[11px] font-semibold text-zinc-400 ">Vincular Serial</p>
                                     <Input 
                                         placeholder="Número de série do item..."
                                         value={serialNumbers[delivery.id] || ''}
@@ -434,7 +434,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                         </div>
                     ) : (
                         <div className="p-6 bg-zinc-900/40 rounded-2xl border border-white/5 text-center">
-                            <p className="text-[11px] font-black uppercase text-zinc-400 tracking-widest mb-1">Status: {getStatusLabel(delivery.status)}</p>
+                            <p className="text-[11px] font-semibold text-zinc-400 mb-1">Status: {getStatusLabel(delivery.status)}</p>
                             <p className="text-[11px] text-zinc-500 font-medium leading-relaxed">
                                 {isMaster ? 'Modo observador: você acompanha esta entrega, mas não altera.' : 
                                  isRenter ? 'O locador está preparando seu equipamento. O token de segurança aparecerá aqui em breve.' : 
@@ -449,7 +449,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                             variant="ghost"
                             onClick={() => handleDeleteBooking(delivery.booking_id)}
                             disabled={updatingId === `del-${delivery.booking_id}`}
-                            className="w-full text-[11px] font-black uppercase tracking-widest text-red-500/40 hover:text-red-500 hover:bg-red-500/10 h-12 rounded-xl mt-4 border border-dashed border-red-500/10"
+                            className="w-full text-[11px] font-semibold text-red-500/40 hover:text-red-500 hover:bg-red-500/10 h-12 rounded-xl mt-4 border border-dashed border-red-500/10"
                         >
                             {updatingId === `del-${delivery.booking_id}` ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -469,7 +469,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
         return (
             <div className="flex flex-col items-center justify-center py-20">
                 <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-                <p className="text-zinc-500 font-medium tracking-widest uppercase text-xs">Carregando entregas...</p>
+                <p className="text-zinc-500 font-medium text-xs">Carregando entregas...</p>
             </div>
         );
     }
@@ -484,7 +484,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                 </p>
                 <Button 
                     variant="outline" 
-                    className="mt-6 border-zinc-800 text-[11px] font-black uppercase tracking-widest"
+                    className="mt-6 border-zinc-800 text-[11px] font-semibold "
                     onClick={() => queryClient.invalidateQueries({ queryKey: ['deliveries'] })}
                 >
                     Tentar Novamente
@@ -499,7 +499,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
             <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-4 border-b border-white/5">
                 <div className="space-y-1">
                     <h2 className="text-4xl font-black tracking-tighter uppercase leading-none">Logística</h2>
-                    <p className="text-zinc-500 font-bold uppercase tracking-wider text-xs">Entregas e devoluções em tempo real</p>
+                    <p className="text-zinc-500 font-bold text-xs">Entregas e devoluções em tempo real</p>
                 </div>
 
                 <div className="flex overflow-x-auto no-scrollbar bg-zinc-950/60 p-1.5 rounded-[20px] border border-white/5 backdrop-blur-xl max-w-full">
@@ -526,7 +526,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
             {activeSubTab === 'deliveries' && (
                 <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
                     {!embedded && (
-                    <div className="flex bg-black/60 p-1.5 rounded-[24px] border border-white/5 backdrop-blur-3xl w-full md:w-fit shadow-2xl">
+                    <div className="flex bg-black/60 p-1.5 rounded-2xl border border-white/5 backdrop-blur-3xl w-full md:w-fit shadow-2xl">
                         <button
                             onClick={() => setLogisticsMode('to_send')}
                             className={cn(
@@ -571,7 +571,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                         <Truck className="h-16 w-16 text-zinc-800 relative z-10 mx-auto" />
                                     </div>
                                     <h3 className="text-2xl font-black uppercase tracking-tighter text-zinc-400">{embedded ? 'Entrega ainda não iniciada' : 'Nenhuma entrega agora'}</h3>
-                                    <p className="text-zinc-500 text-xs mt-3 font-bold uppercase tracking-widest">
+                                    <p className="text-zinc-500 text-xs mt-3 font-bold ">
                                         {embedded
                                             ? 'A logística começa quando a locadora aprovar o pedido.'
                                             : `Nenhum fluxo ${logisticsMode === 'to_send' ? 'de saída' : 'de entrada'} detectado.`}
@@ -588,14 +588,14 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                             animate={{ opacity: 1, y: 0 }}
                                             className="group"
                                         >
-                                            <Card className="bg-zinc-950/40 border-emerald-500/10 rounded-[40px] overflow-hidden hover:border-emerald-500/20 transition-all duration-700 shadow-2xl backdrop-blur-3xl relative">
+                                            <Card className="bg-zinc-950/40 border-emerald-500/10 rounded-2xl overflow-hidden hover:border-emerald-500/20 transition-all duration-700 shadow-2xl backdrop-blur-3xl relative">
                                                 <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/50" />
-                                                <div className="p-8 sm:p-12">
+                                                <div className="p-8 sm:p-8">
                                                     <div className="flex flex-col lg:flex-row gap-12">
                                                         <div className="flex-1 space-y-8">
                                                             <div className="flex items-start justify-between">
                                                                 <div className="flex gap-6">
-                                                                    <div className="h-20 w-20 rounded-[28px] bg-black border border-white/5 flex items-center justify-center overflow-hidden shrink-0">
+                                                                    <div className="h-20 w-20 rounded-2xl bg-black border border-white/5 flex items-center justify-center overflow-hidden shrink-0">
                                                                         {transfer.equipment?.images?.[0] ? (
                                                                             <img src={transfer.equipment.images[0]} alt="" className="w-full h-full object-cover" />
                                                                         ) : (
@@ -604,24 +604,24 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                                     </div>
                                                                     <div className="space-y-2">
                                                                         <div className="flex items-center gap-3">
-                                                                            <Badge className="bg-emerald-500/10 text-emerald-500 border-none text-[11px] font-black uppercase tracking-widest px-3 py-1">Transferência de Suprimento</Badge>
-                                                                            <span className="text-[11px] font-black text-zinc-400 uppercase tracking-widest">TRF-{transfer.id.slice(0, 8).toUpperCase()}</span>
+                                                                            <Badge className="bg-emerald-500/10 text-emerald-500 border-none text-[11px] font-semibold px-3 py-1">Transferência de Suprimento</Badge>
+                                                                            <span className="text-[11px] font-semibold text-zinc-400 ">TRF-{transfer.id.slice(0, 8).toUpperCase()}</span>
                                                                         </div>
                                                                         <h3 className="text-2xl font-black uppercase tracking-tighter text-white">{transfer.equipment?.name}</h3>
-                                                                        <div className="flex items-center gap-2 text-[11px] font-black text-zinc-500 uppercase tracking-widest">
+                                                                        <div className="flex items-center gap-2 text-[11px] font-semibold text-zinc-500 ">
                                                                             <MapPin className="h-3 w-3" /> ORIGEM: <span className="text-zinc-300">{transfer.source_branch?.name || 'Aguardando Liberação'}</span>
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                                 <div className="text-right">
-                                                                    <span className="text-[11px] font-black uppercase text-zinc-500 tracking-wider block mb-1">Status</span>
-                                                                    <Badge variant="outline" className="bg-zinc-900 text-zinc-400 border-white/5 font-black uppercase text-[11px] px-4 py-1.5">{transfer.status}</Badge>
+                                                                    <span className="text-[11px] font-semibold text-zinc-500 block mb-1">Status</span>
+                                                                    <Badge variant="outline" className="bg-zinc-900 text-zinc-400 border-white/5 font-semibold text-[11px] px-4 py-1.5">{transfer.status}</Badge>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div className="w-full lg:w-[340px] bg-zinc-950/60 rounded-[32px] p-8 border border-white/5 flex flex-col items-center justify-center text-center gap-4">
+                                                        <div className="w-full lg:w-[340px] bg-zinc-950/60 rounded-2xl p-8 border border-white/5 flex flex-col items-center justify-center text-center gap-4">
                                                             <Truck className="h-8 w-8 text-emerald-500/20 mb-2" />
-                                                            <p className="text-[11px] font-black uppercase tracking-widest text-zinc-500">Fluxo Interno de Reposição</p>
+                                                            <p className="text-[11px] font-semibold text-zinc-500">Fluxo Interno de Reposição</p>
                                                             <p className="text-[11px] text-zinc-400 font-medium">Este item está sendo movimentado entre suas unidades.</p>
                                                         </div>
                                                     </div>
@@ -639,16 +639,16 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                             exit={{ opacity: 0, scale: 0.95 }}
                                             className="group"
                                         >
-                                            <Card className="bg-zinc-950/40 border-white/5 rounded-[40px] overflow-hidden hover:border-white/10 transition-all duration-700 shadow-[0_30px_100px_rgba(0,0,0,0.6)] backdrop-blur-3xl relative">
+                                            <Card className="bg-zinc-950/40 border-white/5 rounded-2xl overflow-hidden hover:border-white/10 transition-all duration-700 shadow-[0_30px_100px_rgba(0,0,0,0.6)] backdrop-blur-3xl relative">
                                                 <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                                                 
-                                                <div className="p-6 sm:p-12">
+                                                <div className="p-6 sm:p-8">
                                                     <div className="flex flex-col lg:flex-row gap-10">
                                                         {/* Coluna Principal */}
                                                         <div className="flex-1 space-y-8">
                                                             {/* Header Compacto (Estilo App) */}
                                                             <div className="flex items-start gap-5">
-                                                                <div className="h-24 w-24 sm:h-32 sm:w-32 rounded-[28px] bg-black border border-white/5 flex items-center justify-center overflow-hidden shrink-0 shadow-2xl group-hover:border-primary/20 transition-all duration-700">
+                                                                <div className="h-24 w-24 sm:h-32 sm:w-32 rounded-2xl bg-black border border-white/5 flex items-center justify-center overflow-hidden shrink-0 shadow-2xl group-hover:border-primary/20 transition-all duration-700">
                                                                     {delivery.booking?.equipment?.images?.[0] ? (
                                                                         <img src={delivery.booking.equipment.images[0]} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
                                                                     ) : (
@@ -658,10 +658,10 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                                 
                                                                 <div className="flex-1 space-y-2 pt-1">
                                                                     <div className="flex items-center gap-3">
-                                                                        <Badge variant="outline" className="text-[11px] uppercase font-black bg-emerald-500/10 text-emerald-500 border-emerald-500/20 px-2 py-0.5 tracking-widest">
+                                                                        <Badge variant="outline" className="text-[11px] font-semibold bg-emerald-500/10 text-emerald-500 border-emerald-500/20 px-2 py-0.5 ">
                                                                             ORD-{delivery.booking_id.slice(0, 8).toUpperCase()}
                                                                         </Badge>
-                                                                        <span className="text-[11px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
+                                                                        <span className="text-[11px] font-semibold text-zinc-400 flex items-center gap-1.5">
                                                                             <Clock className="h-3 w-3" /> {format(new Date(delivery.created_at), "dd/MM HH:mm")}
                                                                         </span>
                                                                     </div>
@@ -671,12 +671,12 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                                     <div className="flex flex-wrap gap-2 pt-1">
                                                                         <div className="flex items-center gap-1.5 bg-zinc-900/60 px-3 py-1 rounded-full border border-white/5">
                                                                             <div className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
-                                                                            <span className="text-[11px] font-black uppercase tracking-widest text-zinc-400">Cliente</span>
+                                                                            <span className="text-[11px] font-semibold text-zinc-400">Cliente</span>
                                                                         </div>
                                                                         {delivery.fulfilling_company_id !== tenantId && (
                                                                             <div className="flex items-center gap-1.5 bg-amber-500/5 px-3 py-1 rounded-full border border-amber-500/10">
                                                                                 <Truck className="h-3 w-3 text-amber-500/50" />
-                                                                                <span className="text-[11px] font-black uppercase tracking-widest text-amber-500/80">Terceirizado</span>
+                                                                                <span className="text-[11px] font-semibold text-amber-500/80">Terceirizado</span>
                                                                             </div>
                                                                         )}
                                                                     </div>
@@ -687,7 +687,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                             <div className="space-y-2.5">
                                                                 <div className="flex items-center gap-3 bg-black/40 p-4 rounded-2xl border border-white/5 hover:border-white/10 transition-colors">
                                                                     <MapPin className="h-4 w-4 text-zinc-400" />
-                                                                    <span className="text-[11px] font-black uppercase tracking-[0.1em] text-zinc-400">
+                                                                    <span className="text-[11px] font-semibold text-zinc-400">
                                                                         {delivery.origin_branch?.name || 'HUB CENTRAL'}
                                                                     </span>
                                                                 </div>
@@ -695,10 +695,10 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                                     <div className="flex items-start gap-3 bg-primary/5 p-4 rounded-2xl border border-primary/20 hover:border-primary/30 transition-colors">
                                                                         <Truck className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                                                                         <div className="space-y-0.5 min-w-0">
-                                                                            <p className="text-[11px] font-black uppercase tracking-widest text-primary/70">Endereço de Entrega</p>
+                                                                            <p className="text-[11px] font-semibold text-primary/70">Endereço de Entrega</p>
                                                                             <p className="text-[11px] font-bold text-zinc-300 leading-snug">{delivery.booking.delivery_address}</p>
                                                                             {delivery.booking?.delivery_contact && (
-                                                                                <p className="text-[11px] text-zinc-500 font-bold uppercase tracking-wider">
+                                                                                <p className="text-[11px] text-zinc-500 font-bold ">
                                                                                     Responsável: {delivery.booking.delivery_contact}
                                                                                 </p>
                                                                             )}
@@ -707,7 +707,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                                 )}
                                                                 <div className="flex items-center gap-3 bg-black/40 p-4 rounded-2xl border border-white/5 hover:border-white/10 transition-colors">
                                                                     <RotateCcw className="h-4 w-4 text-emerald-500/50" />
-                                                                    <span className="text-[11px] font-black uppercase tracking-[0.1em] text-emerald-500/80">
+                                                                    <span className="text-[11px] font-semibold text-emerald-500/80">
                                                                         RETORNO: {delivery.booking?.renter?.company?.address_city || 'AV. IPIRANGA, 1097'}
                                                                     </span>
                                                                 </div>
@@ -716,16 +716,16 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                             {/* Status Logístico Principal */}
                                                             <div className="space-y-4">
                                                                 <div className="flex flex-col gap-2">
-                                                                    <p className="text-[11px] font-black uppercase text-zinc-400 tracking-wider">Status Logístico</p>
+                                                                    <p className="text-[11px] font-semibold text-zinc-400 ">Status Logístico</p>
                                                                     <div className="w-fit bg-emerald-500/5 border border-emerald-500/20 px-6 py-3 rounded-2xl shadow-[0_0_30px_rgba(16,185,129,0.05)] flex items-center gap-3 group/status">
                                                                         <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)]" />
-                                                                        <span className="text-xs font-black uppercase tracking-[0.1em] text-emerald-500">{getStatusLabel(delivery.status)}</span>
+                                                                        <span className="text-xs font-semibold text-emerald-500">{getStatusLabel(delivery.status)}</span>
                                                                     </div>
                                                                 </div>
-                                                                <div className="text-[11px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-4">
+                                                                <div className="text-[11px] font-semibold text-zinc-500 flex items-center gap-4">
                                                                     <span>Volume: <span className="text-zinc-400 ml-1">{delivery.quantity || 1} UN</span></span>
                                                                     {delivery.fulfillment_type === 'subrental' && (
-                                                                        <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-[11px] font-black uppercase">Sub-locação</Badge>
+                                                                        <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-[11px] font-semibold ">Sub-locação</Badge>
                                                                     )}
                                                                 </div>
                                                             </div>
@@ -738,9 +738,9 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                             {/* Linha do Tempo (Vertical) */}
                                                             <div className="space-y-8">
                                                                 <div className="flex items-center justify-between border-b border-white/5 pb-4">
-                                                                    <h4 className="text-[11px] font-black uppercase tracking-wider text-zinc-500">Linha do Tempo</h4>
+                                                                    <h4 className="text-[11px] font-semibold text-zinc-500">Linha do Tempo</h4>
                                                                     <div className="flex items-center gap-3">
-                                                                        <span className="text-[11px] font-black uppercase text-zinc-500">Exibir detalhes</span>
+                                                                        <span className="text-[11px] font-semibold text-zinc-500">Exibir detalhes</span>
                                                                         <div className="w-8 h-4 bg-emerald-500 rounded-full relative">
                                                                             <div className="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full" />
                                                                         </div>
@@ -812,9 +812,9 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                                         {renderOperationalConsole(delivery)}
                                                                     </motion.div>
                                                                 ) : (
-                                                                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-6 text-center">
+                                                                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-6 text-center">
                                                                         <CheckCircle2 className="h-10 w-10 text-emerald-500 mx-auto mb-3" />
-                                                                        <p className="text-[11px] font-black uppercase tracking-widest text-emerald-500">Fluxo Concluído</p>
+                                                                        <p className="text-[11px] font-semibold text-emerald-500">Fluxo Concluído</p>
                                                                     </div>
                                                                 )}
 
@@ -843,9 +843,9 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                                         <div key={i} className="bg-white/5 rounded-2xl p-4 text-center space-y-2 border border-white/5 min-w-0">
                                                                             <info.icon className="h-4 w-4 mx-auto text-zinc-400" />
                                                                             <div className="space-y-0.5">
-                                                                                <p className="text-[11px] font-black text-zinc-500 uppercase tracking-widest">{info.label}</p>
-                                                                                <p className="text-[11px] font-black text-zinc-100 uppercase truncate">{info.val}</p>
-                                                                                <p className="text-[11px] font-bold text-zinc-400 uppercase truncate">{info.sub}</p>
+                                                                                <p className="text-[11px] font-semibold text-zinc-500 ">{info.label}</p>
+                                                                                <p className="text-[11px] font-semibold text-zinc-100 truncate">{info.val}</p>
+                                                                                <p className="text-[11px] font-bold text-zinc-400 truncate">{info.sub}</p>
                                                                             </div>
                                                                         </div>
                                                                     ))}
@@ -877,26 +877,26 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
             {/* No detalhe do pedido a devolução fica no OrderReturnPanel */}
             {!embedded && activeSubTab === 'reverse' && (
                 <div className="space-y-10 animate-in fade-in slide-in-from-top-4 duration-700">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-indigo-500/5 p-6 rounded-[32px] border border-indigo-500/10 backdrop-blur-xl">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-indigo-500/5 p-6 rounded-2xl border border-indigo-500/10 backdrop-blur-xl">
                         <div className="flex items-center gap-4">
                             <div className="h-14 w-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 shadow-[0_0_30px_rgba(99,102,241,0.2)]">
                                 <RotateCcw className="h-7 w-7 text-indigo-400" />
                             </div>
                             <div>
                                 <h3 className="text-xl font-black uppercase tracking-tighter">Devoluções</h3>
-                                <p className="text-[11px] text-indigo-400/60 font-bold uppercase tracking-wider">Monitoramento de Devoluções e Reentrada</p>
+                                <p className="text-[11px] text-indigo-400/60 font-bold ">Monitoramento de Devoluções e Reentrada</p>
                             </div>
                         </div>
                         <div className="flex gap-4">
                             <div className="text-right">
-                                <p className="text-[11px] font-black uppercase text-indigo-500/40 tracking-widest">Coletas Pendentes</p>
+                                <p className="text-[11px] font-semibold text-indigo-500/40 ">Coletas Pendentes</p>
                                 <p className="text-2xl font-black text-indigo-400">
                                     {deliveries?.filter(d => d.reverse_logistics_status === 'requested').length || 0}
                                 </p>
                             </div>
                             <div className="w-[1px] h-10 bg-indigo-500/10" />
                             <div className="text-right">
-                                <p className="text-[11px] font-black uppercase text-indigo-500/40 tracking-widest">Em Triagem Técnica</p>
+                                <p className="text-[11px] font-semibold text-indigo-500/40 ">Em Triagem Técnica</p>
                                 <p className="text-2xl font-black text-indigo-400">
                                     {deliveries?.filter(d => d.reverse_logistics_status === 'returned').length || 0}
                                 </p>
@@ -906,20 +906,20 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
 
                     <div className="grid grid-cols-1 gap-10">
                         {deliveries?.filter(d => d.reverse_logistics_status !== 'not_started').length === 0 ? (
-                            <div className="bg-zinc-950/20 border border-dashed border-white/5 rounded-[40px] p-32 text-center backdrop-blur-md">
-                                <p className="text-zinc-500 text-[11px] font-black uppercase tracking-wider">Nenhum fluxo de retorno em andamento</p>
+                            <div className="bg-zinc-950/20 border border-dashed border-white/5 rounded-2xl p-32 text-center backdrop-blur-md">
+                                <p className="text-zinc-500 text-[11px] font-semibold ">Nenhum fluxo de retorno em andamento</p>
                             </div>
                         ) : (
                             deliveries?.filter(d => d.reverse_logistics_status !== 'not_started').map(delivery => (
                                 <motion.div key={`rev-${delivery.id}`} layout className="group">
-                                    <Card className="bg-zinc-950/40 border-indigo-500/10 rounded-[40px] overflow-hidden hover:border-indigo-500/30 transition-all duration-700 shadow-2xl relative">
+                                    <Card className="bg-zinc-950/40 border-indigo-500/10 rounded-2xl overflow-hidden hover:border-indigo-500/30 transition-all duration-700 shadow-2xl relative">
                                         <div className="absolute top-0 right-0 p-8">
-                                            <Badge className="bg-indigo-500 text-black font-black uppercase text-[11px] tracking-widest px-4 py-1.5 rounded-full shadow-lg shadow-indigo-500/20">REVERSA</Badge>
+                                            <Badge className="bg-indigo-500 text-black font-semibold text-[11px] px-4 py-1.5 rounded-full shadow-lg shadow-indigo-500/20">REVERSA</Badge>
                                         </div>
-                                        <div className="p-12 flex flex-col lg:flex-row gap-12">
+                                        <div className="p-6 flex flex-col lg:flex-row gap-12">
                                             <div className="flex-1 space-y-8">
                                                 <div className="flex gap-8">
-                                                    <div className="h-24 w-24 rounded-[32px] bg-black border border-white/5 flex items-center justify-center overflow-hidden shrink-0">
+                                                    <div className="h-24 w-24 rounded-2xl bg-black border border-white/5 flex items-center justify-center overflow-hidden shrink-0">
                                                         {delivery.booking?.equipment?.images?.[0] ? (
                                                             <img src={delivery.booking.equipment.images[0]} alt="" className="w-full h-full object-cover" />
                                                         ) : (
@@ -927,14 +927,14 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                         )}
                                                     </div>
                                                     <div className="space-y-2">
-                                                        <p className="text-[11px] font-black text-indigo-500 uppercase tracking-wider">Fluxo de Devolução · TRF-REV-{delivery.id.slice(0,6).toUpperCase()}</p>
+                                                        <p className="text-[11px] font-semibold text-indigo-500 ">Fluxo de Devolução · TRF-REV-{delivery.id.slice(0,6).toUpperCase()}</p>
                                                         <h4 className="text-3xl font-black uppercase tracking-tighter text-white">{delivery.booking?.equipment?.name}</h4>
                                                         <div className="flex items-center gap-4 pt-2">
-                                                            <div className="flex items-center gap-2 text-[11px] font-black text-zinc-500 uppercase tracking-widest">
+                                                            <div className="flex items-center gap-2 text-[11px] font-semibold text-zinc-500 ">
                                                                 <MapPin className="h-3.5 w-3.5 text-indigo-500" /> DE: <span className="text-zinc-300">{delivery.booking?.renter?.company?.city || 'Cliente'}</span>
                                                             </div>
                                                             <ArrowRight className="h-3 w-3 text-zinc-500" />
-                                                            <div className="flex items-center gap-2 text-[11px] font-black text-zinc-500 uppercase tracking-widest">
+                                                            <div className="flex items-center gap-2 text-[11px] font-semibold text-zinc-500 ">
                                                                 <Building2 className="h-3.5 w-3.5 text-indigo-500" /> PARA: <span className="text-zinc-300">{delivery.reverse_logistics_address?.split(',')[0] || 'Base Original'}</span>
                                                             </div>
                                                         </div>
@@ -966,13 +966,13 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                 </div>
                                             </div>
 
-                                            <div className="w-full lg:w-[320px] bg-zinc-950/60 rounded-[32px] p-8 border border-white/5 flex flex-col justify-between items-center text-center gap-6">
+                                            <div className="w-full lg:w-[320px] bg-zinc-950/60 rounded-2xl p-8 border border-white/5 flex flex-col justify-between items-center text-center gap-6">
                                                 <div className="space-y-4">
                                                     <div className="h-12 w-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center mx-auto border border-indigo-500/20">
                                                         {delivery.reverse_logistics_status === 'requested' ? <Clock className="h-6 w-6 text-indigo-400" /> : <ShieldAlert className="h-6 w-6 text-indigo-400" />}
                                                     </div>
                                                     <div>
-                                                        <p className="text-[11px] font-black uppercase tracking-widest text-indigo-400 mb-1">{delivery.reverse_logistics_status}</p>
+                                                        <p className="text-[11px] font-semibold text-indigo-400 mb-1">{delivery.reverse_logistics_status}</p>
                                                         <p className="text-xs text-zinc-500 font-medium leading-relaxed">
                                                             {delivery.reverse_logistics_status === 'requested' ? 'Aguardando início da coleta no endereço do cliente.' : 'Item em processo de retorno e validação técnica.'}
                                                         </p>
@@ -982,7 +982,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                 {delivery.reverse_logistics_status === 'returned' && (
                                                     <div className="space-y-4 w-full">
                                                         <div className="p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl">
-                                                            <p className="text-[11px] text-indigo-400 font-black uppercase tracking-widest mb-1">Aguardando Conferência de Reentrada</p>
+                                                            <p className="text-[11px] text-indigo-400 font-semibold mb-1">Aguardando Conferência de Reentrada</p>
                                                             <p className="text-[11px] text-zinc-500">Valide o estado físico dos itens antes de liberar para o estoque.</p>
                                                         </div>
                                                         <Button
@@ -1003,7 +1003,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                                     queryClient.invalidateQueries({ queryKey: ['bookings'] });
                                                                 }
                                                             }}
-                                                            className="w-full bg-white text-black font-black uppercase text-[11px] tracking-widest h-14 rounded-2xl shadow-xl flex items-center gap-2"
+                                                            className="w-full bg-white text-black font-semibold text-[11px] h-14 rounded-2xl shadow-xl flex items-center gap-2"
                                                         >
                                                             <CheckCircle2 className="h-4 w-4" /> Conferência OK - Guardar
                                                         </Button>
@@ -1018,7 +1018,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                     
                                                     if (isFulfiller) {
                                                         return (
-                                                            <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">
+                                                            <div className="text-[11px] font-bold text-zinc-500 ">
                                                                 Token de Coleta: <span className="text-white font-black">{delivery.reverse_token}</span>
                                                             </div>
                                                         );
@@ -1091,7 +1091,7 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                             >
                                 <div>
                                     <p className="font-black uppercase tracking-tighter">{branch.name}</p>
-                                    <p className="text-[11px] text-zinc-500 font-bold uppercase tracking-widest">{branch.city} - {branch.state}</p>
+                                    <p className="text-[11px] text-zinc-500 font-bold ">{branch.city} - {branch.state}</p>
                                 </div>
                                 {selectedBranchId === branch.id && <CheckCircle2 className="h-5 w-5 text-primary" />}
                             </button>

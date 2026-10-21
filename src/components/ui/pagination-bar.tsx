@@ -18,7 +18,7 @@ export function PaginationBar({ page, totalPages, totalItems, pageSize, onPageCh
 
   return (
     <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-zinc-900 ${className}`}>
-      <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">
+      <p className="text-[11px] font-bold text-zinc-400">
         Exibindo <span className="text-zinc-400">{from}–{to}</span> de <span className="text-zinc-400">{totalItems}</span> registros
       </p>
 
@@ -59,7 +59,7 @@ export function PaginationBar({ page, totalPages, totalItems, pageSize, onPageCh
                 <button
                   key={item}
                   onClick={() => onPageChange(item as number)}
-                  className={`h-9 min-w-[36px] px-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                  className={`h-9 min-w-[36px] px-2 rounded-xl text-xs font-semibold transition-all ${
                     item === page
                       ? 'bg-primary text-white shadow-[0_0_16px_rgba(var(--primary-rgb),0.3)]'
                       : 'text-zinc-500 hover:text-white hover:bg-zinc-800'

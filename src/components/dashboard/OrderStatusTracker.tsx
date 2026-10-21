@@ -21,8 +21,8 @@ export function OrderStatusTracker({ status }: OrderStatusTrackerProps) {
   
   if (status === 'cancelled') {
     return (
-      <div className="bg-destructive/5 border border-destructive/10 rounded-3xl p-8 text-center backdrop-blur-xl">
-        <p className="text-destructive font-black uppercase tracking-wider text-[11px]">Operação Abortada</p>
+      <div className="bg-destructive/5 border border-destructive/10 rounded-2xl p-8 text-center backdrop-blur-xl">
+        <p className="text-destructive font-semibold text-[11px]">Operação Abortada</p>
       </div>
     );
   }
@@ -115,7 +115,7 @@ export function OrderStatusTracker({ status }: OrderStatusTrackerProps) {
 
               {/* High-End Labeling */}
               <div className="absolute -bottom-10 sm:-bottom-12 left-1/2 -translate-x-1/2 w-[60px] sm:w-[80px] text-center flex flex-col items-center">
-                <p className={`text-[6.5px] sm:text-[11px] font-black uppercase tracking-[0.05em] sm:tracking-wider transition-all duration-500 leading-tight ${
+                <p className={`text-[6.5px] sm:text-[11px] font-semibold sm:tracking-wider transition-all duration-500 leading-tight ${
                   isCurrent ? 'text-emerald-400' : isCompleted ? 'text-zinc-400' : 'text-zinc-800'
                 }`}>
                   {step.label}

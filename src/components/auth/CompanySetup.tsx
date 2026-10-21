@@ -241,7 +241,7 @@ export function CompanySetup({ ownerId }: { ownerId: string }) {
 
   if (isSuccess) {
     return (
-      <div className="max-w-2xl mx-auto p-10 bg-card border rounded-2xl shadow-xl text-center animate-in fade-in zoom-in-95 duration-500">
+      <div className="max-w-2xl mx-auto p-6 bg-card border rounded-2xl shadow-xl text-center animate-in fade-in zoom-in-95 duration-500">
         <div className="relative w-24 h-24 mx-auto mb-6">
           <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-2xl animate-pulse" />
           <div className="relative w-24 h-24 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">

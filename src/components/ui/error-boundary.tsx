@@ -42,7 +42,7 @@ export class ErrorBoundary extends Component<Props, State> {
             {/* Ícone */}
             <div className="relative mx-auto w-24 h-24">
               <div className="absolute inset-0 bg-destructive/20 blur-3xl rounded-full" />
-              <div className="relative bg-zinc-900 w-24 h-24 rounded-3xl flex items-center justify-center border border-zinc-800 shadow-2xl">
+              <div className="relative bg-zinc-900 w-24 h-24 rounded-2xl flex items-center justify-center border border-zinc-800 shadow-2xl">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-10 w-10 text-destructive"
@@ -73,7 +73,7 @@ export class ErrorBoundary extends Component<Props, State> {
             {/* Detalhe do erro (apenas em dev) */}
             {import.meta.env.DEV && this.state.error && (
               <div className="bg-zinc-900 rounded-xl p-4 text-left border border-zinc-800">
-                <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest mb-2">
+                <p className="text-[11px] font-semibold text-zinc-500 mb-2">
                   Detalhe do Erro (dev only)
                 </p>
                 <code className="text-xs text-destructive break-all font-mono">
@@ -86,13 +86,13 @@ export class ErrorBoundary extends Component<Props, State> {
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 onClick={this.handleReset}
-                className="inline-flex items-center justify-center h-11 px-8 rounded-xl bg-primary text-white font-black uppercase text-xs tracking-widest hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
+                className="inline-flex items-center justify-center h-11 px-8 rounded-xl bg-primary text-white font-semibold text-xs hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
               >
                 Tentar novamente
               </button>
               <a
                 href="/"
-                className="inline-flex items-center justify-center h-11 px-8 rounded-xl border border-zinc-800 text-zinc-300 font-black uppercase text-xs tracking-widest hover:bg-zinc-900 transition-colors"
+                className="inline-flex items-center justify-center h-11 px-8 rounded-xl border border-zinc-800 text-zinc-300 font-semibold text-xs hover:bg-zinc-900 transition-colors"
               >
                 Voltar ao início
               </a>

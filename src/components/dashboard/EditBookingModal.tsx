@@ -55,11 +55,11 @@ export function EditBookingModal({ booking, isOpen, onClose }: EditBookingModalP
     return (
         <Dialog isOpen={isOpen} onClose={onClose} title="Editar Pedido">
             <div className="space-y-6">
-                <p className="text-zinc-500 text-xs uppercase font-bold tracking-widest -mt-4">{booking.equipment?.name}</p>
+                <p className="text-zinc-500 text-xs font-bold -mt-4">{booking.equipment?.name}</p>
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest">Retirada</p>
+                        <p className="text-[11px] font-semibold text-zinc-500 ">Retirada</p>
                         <Input
                             type="date"
                             value={startDate}
@@ -68,7 +68,7 @@ export function EditBookingModal({ booking, isOpen, onClose }: EditBookingModalP
                         />
                     </div>
                     <div className="space-y-2">
-                        <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest">Devolução</p>
+                        <p className="text-[11px] font-semibold text-zinc-500 ">Devolução</p>
                         <Input
                             type="date"
                             value={endDate}
@@ -81,7 +81,7 @@ export function EditBookingModal({ booking, isOpen, onClose }: EditBookingModalP
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest">Quantidade</p>
+                        <p className="text-[11px] font-semibold text-zinc-500 ">Quantidade</p>
                         <Input
                             type="number"
                             min={1}
@@ -91,7 +91,7 @@ export function EditBookingModal({ booking, isOpen, onClose }: EditBookingModalP
                         />
                     </div>
                     <div className="space-y-2">
-                        <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest">Valor Total (R$)</p>
+                        <p className="text-[11px] font-semibold text-zinc-500 ">Valor Total (R$)</p>
                         <Input
                             type="number"
                             min={0}
@@ -104,7 +104,7 @@ export function EditBookingModal({ booking, isOpen, onClose }: EditBookingModalP
                 </div>
 
                 <div className="space-y-2">
-                    <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest">Status</p>
+                    <p className="text-[11px] font-semibold text-zinc-500 ">Status</p>
                     <select
                         value={status}
                         onChange={(e) => setStatus(e.target.value as Booking['status'])}
@@ -117,7 +117,7 @@ export function EditBookingModal({ booking, isOpen, onClose }: EditBookingModalP
                 </div>
 
                 <div className="space-y-2">
-                    <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest">Observações</p>
+                    <p className="text-[11px] font-semibold text-zinc-500 ">Observações</p>
                     <Input
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}
@@ -130,14 +130,14 @@ export function EditBookingModal({ booking, isOpen, onClose }: EditBookingModalP
                     <Button
                         variant="outline"
                         onClick={onClose}
-                        className="flex-1 border-zinc-800 rounded-xl font-black uppercase text-xs tracking-widest"
+                        className="flex-1 border-zinc-800 rounded-xl font-semibold text-xs "
                     >
                         Cancelar
                     </Button>
                     <Button
                         onClick={handleSave}
                         disabled={editBooking.isPending}
-                        className="flex-1 bg-primary hover:bg-primary/90 rounded-xl font-black uppercase text-xs tracking-widest"
+                        className="flex-1 bg-primary hover:bg-primary/90 rounded-xl font-semibold text-xs "
                     >
                         {editBooking.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Salvar Alterações'}
                     </Button>

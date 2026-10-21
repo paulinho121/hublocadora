@@ -97,11 +97,7 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
             whileHover={{ y: -2, transition: { duration: 0.18 } }}
             transition={{ type: 'spring', stiffness: 280, damping: 28 }}
             onClick={onClick}
-            className="group relative flex flex-col bg-zinc-900/50 border border-zinc-800/70
-                       rounded-2xl overflow-hidden cursor-pointer
-                       hover:border-primary/30 hover:bg-zinc-900/80
-                       hover:shadow-xl hover:shadow-black/40
-                       transition-colors duration-300"
+            className="group relative flex flex-col bg-zinc-900/50 border border-zinc-800/70 rounded-2xl overflow-hidden cursor-pointer hover:border-primary/30 hover:bg-zinc-900/80 hover:shadow-xl hover:shadow-black/40 transition-colors duration-300"
         >
             {/* ── Top accent line (status color) ── */}
             <div className={`h-0.5 w-full ${
@@ -119,13 +115,11 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
                 {/* ── Header ── */}
                 <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20
-                                        flex items-center justify-center shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
                             <Clapperboard className="w-4.5 h-4.5 text-primary" />
                         </div>
                         <div className="min-w-0">
-                            <h3 className="text-[13px] font-black uppercase tracking-wider text-white
-                                           truncate leading-tight group-hover:text-primary transition-colors">
+                            <h3 className="text-[13px] font-black uppercase tracking-wider text-white truncate leading-tight group-hover:text-primary transition-colors">
                                 {project.name}
                             </h3>
                             {startDate && endDate ? (
@@ -141,7 +135,7 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
                             )}
                         </div>
                     </div>
-                    <Badge className={`text-[11px] font-black uppercase tracking-widest border shrink-0 ${statusColor}`}>
+                    <Badge className={`text-[11px] font-semibold border shrink-0 ${statusColor}`}>
                         {statusLabel}
                     </Badge>
                 </div>
@@ -149,7 +143,7 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
                 {/* ── Progress bar ── */}
                 {showProgress && (
                     <div>
-                        <div className="flex justify-between text-[11px] font-black uppercase tracking-widest mb-1.5">
+                        <div className="flex justify-between text-[11px] font-semibold mb-1.5">
                             <span className={`flex items-center gap-1 ${isReturning ? 'text-orange-400/80' : 'text-zinc-500'}`}>
                                 {isReturning && <RotateCcw className="w-2.5 h-2.5" />}
                                 {progressLabel}
@@ -179,22 +173,19 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
                                 : (outboundSh?.status ?? 'awaiting_approval');
                             return (
                                 <div key={b.id} className="relative">
-                                    <div className="w-9 h-9 rounded-lg bg-zinc-800/70 border border-zinc-700/50
-                                                    overflow-hidden flex items-center justify-center">
+                                    <div className="w-9 h-9 rounded-lg bg-zinc-800/70 border border-zinc-700/50 overflow-hidden flex items-center justify-center">
                                         {img
                                             ? <img src={img} alt="" loading="lazy" className="w-full h-full object-contain p-1" />
                                             : <Package className="w-3.5 h-3.5 text-zinc-400" />}
                                     </div>
-                                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full
-                                                    bg-zinc-950 flex items-center justify-center">
+                                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-zinc-950 flex items-center justify-center">
                                         <ShipmentDot status={shipStatus} />
                                     </div>
                                 </div>
                             );
                         })}
                         {bookings.length > 5 && (
-                            <div className="w-9 h-9 rounded-lg bg-zinc-800/40 border border-zinc-700/30
-                                            flex items-center justify-center">
+                            <div className="w-9 h-9 rounded-lg bg-zinc-800/40 border border-zinc-700/30 flex items-center justify-center">
                                 <span className="text-[11px] font-black text-zinc-500">+{bookings.length - 5}</span>
                             </div>
                         )}
@@ -212,15 +203,14 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
                 {/* ── Footer ── */}
                 <div className="flex items-center justify-between pt-3 border-t border-zinc-800/60">
                     <div className="flex flex-col gap-0.5">
-                        <span className="text-[11px] uppercase font-black tracking-[0.15em] text-zinc-400">
+                        <span className="text-[11px] font-semibold text-zinc-400">
                             Total do projeto
                         </span>
                         <span className="text-base font-black text-white tabular-nums leading-none">
                             {brl(total)}
                         </span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest
-                                    text-zinc-500 group-hover:text-primary transition-colors">
+                    <div className="flex items-center gap-1.5 text-[11px] font-semibold text-zinc-500 group-hover:text-primary transition-colors">
                         Ver detalhes
                         <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                     </div>
@@ -245,7 +235,7 @@ function KpiCard({ label, value, sub, icon: Icon, accent }: {
                 <Icon className="w-4 h-4 text-white/70" />
             </div>
             <div className="min-w-0">
-                <p className="text-[11px] uppercase font-black tracking-wider text-zinc-500 mb-0.5">{label}</p>
+                <p className="text-[11px] font-semibold text-zinc-500 mb-0.5">{label}</p>
                 <p className="text-lg font-black text-white leading-none tabular-nums">{value}</p>
                 {sub && <p className="text-[11px] text-zinc-400 mt-0.5 truncate">{sub}</p>}
             </div>
@@ -311,7 +301,7 @@ export function ProjectsTab() {
                 </div>
                 <Button
                     variant="outline"
-                    className="border-zinc-700 text-zinc-300 font-black uppercase text-[11px] tracking-widest rounded-xl"
+                    className="border-zinc-700 text-zinc-300 font-semibold text-[11px] rounded-xl"
                     onClick={() => window.location.reload()}
                 >
                     Tentar novamente
@@ -335,9 +325,7 @@ export function ProjectsTab() {
                 <Button
                     variant="ghost"
                     size="sm"
-                    className="shrink-0 text-[11px] font-black uppercase tracking-widest text-zinc-500
-                               hover:text-primary hover:bg-primary/5 rounded-xl border border-zinc-800
-                               hover:border-primary/30 transition-all"
+                    className="shrink-0 text-[11px] font-semibold text-zinc-500 hover:text-primary hover:bg-primary/5 rounded-xl border border-zinc-800 hover:border-primary/30 transition-all"
                     onClick={() => window.location.href = '/'}
                 >
                     <ExternalLink className="w-3.5 h-3.5 mr-1.5" />
@@ -389,16 +377,13 @@ export function ProjectsTab() {
                             <button
                                 key={f}
                                 onClick={() => setFilter(f)}
-                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px]
-                                           font-black uppercase tracking-widest transition-all duration-200
-                                           ${filter === f
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] font-semibold transition-all duration-200 ${filter === f
                                                ? 'bg-primary border-primary/50 text-white shadow-lg shadow-primary/20'
                                                : 'bg-zinc-900/40 border-zinc-800/60 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300'
                                            }`}
                             >
                                 {FILTER_LABELS[f]}
-                                <span className={`text-[11px] font-black px-1 py-0.5 rounded-full
-                                    ${filter === f ? 'bg-white/20 text-white' : 'bg-zinc-800 text-zinc-500'}`}>
+                                <span className={`text-[11px] font-black px-1 py-0.5 rounded-full ${filter === f ? 'bg-white/20 text-white' : 'bg-zinc-800 text-zinc-500'}`}>
                                     {count}
                                 </span>
                             </button>
@@ -412,11 +397,9 @@ export function ProjectsTab() {
                 <motion.div
                     initial={{ opacity: 0, scale: 0.97 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="flex flex-col items-center justify-center py-28
-                               border border-dashed border-zinc-800 rounded-3xl text-center gap-5"
+                    className="flex flex-col items-center justify-center py-28 border border-dashed border-zinc-800 rounded-2xl text-center gap-5"
                 >
-                    <div className="w-20 h-20 rounded-3xl bg-zinc-900 border border-zinc-800
-                                    flex items-center justify-center">
+                    <div className="w-20 h-20 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center">
                         <FolderOpen className="w-9 h-9 text-zinc-500" />
                     </div>
                     <div>
@@ -430,8 +413,7 @@ export function ProjectsTab() {
                         </p>
                     </div>
                     <Button
-                        className="bg-primary hover:bg-primary/90 text-white font-black uppercase
-                                   text-[11px] tracking-widest rounded-xl shadow-lg shadow-primary/20"
+                        className="bg-primary hover:bg-primary/90 text-white font-semibold text-[11px] rounded-xl shadow-lg shadow-primary/20"
                         onClick={() => window.location.href = '/'}
                     >
                         Explorar Marketplace <ArrowRight className="w-3.5 h-3.5 ml-2" />
@@ -447,7 +429,7 @@ export function ProjectsTab() {
                     </p>
                     <button
                         onClick={() => setFilter('all')}
-                        className="text-[11px] font-black uppercase tracking-widest text-primary hover:underline"
+                        className="text-[11px] font-semibold text-primary hover:underline"
                     >
                         Ver todos
                     </button>

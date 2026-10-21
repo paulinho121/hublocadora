@@ -97,7 +97,7 @@ function TrackingForm({
 
     return (
         <div className="mt-3 p-3 bg-emerald-500/5 rounded-xl border border-emerald-500/20 space-y-2">
-            <p className="text-[11px] font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+            <p className="text-[11px] font-semibold text-emerald-400 flex items-center gap-1.5">
                 <Truck className="w-3 h-3" />
                 Rastreio de envio — Locadora
             </p>
@@ -123,7 +123,7 @@ function TrackingForm({
                 />
             </div>
             <Button
-                className="w-full h-8 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase tracking-widest text-[11px]"
+                className="w-full h-8 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-[11px]"
                 onClick={handleSave}
                 disabled={update.isPending}
             >
@@ -176,7 +176,7 @@ function ReturnTrackingForm({
 
     return (
         <div className="mt-3 p-3 bg-red-500/5 rounded-xl border border-red-500/20 space-y-2">
-            <p className="text-[11px] font-black uppercase tracking-wider text-red-400 flex items-center gap-1.5">
+            <p className="text-[11px] font-semibold text-red-400 flex items-center gap-1.5">
                 <ArrowUpFromLine className="w-3 h-3" />
                 Rastreio do retorno — Locatário
             </p>
@@ -202,7 +202,7 @@ function ReturnTrackingForm({
                 />
             </div>
             <Button
-                className="w-full h-8 rounded-lg bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-widest text-[11px]"
+                className="w-full h-8 rounded-lg bg-red-600 hover:bg-red-500 text-white font-semibold text-[11px]"
                 onClick={handleSave}
                 disabled={update.isPending}
             >
@@ -251,7 +251,7 @@ function CompanyGroup({
                             : <Building2 className="w-4 h-4 text-zinc-500" />}
                     </div>
                     <div className="text-left">
-                        <p className="text-xs font-black uppercase tracking-wider text-white">{companyName}</p>
+                        <p className="text-xs font-semibold text-white">{companyName}</p>
                         {companyCity && (
                             <p className="text-[11px] text-zinc-500 flex items-center gap-1 mt-0.5">
                                 <MapPin className="w-2.5 h-2.5" />{companyCity}
@@ -261,12 +261,12 @@ function CompanyGroup({
                 </div>
                 <div className="flex items-center gap-2">
                     {groupDelivered && (
-                        <span className="text-[11px] font-black uppercase tracking-widest text-emerald-400 flex items-center gap-1">
+                        <span className="text-[11px] font-semibold text-emerald-400 flex items-center gap-1">
                             <CheckCircle2 className="w-3 h-3" /> Entregue
                         </span>
                     )}
                     {groupInTransit && !groupDelivered && (
-                        <span className="text-[11px] font-black uppercase tracking-widest text-blue-400 flex items-center gap-1">
+                        <span className="text-[11px] font-semibold text-blue-400 flex items-center gap-1">
                             <Truck className="w-3 h-3" /> Em trânsito
                         </span>
                     )}
@@ -306,10 +306,10 @@ function CompanyGroup({
                                             {/* Info */}
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-start justify-between gap-2">
-                                                    <p className="text-[11px] font-black uppercase tracking-wider text-white line-clamp-2">
+                                                    <p className="text-[11px] font-semibold text-white line-clamp-2">
                                                         {eq?.name ?? 'Equipamento'}
                                                     </p>
-                                                    <Badge className={`text-[11px] font-black uppercase tracking-widest border shrink-0 ${BOOKING_STATUS_COLOR[booking.status] ?? ''}`}>
+                                                    <Badge className={`text-[11px] font-semibold border shrink-0 ${BOOKING_STATUS_COLOR[booking.status] ?? ''}`}>
                                                         {BOOKING_STATUS_LABEL[booking.status] ?? booking.status}
                                                     </Badge>
                                                 </div>
@@ -322,7 +322,7 @@ function CompanyGroup({
                                                 {shipment && (
                                                     <div className="flex items-center gap-1.5 mt-1.5">
                                                         {shipmentIcon(shipSt, 'w-3 h-3')}
-                                                        <span className={`text-[11px] font-black uppercase tracking-widest ${SHIPMENT_STATUS_COLOR[shipSt]}`}>
+                                                        <span className={`text-[11px] font-semibold ${SHIPMENT_STATUS_COLOR[shipSt]}`}>
                                                             {SHIPMENT_STATUS_LABEL[shipSt]}
                                                         </span>
                                                         {shipment.tracking_code && (
@@ -359,7 +359,7 @@ function CompanyGroup({
                                             {isOwner && booking.status === 'approved' && shipment && shipSt !== 'delivered' && (
                                                 <button
                                                     onClick={() => setShowTrackingId(isShowingTracking ? null : booking.id)}
-                                                    className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-emerald-500 hover:text-emerald-400 transition-colors"
+                                                    className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-500 hover:text-emerald-400 transition-colors"
                                                 >
                                                     <Edit3 className="w-3 h-3" />
                                                     {shipment.tracking_code ? 'Editar rastreio' : 'Adicionar rastreio'}
@@ -429,7 +429,7 @@ function ReturnCompanyGroup({
                             : <Building2 className="w-4 h-4 text-zinc-500" />}
                     </div>
                     <div className="text-left">
-                        <p className="text-xs font-black uppercase tracking-wider text-white">{companyName}</p>
+                        <p className="text-xs font-semibold text-white">{companyName}</p>
                         {companyCity && (
                             <p className="text-[11px] text-zinc-500 flex items-center gap-1 mt-0.5">
                                 <MapPin className="w-2.5 h-2.5" />{companyCity}
@@ -439,12 +439,12 @@ function ReturnCompanyGroup({
                 </div>
                 <div className="flex items-center gap-2">
                     {allReturned && (
-                        <span className="text-[11px] font-black uppercase tracking-widest text-emerald-400 flex items-center gap-1">
+                        <span className="text-[11px] font-semibold text-emerald-400 flex items-center gap-1">
                             <PackageCheck className="w-3 h-3" /> Recebido
                         </span>
                     )}
                     {anyInTransit && !allReturned && (
-                        <span className="text-[11px] font-black uppercase tracking-widest text-red-400 flex items-center gap-1">
+                        <span className="text-[11px] font-semibold text-red-400 flex items-center gap-1">
                             <Truck className="w-3 h-3" /> Retornando
                         </span>
                     )}
@@ -485,7 +485,7 @@ function ReturnCompanyGroup({
 
                                             {/* Info */}
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-[11px] font-black uppercase tracking-wider text-white line-clamp-2">
+                                                <p className="text-[11px] font-semibold text-white line-clamp-2">
                                                     {eq?.name ?? 'Equipamento'}
                                                 </p>
                                                 <p className="text-[11px] text-zinc-500 mt-1">
@@ -496,7 +496,7 @@ function ReturnCompanyGroup({
                                                 {retShipment && (
                                                     <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
                                                         {shipmentIcon(retStatus, 'w-3 h-3')}
-                                                        <span className={`text-[11px] font-black uppercase tracking-widest ${statusCol}`}>
+                                                        <span className={`text-[11px] font-semibold ${statusCol}`}>
                                                             {statusLabel}
                                                         </span>
                                                         {retShipment.tracking_code && (
@@ -533,7 +533,7 @@ function ReturnCompanyGroup({
                                             {isRenter && retShipment && retStatus === 'awaiting_approval' && (
                                                 <button
                                                     onClick={() => setShowReturnTrackingId(isShowingForm ? null : booking.id)}
-                                                    className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-red-400 hover:text-red-300 transition-colors"
+                                                    className="flex items-center gap-1.5 text-[11px] font-semibold text-red-400 hover:text-red-300 transition-colors"
                                                 >
                                                     <ArrowUpFromLine className="w-3 h-3" />
                                                     {retShipment.tracking_code ? 'Editar rastreio de retorno' : 'Informar envio'}
@@ -550,7 +550,7 @@ function ReturnCompanyGroup({
 
                                             {/* Completed indicator */}
                                             {retStatus === 'delivered' && (
-                                                <span className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-emerald-400">
+                                                <span className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400">
                                                     <PackageCheck className="w-3 h-3" />
                                                     Recebido pela locadora
                                                 </span>
@@ -600,7 +600,7 @@ function ConfirmDeliveryButton({ shipmentId }: { shipmentId: string }) {
         <button
             onClick={handleConfirm}
             disabled={update.isPending}
-            className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 text-[11px] font-semibold text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
         >
             {update.isPending
                 ? <Loader2 className="w-3 h-3 animate-spin" />
@@ -635,7 +635,7 @@ function ConfirmReturnButton({
         <button
             onClick={handleConfirm}
             disabled={confirmReturn.isPending}
-            className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-emerald-400 hover:text-emerald-300 transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400 hover:text-emerald-300 transition-colors disabled:opacity-50"
         >
             {confirmReturn.isPending
                 ? <Loader2 className="w-3 h-3 animate-spin" />
@@ -708,7 +708,7 @@ function ReturnSection({
             {/* Divider with label */}
             <div className="flex items-center gap-3 py-1">
                 <div className="flex-1 h-px bg-zinc-800" />
-                <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-red-400">
+                <div className="flex items-center gap-2 text-[11px] font-semibold text-red-400">
                     <RotateCcw className="w-3 h-3" />
                     Logística Reversa
                 </div>
@@ -735,7 +735,7 @@ function ReturnSection({
                     <Button
                         onClick={handleInitiateReturn}
                         disabled={initiateReturn.isPending}
-                        className="bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-widest text-[11px] h-10 px-8 rounded-xl shadow-lg shadow-red-500/20"
+                        className="bg-red-600 hover:bg-red-500 text-white font-semibold text-[11px] h-10 px-8 rounded-xl shadow-lg shadow-red-500/20"
                     >
                         {initiateReturn.isPending
                             ? <Loader2 className="w-4 h-4 animate-spin" />
@@ -749,7 +749,7 @@ function ReturnSection({
                 <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-4 flex items-center gap-3">
                     <Clock className="w-5 h-5 text-emerald-500 shrink-0" />
                     <div>
-                        <p className="text-xs font-black uppercase tracking-wider text-emerald-400">
+                        <p className="text-xs font-semibold text-emerald-400">
                             Aguardando devolução pelo locatário
                         </p>
                         <p className="text-[11px] text-zinc-500 mt-0.5">
@@ -764,7 +764,7 @@ function ReturnSection({
                 <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-4 flex items-center gap-3">
                     <PackageCheck className="w-6 h-6 text-emerald-400 shrink-0" />
                     <div>
-                        <p className="text-xs font-black uppercase tracking-wider text-emerald-400">
+                        <p className="text-xs font-semibold text-emerald-400">
                             Todos os itens devolvidos com sucesso
                         </p>
                         <p className="text-[11px] text-zinc-500 mt-0.5">
@@ -866,9 +866,7 @@ export function ProjectDetailModal({ project, isOpen, onClose }: Props) {
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 40 }}
-                className="relative z-10 w-full sm:max-w-2xl max-h-[92vh] flex flex-col
-                           bg-zinc-950 border border-zinc-800 rounded-t-3xl sm:rounded-3xl
-                           shadow-[0_-20px_60px_rgba(0,0,0,0.7)] overflow-hidden"
+                className="relative z-10 w-full sm:max-w-2xl max-h-[92vh] flex flex-col bg-zinc-950 border border-zinc-800 rounded-t-3xl sm:rounded-2xl shadow-[0_-20px_60px_rgba(0,0,0,0.7)] overflow-hidden"
             >
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-800 shrink-0">
@@ -877,7 +875,7 @@ export function ProjectDetailModal({ project, isOpen, onClose }: Props) {
                             <Clapperboard className="w-4.5 h-4.5 text-primary" />
                         </div>
                         <div>
-                            <p className="text-[11px] font-black uppercase tracking-wider text-zinc-500">
+                            <p className="text-[11px] font-semibold text-zinc-500">
                                 Projeto
                             </p>
                             <h2 className="text-sm font-black uppercase tracking-wider text-white leading-none mt-0.5">
@@ -886,7 +884,7 @@ export function ProjectDetailModal({ project, isOpen, onClose }: Props) {
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <Badge className={`text-[11px] font-black uppercase tracking-widest border ${statusColor}`}>
+                        <Badge className={`text-[11px] font-semibold border ${statusColor}`}>
                             {statusLabel}
                         </Badge>
                         <button
@@ -905,7 +903,7 @@ export function ProjectDetailModal({ project, isOpen, onClose }: Props) {
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div className="bg-zinc-900/40 rounded-2xl p-4 border border-zinc-800/50">
                             <CalendarDays className="w-4 h-4 text-primary mb-2" />
-                            <p className="text-[11px] text-zinc-500 font-black uppercase tracking-widest">Período</p>
+                            <p className="text-[11px] text-zinc-500 font-semibold ">Período</p>
                             {bookings[0] && (
                                 <p className="text-xs font-black text-white mt-1">
                                     {format(parseISO(bookings[0].start_date), "d MMM", { locale: ptBR })}
@@ -918,7 +916,7 @@ export function ProjectDetailModal({ project, isOpen, onClose }: Props) {
 
                         <div className="bg-zinc-900/40 rounded-2xl p-4 border border-zinc-800/50">
                             <Package className="w-4 h-4 text-primary mb-2" />
-                            <p className="text-[11px] text-zinc-500 font-black uppercase tracking-widest">Itens</p>
+                            <p className="text-[11px] text-zinc-500 font-semibold ">Itens</p>
                             <p className="text-lg font-black text-white mt-1">{bookings.length}</p>
                             <p className="text-[11px] text-zinc-500">
                                 {isReturning
@@ -928,7 +926,7 @@ export function ProjectDetailModal({ project, isOpen, onClose }: Props) {
                         </div>
 
                         <div className="bg-zinc-900/40 rounded-2xl p-4 border border-zinc-800/50">
-                            <p className="text-[11px] text-zinc-500 font-black uppercase tracking-widest mb-2">Total</p>
+                            <p className="text-[11px] text-zinc-500 font-semibold mb-2">Total</p>
                             <p className="text-sm font-black text-white tabular-nums">{brl(total)}</p>
                             <p className="text-[11px] text-zinc-500 mt-0.5">{brl(total / Math.max(1, days))}/dia</p>
                         </div>
@@ -937,7 +935,7 @@ export function ProjectDetailModal({ project, isOpen, onClose }: Props) {
                     {/* Progress bar */}
                     {bookings.length > 0 && progressPct > 0 && (
                         <div>
-                            <div className="flex justify-between text-[11px] font-black uppercase tracking-widest text-zinc-500 mb-2">
+                            <div className="flex justify-between text-[11px] font-semibold text-zinc-500 mb-2">
                                 <span>{progressLabel}</span>
                                 <span>{progressCurrent}/{bookings.length} itens</span>
                             </div>
@@ -954,7 +952,7 @@ export function ProjectDetailModal({ project, isOpen, onClose }: Props) {
 
                     {/* ── Outbound: Grouped by company ─────────────────────────── */}
                     <div>
-                        <p className="text-[11px] font-black uppercase tracking-wider text-zinc-500 mb-3">
+                        <p className="text-[11px] font-semibold text-zinc-500 mb-3">
                             Equipamentos por locadora
                         </p>
                         <div className="space-y-3">
@@ -988,7 +986,7 @@ export function ProjectDetailModal({ project, isOpen, onClose }: Props) {
                     {/* Delivery address */}
                     {project.delivery_method === 'delivery' && project.delivery_address && (
                         <div className="bg-zinc-900/40 rounded-2xl p-4 border border-zinc-800/50">
-                            <p className="text-[11px] font-black uppercase tracking-wider text-zinc-500 mb-2">
+                            <p className="text-[11px] font-semibold text-zinc-500 mb-2">
                                 Endereço de entrega
                             </p>
                             <p className="text-xs text-white flex items-start gap-2">

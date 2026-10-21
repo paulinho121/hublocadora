@@ -212,12 +212,12 @@ export default function Register() {
                         </div>
                         {error && (
                             <div className="space-y-2 mt-2">
-                                <p className="text-xs text-red-400 font-bold uppercase tracking-widest text-center">{error}</p>
+                                <p className="text-xs text-red-400 font-bold text-center">{error}</p>
                                 {error.includes('já está cadastrado') && (
                                     <Button 
                                         type="button"
                                         variant="link" 
-                                        className="w-full text-xs text-primary hover:text-primary/80 font-black uppercase underline underline-offset-4"
+                                        className="w-full text-xs text-primary hover:text-primary/80 font-semibold underline underline-offset-4"
                                         onClick={handleResetPassword}
                                     >
                                         Esqueci minha senha / Recuperar Acesso
@@ -227,7 +227,7 @@ export default function Register() {
                         )}
                         {successMessage && (
                             <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl text-center">
-                                <p className="text-xs text-emerald-400 font-black uppercase tracking-widest leading-relaxed">
+                                <p className="text-xs text-emerald-400 font-semibold leading-relaxed">
                                     {successMessage}
                                 </p>
                             </div>
@@ -261,7 +261,7 @@ export default function Register() {
 
                         <div className="relative flex items-center py-2 shrink-0">
                             <div className="flex-grow border-t border-zinc-800"></div>
-                            <span className="flex-shrink-0 mx-4 text-zinc-500 text-xs uppercase font-bold tracking-widest">ou</span>
+                            <span className="flex-shrink-0 mx-4 text-zinc-500 text-xs font-bold ">ou</span>
                             <div className="flex-grow border-t border-zinc-800"></div>
                         </div>
 
@@ -283,7 +283,7 @@ export default function Register() {
                     </form>
                 </CardContent>
                 <CardFooter className="flex flex-col space-y-4 text-center pb-8">
-                    <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">
+                    <p className="text-xs text-muted-foreground font-bold ">
                         Já faz parte da cena?{' '}
                         <Button variant="link" className="px-2 py-3 -my-3 h-auto text-primary font-black uppercase underline underline-offset-4" onClick={() => navigate('/login', { state: location.state })}>
                             Entrar

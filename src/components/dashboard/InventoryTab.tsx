@@ -150,7 +150,7 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
         <div className="flex gap-2 w-full md:w-auto">
            <Button
             onClick={onAdd}
-            className="h-11 px-6 font-bold flex-1 md:flex-none uppercase text-xs tracking-widest gap-2 bg-primary hover:bg-primary/90 rounded-xl shadow-[0_0_20px_rgba(var(--primary),0.3)] transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+            className="h-11 px-6 font-bold flex-1 md:flex-none text-xs gap-2 bg-primary hover:bg-primary/90 rounded-xl shadow-[0_0_20px_rgba(var(--primary),0.3)] transition-all transform hover:scale-[1.02] active:scale-[0.98]"
            >
              <Plus className="h-4 w-4" /> Novo Item
            </Button>
@@ -172,7 +172,7 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
           ))}
         </div>
       ) : equipments.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 bg-zinc-950/20 border border-dashed border-zinc-800 rounded-3xl text-center space-y-6 animate-in zoom-in-95 duration-500">
+        <div className="flex flex-col items-center justify-center py-20 bg-zinc-950/20 border border-dashed border-zinc-800 rounded-2xl text-center space-y-6 animate-in zoom-in-95 duration-500">
           <div className="w-24 h-24 rounded-full bg-zinc-900 flex items-center justify-center shadow-inner">
              <Package className="h-10 w-10 text-zinc-500" />
           </div>
@@ -217,7 +217,7 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
               </div>
               <div>
-                 <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest leading-none mb-1">Disponíveis</p>
+                 <p className="text-[11px] font-semibold text-zinc-500 leading-none mb-1">Disponíveis</p>
                  <p className="font-bold text-sm tracking-tighter">{computedStats.available} itens</p>
               </div>
            </div>
@@ -227,7 +227,7 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
                  <Package className="h-4 w-4 text-amber-500" />
               </div>
               <div>
-                 <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest leading-none mb-1">Locados</p>
+                 <p className="text-[11px] font-semibold text-zinc-500 leading-none mb-1">Locados</p>
                  <p className="font-bold text-sm tracking-tighter">{computedStats.rented} itens</p>
               </div>
            </div>
@@ -237,7 +237,7 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
                  <AlertCircle className="h-4 w-4 text-destructive" />
               </div>
               <div>
-                 <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest leading-none mb-1">Manutenção</p>
+                 <p className="text-[11px] font-semibold text-zinc-500 leading-none mb-1">Manutenção</p>
                  <p className="font-bold text-sm tracking-tighter">{computedStats.maintenance} itens</p>
               </div>
            </div>

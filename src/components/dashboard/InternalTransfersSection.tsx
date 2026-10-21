@@ -41,7 +41,7 @@ export function InternalTransfersSection() {
     if (isLoading) return (
         <div className="py-20 flex flex-col items-center justify-center">
             <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-            <p className="text-[11px] font-black uppercase tracking-wider text-zinc-400">Carregando transferências...</p>
+            <p className="text-[11px] font-semibold text-zinc-400">Carregando transferências...</p>
         </div>
     );
 
@@ -64,14 +64,14 @@ export function InternalTransfersSection() {
 
                 <div className="grid grid-cols-1 gap-6">
                     {pendingTransfers.length === 0 ? (
-                        <div className="py-16 bg-zinc-950/20 border border-dashed border-white/5 rounded-[32px] text-center backdrop-blur-md">
-                            <p className="text-zinc-500 text-[11px] font-black uppercase tracking-wider">Fluxo de Aprovação Limpo</p>
+                        <div className="py-16 bg-zinc-950/20 border border-dashed border-white/5 rounded-2xl text-center backdrop-blur-md">
+                            <p className="text-zinc-500 text-[11px] font-semibold ">Fluxo de Aprovação Limpo</p>
                         </div>
                     ) : pendingTransfers.map(transfer => (
-                        <Card key={transfer.id} className="bg-zinc-950/40 border-white/5 rounded-[32px] overflow-hidden hover:border-primary/20 transition-all duration-500 group backdrop-blur-3xl shadow-2xl">
+                        <Card key={transfer.id} className="bg-zinc-950/40 border-white/5 rounded-2xl overflow-hidden hover:border-primary/20 transition-all duration-500 group backdrop-blur-3xl shadow-2xl">
                             <CardContent className="p-8 flex flex-col md:flex-row items-center justify-between gap-8">
                                 <div className="flex items-center gap-8 w-full">
-                                    <div className="h-20 w-20 rounded-[24px] bg-black border border-white/5 flex items-center justify-center overflow-hidden shrink-0 shadow-inner group-hover:scale-105 transition-transform duration-500">
+                                    <div className="h-20 w-20 rounded-2xl bg-black border border-white/5 flex items-center justify-center overflow-hidden shrink-0 shadow-inner group-hover:scale-105 transition-transform duration-500">
                                         {transfer.equipment?.images?.[0] ? (
                                             <img src={transfer.equipment.images[0]} alt="" className="w-full h-full object-cover" />
                                         ) : (
@@ -80,18 +80,18 @@ export function InternalTransfersSection() {
                                     </div>
                                     <div className="space-y-2 flex-1">
                                         <div className="flex items-center gap-3">
-                                            <Badge className="bg-primary/5 text-primary border-primary/10 text-[11px] uppercase font-black tracking-widest px-3 py-1">REPOSIÇÃO URGENTE</Badge>
-                                            <span className="text-[11px] font-black text-zinc-400 uppercase tracking-wider">{format(new Date(transfer.created_at), "dd/MM '·' HH:mm")}</span>
+                                            <Badge className="bg-primary/5 text-primary border-primary/10 text-[11px] font-semibold px-3 py-1">REPOSIÇÃO URGENTE</Badge>
+                                            <span className="text-[11px] font-semibold text-zinc-400 ">{format(new Date(transfer.created_at), "dd/MM '·' HH:mm")}</span>
                                         </div>
                                         <h4 className="text-2xl font-black uppercase tracking-tighter text-white">{transfer.equipment?.name}</h4>
-                                        <div className="flex items-center gap-2 text-[11px] font-black text-zinc-500 uppercase tracking-widest">
+                                        <div className="flex items-center gap-2 text-[11px] font-semibold text-zinc-500 ">
                                             <Building2 className="h-3.5 w-3.5" /> DESTINO: <span className="text-zinc-300">{transfer.requester_branch?.name}</span>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-10 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-white/5 pt-6 md:pt-0">
                                     <div className="text-right">
-                                        <span className="text-[11px] font-black uppercase text-zinc-500 tracking-wider block mb-1">Volume</span>
+                                        <span className="text-[11px] font-semibold text-zinc-500 block mb-1">Volume</span>
                                         <span className="text-4xl font-black text-white">{transfer.quantity}</span>
                                     </div>
                                     <Button 
@@ -121,22 +121,22 @@ export function InternalTransfersSection() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {activeTransfers.map(transfer => (
-                        <Card key={transfer.id} className="bg-zinc-950/20 border-white/5 rounded-[32px] overflow-hidden backdrop-blur-xl">
+                        <Card key={transfer.id} className="bg-zinc-950/20 border-white/5 rounded-2xl overflow-hidden backdrop-blur-xl">
                             <CardContent className="p-8 space-y-8">
                                 <div className="flex items-center justify-between">
-                                    <Badge className="bg-zinc-900 text-zinc-400 border-white/5 text-[11px] font-black uppercase tracking-wider px-4 py-1.5">{transfer.status}</Badge>
-                                    <div className="text-[11px] font-black text-zinc-500 uppercase tracking-widest">TRF-{transfer.id.slice(0, 8).toUpperCase()}</div>
+                                    <Badge className="bg-zinc-900 text-zinc-400 border-white/5 text-[11px] font-semibold px-4 py-1.5">{transfer.status}</Badge>
+                                    <div className="text-[11px] font-semibold text-zinc-500 ">TRF-{transfer.id.slice(0, 8).toUpperCase()}</div>
                                 </div>
                                 
                                 <h4 className="text-lg font-black uppercase tracking-tighter text-zinc-300">{transfer.equipment?.name} · <span className="text-white">{transfer.quantity} UN</span></h4>
 
-                                <div className="flex items-center justify-between bg-black/40 p-8 rounded-[24px] border border-white/5 relative overflow-hidden group">
+                                <div className="flex items-center justify-between bg-black/40 p-8 rounded-2xl border border-white/5 relative overflow-hidden group">
                                     <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
                                     
                                     <div className="flex-1 text-center relative z-10 space-y-1">
-                                        <p className="text-[11px] font-black uppercase text-zinc-500 tracking-wider">Origem</p>
+                                        <p className="text-[11px] font-semibold text-zinc-500 ">Origem</p>
                                         <p className="text-xs font-black text-zinc-200">{transfer.source_branch?.name}</p>
-                                        <p className="text-[11px] text-zinc-400 font-bold uppercase tracking-widest">{transfer.source_branch?.city}</p>
+                                        <p className="text-[11px] text-zinc-400 font-bold ">{transfer.source_branch?.city}</p>
                                     </div>
                                     
                                     <div className="px-6 relative z-10">
@@ -150,9 +150,9 @@ export function InternalTransfersSection() {
                                     </div>
 
                                     <div className="flex-1 text-center relative z-10 space-y-1">
-                                        <p className="text-[11px] font-black uppercase text-zinc-500 tracking-wider">Destino</p>
+                                        <p className="text-[11px] font-semibold text-zinc-500 ">Destino</p>
                                         <p className="text-xs font-black text-zinc-200">{transfer.requester_branch?.name}</p>
-                                        <p className="text-[11px] text-zinc-400 font-bold uppercase tracking-widest">{transfer.requester_branch?.city}</p>
+                                        <p className="text-[11px] text-zinc-400 font-bold ">{transfer.requester_branch?.city}</p>
                                     </div>
                                 </div>
                             </CardContent>
@@ -168,14 +168,14 @@ export function InternalTransfersSection() {
                 title="Sincronização de Estoque"
             >
                 <div className="space-y-8">
-                    <div className="p-6 bg-primary/5 border border-primary/10 rounded-[24px] backdrop-blur-xl">
+                    <div className="p-6 bg-primary/5 border border-primary/10 rounded-2xl backdrop-blur-xl">
                         <p className="text-zinc-500 text-sm font-medium leading-relaxed">
                             A unidade <span className="text-white font-black">{selectedTransfer?.requester_branch?.name}</span> necessita de <span className="text-white font-black">{selectedTransfer?.quantity}x {selectedTransfer?.equipment?.name}</span>. Selecione a base de suprimento:
                         </p>
                     </div>
 
                     <div className="space-y-4">
-                        <label className="text-[11px] font-black uppercase tracking-wider text-zinc-400 ml-2">Bases de Distribuição Disponíveis</label>
+                        <label className="text-[11px] font-semibold text-zinc-400 ml-2">Bases de Distribuição Disponíveis</label>
                         <div className="grid grid-cols-1 gap-3 max-h-[350px] overflow-y-auto pr-3 custom-scrollbar">
                             {getBranchesWithStock(selectedTransfer?.equipment_id || '').map(branch => (
                                 <button
@@ -189,7 +189,7 @@ export function InternalTransfersSection() {
                                 >
                                     <div className="space-y-1">
                                         <p className="text-sm font-black uppercase tracking-tight text-white">{branch.name}</p>
-                                        <p className="text-[11px] text-zinc-500 font-bold uppercase tracking-widest">{branch.city} · {branch.state}</p>
+                                        <p className="text-[11px] text-zinc-500 font-bold ">{branch.city} · {branch.state}</p>
                                     </div>
                                     {sourceBranchId === branch.id && (
                                         <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center">
@@ -202,11 +202,11 @@ export function InternalTransfersSection() {
                     </div>
 
                     <div className="flex gap-4 pt-6 border-t border-white/5">
-                        <Button variant="ghost" onClick={() => setIsApprovalModalOpen(false)} className="flex-1 font-black uppercase text-[11px] tracking-widest text-zinc-400 hover:text-white transition-colors">Abortar</Button>
+                        <Button variant="ghost" onClick={() => setIsApprovalModalOpen(false)} className="flex-1 font-semibold text-[11px] text-zinc-400 hover:text-white transition-colors">Abortar</Button>
                         <Button 
                             disabled={!sourceBranchId}
                             onClick={handleApprove} 
-                            className="flex-[2] bg-white text-black hover:bg-zinc-200 font-black uppercase text-[11px] tracking-wider px-10 rounded-[18px] h-14 shadow-2xl transition-all active:scale-95"
+                            className="flex-[2] bg-white text-black hover:bg-zinc-200 font-semibold text-[11px] px-10 rounded-[18px] h-14 shadow-2xl transition-all active:scale-95"
                         >
                             Confirmar Movimentação
                         </Button>

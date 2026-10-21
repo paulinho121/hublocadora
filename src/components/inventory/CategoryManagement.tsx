@@ -41,7 +41,7 @@ export function CategoryManagement() {
   return (
     <div className="space-y-8 py-4">
       <div className="space-y-4">
-        <Label className="text-xs font-black uppercase tracking-wider text-zinc-500">Adicionar Nova Categoria</Label>
+        <Label className="text-xs font-semibold text-zinc-500">Adicionar Nova Categoria</Label>
         <div className="flex gap-2">
           <div className="relative flex-1">
             <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
@@ -65,12 +65,12 @@ export function CategoryManagement() {
       </div>
 
       <div className="space-y-4">
-        <Label className="text-xs font-black uppercase tracking-wider text-zinc-500">Categorias Atuais</Label>
+        <Label className="text-xs font-semibold text-zinc-500">Categorias Atuais</Label>
         <div className="flex flex-wrap gap-3">
           {isLoading ? (
             <div className="flex items-center gap-2 text-zinc-400">
               <Loader2 className="w-4 h-4 animate-spin" />
-              <span className="text-xs font-bold uppercase tracking-widest">Carregando...</span>
+              <span className="text-xs font-bold ">Carregando...</span>
             </div>
           ) : (
             categories?.map((cat) => (
@@ -80,7 +80,7 @@ export function CategoryManagement() {
                 className="h-10 px-4 rounded-xl border-zinc-900 bg-zinc-950 text-zinc-100 flex items-center gap-2 hover:bg-zinc-900 transition-colors"
               >
                 <div className="w-2 h-2 rounded-full bg-primary/40" />
-                <span className="font-bold uppercase tracking-tight text-xs">{cat.name}</span>
+                <span className="font-bold tracking-tight text-xs">{cat.name}</span>
               </Badge>
             ))
           )}

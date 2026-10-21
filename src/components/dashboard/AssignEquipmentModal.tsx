@@ -112,11 +112,11 @@ export function AssignEquipmentModal({ equipment, isOpen, onClose }: AssignEquip
             <div className="space-y-6 py-2">
                 <div className="p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800 flex items-center justify-between">
                     <div>
-                        <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest mb-1">Equipamento Selecionado</p>
+                        <p className="text-[11px] font-semibold text-zinc-500 mb-1">Equipamento Selecionado</p>
                         <p className="text-sm font-black text-zinc-100 uppercase">{equipment?.name}</p>
                     </div>
                     <div className="text-right">
-                        <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest mb-1">Qtd. a Enviar</p>
+                        <p className="text-[11px] font-semibold text-zinc-500 mb-1">Qtd. a Enviar</p>
                         <input 
                             type="number" 
                             value={quantity}
@@ -151,7 +151,7 @@ export function AssignEquipmentModal({ equipment, isOpen, onClose }: AssignEquip
                                     <p className="font-black uppercase tracking-tighter text-zinc-200">{branch.name}</p>
                                     <div className="flex items-center gap-2 mt-0.5">
                                         <MapPin className="h-3 w-3 text-zinc-400" />
-                                        <p className="text-[11px] text-zinc-500 font-bold uppercase tracking-widest truncate">
+                                        <p className="text-[11px] text-zinc-500 font-bold truncate">
                                             {branch.city} - {branch.state} {branch.is_main && '(Sede)'}
                                         </p>
                                     </div>
@@ -170,7 +170,7 @@ export function AssignEquipmentModal({ equipment, isOpen, onClose }: AssignEquip
                     <Button 
                         variant="ghost" 
                         onClick={onClose}
-                        className="flex-1 text-zinc-500 font-bold uppercase tracking-widest text-[11px]"
+                        className="flex-1 text-zinc-500 font-bold text-[11px]"
                     >
                         Cancelar
                     </Button>

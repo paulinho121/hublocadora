@@ -38,7 +38,7 @@ export default function NotFound() {
                 <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                     <Button
                         onClick={() => navigate('/')}
-                        className="h-12 px-8 clay-button-primary font-black uppercase tracking-widest text-xs flex items-center gap-2"
+                        className="h-12 px-8 clay-button-primary font-semibold text-xs flex items-center gap-2"
                     >
                         <Home className="h-4 w-4" />
                         Voltar ao Hub
@@ -46,7 +46,7 @@ export default function NotFound() {
                     <Button
                         onClick={() => navigate('/dashboard')}
                         variant="outline"
-                        className="h-12 px-8 border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800 font-black uppercase tracking-widest text-xs flex items-center gap-2"
+                        className="h-12 px-8 border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800 font-semibold text-xs flex items-center gap-2"
                     >
                         <Search className="h-4 w-4" />
                         Ir para Locadora

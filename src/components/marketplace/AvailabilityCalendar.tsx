@@ -139,7 +139,7 @@ export function AvailabilityCalendar({
           {/* Week day headers */}
           <div className="grid grid-cols-7">
             {WEEK_DAYS.map(d => (
-              <div key={d} className="text-center text-[11px] font-black uppercase text-zinc-400 tracking-widest py-1">
+              <div key={d} className="text-center text-[11px] font-semibold text-zinc-400 py-1">
                 {d}
               </div>
             ))}
@@ -196,15 +196,15 @@ export function AvailabilityCalendar({
       <div className="flex items-center justify-center gap-4 pt-3 border-t border-zinc-800/70">
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded bg-emerald-500/40" />
-          <span className="text-[11px] font-black uppercase text-zinc-500">Disponível</span>
+          <span className="text-[11px] font-semibold text-zinc-500">Disponível</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded bg-amber-500/40" />
-          <span className="text-[11px] font-black uppercase text-zinc-500">Parcial</span>
+          <span className="text-[11px] font-semibold text-zinc-500">Parcial</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded bg-red-500/30" />
-          <span className="text-[11px] font-black uppercase text-zinc-500">Ocupado</span>
+          <span className="text-[11px] font-semibold text-zinc-500">Ocupado</span>
         </div>
       </div>
 

@@ -79,28 +79,13 @@ const AnimatedGlowingSearchBar = ({
       <div className="relative flex items-center justify-center group w-full">
 
         {/* Outer glow layers */}
-        <div className="absolute z-[-1] overflow-hidden h-full w-full max-h-[70px] rounded-xl blur-[3px]
-                        before:absolute before:content-[''] before:z-[-2] before:w-[999px] before:h-[999px] before:bg-no-repeat before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:rotate-[60deg]
-                        before:bg-[conic-gradient(#000,#7a0020_5%,#000_38%,#000_50%,#D81545_60%,#000_87%)] before:transition-all before:duration-[2000ms]
-                        group-hover:before:rotate-[-120deg] group-focus-within:before:rotate-[420deg] group-focus-within:before:duration-[4000ms]" />
-        <div className="absolute z-[-1] overflow-hidden h-full w-full max-h-[65px] rounded-xl blur-[3px]
-                        before:absolute before:content-[''] before:z-[-2] before:w-[600px] before:h-[600px] before:bg-no-repeat before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:rotate-[82deg]
-                        before:bg-[conic-gradient(rgba(0,0,0,0),#5a0015,rgba(0,0,0,0)_10%,rgba(0,0,0,0)_50%,#7a001a,rgba(0,0,0,0)_60%)] before:transition-all before:duration-[2000ms]
-                        group-hover:before:rotate-[-98deg] group-focus-within:before:rotate-[442deg] group-focus-within:before:duration-[4000ms]" />
-        <div className="absolute z-[-1] overflow-hidden h-full w-full max-h-[65px] rounded-xl blur-[3px]
-                        before:absolute before:content-[''] before:z-[-2] before:w-[600px] before:h-[600px] before:bg-no-repeat before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:rotate-[82deg]
-                        before:bg-[conic-gradient(rgba(0,0,0,0),#5a0015,rgba(0,0,0,0)_10%,rgba(0,0,0,0)_50%,#7a001a,rgba(0,0,0,0)_60%)] before:transition-all before:duration-[2000ms]
-                        group-hover:before:rotate-[-98deg] group-focus-within:before:rotate-[442deg] group-focus-within:before:duration-[4000ms]" />
+        <div className="absolute z-[-1] overflow-hidden h-full w-full max-h-[70px] rounded-xl blur-[3px] before:absolute before:content-[''] before:z-[-2] before:w-[999px] before:h-[999px] before:bg-no-repeat before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:rotate-[60deg] before:bg-[conic-gradient(#000,#7a0020_5%,#000_38%,#000_50%,#D81545_60%,#000_87%)] before:transition-all before:duration-[2000ms] group-hover:before:rotate-[-120deg] group-focus-within:before:rotate-[420deg] group-focus-within:before:duration-[4000ms]" />
+        <div className="absolute z-[-1] overflow-hidden h-full w-full max-h-[65px] rounded-xl blur-[3px] before:absolute before:content-[''] before:z-[-2] before:w-[600px] before:h-[600px] before:bg-no-repeat before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:rotate-[82deg] before:bg-[conic-gradient(rgba(0,0,0,0),#5a0015,rgba(0,0,0,0)_10%,rgba(0,0,0,0)_50%,#7a001a,rgba(0,0,0,0)_60%)] before:transition-all before:duration-[2000ms] group-hover:before:rotate-[-98deg] group-focus-within:before:rotate-[442deg] group-focus-within:before:duration-[4000ms]" />
+        <div className="absolute z-[-1] overflow-hidden h-full w-full max-h-[65px] rounded-xl blur-[3px] before:absolute before:content-[''] before:z-[-2] before:w-[600px] before:h-[600px] before:bg-no-repeat before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:rotate-[82deg] before:bg-[conic-gradient(rgba(0,0,0,0),#5a0015,rgba(0,0,0,0)_10%,rgba(0,0,0,0)_50%,#7a001a,rgba(0,0,0,0)_60%)] before:transition-all before:duration-[2000ms] group-hover:before:rotate-[-98deg] group-focus-within:before:rotate-[442deg] group-focus-within:before:duration-[4000ms]" />
 
         {/* Inner glow layers */}
-        <div className="absolute z-[-1] overflow-hidden h-full w-full max-h-[63px] rounded-lg blur-[2px]
-                        before:absolute before:content-[''] before:z-[-2] before:w-[600px] before:h-[600px] before:bg-no-repeat before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:rotate-[83deg]
-                        before:bg-[conic-gradient(rgba(0,0,0,0)_0%,#f87171,rgba(0,0,0,0)_8%,rgba(0,0,0,0)_50%,#fca5a5,rgba(0,0,0,0)_58%)] before:brightness-[1.4]
-                        before:transition-all before:duration-[2000ms] group-hover:before:rotate-[-97deg] group-focus-within:before:rotate-[443deg] group-focus-within:before:duration-[4000ms]" />
-        <div className="absolute z-[-1] overflow-hidden h-full w-full max-h-[59px] rounded-xl blur-[0.5px]
-                        before:absolute before:content-[''] before:z-[-2] before:w-[600px] before:h-[600px] before:bg-no-repeat before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:rotate-[70deg]
-                        before:bg-[conic-gradient(#1c191c,#7a0020_5%,#1c191c_14%,#1c191c_50%,#D81545_60%,#1c191c_64%)] before:brightness-[1.3]
-                        before:transition-all before:duration-[2000ms] group-hover:before:rotate-[-110deg] group-focus-within:before:rotate-[430deg] group-focus-within:before:duration-[4000ms]" />
+        <div className="absolute z-[-1] overflow-hidden h-full w-full max-h-[63px] rounded-lg blur-[2px] before:absolute before:content-[''] before:z-[-2] before:w-[600px] before:h-[600px] before:bg-no-repeat before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:rotate-[83deg] before:bg-[conic-gradient(rgba(0,0,0,0)_0%,#f87171,rgba(0,0,0,0)_8%,rgba(0,0,0,0)_50%,#fca5a5,rgba(0,0,0,0)_58%)] before:brightness-[1.4] before:transition-all before:duration-[2000ms] group-hover:before:rotate-[-97deg] group-focus-within:before:rotate-[443deg] group-focus-within:before:duration-[4000ms]" />
+        <div className="absolute z-[-1] overflow-hidden h-full w-full max-h-[59px] rounded-xl blur-[0.5px] before:absolute before:content-[''] before:z-[-2] before:w-[600px] before:h-[600px] before:bg-no-repeat before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:rotate-[70deg] before:bg-[conic-gradient(#1c191c,#7a0020_5%,#1c191c_14%,#1c191c_50%,#D81545_60%,#1c191c_64%)] before:brightness-[1.3] before:transition-all before:duration-[2000ms] group-hover:before:rotate-[-110deg] group-focus-within:before:rotate-[430deg] group-focus-within:before:duration-[4000ms]" />
 
         {/* Input wrapper */}
         <div className="relative group w-full">
@@ -129,10 +114,7 @@ const AnimatedGlowingSearchBar = ({
           <div className="pointer-events-none w-[30px] h-[20px] absolute bg-[#D81545] top-[10px] left-[5px] blur-2xl opacity-80 transition-all duration-[2000ms] group-hover:opacity-0" />
 
           {/* Right spinning border */}
-          <div className="absolute h-[38px] w-[36px] md:h-[42px] md:w-[40px] overflow-hidden top-[7px] right-[7px] rounded-lg
-                          before:absolute before:content-[''] before:w-[600px] before:h-[600px] before:bg-no-repeat before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:rotate-90
-                          before:bg-[conic-gradient(rgba(0,0,0,0),#4f1a1a,rgba(0,0,0,0)_50%,rgba(0,0,0,0)_50%,#4f1a1a,rgba(0,0,0,0)_100%)]
-                          before:brightness-[1.35] before:animate-spin-slow" />
+          <div className="absolute h-[38px] w-[36px] md:h-[42px] md:w-[40px] overflow-hidden top-[7px] right-[7px] rounded-lg before:absolute before:content-[''] before:w-[600px] before:h-[600px] before:bg-no-repeat before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:rotate-90 before:bg-[conic-gradient(rgba(0,0,0,0),#4f1a1a,rgba(0,0,0,0)_50%,rgba(0,0,0,0)_50%,#4f1a1a,rgba(0,0,0,0)_100%)] before:brightness-[1.35] before:animate-spin-slow" />
 
           {/* Filter / search button */}
           <button

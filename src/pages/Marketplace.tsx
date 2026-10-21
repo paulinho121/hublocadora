@@ -73,21 +73,15 @@ function ProjectDateBar({ availableCount }: { availableCount: number }) {
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="sticky top-[72px] md:top-[88px] z-40 w-full
-                 bg-zinc-950/95 border border-zinc-800/70 backdrop-blur-xl
-                 rounded-2xl px-4 py-3 mb-6
-                 flex items-center gap-3 flex-wrap
-                 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+      className="sticky top-[72px] md:top-[88px] z-40 w-full bg-zinc-950/95 border border-zinc-800/70 backdrop-blur-xl rounded-2xl px-4 py-3 mb-6 flex items-center gap-3 flex-wrap shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
     >
       {/* ── Date inputs ── */}
       <div className="flex items-center gap-2 flex-1 min-w-0">
         {/* Start */}
-        <label className="flex items-center gap-2 bg-zinc-900/70 rounded-xl px-3 py-2
-                          border border-zinc-800/60 hover:border-primary/40 transition-colors
-                          cursor-pointer group">
+        <label className="flex items-center gap-2 bg-zinc-900/70 rounded-xl px-3 py-2 border border-zinc-800/60 hover:border-primary/40 transition-colors cursor-pointer group">
           <Calendar className="w-3.5 h-3.5 text-primary shrink-0" />
           <div className="flex flex-col leading-none">
-            <span className="text-[11px] font-black uppercase tracking-wider text-zinc-500 mb-0.5">
+            <span className="text-[11px] font-semibold text-zinc-500 mb-0.5">
               Início
             </span>
             <input
@@ -95,8 +89,7 @@ function ProjectDateBar({ availableCount }: { availableCount: number }) {
               value={state.startDate}
               min={today}
               onChange={e => handleStart(e.target.value)}
-              className="bg-transparent text-[11px] font-black text-white focus:outline-none
-                         cursor-pointer [color-scheme:dark] w-[96px]"
+              className="bg-transparent text-[11px] font-black text-white focus:outline-none cursor-pointer [color-scheme:dark] w-[96px]"
             />
           </div>
         </label>
@@ -104,12 +97,10 @@ function ProjectDateBar({ availableCount }: { availableCount: number }) {
         <ArrowRight className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
 
         {/* End */}
-        <label className="flex items-center gap-2 bg-zinc-900/70 rounded-xl px-3 py-2
-                          border border-zinc-800/60 hover:border-primary/40 transition-colors
-                          cursor-pointer group">
+        <label className="flex items-center gap-2 bg-zinc-900/70 rounded-xl px-3 py-2 border border-zinc-800/60 hover:border-primary/40 transition-colors cursor-pointer group">
           <Calendar className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
           <div className="flex flex-col leading-none">
-            <span className="text-[11px] font-black uppercase tracking-wider text-zinc-500 mb-0.5">
+            <span className="text-[11px] font-semibold text-zinc-500 mb-0.5">
               Término
             </span>
             <input
@@ -117,16 +108,13 @@ function ProjectDateBar({ availableCount }: { availableCount: number }) {
               value={state.endDate}
               min={state.startDate}
               onChange={e => handleEnd(e.target.value)}
-              className="bg-transparent text-[11px] font-black text-white focus:outline-none
-                         cursor-pointer [color-scheme:dark] w-[96px]"
+              className="bg-transparent text-[11px] font-black text-white focus:outline-none cursor-pointer [color-scheme:dark] w-[96px]"
             />
           </div>
         </label>
 
         {/* Days pill */}
-        <span className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-lg
-                         bg-zinc-900/50 border border-zinc-800/40
-                         text-[11px] font-black uppercase tracking-widest text-zinc-500 shrink-0">
+        <span className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-lg bg-zinc-900/50 border border-zinc-800/40 text-[11px] font-semibold text-zinc-500 shrink-0">
           {totalDays} {totalDays === 1 ? 'diária' : 'diárias'}
         </span>
       </div>
@@ -144,9 +132,7 @@ function ProjectDateBar({ availableCount }: { availableCount: number }) {
           whileHover={{ scale: 1.03, y: -1 }}
           whileTap={{ scale: 0.97 }}
           onClick={openDrawer}
-          className="flex items-center gap-2 bg-primary text-white rounded-xl
-                     px-4 py-2.5 font-black uppercase tracking-widest text-[11px]
-                     shadow-lg shadow-primary/25 shrink-0 transition-colors hover:bg-primary/90"
+          className="flex items-center gap-2 bg-primary text-white rounded-xl px-4 py-2.5 font-semibold text-[11px] shadow-lg shadow-primary/25 shrink-0 transition-colors hover:bg-primary/90"
         >
           <FolderOpen className="w-3.5 h-3.5" />
           {itemCount} {itemCount === 1 ? 'item' : 'itens'} · {brl(estimatedTotal)}
@@ -395,10 +381,10 @@ export default function Marketplace() {
             transition={{ delay: 0.05, duration: 0.5 }}
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-md mb-6"
           >
-            <span className="text-[11px] font-black uppercase tracking-wider text-primary">O Hub da sua produção</span>
+            <span className="text-[11px] font-semibold text-primary">O Hub da sua produção</span>
           </motion.div>
           {/* Headline */}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-black tracking-tighter text-white mb-3 leading-[0.9]">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight text-white mb-3 leading-[0.9]">
             Encontre o equipamento<br />
             <span className="text-primary">perfeito</span> para o seu set.
           </h1>
@@ -454,7 +440,7 @@ export default function Marketplace() {
                     setSelectedBrand(undefined);
                     setSelectedSubCategory(undefined);
                   }}
-                  className="text-zinc-500 hover:text-white uppercase font-black tracking-widest text-[11px]"
+                  className="text-zinc-500 hover:text-white font-semibold text-[11px]"
                 >
                   Limpar Filtros
                 </Button>
@@ -465,7 +451,7 @@ export default function Marketplace() {
           {isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[...Array(8)].map((_, i) => (
-                <div key={i} className="h-[380px] rounded-[2.5rem] bg-zinc-900/40 border border-white/5 animate-pulse overflow-hidden relative">
+                <div key={i} className="h-[380px] rounded-2xl bg-zinc-900/40 border border-white/5 animate-pulse overflow-hidden relative">
                    <div className="h-48 bg-zinc-800/50" />
                    <div className="p-6 space-y-4">
                       <div className="h-4 w-3/4 bg-zinc-800/50 rounded-full" />
@@ -480,7 +466,7 @@ export default function Marketplace() {
             <>
               {displayedEquipments.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-24 text-center">
-                  <div className="h-20 w-20 rounded-3xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-6">
+                  <div className="h-20 w-20 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-6">
                     <Package className="h-8 w-8 text-zinc-500" />
                   </div>
                   <h3 className="text-xl font-black uppercase tracking-tighter mb-2">Nenhum item encontrado</h3>
@@ -526,7 +512,7 @@ export default function Marketplace() {
                     variant="outline" 
                     size="lg" 
                     onClick={() => setShowAll(true)} 
-                    className="rounded-2xl border-white/5 bg-zinc-950/50 text-zinc-400 hover:text-white hover:bg-zinc-900 border-2 px-12 h-16 font-black tracking-widest uppercase text-xs transition-all hover:scale-105 active:scale-95 shadow-2xl"
+                    className="rounded-2xl border-white/5 bg-zinc-950/50 text-zinc-400 hover:text-white hover:bg-zinc-900 border-2 px-12 h-16 font-semibold text-xs transition-all hover:scale-105 active:scale-95 shadow-2xl"
                   >
                     Ver Catálogo Completo
                   </Button>
@@ -540,12 +526,12 @@ export default function Marketplace() {
       {/* Featured Banners - Ocultado temporariamente a pedido do usuário */}
       {/* 
       <div className="w-full max-w-7xl mx-auto px-6 mb-24 flex justify-center">
-        <div className="relative overflow-hidden rounded-[40px] bg-zinc-950/40 border border-white/5 p-12 min-h-[380px] w-full max-w-4xl flex flex-col justify-between group cursor-pointer hover:border-emerald-500/20 transition-all duration-500 shadow-2xl">
+        <div className="relative overflow-hidden rounded-2xl bg-zinc-950/40 border border-white/5 p-6 min-h-[380px] w-full max-w-4xl flex flex-col justify-between group cursor-pointer hover:border-emerald-500/20 transition-all duration-500 shadow-2xl">
           <div className="z-10 max-w-[280px]">
-            <div className="inline-block px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[11px] font-black uppercase tracking-widest mb-6">Pro Lighting</div>
+            <div className="inline-block px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[11px] font-semibold mb-6">Pro Lighting</div>
             <h2 className="text-5xl font-display font-black text-white tracking-tighter uppercase mb-6 leading-[0.85]">Iluminação & Grip</h2>
             <p className="text-zinc-500 mb-8 font-medium leading-relaxed">Controle total da luz com acessórios profissionais e telões de LED de alta definição.</p>
-            <Button className="w-fit bg-emerald-600 hover:bg-emerald-500 text-white border-none rounded-2xl font-black uppercase tracking-widest text-[11px] h-14 px-10 shadow-xl shadow-emerald-500/20 transition-all hover:-translate-y-1">
+            <Button className="w-fit bg-emerald-600 hover:bg-emerald-500 text-white border-none rounded-2xl font-semibold text-[11px] h-14 px-10 shadow-xl shadow-emerald-500/20 transition-all hover:-translate-y-1">
               Buscar <ChevronRight className="ml-2 h-4 w-4"/>
             </Button>
           </div>

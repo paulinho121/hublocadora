@@ -112,8 +112,7 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
       <motion.div
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center justify-center py-14 px-4 text-center
-                   bg-emerald-500/5 border border-emerald-500/20 rounded-3xl"
+        className="flex flex-col items-center justify-center py-14 px-4 text-center bg-emerald-500/5 border border-emerald-500/20 rounded-2xl"
       >
         <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center mb-5">
           <CheckCircle2 className="w-8 h-8 text-emerald-400" />
@@ -126,7 +125,7 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
             ? `Seu pedido tem ${cartCount} equipamentos. Continue locando ou finalize para enviar às locadoras.`
             : 'Continue locando ou finalize o pedido para enviar à locadora.'}
         </p>
-        <p className="text-[11px] font-black uppercase tracking-widest text-emerald-400 mb-6">
+        <p className="text-[11px] font-semibold text-emerald-400 mb-6">
           {format(parseISO(startDate), "d 'de' MMM", { locale: ptBR })}
           {' → '}
           {format(parseISO(endDate), "d 'de' MMM", { locale: ptBR })}
@@ -136,13 +135,13 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
           <Button
             variant="outline"
             onClick={() => navigate('/')}
-            className="rounded-xl border-zinc-700 text-zinc-300 font-black uppercase text-[11px] tracking-widest h-12 px-6"
+            className="rounded-xl border-zinc-700 text-zinc-300 font-semibold text-[11px] h-12 px-6"
           >
             Continuar locando
           </Button>
           <Button
             onClick={openDrawer}
-            className="rounded-xl font-black uppercase text-[11px] tracking-widest h-12 px-6"
+            className="rounded-xl font-semibold text-[11px] h-12 px-6"
           >
             Finalizar pedido <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
@@ -159,7 +158,7 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
         <div className="grid grid-cols-2 divide-x divide-zinc-800">
           {/* Start date */}
           <label className="flex flex-col gap-1 px-4 py-3.5 cursor-pointer hover:bg-zinc-900/60 transition-colors">
-            <span className="text-[11px] font-black uppercase tracking-wider text-zinc-500">
+            <span className="text-[11px] font-semibold text-zinc-500">
               Retirada
             </span>
             <input
@@ -167,14 +166,13 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
               value={startDate}
               min={today}
               onChange={e => handleStart(e.target.value)}
-              className="bg-transparent text-sm font-black text-white focus:outline-none
-                         cursor-pointer [color-scheme:dark] w-full"
+              className="bg-transparent text-sm font-black text-white focus:outline-none cursor-pointer [color-scheme:dark] w-full"
             />
           </label>
 
           {/* End date */}
           <label className="flex flex-col gap-1 px-4 py-3.5 cursor-pointer hover:bg-zinc-900/60 transition-colors">
-            <span className="text-[11px] font-black uppercase tracking-wider text-zinc-500">
+            <span className="text-[11px] font-semibold text-zinc-500">
               Devolução
             </span>
             <input
@@ -182,15 +180,14 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
               value={endDate}
               min={startDate || tomorrow}
               onChange={e => setEndDate(e.target.value)}
-              className="bg-transparent text-sm font-black text-white focus:outline-none
-                         cursor-pointer [color-scheme:dark] w-full"
+              className="bg-transparent text-sm font-black text-white focus:outline-none cursor-pointer [color-scheme:dark] w-full"
             />
           </label>
         </div>
 
         {/* Days count + availability */}
         <div className="flex items-center justify-between px-4 py-2.5 border-t border-zinc-800 bg-zinc-950/40">
-          <span className="text-[11px] font-black uppercase tracking-widest text-zinc-500">
+          <span className="text-[11px] font-semibold text-zinc-500">
             {totalDays} {totalDays === 1 ? 'diária' : 'diárias'}
           </span>
           {loadingAvail ? (
@@ -198,7 +195,7 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
           ) : avail ? (
             <div className="flex items-center gap-1.5">
               <span className={`w-2 h-2 rounded-full ${avail.isAvailable ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
-              <span className={`text-[11px] font-black uppercase tracking-widest ${avail.isAvailable ? 'text-emerald-400' : 'text-red-400'}`}>
+              <span className={`text-[11px] font-semibold ${avail.isAvailable ? 'text-emerald-400' : 'text-red-400'}`}>
                 {avail.isAvailable
                   ? `${avail.available} disponíve${avail.available === 1 ? 'l' : 'is'}`
                   : 'Indisponível'}
@@ -211,10 +208,7 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
       {/* ── Availability calendar (expandable) ────────────────────────────── */}
       <button
         onClick={() => setShowCal(v => !v)}
-        className="w-full flex items-center justify-between px-4 py-3 rounded-2xl
-                   bg-zinc-900/40 border border-zinc-800/60 hover:border-zinc-700
-                   text-[11px] font-black uppercase tracking-widest text-zinc-500
-                   hover:text-zinc-300 transition-all"
+        className="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-zinc-900/40 border border-zinc-800/60 hover:border-zinc-700 text-[11px] font-semibold text-zinc-500 hover:text-zinc-300 transition-all"
       >
         <span className="flex items-center gap-2">
           <CalendarSearch className="w-3.5 h-3.5 text-primary" />
@@ -247,10 +241,9 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
 
       {/* ── Quantity (only if stock > 1) ───────────────────────────────────── */}
       {(equipment.stock_quantity ?? 1) > 1 && (
-        <div className="flex items-center justify-between px-4 py-3.5 rounded-2xl
-                        bg-zinc-900/40 border border-zinc-800/60">
+        <div className="flex items-center justify-between px-4 py-3.5 rounded-2xl bg-zinc-900/40 border border-zinc-800/60">
           <div className="flex flex-col">
-            <span className="text-[11px] font-black uppercase tracking-wider text-zinc-500 mb-0.5">
+            <span className="text-[11px] font-semibold text-zinc-500 mb-0.5">
               Quantidade
             </span>
             <span className="text-[11px] text-zinc-400">
@@ -260,8 +253,7 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setQty(q => Math.max(1, q - 1))}
-              className="w-10 h-10 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700
-                         flex items-center justify-center transition-colors disabled:opacity-30"
+              className="w-10 h-10 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 flex items-center justify-center transition-colors disabled:opacity-30"
               disabled={quantity <= 1}
             >
               <Minus className="w-3.5 h-3.5" />
@@ -271,8 +263,7 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
             </span>
             <button
               onClick={() => setQty(q => Math.min(maxQty, q + 1))}
-              className="w-10 h-10 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700
-                         flex items-center justify-center transition-colors disabled:opacity-30"
+              className="w-10 h-10 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 flex items-center justify-center transition-colors disabled:opacity-30"
               disabled={quantity >= maxQty}
             >
               <Plus className="w-3.5 h-3.5" />
@@ -288,7 +279,7 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
           <span className="text-zinc-300 font-bold">{brl(totalAmount)}</span>
         </div>
         <div className="flex items-center justify-between pt-2 border-t border-zinc-800">
-          <span className="text-xs font-black uppercase tracking-widest text-white">Total</span>
+          <span className="text-xs font-semibold text-white">Total</span>
           <span className="text-xl font-black text-white tabular-nums">{brl(totalAmount)}</span>
         </div>
       </div>
@@ -300,9 +291,7 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
           whileTap={canBook ? { scale: 0.99 } : {}}
           onClick={handleAddToOrder}
           disabled={!canBook || loadingAvail}
-          className={`w-full h-14 rounded-2xl font-black uppercase tracking-tighter text-base
-                      flex items-center justify-center gap-2 transition-all
-                      ${canBook
+          className={`w-full h-14 rounded-2xl font-black uppercase tracking-tighter text-base flex items-center justify-center gap-2 transition-all ${canBook
                         ? 'bg-primary text-white shadow-[0_8px_24px_rgba(234,88,12,0.35)] hover:bg-primary/90'
                         : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'}`}
         >
@@ -321,7 +310,7 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
 
       {/* ── Trust badges ──────────────────────────────────────────────────── */}
       <div className="flex items-center justify-center gap-4 pt-2">
-        <span className="text-[11px] font-black uppercase tracking-widest text-zinc-400 flex items-center gap-1">
+        <span className="text-[11px] font-semibold text-zinc-400 flex items-center gap-1">
           <ShieldCheck className="w-3 h-3 text-emerald-600" /> Locadora verificada pelo CineHub
         </span>
       </div>
@@ -349,9 +338,7 @@ function MobileBookingBar({ dailyRate, targetRef }: { dailyRate: number; targetR
 
   return (
     <div
-      className="lg:hidden fixed left-3 right-3 z-40 flex items-center justify-between gap-3
-                 bg-zinc-950/95 backdrop-blur-xl border border-zinc-800 rounded-2xl pl-4 pr-2 py-2
-                 shadow-[0_12px_40px_rgba(0,0,0,0.8)] animate-in slide-in-from-bottom-4 fade-in duration-200"
+      className="lg:hidden fixed left-3 right-3 z-40 flex items-center justify-between gap-3 bg-zinc-950/95 backdrop-blur-xl border border-zinc-800 rounded-2xl pl-4 pr-2 py-2 shadow-[0_12px_40px_rgba(0,0,0,0.8)] animate-in slide-in-from-bottom-4 fade-in duration-200"
       // Logado, a barra de navegação inferior ocupa o rodapé: fica logo acima dela
       style={{ bottom: `calc(env(safe-area-inset-bottom) + ${user ? 84 : 12}px)` }}
     >
@@ -361,8 +348,7 @@ function MobileBookingBar({ dailyRate, targetRef }: { dailyRate: number; targetR
       </div>
       <button
         onClick={() => targetRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-        className="h-12 px-5 rounded-xl bg-primary text-white font-black uppercase tracking-tight text-sm
-                   flex items-center gap-2 shadow-[0_8px_24px_rgba(234,88,12,0.35)] active:scale-[0.98] transition-transform"
+        className="h-12 px-5 rounded-xl bg-primary text-white font-black uppercase tracking-tight text-sm flex items-center gap-2 shadow-[0_8px_24px_rgba(234,88,12,0.35)] active:scale-[0.98] transition-transform"
       >
         Adicionar ao pedido <ArrowRight className="w-4 h-4" />
       </button>
@@ -394,7 +380,7 @@ export default function EquipmentDetails() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[80vh] gap-4">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="text-zinc-500 font-black uppercase tracking-widest text-[11px] animate-pulse">
+        <p className="text-zinc-500 font-semibold text-[11px] animate-pulse">
           Carregando equipamento...
         </p>
       </div>
@@ -412,10 +398,10 @@ export default function EquipmentDetails() {
           Não conseguimos carregar as especificações deste item.
         </p>
         <div className="flex justify-center gap-4">
-          <Button onClick={() => window.location.reload()} variant="outline" className="rounded-xl uppercase font-black text-xs">
+          <Button onClick={() => window.location.reload()} variant="outline" className="rounded-xl font-semibold text-xs">
             Tentar Novamente
           </Button>
-          <Button onClick={() => navigate('/')} className="rounded-xl uppercase font-black text-xs">
+          <Button onClick={() => navigate('/')} className="rounded-xl font-semibold text-xs">
             Ir para Marketplace
           </Button>
         </div>
@@ -457,7 +443,7 @@ export default function EquipmentDetails() {
           {/* ── Left: images + info ───────────────────────────────────────── */}
           <div className="space-y-6">
             {/* Main image */}
-            <div className="aspect-[4/3] rounded-3xl overflow-hidden bg-zinc-900 border border-zinc-800 relative">
+            <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800 relative">
               {equipment.images?.[activeImage] ? (
                 <img
                   src={equipment.images[activeImage]}
@@ -484,8 +470,7 @@ export default function EquipmentDetails() {
                   <button
                     key={idx}
                     onClick={() => setActiveImage(idx)}
-                    className={`relative w-20 h-20 rounded-2xl overflow-hidden border-2 shrink-0 transition-all
-                      ${activeImage === idx ? 'border-primary scale-105' : 'border-zinc-800 opacity-50 hover:opacity-100'}`}
+                    className={`relative w-20 h-20 rounded-2xl overflow-hidden border-2 shrink-0 transition-all ${activeImage === idx ? 'border-primary scale-105' : 'border-zinc-800 opacity-50 hover:opacity-100'}`}
                   >
                     <img src={img} className="w-full h-full object-cover" />
                   </button>
@@ -497,16 +482,16 @@ export default function EquipmentDetails() {
             <div>
               {/* Tags row */}
               <div className="flex flex-wrap items-center gap-2 mb-4">
-                <span className={`px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest ${conditionColors[equipment.condition] ?? 'bg-zinc-800 text-zinc-400'}`}>
+                <span className={`px-3 py-1 rounded-full text-[11px] font-semibold ${conditionColors[equipment.condition] ?? 'bg-zinc-800 text-zinc-400'}`}>
                   {conditionLabels[equipment.condition] ?? 'N/A'}
                 </span>
-                <div className="flex items-center gap-1.5 text-zinc-300 text-[11px] font-black uppercase tracking-wider bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-xl">
+                <div className="flex items-center gap-1.5 text-zinc-300 text-[11px] font-semibold bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-xl">
                   {equipment.company?.logo_url
                     ? <img src={equipment.company.logo_url} alt="" className="w-4 h-4 rounded-md object-cover shrink-0" />
                     : <Building2 className="w-3 h-3 text-primary shrink-0" />}
                   <span>{equipment.company?.name ?? 'Matriz'}</span>
                 </div>
-                <div className="flex items-center gap-1 text-zinc-300 text-[11px] font-black uppercase tracking-wider bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-xl">
+                <div className="flex items-center gap-1 text-zinc-300 text-[11px] font-semibold bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-xl">
                   <MapPin className="w-3 h-3 text-primary" />
                   <span>
                     {equipment.location_base ?? equipment.company?.address_city ?? 'Fortaleza'}
@@ -524,10 +509,7 @@ export default function EquipmentDetails() {
                   <button
                     onClick={() => setShowDescription(v => !v)}
                     aria-expanded={showDescription}
-                    className="w-full flex items-center justify-between px-4 py-3 rounded-2xl
-                               bg-zinc-900/40 border border-zinc-800/60 hover:border-zinc-700
-                               text-[11px] font-black uppercase tracking-widest text-zinc-500
-                               hover:text-zinc-300 transition-all"
+                    className="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-zinc-900/40 border border-zinc-800/60 hover:border-zinc-700 text-[11px] font-semibold text-zinc-500 hover:text-zinc-300 transition-all"
                   >
                     <span className="flex items-center gap-2">
                       <FileText className="w-3.5 h-3.5" />
@@ -564,7 +546,7 @@ export default function EquipmentDetails() {
                 <div className="grid grid-cols-2 gap-3">
                   {Object.entries(equipment.features).map(([key, value]) => (
                     <div key={key} className="bg-zinc-900/30 p-4 rounded-2xl border border-zinc-800/50">
-                      <p className="text-[11px] uppercase font-black text-zinc-500 tracking-widest mb-1">{FEATURE_LABELS[key.toLowerCase()] ?? key}</p>
+                      <p className="text-[11px] font-semibold text-zinc-500 mb-1">{FEATURE_LABELS[key.toLowerCase()] ?? key}</p>
                       <p className="font-bold text-zinc-300">{String(value)}</p>
                     </div>
                   ))}
@@ -579,7 +561,7 @@ export default function EquipmentDetails() {
             {/* Price header */}
             <div className="flex items-end justify-between">
               <div>
-                <p className="text-[11px] font-black uppercase tracking-wider text-zinc-500 mb-1">
+                <p className="text-[11px] font-semibold text-zinc-500 mb-1">
                   Preço da Diária
                 </p>
                 <span className="text-4xl font-black tracking-tighter text-white">

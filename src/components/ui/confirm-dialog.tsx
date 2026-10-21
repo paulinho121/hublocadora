@@ -46,7 +46,7 @@ export function ConfirmHost() {
   return (
     <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => close(false)} />
-      <div className="relative w-full max-w-sm bg-zinc-950 border border-zinc-800 rounded-3xl p-6 space-y-4 shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-200">
+      <div className="relative w-full max-w-sm bg-zinc-950 border border-zinc-800 rounded-2xl p-6 space-y-4 shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-200">
         <h2 id="confirm-title" className="text-lg font-bold text-white">{request.title}</h2>
         {request.description && <p className="text-sm text-zinc-400 leading-relaxed">{request.description}</p>}
         <div className="flex flex-col-reverse sm:flex-row gap-2 pt-2">

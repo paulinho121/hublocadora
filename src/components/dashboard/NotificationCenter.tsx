@@ -126,18 +126,18 @@ export function NotificationCenter() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className="bg-zinc-950/80 border border-white/5 rounded-[32px] shadow-[0_30px_100px_rgba(0,0,0,0.8)] backdrop-blur-3xl overflow-hidden"
+                        className="bg-zinc-950/80 border border-white/5 rounded-2xl shadow-[0_30px_100px_rgba(0,0,0,0.8)] backdrop-blur-3xl overflow-hidden"
                         style={panelStyle}
                     >
                         <header className="p-6 border-b border-white/5 flex justify-between items-center bg-black/40">
                              <div className="space-y-1">
-                                <h4 className="text-[11px] font-black uppercase tracking-wider text-white">Central de Alertas</h4>
-                                <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">Você tem {unreadCount} mensagens não lidas</p>
+                                <h4 className="text-[11px] font-semibold text-white">Central de Alertas</h4>
+                                <p className="text-[11px] font-bold text-zinc-500 ">Você tem {unreadCount} mensagens não lidas</p>
                              </div>
                              {unreadCount > 0 && (
                                 <button 
                                     onClick={handleMarkAllAsRead}
-                                    className="text-[11px] font-black uppercase tracking-widest text-primary hover:text-primary/80 transition-colors"
+                                    className="text-[11px] font-semibold text-primary hover:text-primary/80 transition-colors"
                                 >
                                     Ler Tudo
                                 </button>
@@ -172,7 +172,7 @@ export function NotificationCenter() {
                                         
                                         <div className="flex-1 space-y-2">
                                             <div className="flex items-center justify-between">
-                                                <span className="text-[11px] font-black uppercase tracking-widest text-zinc-500">
+                                                <span className="text-[11px] font-semibold text-zinc-500">
                                                     {getTypeLabel(n.type)}
                                                 </span>
                                                 <span className="text-[11px] font-bold text-zinc-500 flex items-center gap-1">
@@ -181,7 +181,7 @@ export function NotificationCenter() {
                                                 </span>
                                             </div>
                                             
-                                            <h5 className="text-xs font-black uppercase tracking-tight text-zinc-100 group-hover:text-white transition-colors">
+                                            <h5 className="text-xs font-semibold tracking-tight text-zinc-100 group-hover:text-white transition-colors">
                                                 {n.title}
                                             </h5>
                                             <p className="text-[11px] text-zinc-500 font-medium leading-relaxed">
@@ -192,20 +192,20 @@ export function NotificationCenter() {
                                   </motion.div>
                                ))
                            ) : (
-                               <div className="p-12 text-center space-y-4">
+                               <div className="p-6 text-center space-y-4">
                                    <div className="h-16 w-16 bg-zinc-900 rounded-full flex items-center justify-center mx-auto border border-white/5">
                                        <ShieldCheck className="h-8 w-8 text-zinc-800" />
                                    </div>
                                    <div className="space-y-1">
-                                       <p className="text-[11px] font-black uppercase tracking-widest text-zinc-500">Espaço Limpo</p>
-                                       <p className="text-[11px] text-zinc-500 font-medium uppercase tracking-tighter">Nenhuma nova notificação por aqui.</p>
+                                       <p className="text-[11px] font-semibold text-zinc-500">Espaço Limpo</p>
+                                       <p className="text-[11px] text-zinc-500 font-medium tracking-tighter">Nenhuma nova notificação por aqui.</p>
                                    </div>
                                </div>
                            )}
                         </div>
                         
                         <footer className="p-4 bg-black/60 border-t border-white/5 text-center">
-                             <button className="text-[11px] font-black uppercase tracking-wider text-zinc-400 hover:text-zinc-400 transition-colors">
+                             <button className="text-[11px] font-semibold text-zinc-400 hover:text-zinc-400 transition-colors">
                                 Configurações de Notificação
                              </button>
                         </footer>

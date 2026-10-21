@@ -91,10 +91,7 @@ export function EquipmentCard({
 
   return (
     <Card
-      className={`group overflow-hidden clay-card flex flex-col h-full
-        transition-all duration-300 ease-out
-        hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/50
-        ${borderAccent}`}
+      className={`group overflow-hidden clay-card flex flex-col h-full transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/50 ${borderAccent}`}
     >
       {/* ─── Image area ──────────────────────────────────────────── */}
       <div
@@ -102,11 +99,9 @@ export function EquipmentCard({
         className="relative w-full h-52 overflow-hidden bg-zinc-900 shrink-0 cursor-pointer"
       >
         {/* Shimmer placeholder — hidden once first image is loaded */}
-        <div className={`absolute inset-0 transition-opacity duration-500
-          ${loadedSet.has(0) ? 'opacity-0' : 'opacity-100'}`}>
+        <div className={`absolute inset-0 transition-opacity duration-500 ${loadedSet.has(0) ? 'opacity-0' : 'opacity-100'}`}>
           <div className="w-full h-full bg-zinc-900 relative overflow-hidden">
-            <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.6s_infinite]
-                            bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
+            <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.6s_infinite] bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
           </div>
         </div>
 
@@ -120,9 +115,7 @@ export function EquipmentCard({
               loading={i === 0 ? 'eager' : 'lazy'}
               decoding="async"
               onLoad={() => markLoaded(i)}
-              className={`absolute inset-0 w-full h-full object-contain p-6
-                transition-all duration-700 ease-in-out
-                ${i === activeIdx && loadedSet.has(i)
+              className={`absolute inset-0 w-full h-full object-contain p-6 transition-all duration-700 ease-in-out ${i === activeIdx && loadedSet.has(i)
                   ? 'opacity-100 scale-100'
                   : 'opacity-0 scale-105'}`}
             />
@@ -134,27 +127,24 @@ export function EquipmentCard({
         )}
 
         {/* Gradient overlays */}
-        <div className="absolute inset-x-0 top-0    h-20 bg-gradient-to-b from-black/60 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/60 to-transparent pointer-events-none" />
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/95 via-black/40 to-transparent pointer-events-none" />
 
         {/* ── Top row: availability pill + heart ── */}
         <div className="absolute top-3 inset-x-3 z-10 flex items-start justify-between">
           {/* Availability pills: disponíveis + locados hoje */}
           <div className="flex flex-wrap items-center gap-1.5">
-          <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full
-            backdrop-blur-md text-[11px] font-black uppercase tracking-widest border
-            ${isFullyRented
+          <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full backdrop-blur-md text-[11px] font-semibold border ${isFullyRented
               ? 'bg-zinc-950/90 border-red-500/30  text-red-400'
               : 'bg-zinc-950/80 border-emerald-500/25 text-emerald-400'}`}>
-            <span className={`w-1.5 h-1.5 rounded-full shrink-0
-              ${isFullyRented ? 'bg-red-500' : 'bg-emerald-400 animate-pulse'}`}
+            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isFullyRented ? 'bg-red-500' : 'bg-emerald-400 animate-pulse'}`}
             />
             {isFullyRented
               ? 'Esgotado'
               : `${availableQty} ${availableQty === 1 ? 'disponível' : 'disponíveis'}`}
           </div>
           {rentedQuantity > 0 && !isFullyRented && (
-            <div className="flex items-center px-2.5 py-1.5 rounded-full backdrop-blur-md text-[11px] font-black uppercase tracking-widest border bg-zinc-950/80 border-amber-500/25 text-amber-400">
+            <div className="flex items-center px-2.5 py-1.5 rounded-full backdrop-blur-md text-[11px] font-semibold border bg-zinc-950/80 border-amber-500/25 text-amber-400">
               {rentedQuantity} {rentedQuantity === 1 ? 'locado' : 'locados'}
             </div>
           )}
@@ -168,10 +158,7 @@ export function EquipmentCard({
 
         {/* ── Date availability chip (only when project dates set) ── */}
         {isAvailableForDates !== null && (
-          <div className={`absolute z-10 flex items-center gap-1 px-2 py-1 rounded-full
-            backdrop-blur-md text-[11px] font-black uppercase tracking-widest border
-            transition-all duration-300 animate-in fade-in
-            ${isAvailableForDates === true
+          <div className={`absolute z-10 flex items-center gap-1 px-2 py-1 rounded-full backdrop-blur-md text-[11px] font-semibold border transition-all duration-300 animate-in fade-in ${isAvailableForDates === true
               ? 'top-[2.75rem] left-3 bg-emerald-950/80 border-emerald-500/20 text-emerald-400'
               : 'top-[2.75rem] left-3 bg-red-950/80    border-red-500/20    text-red-400'}`}>
             {isAvailableForDates
@@ -184,8 +171,7 @@ export function EquipmentCard({
         {hasMultiple && (
           <div className="absolute bottom-9 left-1/2 -translate-x-1/2 flex gap-1 z-10">
             {images.map((_, i) => (
-              <span key={i} className={`block h-0.5 rounded-full transition-all duration-500
-                ${i === activeIdx ? 'w-4 bg-white/80' : 'w-1 bg-white/20'}`}
+              <span key={i} className={`block h-0.5 rounded-full transition-all duration-500 ${i === activeIdx ? 'w-4 bg-white/80' : 'w-1 bg-white/20'}`}
               />
             ))}
           </div>
@@ -194,8 +180,8 @@ export function EquipmentCard({
         {/* ── Bottom overlay: price + location ── */}
         <div className="absolute bottom-0 inset-x-0 z-10 px-4 py-3 flex items-end justify-between">
           <div className="flex flex-col leading-none">
-            <span className="text-[11px] uppercase text-white/40 font-black tracking-wider mb-1">
-              por diária
+            <span className="text-[11px] text-white/40 font-semibold mb-1">
+              Por diária
             </span>
             <span className="text-[1.35rem] font-display font-black text-white tracking-tight leading-none">
               {price}
@@ -203,10 +189,9 @@ export function EquipmentCard({
           </div>
 
           {item.state_uf && (
-            <div className="flex items-center gap-1 bg-white/8 backdrop-blur-sm
-                            border border-white/8 px-2 py-1 rounded-lg">
+            <div className="flex items-center gap-1 bg-white/8 backdrop-blur-sm border border-white/8 px-2 py-1 rounded-lg">
               <MapPin className="w-2.5 h-2.5 text-white/50" />
-              <span className="text-[11px] font-black text-white/60 uppercase tracking-widest">
+              <span className="text-[11px] font-semibold text-white/60 ">
                 {item.state_uf}
               </span>
             </div>
@@ -220,9 +205,7 @@ export function EquipmentCard({
         {/* Name */}
         <h4
           onClick={handleViewDetails}
-          className="text-[11px] font-black leading-snug uppercase tracking-widest
-                     text-zinc-100 group-hover:text-primary transition-colors duration-200
-                     line-clamp-2 cursor-pointer mb-2"
+          className="text-sm font-bold leading-snug text-zinc-100 group-hover:text-primary transition-colors duration-200 line-clamp-2 cursor-pointer mb-2"
         >
           {item.name}
         </h4>
@@ -231,7 +214,7 @@ export function EquipmentCard({
         {rentedQuantity > 0 && (
           <div className="flex items-center gap-1.5 mb-1.5">
             <Clock className="w-3 h-3 text-amber-500/70 shrink-0" />
-            <span className="text-[11px] text-amber-500/80 font-bold uppercase tracking-wider leading-none">
+            <span className="text-[11px] text-amber-500/80 font-bold leading-none">
               {totalStock > 1
                 ? `${rentedQuantity} ${rentedQuantity === 1 ? 'locado' : 'locados'} agora`
                 : 'Locado agora'}
@@ -242,7 +225,7 @@ export function EquipmentCard({
         {upcomingQuantity > 0 && (
           <div className="flex items-center gap-1.5 mb-2">
             <CalendarClock className="w-3 h-3 text-zinc-500 shrink-0" />
-            <span className="text-[11px] text-zinc-500 font-bold uppercase tracking-wider leading-none">
+            <span className="text-[11px] text-zinc-500 font-bold leading-none">
               {upcomingQuantity} {upcomingQuantity === 1 ? 'reservado' : 'reservados'}
               {formattedUpcoming && ` a partir de ${formattedUpcoming}`}
             </span>
@@ -260,9 +243,7 @@ export function EquipmentCard({
             onClick={handleToggleProject}
             disabled={isFullyRented || isAvailableForDates === false}
             title={isAvailableForDates === false ? 'Indisponível nas suas datas' : undefined}
-            className={`flex-1 h-9 text-[11px] font-black uppercase tracking-widest gap-1.5 rounded-xl
-              transition-all duration-200
-              ${inCart
+            className={`flex-1 h-9 text-[11px] font-semibold gap-1.5 rounded-xl transition-all duration-200 ${inCart
                 ? 'bg-primary/10 text-primary border border-primary/25 hover:bg-red-500/8 hover:text-red-400 hover:border-red-500/25'
                 : isAvailableForDates === true
                   ? 'bg-emerald-500/8 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/15 hover:border-emerald-500/30'
@@ -281,10 +262,7 @@ export function EquipmentCard({
             size="sm"
             onClick={handleViewDetails}
             disabled={isFullyRented}
-            className="h-9 w-9 shrink-0 p-0 bg-primary text-white rounded-xl
-                       hover:bg-primary/90 transition-all duration-200 hover:-translate-y-0.5
-                       shadow-lg shadow-primary/20
-                       disabled:opacity-25 disabled:cursor-not-allowed"
+            className="h-9 w-9 shrink-0 p-0 bg-primary text-white rounded-xl hover:bg-primary/90 transition-all duration-200 hover:-translate-y-0.5 shadow-lg shadow-primary/20 disabled:opacity-25 disabled:cursor-not-allowed"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>

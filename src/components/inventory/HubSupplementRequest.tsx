@@ -152,7 +152,7 @@ export function HubSupplementRequest({ onSuccess }: HubSupplementRequestProps) {
       <div className="space-y-4">
         {/* Equipamento */}
         <div className="space-y-2">
-          <Label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Equipamento Requisitado</Label>
+          <Label className="text-xs font-bold text-zinc-500">Equipamento Requisitado</Label>
           <Select 
             {...form.register('equipmentId')}
             className="h-12 bg-zinc-950 border-zinc-800 w-full"
@@ -173,7 +173,7 @@ export function HubSupplementRequest({ onSuccess }: HubSupplementRequestProps) {
         <div className="grid grid-cols-2 gap-4">
           {/* Quantidade */}
           <div className="space-y-2">
-            <Label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Quantidade</Label>
+            <Label className="text-xs font-bold text-zinc-500">Quantidade</Label>
             <div className="relative">
               <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
               <Input 
@@ -186,7 +186,7 @@ export function HubSupplementRequest({ onSuccess }: HubSupplementRequestProps) {
 
           {/* Período (Simplificado para o MVP) */}
           <div className="space-y-2">
-            <Label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Início</Label>
+            <Label className="text-xs font-bold text-zinc-500">Início</Label>
             <div className="relative">
               <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
               <Input 
@@ -201,7 +201,7 @@ export function HubSupplementRequest({ onSuccess }: HubSupplementRequestProps) {
         <div className="grid grid-cols-2 gap-4">
            {/* Término */}
            <div className="space-y-2">
-            <Label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Término</Label>
+            <Label className="text-xs font-bold text-zinc-500">Término</Label>
             <div className="relative">
               <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
               <Input 
@@ -215,7 +215,7 @@ export function HubSupplementRequest({ onSuccess }: HubSupplementRequestProps) {
 
         {/* Logística */}
         <div className="space-y-3 pt-2">
-          <Label className="text-xs font-bold uppercase tracking-widest text-emerald-500">Logística de Recebimento</Label>
+          <Label className="text-xs font-bold text-emerald-500">Logística de Recebimento</Label>
           <RadioGroup 
             defaultValue="pickup" 
             onValueChange={(v) => form.setValue('deliveryMethod', v as 'pickup' | 'delivery')}
@@ -228,7 +228,7 @@ export function HubSupplementRequest({ onSuccess }: HubSupplementRequestProps) {
                 className="flex flex-col items-center justify-between rounded-xl border-2 border-zinc-900 bg-zinc-950 p-4 hover:bg-zinc-900 peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-all"
               >
                 <Store className="mb-2 h-6 w-6 text-zinc-500" />
-                <span className="text-xs font-bold uppercase">Retirar no HUB</span>
+                <span className="text-xs font-bold ">Retirar no HUB</span>
               </Label>
             </div>
             <div>
@@ -238,7 +238,7 @@ export function HubSupplementRequest({ onSuccess }: HubSupplementRequestProps) {
                 className="flex flex-col items-center justify-between rounded-xl border-2 border-zinc-900 bg-zinc-950 p-4 hover:bg-zinc-900 peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-all"
               >
                 <Truck className="mb-2 h-6 w-6 text-zinc-500" />
-                <span className="text-xs font-bold uppercase">Receber no Local</span>
+                <span className="text-xs font-bold ">Receber no Local</span>
               </Label>
             </div>
           </RadioGroup>
@@ -247,7 +247,7 @@ export function HubSupplementRequest({ onSuccess }: HubSupplementRequestProps) {
         {deliveryMethod === 'delivery' && (
           <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
             <div className="space-y-2">
-              <Label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Endereço de Entrega *</Label>
+              <Label className="text-xs font-bold text-zinc-500">Endereço de Entrega *</Label>
               <div className="relative">
                 <MapPin className="absolute left-3 top-3 w-4 h-4 text-zinc-400" />
                 <Textarea
@@ -261,7 +261,7 @@ export function HubSupplementRequest({ onSuccess }: HubSupplementRequestProps) {
               )}
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Responsável pelo Recebimento *</Label>
+              <Label className="text-xs font-bold text-zinc-500">Responsável pelo Recebimento *</Label>
               <Input
                 placeholder="Nome e telefone de quem vai receber"
                 className="bg-zinc-950 border-zinc-800"
@@ -275,7 +275,7 @@ export function HubSupplementRequest({ onSuccess }: HubSupplementRequestProps) {
         )}
 
         <div className="space-y-2">
-          <Label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Observações adicionais</Label>
+          <Label className="text-xs font-bold text-zinc-500">Observações adicionais</Label>
           <Textarea 
             placeholder="Ex: Preciso que os cabos sejam de 10m..."
             className="bg-zinc-950 border-zinc-800"

@@ -87,7 +87,7 @@ export function BranchStockModal({ branchId, branchName, isOpen, onClose }: Bran
                     {loadingEquipments ? (
                         <div className="flex flex-col items-center justify-center py-10 gap-2">
                             <Loader2 className="h-8 w-8 animate-spin text-primary opacity-50" />
-                            <span className="text-[11px] font-black uppercase text-zinc-400">Carregando...</span>
+                            <span className="text-[11px] font-semibold text-zinc-400">Carregando...</span>
                         </div>
                     ) : filteredEquipments.length > 0 ? (
                         filteredEquipments.map((equipment) => {
@@ -116,18 +116,18 @@ export function BranchStockModal({ branchId, branchName, isOpen, onClose }: Bran
                                         </div>
                                         
                                         <div className="min-w-0">
-                                            <h4 className="font-bold text-xs uppercase truncate text-zinc-200">
+                                            <h4 className="font-bold text-xs truncate text-zinc-200">
                                                 {equipment.name}
                                             </h4>
                                             <div className="flex items-center gap-2 mt-1">
-                                                <Badge variant="outline" className="text-[11px] uppercase font-black px-1.5 py-0 border-zinc-800 text-zinc-500">
+                                                <Badge variant="outline" className="text-[11px] font-semibold px-1.5 py-0 border-zinc-800 text-zinc-500">
                                                     {equipment.category}
                                                 </Badge>
                                                 {currentStock === 0 && (
                                                     <button 
                                                         disabled={requestingId === equipment.id}
                                                         onClick={() => handleRequestTransfer(equipment.id)}
-                                                        className="flex items-center gap-1 text-[11px] font-black uppercase text-primary hover:text-primary/80 transition-colors"
+                                                        className="flex items-center gap-1 text-[11px] font-semibold text-primary hover:text-primary/80 transition-colors"
                                                     >
                                                         <Truck className="h-2 w-2" />
                                                         {requestingId === equipment.id ? 'Solicitando...' : 'Solicitar Reposição'}
@@ -138,7 +138,7 @@ export function BranchStockModal({ branchId, branchName, isOpen, onClose }: Bran
                                     </div>
 
                                     <div className="flex items-center gap-3 bg-zinc-950 p-1.5 rounded-xl border border-zinc-800">
-                                        <span className="text-[11px] font-black uppercase text-zinc-400 ml-2">QTD</span>
+                                        <span className="text-[11px] font-semibold text-zinc-400 ml-2">QTD</span>
                                         <Input 
                                             type="number"
                                             min="0"
@@ -157,7 +157,7 @@ export function BranchStockModal({ branchId, branchName, isOpen, onClose }: Bran
                         })
                     ) : (
                         <div className="py-10 text-center">
-                            <p className="text-zinc-400 text-[11px] font-bold uppercase">Nenhum item encontrado</p>
+                            <p className="text-zinc-400 text-[11px] font-bold ">Nenhum item encontrado</p>
                         </div>
                     )}
                 </div>

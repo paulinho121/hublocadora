@@ -141,7 +141,7 @@ export default function ResetPassword() {
                             </div>
 
                             {error && (
-                                <p className="text-xs text-red-400 font-bold uppercase tracking-widest text-center mt-4">
+                                <p className="text-xs text-red-400 font-bold text-center mt-4">
                                     {error}
                                 </p>
                             )}

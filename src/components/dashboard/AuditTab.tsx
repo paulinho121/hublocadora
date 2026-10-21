@@ -61,11 +61,11 @@ export function AuditTab() {
 
   const getActionBadge = (type: string) => {
     switch (type) {
-      case 'stock_out': return <Badge className="bg-red-500/10 text-red-500 border-red-500/20 uppercase text-[11px] font-black tracking-widest"><ArrowUpRight className="w-3 h-3 mr-1" /> Saída HUB</Badge>;
-      case 'stock_in': return <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 uppercase text-[11px] font-black tracking-widest"><ArrowDownLeft className="w-3 h-3 mr-1" /> Retorno HUB</Badge>;
-      case 'visibility_hidden': return <Badge className="bg-zinc-500/10 text-zinc-400 border-zinc-500/20 uppercase text-[11px] font-black tracking-widest"><EyeOff className="w-3 h-3 mr-1" /> Ocultado (Loc. Externa)</Badge>;
-      case 'visibility_restored': return <Badge className="bg-primary/10 text-primary border-primary/20 uppercase text-[11px] font-black tracking-widest"><Eye className="w-3 h-3 mr-1" /> Retornou ao HUB</Badge>;
-      default: return <Badge variant="outline" className="uppercase text-[11px] font-black tracking-widest">{type}</Badge>;
+      case 'stock_out': return <Badge className="bg-red-500/10 text-red-500 border-red-500/20 text-[11px] font-semibold "><ArrowUpRight className="w-3 h-3 mr-1" /> Saída HUB</Badge>;
+      case 'stock_in': return <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[11px] font-semibold "><ArrowDownLeft className="w-3 h-3 mr-1" /> Retorno HUB</Badge>;
+      case 'visibility_hidden': return <Badge className="bg-zinc-500/10 text-zinc-400 border-zinc-500/20 text-[11px] font-semibold "><EyeOff className="w-3 h-3 mr-1" /> Ocultado (Loc. Externa)</Badge>;
+      case 'visibility_restored': return <Badge className="bg-primary/10 text-primary border-primary/20 text-[11px] font-semibold "><Eye className="w-3 h-3 mr-1" /> Retornou ao HUB</Badge>;
+      default: return <Badge variant="outline" className="text-[11px] font-semibold ">{type}</Badge>;
     }
   };
 
@@ -98,7 +98,7 @@ export function AuditTab() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
            {unavailableItems?.length === 0 ? (
-             <div className="col-span-full h-32 flex items-center justify-center bg-zinc-900/30 rounded-3xl border border-zinc-900 border-dashed text-zinc-400 text-[11px] font-black uppercase tracking-widest">
+             <div className="col-span-full h-32 flex items-center justify-center bg-zinc-900/30 rounded-2xl border border-zinc-900 border-dashed text-zinc-400 text-[11px] font-semibold ">
                Todos os equipamentos estão disponíveis no HUB
              </div>
            ) : (
@@ -106,15 +106,15 @@ export function AuditTab() {
                <Card key={item.id} className="bg-zinc-950 border-red-500/20 rounded-2xl overflow-hidden group hover:border-red-500/50 transition-all shadow-2xl">
                  <CardContent className="p-5 space-y-4">
                     <div className="flex justify-between items-start">
-                      <Badge className="bg-red-500/10 text-red-500 border-red-500/20 text-[11px] font-black uppercase">Oculto</Badge>
-                      <span className="text-[11px] text-zinc-500 font-bold flex items-center gap-1 uppercase tracking-widest flex-1 text-right truncate pl-4">
+                      <Badge className="bg-red-500/10 text-red-500 border-red-500/20 text-[11px] font-semibold ">Oculto</Badge>
+                      <span className="text-[11px] text-zinc-500 font-bold flex items-center gap-1 flex-1 text-right truncate pl-4">
                         <Building2 className="w-3 h-3 inline mr-1 text-primary" /> 
                         {item.subrental?.name || item.owner?.name}
                       </span>
                     </div>
                     <div>
                       <h4 className="font-black text-white uppercase tracking-tighter truncate">{item.name}</h4>
-                      <p className="text-[11px] text-zinc-500 font-bold uppercase">{item.category}</p>
+                      <p className="text-[11px] text-zinc-500 font-bold ">{item.category}</p>
                     </div>
                     <div className="pt-3 border-t border-zinc-900 flex items-center justify-between">
                        <div className="flex items-center gap-2 text-zinc-400">
@@ -139,13 +139,13 @@ export function AuditTab() {
         </div>
         
         {(isLoadingLogs || isLoadingUnavailable) ? (
-          <div className="h-64 flex items-center justify-center bg-zinc-950 rounded-3xl border border-zinc-900 border-dashed">
+          <div className="h-64 flex items-center justify-center bg-zinc-950 rounded-2xl border border-zinc-900 border-dashed">
             <Clock className="w-8 h-8 text-zinc-800 animate-spin" />
           </div>
         ) : logs?.length === 0 ? (
-          <div className="h-64 flex flex-col items-center justify-center bg-zinc-950 rounded-3xl border border-zinc-900 border-dashed text-zinc-400 gap-4">
+          <div className="h-64 flex flex-col items-center justify-center bg-zinc-950 rounded-2xl border border-zinc-900 border-dashed text-zinc-400 gap-4">
              <History className="w-12 h-12 opacity-20" />
-             <p className="font-bold uppercase tracking-widest text-[11px]">Nenhuma atividade registrada ainda</p>
+             <p className="font-bold text-[11px]">Nenhuma atividade registrada ainda</p>
           </div>
         ) : (
           logs?.map((log: any) => (
@@ -154,7 +154,7 @@ export function AuditTab() {
                 <div className="flex flex-col md:flex-row md:items-center p-6 gap-6">
                   {/* DATA E HORA */}
                   <div className="md:w-32 flex flex-col shrink-0">
-                    <span className="text-xs font-black text-zinc-200 uppercase tracking-tighter">
+                    <span className="text-xs font-semibold text-zinc-200 tracking-tighter">
                       {format(new Date(log.created_at), 'dd MMM yyyy', { locale: ptBR })}
                     </span>
                     <span className="text-[11px] text-zinc-500 font-bold flex items-center gap-1">
@@ -180,19 +180,19 @@ export function AuditTab() {
                     <div className="md:w-64 bg-zinc-900/50 p-4 rounded-xl border border-zinc-900 flex flex-col gap-2">
                        {log.metadata.unavailable_duration && (
                          <div className="flex items-center justify-between">
-                            <span className="text-[11px] font-black text-zinc-500 uppercase tracking-widest">Tempo Fora</span>
+                            <span className="text-[11px] font-semibold text-zinc-500 ">Tempo Fora</span>
                             <span className="text-xs font-bold text-emerald-500">{log.metadata.unavailable_duration}</span>
                          </div>
                        )}
                        {log.metadata.quantity && (
                          <div className="flex items-center justify-between">
-                            <span className="text-[11px] font-black text-zinc-500 uppercase tracking-widest">Qtd. Movimentada</span>
+                            <span className="text-[11px] font-semibold text-zinc-500 ">Qtd. Movimentada</span>
                             <span className="text-xs font-bold text-primary">{log.metadata.quantity} un.</span>
                          </div>
                        )}
                        {log.metadata.operator && (
                          <div className="flex items-center justify-between pt-1 border-t border-zinc-800">
-                            <span className="text-[11px] font-black text-zinc-500 uppercase tracking-widest">Operador</span>
+                            <span className="text-[11px] font-semibold text-zinc-500 ">Operador</span>
                             <span className="text-[11px] font-bold text-zinc-300">ID: {log.metadata.operator.slice(0, 8)}</span>
                          </div>
                        )}

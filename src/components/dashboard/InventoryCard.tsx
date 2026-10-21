@@ -87,13 +87,13 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId, onAssign, acti
         ) : (
           <div className="flex flex-col items-center gap-2 text-zinc-500">
             <Package className="h-12 w-12" />
-            <span className="text-[11px] uppercase font-bold tracking-widest">Sem imagem</span>
+            <span className="text-[11px] font-bold ">Sem imagem</span>
           </div>
         )}
         
         <Badge 
           variant="outline" 
-          className={`absolute top-3 right-3 text-[11px] uppercase font-black px-2 py-1 backdrop-blur-md ${getStatusColor(isRentedNow ? 'rented' : item.status)}`}
+          className={`absolute top-3 right-3 text-[11px] font-semibold px-2 py-1 backdrop-blur-md ${getStatusColor(isRentedNow ? 'rented' : item.status)}`}
         >
           {getStatusLabel(isRentedNow ? 'rented' : item.status)}
         </Badge>
@@ -103,11 +103,11 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId, onAssign, acti
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-1">
             {brand && (
-              <span className="text-[11px] uppercase font-black tracking-widest text-primary bg-primary/10 px-2 py-0.5 rounded">
+              <span className="text-[11px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded">
                 {brand}
               </span>
             )}
-            <p className="text-[11px] uppercase text-zinc-500 font-bold tracking-widest">{item.category}</p>
+            <p className="text-[11px] text-zinc-500 font-bold ">{item.category}</p>
           </div>
           <h3 
             className="font-bold text-lg leading-tight truncate group-hover:text-primary transition-colors cursor-pointer"
@@ -121,15 +121,15 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId, onAssign, acti
           <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl animate-in slide-in-from-top-1 duration-300">
             <div className="flex items-center gap-2 mb-2">
               <div className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
-              <p className="text-[11px] font-black uppercase text-amber-500 tracking-widest">Em Locação Ativa</p>
+              <p className="text-[11px] font-semibold text-amber-500 ">Em Locação Ativa</p>
             </div>
             <div className="space-y-1.5">
               <p className="text-[11px] font-bold text-zinc-100 truncate">
-                <span className="text-zinc-500 uppercase text-[11px] mr-1">Cliente:</span>
+                <span className="text-zinc-500 text-[11px] mr-1">Cliente:</span>
                 {activeBooking.renter?.company?.name || activeBooking.renter?.full_name}
               </p>
               <p className="text-[11px] font-bold text-zinc-100">
-                <span className="text-zinc-500 uppercase text-[11px] mr-1">Retorno:</span>
+                <span className="text-zinc-500 text-[11px] mr-1">Retorno:</span>
                 {format(new Date(activeBooking.end_date + 'T00:00'), "dd/MM/yyyy", { locale: ptBR })}
               </p>
             </div>
@@ -139,10 +139,10 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId, onAssign, acti
         <div className="flex flex-col gap-4 mt-auto">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-[11px] text-zinc-500 uppercase font-black tracking-widest mb-0.5">Taxa Diária</p>
-              <div className="text-xl font-black tracking-tighter text-zinc-100">
+              <p className="text-[11px] text-zinc-500 font-semibold mb-0.5">Taxa Diária</p>
+              <div className="text-xl font-bold tracking-tight text-zinc-100">
                 {formatCurrency(item.daily_rate)}
-                <span className="text-[11px] text-zinc-500 uppercase font-bold tracking-widest ml-1">/ dia</span>
+                <span className="text-[11px] text-zinc-500 font-bold ml-1">/ dia</span>
               </div>
             </div>
             
@@ -183,13 +183,13 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId, onAssign, acti
             <div className="flex flex-wrap gap-2">
               <div className="flex items-center gap-1.5 text-zinc-400 bg-zinc-900 px-2 py-1 rounded-lg border border-zinc-800">
                 <span className="w-1 h-1 rounded-full bg-primary shrink-0 animate-pulse"></span>
-                <span className="text-[11px] font-bold uppercase tracking-widest">
+                <span className="text-[11px] font-bold ">
                   {item.location_base || 'Sede Principal'}
                 </span>
               </div>
               <div className="flex items-center gap-1.5 text-emerald-500 bg-emerald-500/5 px-2 py-1 rounded-lg border border-emerald-500/10">
                 <Package className="h-3 w-3" />
-                <span className="text-[11px] font-bold uppercase tracking-widest">
+                <span className="text-[11px] font-bold ">
                   {item.stock_quantity || 0} em estoque
                 </span>
               </div>
@@ -197,10 +197,10 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId, onAssign, acti
 
             <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-900/50 border border-zinc-800/50 hover:border-zinc-700 transition-colors">
               <div className="flex flex-col gap-0.5">
-                <Label htmlFor={`visibility-${item.id}`} className="text-[11px] font-black uppercase tracking-widest cursor-pointer">
+                <Label htmlFor={`visibility-${item.id}`} className="text-[11px] font-semibold cursor-pointer">
                   Status no HUB
                 </Label>
-                <span className={`text-[11px] font-bold uppercase tracking-tight ${item.status === 'unavailable' ? 'text-zinc-500' : 'text-emerald-500'}`}>
+                <span className={`text-[11px] font-bold tracking-tight ${item.status === 'unavailable' ? 'text-zinc-500' : 'text-emerald-500'}`}>
                   {item.status === 'unavailable' ? 'Oculto para Clientes' : 'Visível para Clientes'}
                 </span>
               </div>
@@ -218,7 +218,7 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId, onAssign, acti
            <Button 
             variant="outline" 
             size="sm" 
-            className="w-full text-[11px] uppercase font-bold h-8 gap-1.5 border-zinc-800 hover:bg-zinc-900"
+            className="w-full text-[11px] font-bold h-8 gap-1.5 border-zinc-800 hover:bg-zinc-900"
             onClick={() => navigate(`/equipment/${item.id}`)}
            >
              <Info className="h-3 w-3" /> Ver Detalhes

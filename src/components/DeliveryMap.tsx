@@ -215,7 +215,7 @@ export function OrderLiveLocation({ bookingId, title }: { bookingId: string; tit
     : null;
 
   return (
-    <div className="rounded-3xl border border-zinc-800 overflow-hidden bg-zinc-900/30">
+    <div className="rounded-2xl border border-zinc-800 overflow-hidden bg-zinc-900/30">
       <button
         onClick={() => setOpen(v => !v)}
         aria-expanded={open}
@@ -233,7 +233,7 @@ export function OrderLiveLocation({ bookingId, title }: { bookingId: string; tit
               : 'Em trânsito · aguardando o GPS do veículo'}
           </span>
         </span>
-        <span className="shrink-0 h-11 px-4 rounded-xl bg-white text-zinc-900 text-[11px] font-black uppercase tracking-widest flex items-center gap-2">
+        <span className="shrink-0 h-11 px-4 rounded-xl bg-white text-zinc-900 text-[11px] font-semibold flex items-center gap-2">
           <MapPin className="h-4 w-4" /> {open ? 'Fechar' : 'Ver no mapa'}
         </span>
       </button>

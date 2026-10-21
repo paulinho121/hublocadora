@@ -148,7 +148,7 @@ export default function AcceptInvite() {
                 <CardContent>
                     <form onSubmit={handleAccept} className="space-y-4">
                         <div className="space-y-2 mb-6">
-                            <label className="text-[11px] font-black uppercase tracking-widest text-zinc-500 ml-1">E-mail de Acesso (Fixo)</label>
+                            <label className="text-[11px] font-semibold text-zinc-500 ml-1">E-mail de Acesso (Fixo)</label>
                             <Input
                                 type="email"
                                 value={branchData?.manager_email}
@@ -179,7 +179,7 @@ export default function AcceptInvite() {
                         
                         {error && (
                             <div className="bg-red-500/10 border border-red-500/20 p-3 rounded-xl text-center mt-4">
-                                <p className="text-[11px] text-red-400 font-bold uppercase tracking-widest">{error}</p>
+                                <p className="text-[11px] text-red-400 font-bold ">{error}</p>
                             </div>
                         )}
                         
