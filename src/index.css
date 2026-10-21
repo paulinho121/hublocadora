@@ -231,69 +231,22 @@
 
 /* ── Mapa de rastreio (Leaflet) ─────────────────────────────────────────── */
 
-/* Os filtros vão em cada tile, não na camada: filtro na camada inteira
-   cria linhas de emenda visíveis entre os tiles. */
-
-/* Geoapify dark-matter-dark-grey: clareado para ruas e nomes legíveis */
-.map-tiles-geoapify .leaflet-tile {
-  filter: brightness(1.9) contrast(1.25);
-}
-
-/* Reserva sem chave: tiles claros do OpenStreetMap convertidos para tema escuro */
-.map-tiles-dark .leaflet-tile {
-  filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9) saturate(0.6);
-}
-
 .cinehub-map {
-  background: #0a0a0a;
+  background: #eef0f3;
   font-family: inherit;
-}
-
-/* Remove as linhas de emenda entre tiles (arredondamento de subpixel) */
-.cinehub-map .leaflet-tile-container img.leaflet-tile {
-  width: 256.5px !important;
-  height: 256.5px !important;
-}
-
-/* Botões de zoom no tema do app */
-.cinehub-map .leaflet-control-zoom {
-  border: 1px solid rgb(39 39 42) !important;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-}
-.cinehub-map .leaflet-control-zoom a {
-  background: rgba(9, 9, 11, 0.85);
-  backdrop-filter: blur(8px);
-  color: rgb(212 212 216);
-  border-bottom: 1px solid rgb(39 39 42);
-  width: 34px;
-  height: 34px;
-  line-height: 34px;
-}
-.cinehub-map .leaflet-control-zoom a:last-child {
-  border-bottom: none;
-}
-.cinehub-map .leaflet-control-zoom a:hover {
-  background: rgb(39 39 42);
-  color: #fff;
-}
-.cinehub-map .leaflet-control-zoom a.leaflet-disabled {
-  background: rgba(9, 9, 11, 0.85);
-  color: rgb(63 63 70);
 }
 
 /* Créditos discretos */
 .cinehub-map .leaflet-control-attribution {
-  background: rgba(9, 9, 11, 0.7);
-  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(6px);
   color: rgb(113 113 122);
   font-size: 9px;
-  border-radius: 0 0 0 8px;
+  border-radius: 0 0 8px 0;
   padding: 2px 8px;
 }
 .cinehub-map .leaflet-control-attribution a {
-  color: rgb(161 161 170);
+  color: rgb(82 82 91);
 }
 
 /* ── Celular: evita o zoom automático do iPhone ao tocar em campos ─────────

@@ -1,28 +1,59 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Polyline, AttributionControl, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useDeliveryTracking } from '../hooks/useDeliveryTracking';
 import { getRoute, distanceMeters, LatLng, Route, MAP_TILES } from '@/lib/geo';
-import { MapPin } from 'lucide-react';
+import { Car, Crosshair, Loader2, MapPin, Minus, Plus } from 'lucide-react';
 
-// Ícones em HTML puro (sem depender de imagens externas)
-const truckIcon = L.divIcon({
+// Carro visto de cima, apontando para cima (0°); girado conforme a direção do trajeto
+const carIcon = (heading: number) => L.divIcon({
   className: '',
-  html: '<div style="width:40px;height:40px;border-radius:9999px;background:#e11d48;border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 20px rgba(225,29,72,.6)">🚚</div>',
-  iconSize: [40, 40],
-  iconAnchor: [20, 20],
+  html: `
+    <div style="width:52px;height:52px;border-radius:9999px;background:rgba(225,29,72,.14);display:flex;align-items:center;justify-content:center">
+      <div style="width:38px;height:38px;border-radius:9999px;background:#fff;box-shadow:0 0 0 4px rgba(225,29,72,.18),0 6px 16px rgba(225,29,72,.35);display:flex;align-items:center;justify-content:center">
+        <svg width="22" height="22" viewBox="0 0 24 24" style="transform:rotate(${heading}deg);transition:transform .6s ease">
+          <rect x="6" y="2" width="12" height="20" rx="4" fill="#e11d48"/>
+          <rect x="8" y="5" width="8" height="4" rx="1.5" fill="#fecdd3"/>
+          <rect x="8" y="15" width="8" height="3" rx="1.5" fill="#fecdd3"/>
+          <rect x="7.5" y="10" width="9" height="4.5" rx="1" fill="#be123c"/>
+        </svg>
+      </div>
+    </div>`,
+  iconSize: [52, 52],
+  iconAnchor: [26, 26],
 });
 
 const destinationIcon = L.divIcon({
   className: '',
-  html: '<div style="width:32px;height:32px;border-radius:9999px;background:#10b981;border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 16px rgba(16,185,129,.6)">📍</div>',
-  iconSize: [32, 32],
-  iconAnchor: [16, 16],
+  html: `
+    <svg width="34" height="42" viewBox="0 0 34 42" style="filter:drop-shadow(0 4px 6px rgba(0,0,0,.25))">
+      <path d="M17 41s14-13.3 14-24A14 14 0 0 0 3 17c0 10.7 14 24 14 24z" fill="#111827"/>
+      <circle cx="17" cy="17" r="5.5" fill="#fff"/>
+    </svg>`,
+  iconSize: [34, 42],
+  iconAnchor: [17, 41],
 });
 
-// Recalcula a rota só quando o veículo andou isso (evita abusar do OSRM público)
+// Recalcula a rota só quando o veículo andou isso (poupa a cota da API de rotas)
 const ROUTE_REFRESH_METERS = 200;
+
+/** Direção (graus, 0 = norte) de a para b */
+function bearing(a: LatLng, b: LatLng): number {
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const y = Math.sin(toRad(b.lng - a.lng)) * Math.cos(toRad(b.lat));
+  const x = Math.cos(toRad(a.lat)) * Math.sin(toRad(b.lat))
+    - Math.sin(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.cos(toRad(b.lng - a.lng));
+  return ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
+}
+
+// Enquadra veículo + destino, deixando espaço para o cartão de baixo
+const FIT_OPTIONS = { paddingTopLeft: [40, 60] as [number, number], paddingBottomRight: [40, 130] as [number, number] };
+
+function fitPoints(map: L.Map, points: LatLng[], zoomIfSingle = 16) {
+  if (points.length === 1) map.flyTo([points[0].lat, points[0].lng], zoomIfSingle);
+  else if (points.length > 1) map.fitBounds(L.latLngBounds(points.map(p => [p.lat, p.lng])), FIT_OPTIONS);
+}
 
 function FitBounds({ points }: { points: LatLng[] }) {
   const map = useMap();
@@ -32,17 +63,8 @@ function FitBounds({ points }: { points: LatLng[] }) {
     // O mapa pode montar dentro de um modal ainda animando: recalcula o tamanho antes de enquadrar
     const timer = setTimeout(() => {
       map.invalidateSize();
-      if (points.length === 1) {
-        map.flyTo([points[0].lat, points[0].lng], fitted.current ? map.getZoom() : 15);
-      } else if (!fitted.current) {
-        // Folga extra embaixo para o painel de distância/tempo não cobrir o destino
-        map.fitBounds(L.latLngBounds(points.map(p => [p.lat, p.lng])), {
-          paddingTopLeft: [40, 50],
-          paddingBottomRight: [40, 100],
-        });
-      } else {
-        map.panTo([points[0].lat, points[0].lng]);
-      }
+      if (!fitted.current) fitPoints(map, points);
+      else map.panTo([points[0].lat, points[0].lng]);
       fitted.current = true;
     }, 250);
     return () => clearTimeout(timer);
@@ -50,17 +72,42 @@ function FitBounds({ points }: { points: LatLng[] }) {
   return null;
 }
 
+/** Captura a instância do mapa para os botões flutuantes (fora do MapContainer) */
+function MapRef({ onReady }: { onReady: (map: L.Map) => void }) {
+  const map = useMap();
+  useEffect(() => { onReady(map); }, [map]); // eslint-disable-line react-hooks/exhaustive-deps
+  return null;
+}
+
+const floatingButton =
+  'h-11 w-11 flex items-center justify-center bg-white text-zinc-800 hover:bg-zinc-50 active:bg-zinc-100 transition-colors';
+
 interface TrackingMapProps {
   position: LatLng | null;
   destination: LatLng | null;
   waitingMessage?: string;
+  /** Título do cartão de baixo (ex.: "Seu pedido está a caminho") */
+  title?: string;
   onRoute?: (route: Route) => void;
 }
 
-/** Mapa com o veículo, o destino e a rota entre eles (km e tempo restantes). */
-export function TrackingMap({ position, destination, waitingMessage, onRoute }: TrackingMapProps) {
+/** Mapa claro com o veículo, o destino, a rota e o tempo estimado de chegada. */
+export function TrackingMap({ position, destination, waitingMessage, title = 'Seu pedido está a caminho', onRoute }: TrackingMapProps) {
   const [route, setRoute] = useState<Route | null>(null);
+  const [map, setMap] = useState<L.Map | null>(null);
   const lastRouted = useRef<LatLng | null>(null);
+
+  // Direção do carro: calculada pelo deslocamento entre um ponto de GPS e o seguinte
+  const lastPos = useRef<LatLng | null>(null);
+  const [heading, setHeading] = useState(0);
+  useEffect(() => {
+    if (!position) return;
+    const prev = lastPos.current;
+    if (prev && distanceMeters(prev, position) > 5) setHeading(bearing(prev, position));
+    else if (!prev && destination) setHeading(bearing(position, destination));
+    lastPos.current = position;
+  }, [position?.lat, position?.lng]);
+  const icon = useMemo(() => carIcon(heading), [Math.round(heading)]);
 
   useEffect(() => {
     if (!position || !destination) return;
@@ -75,50 +122,74 @@ export function TrackingMap({ position, destination, waitingMessage, onRoute }: 
 
   if (!position) {
     return (
-      <div className="h-full w-full bg-zinc-950 flex items-center justify-center">
-        <p className="text-white font-medium flex items-center gap-2 text-sm">
-          <MapPin className="text-red-500" /> {waitingMessage || 'Aguardando sinal GPS do veículo...'}
-        </p>
+      <div className="h-full w-full bg-[#eef0f3] flex flex-col items-center justify-center gap-3 text-center px-6">
+        <div className="h-12 w-12 rounded-full bg-white shadow-md flex items-center justify-center">
+          <MapPin className="h-5 w-5 text-primary" />
+        </div>
+        <p className="text-zinc-600 font-semibold text-sm">{waitingMessage || 'Aguardando sinal GPS do veículo...'}</p>
       </div>
     );
   }
+
+  const points = destination ? [position, destination] : [position];
+  const minutes = route ? Math.max(1, Math.round(route.durationMin)) : null;
 
   return (
     <div className="relative h-full w-full z-0">
       <MapContainer
         center={[position.lat, position.lng]}
-        zoom={15}
+        zoom={16}
+        zoomControl={false}
         attributionControl={false}
         className="cinehub-map"
         style={{ height: '100%', width: '100%' }}
       >
-        {/* Créditos no topo: o painel de distância/tempo ocupa a parte de baixo */}
-        <AttributionControl position="topright" prefix={false} />
-        {/* Geoapify (tema escuro) quando há chave; senão OSM escurecido por CSS — ver geo.ts */}
-        <TileLayer
-          url={MAP_TILES.url}
-          className={MAP_TILES.className}
-          maxZoom={19}
-          attribution={MAP_TILES.attribution}
-        />
-        <FitBounds points={destination ? [position, destination] : [position]} />
-        {route && <Polyline positions={route.coords} pathOptions={{ color: '#e11d48', weight: 5, opacity: 0.85 }} />}
+        <AttributionControl position="topleft" prefix={false} />
+        <TileLayer url={MAP_TILES.url} className={MAP_TILES.className} maxZoom={19} attribution={MAP_TILES.attribution} />
+        <MapRef onReady={setMap} />
+        <FitBounds points={points} />
+        {route && (
+          <>
+            {/* Contorno branco por baixo deixa a rota legível sobre as ruas */}
+            <Polyline positions={route.coords} pathOptions={{ color: '#ffffff', weight: 9, opacity: 0.9 }} />
+            <Polyline positions={route.coords} pathOptions={{ color: '#e11d48', weight: 5, opacity: 0.95 }} />
+          </>
+        )}
         {destination && <Marker position={[destination.lat, destination.lng]} icon={destinationIcon} />}
-        <Marker position={[position.lat, position.lng]} icon={truckIcon} />
+        <Marker position={[position.lat, position.lng]} icon={icon} />
       </MapContainer>
 
-      {route && (
-        <div className="absolute bottom-3 left-3 right-3 z-[400] flex justify-between gap-2 bg-black/80 backdrop-blur-md border border-zinc-800 rounded-2xl px-4 py-3">
-          <div>
-            <p className="text-[9px] font-black uppercase text-zinc-500 tracking-widest">Distância</p>
-            <p className="text-sm font-black text-white">{route.distanceKm.toFixed(1)} km</p>
-          </div>
-          <div className="text-right">
-            <p className="text-[9px] font-black uppercase text-zinc-500 tracking-widest">Chegada estimada</p>
-            <p className="text-sm font-black text-white">{Math.max(1, Math.round(route.durationMin))} min</p>
-          </div>
+      {/* Zoom */}
+      <div className="absolute top-3 right-3 z-[400] flex flex-col rounded-2xl overflow-hidden shadow-[0_6px_20px_rgba(0,0,0,0.15)] divide-y divide-zinc-200">
+        <button aria-label="Aproximar" onClick={() => map?.zoomIn()} className={floatingButton}><Plus className="h-5 w-5" /></button>
+        <button aria-label="Afastar" onClick={() => map?.zoomOut()} className={floatingButton}><Minus className="h-5 w-5" /></button>
+      </div>
+
+      {/* Recentralizar no veículo e no destino */}
+      <button
+        aria-label="Centralizar"
+        onClick={() => map && fitPoints(map, points)}
+        className={`${floatingButton} absolute right-3 bottom-[92px] z-[400] rounded-full shadow-[0_6px_20px_rgba(0,0,0,0.15)]`}
+      >
+        <Crosshair className="h-5 w-5" />
+      </button>
+
+      {/* Cartão de status */}
+      <div className="absolute left-3 right-3 bottom-3 z-[400] flex items-center gap-3 bg-white rounded-2xl px-3 py-3 shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
+        <div className="h-11 w-11 rounded-full bg-rose-100 flex items-center justify-center shrink-0">
+          <Car className="h-5 w-5 text-primary" />
         </div>
-      )}
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-bold text-zinc-900 truncate">{title}</p>
+          <p className="text-xs text-zinc-500 truncate">
+            {minutes !== null
+              ? `Chegada em aproximadamente ${minutes} min · ${route!.distanceKm.toFixed(1)} km`
+              : destination
+                ? <span className="inline-flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" /> Calculando rota...</span>
+                : 'Endereço de entrega sem localização no mapa'}
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
@@ -128,7 +199,7 @@ export function TrackingMap({ position, destination, waitingMessage, onRoute }: 
  * tempo real (Realtime) e aparece sozinho, para a locadora e para o cliente, assim que
  * o pedido é despachado — sem depender da lista de pedidos ser recarregada.
  */
-export function OrderLiveLocation({ bookingId }: { bookingId: string }) {
+export function OrderLiveLocation({ bookingId, title }: { bookingId: string; title?: string }) {
   const { delivery } = useDeliveryTracking(bookingId);
   if (!delivery || delivery.status !== 'shipped') return null;
 
@@ -144,8 +215,8 @@ export function OrderLiveLocation({ bookingId }: { bookingId: string }) {
       <h3 className="text-lg font-black uppercase tracking-tighter flex items-center gap-2">
         <MapPin className="h-4 w-4 text-primary" /> Localização do equipamento
       </h3>
-      <div className="h-80 md:h-96 rounded-3xl overflow-hidden border border-zinc-800">
-        <TrackingMap position={position} destination={destination} waitingMessage="Aguardando sinal GPS do veículo..." />
+      <div className="h-96 md:h-[28rem] rounded-3xl overflow-hidden border border-zinc-800">
+        <TrackingMap position={position} destination={destination} title={title} waitingMessage="Aguardando sinal GPS do veículo..." />
       </div>
     </div>
   );

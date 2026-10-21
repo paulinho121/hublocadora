@@ -913,7 +913,10 @@ export default function Dashboard() {
                    </Card>
 
                    {/* Localização ao vivo: visível para a locadora e para o cliente */}
-                   <OrderLiveLocation bookingId={order.id} />
+                   <OrderLiveLocation
+                     bookingId={order.id}
+                     title={order._direction === 'sent' ? 'Seu pedido está a caminho' : 'Equipamento a caminho do cliente'}
+                   />
 
                    <div className="space-y-3">
                      <h3 className="text-lg font-black uppercase tracking-tighter flex items-center gap-2"><Truck className="h-4 w-4 text-primary" /> Entrega</h3>

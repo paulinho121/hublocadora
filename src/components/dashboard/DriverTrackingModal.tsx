@@ -113,7 +113,7 @@ export function DriverTrackingModal({ delivery, onClose }: DriverTrackingModalPr
         )}
 
         <div className="h-[55vh] rounded-3xl overflow-hidden border border-zinc-800">
-          <TrackingMap position={position} destination={destination} waitingMessage="Obtendo sua localização..." onRoute={handleRoute} />
+          <TrackingMap position={position} destination={destination} title="Você está a caminho do cliente" waitingMessage="Obtendo sua localização..." onRoute={handleRoute} />
         </div>
 
         {address && (

@@ -21,21 +21,21 @@ export type Route = {
 };
 
 /**
- * Camada de mapa para o Leaflet. Com Geoapify: estilo escuro neutro, clareado por CSS
- * (.map-tiles-geoapify em index.css) para as ruas ficarem legíveis. {r} vira @2x em telas retina.
+ * Camada de mapa para o Leaflet: estilo claro e limpo (Positron) no Geoapify.
+ * {r} vira @2x em telas retina.
  */
 export const MAP_TILES = GEOAPIFY_KEY
   ? {
-      url: `https://maps.geoapify.com/v1/tile/dark-matter-dark-grey/{z}/{x}/{y}{r}.png?apiKey=${GEOAPIFY_KEY}`,
+      url: `https://maps.geoapify.com/v1/tile/positron/{z}/{x}/{y}{r}.png?apiKey=${GEOAPIFY_KEY}`,
       attribution:
         'Powered by <a href="https://www.geoapify.com/">Geoapify</a> | &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      className: 'map-tiles-geoapify',
+      className: undefined as string | undefined,
     }
   : {
-      // Tiles claros do OSM escurecidos por CSS (.map-tiles-dark em index.css)
+      // Reserva sem chave: tiles padrão do OpenStreetMap
       url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      className: 'map-tiles-dark',
+      className: undefined as string | undefined,
     };
 
 // ── Geocodificação ───────────────────────────────────────────────────────────
