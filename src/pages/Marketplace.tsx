@@ -164,6 +164,40 @@ export default function Marketplace() {
     });
   }, [equipments, city, sortBy, availabilityMap]);
 
+  // Carrossel do celular: ordem aleatória (sorteada uma vez por visita, para os cards não pularem),
+  // ainda com os disponíveis primeiro. Se a pessoa escolher ordenar por preço, vale o preço.
+  const [randomRank] = useState(() => new Map<string, number>());
+  const carouselEquipments = useMemo(() => {
+    if (sortBy !== 'available') return displayedEquipments;
+    const rank = (id: string) => {
+      if (!randomRank.has(id)) randomRank.set(id, Math.random());
+      return randomRank.get(id)!;
+    };
+    return [...displayedEquipments].sort((a, b) => {
+      const av = availabilityMap.get(a.id) === false ? 1 : 0;
+      const bv = availabilityMap.get(b.id) === false ? 1 : 0;
+      return av - bv || rank(a.id) - rank(b.id);
+    });
+  }, [displayedEquipments, sortBy, availabilityMap, randomRank]);
+
+  const renderCard = (item: ConsolidatedItem) => (
+    <EquipmentCard
+      key={item.id}
+      item={item}
+      rentedQuantity={(item as any).rentedQuantity ?? 0}
+      nextReturnDate={(item as any).nextReturnDate ?? null}
+      upcomingQuantity={(item as any).upcomingQuantity ?? 0}
+      nextUpcomingStart={(item as any).nextUpcomingStart ?? null}
+      isAvailableForDates={availabilityMap.get(item.id) ?? null}
+      projectDates={
+        projectState.startDate && projectState.endDate
+          ? { start: projectState.startDate, end: projectState.endDate }
+          : null
+      }
+      onClick={() => navigate(`/equipment/${item.id}`)}
+    />
+  );
+
   const hasFilters = !!(search || city || selectedCategory);
   const clearFilters = () => {
     setSearch('');
@@ -314,25 +348,21 @@ export default function Marketplace() {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-              {displayedEquipments.map((item) => (
-                <EquipmentCard
-                  key={item.id}
-                  item={item}
-                  rentedQuantity={(item as any).rentedQuantity ?? 0}
-                  nextReturnDate={(item as any).nextReturnDate ?? null}
-                  upcomingQuantity={(item as any).upcomingQuantity ?? 0}
-                  nextUpcomingStart={(item as any).nextUpcomingStart ?? null}
-                  isAvailableForDates={availabilityMap.get(item.id) ?? null}
-                  projectDates={
-                    projectState.startDate && projectState.endDate
-                      ? { start: projectState.startDate, end: projectState.endDate }
-                      : null
-                  }
-                  onClick={() => navigate(`/equipment/${item.id}`)}
-                />
-              ))}
-            </div>
+            <>
+              {/* Celular: carrossel deslizando para o lado, em ordem aleatória */}
+              <div className="sm:hidden -mx-4 px-4 flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {carouselEquipments.map((item) => (
+                  <div key={item.id} className="w-[82%] shrink-0 snap-start">
+                    {renderCard(item)}
+                  </div>
+                ))}
+              </div>
+
+              {/* Tablet e computador: grade */}
+              <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+                {displayedEquipments.map(renderCard)}
+              </div>
+            </>
           )}
         </div>
       </div>
