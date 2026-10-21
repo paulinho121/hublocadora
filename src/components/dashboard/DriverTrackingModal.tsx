@@ -16,7 +16,7 @@ interface DriverTrackingModalProps {
 
 /**
  * Aberto pela logística ao marcar "Enviado". Enquanto estiver aberto, envia o GPS
- * do celular para deliveries.current_lat/current_lng — o cliente acompanha pelo DeliveryMap.
+ * do celular para deliveries.current_lat/current_lng — cliente e locadora acompanham pelo OrderLiveLocation, no detalhe do pedido.
  */
 export function DriverTrackingModal({ delivery, onClose }: DriverTrackingModalProps) {
   const [position, setPosition] = useState<LatLng | null>(null);

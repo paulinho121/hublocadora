@@ -4,7 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useDeliveryTracking } from '../hooks/useDeliveryTracking';
 import { getRoute, distanceMeters, LatLng, Route, MAP_TILES } from '@/lib/geo';
-import { MapPin, Loader2 } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 
 // Ícones em HTML puro (sem depender de imagens externas)
 const truckIcon = L.divIcon({
@@ -123,29 +123,14 @@ export function TrackingMap({ position, destination, waitingMessage, onRoute }: 
   );
 }
 
-interface DeliveryMapProps {
-  bookingId: string;
-}
-
-/** Visão do cliente: acompanha em tempo real o GPS enviado pela logística. */
-export function DeliveryMap({ bookingId }: DeliveryMapProps) {
-  const { delivery, loading, error } = useDeliveryTracking(bookingId);
-
-  if (loading) {
-    return (
-      <div className="flex h-full items-center justify-center bg-zinc-950">
-        <p className="text-zinc-400 flex items-center gap-2 text-sm"><Loader2 className="h-4 w-4 animate-spin" /> Conectando ao rastreio...</p>
-      </div>
-    );
-  }
-
-  if (error || !delivery) {
-    return (
-      <div className="flex h-full items-center justify-center bg-zinc-950 text-red-500 text-sm">
-        Erro ao buscar detalhes do rastreamento.
-      </div>
-    );
-  }
+/**
+ * Bloco "Localização do equipamento" do detalhe do pedido. Acompanha a entrega em
+ * tempo real (Realtime) e aparece sozinho, para a locadora e para o cliente, assim que
+ * o pedido é despachado — sem depender da lista de pedidos ser recarregada.
+ */
+export function OrderLiveLocation({ bookingId }: { bookingId: string }) {
+  const { delivery } = useDeliveryTracking(bookingId);
+  if (!delivery || delivery.status !== 'shipped') return null;
 
   const position = delivery.current_lat != null && delivery.current_lng != null
     ? { lat: Number(delivery.current_lat), lng: Number(delivery.current_lng) }
@@ -155,10 +140,13 @@ export function DeliveryMap({ bookingId }: DeliveryMapProps) {
     : null;
 
   return (
-    <TrackingMap
-      position={position}
-      destination={destination}
-      waitingMessage={delivery.status === 'shipped' ? 'Aguardando sinal GPS do veículo...' : 'O rastreio começa quando o pedido for enviado.'}
-    />
+    <div className="space-y-3">
+      <h3 className="text-lg font-black uppercase tracking-tighter flex items-center gap-2">
+        <MapPin className="h-4 w-4 text-primary" /> Localização do equipamento
+      </h3>
+      <div className="h-80 md:h-96 rounded-3xl overflow-hidden border border-zinc-800">
+        <TrackingMap position={position} destination={destination} waitingMessage="Aguardando sinal GPS do veículo..." />
+      </div>
+    </div>
   );
 }
