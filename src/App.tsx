@@ -12,6 +12,7 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { TenantProvider, useTenant } from '@/contexts/TenantContext';
 import { ProjectProvider, useProject } from '@/contexts/ProjectContext';
 import { ProjectDrawer } from '@/components/marketplace/ProjectDrawer';
+import { RealtimeSync } from '@/components/RealtimeSync';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AdminRoute } from '@/components/auth/AdminRoute';
 import { queryClient } from '@/lib/react-query';
@@ -340,6 +341,8 @@ function MainLayout() {
   return (
     <div className="min-h-screen bg-background font-sans antialiased flex flex-col relative overflow-x-hidden supports-[overflow:clip]:overflow-x-clip">
       <ProfessionalBackground />
+      {/* Pedidos, entregas e prorrogações em tempo real para quem está logado */}
+      <RealtimeSync />
       {!isAuthPage && <Navbar />}
       {!isAuthPage && <ProjectDrawer />}
       <ErrorBoundary>
