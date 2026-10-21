@@ -18,7 +18,7 @@ interface ProjectState {
 }
 
 type ProjectAction =
-  | { type: 'ADD_ITEM'; equipment: Equipment }
+  | { type: 'ADD_ITEM'; equipment: Equipment; quantity?: number }
   | { type: 'REMOVE_ITEM'; equipmentId: string }
   | { type: 'UPDATE_QUANTITY'; equipmentId: string; quantity: number }
   | { type: 'SET_DATES'; startDate: string; endDate: string }
@@ -29,7 +29,8 @@ type ProjectAction =
 
 interface ProjectContextType {
   state: ProjectState;
-  addItem: (equipment: Equipment) => void;
+  /** Adiciona ao pedido; se o item já estiver lá e vier quantidade, atualiza a quantidade */
+  addItem: (equipment: Equipment, quantity?: number) => void;
   removeItem: (equipmentId: string) => void;
   updateQuantity: (equipmentId: string, quantity: number) => void;
   setDates: (startDate: string, endDate: string) => void;
@@ -59,9 +60,16 @@ const defaultState: ProjectState = {
 function projectReducer(state: ProjectState, action: ProjectAction): ProjectState {
   switch (action.type) {
     case 'ADD_ITEM': {
+      const qty = Math.max(1, Math.min(action.quantity ?? 1, action.equipment.stock_quantity || 1));
       const exists = state.items.some(i => i.equipment.id === action.equipment.id);
-      if (exists) return state;
-      return { ...state, items: [...state.items, { equipment: action.equipment, quantity: 1 }] };
+      if (exists) {
+        if (action.quantity === undefined) return state;
+        return {
+          ...state,
+          items: state.items.map(i => i.equipment.id === action.equipment.id ? { ...i, quantity: qty } : i),
+        };
+      }
+      return { ...state, items: [...state.items, { equipment: action.equipment, quantity: qty }] };
     }
     case 'REMOVE_ITEM':
       return { ...state, items: state.items.filter(i => i.equipment.id !== action.equipmentId) };
@@ -137,7 +145,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 
   const value: ProjectContextType = {
     state,
-    addItem:        (equipment)            => dispatch({ type: 'ADD_ITEM', equipment }),
+    addItem:        (equipment, quantity)  => dispatch({ type: 'ADD_ITEM', equipment, quantity }),
     removeItem:     (equipmentId)          => dispatch({ type: 'REMOVE_ITEM', equipmentId }),
     updateQuantity: (equipmentId, quantity)=> dispatch({ type: 'UPDATE_QUANTITY', equipmentId, quantity }),
     setDates:       (startDate, endDate)   => dispatch({ type: 'SET_DATES', startDate, endDate }),

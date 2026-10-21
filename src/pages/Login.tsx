@@ -16,7 +16,8 @@ export default function Login() {
     const [message, setMessage] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
 
-    const from = location.state?.from?.pathname || '/dashboard';
+    const fromState = location.state?.from;
+    const from = fromState?.pathname ? fromState.pathname + (fromState.search || '') : '/dashboard';
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();

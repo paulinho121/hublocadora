@@ -17,6 +17,7 @@ import {
   Clapperboard,
   RefreshCw,
   Pencil,
+  ArrowLeftRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -70,12 +71,12 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
   const menuItems = [
     { id: 'overview', label: 'Visão Geral', icon: BarChart3 },
     { id: 'inventory', label: 'Inventário', icon: Package },
-    { id: 'bookings', label: 'Reservas', icon: CalendarDays },
+    { id: 'bookings', label: 'Pedidos', icon: CalendarDays },
     { id: 'projects', label: 'Projetos', icon: Clapperboard },
-    { id: 'logistics', label: 'Logística', icon: Truck },
     { id: 'reports', label: 'Relatórios', icon: FileText },
     { id: 'history', label: 'Histórico', icon: History },
     { id: 'favorites', label: 'Favoritos', icon: Heart },
+    { id: 'transfers', label: 'Transferências', icon: ArrowLeftRight },
     ...(isAdmin ? [
       { id: 'network', label: 'Minha Rede', icon: Globe },
       { id: 'audit', label: 'Auditoria', icon: History }

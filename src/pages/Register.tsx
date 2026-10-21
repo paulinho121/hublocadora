@@ -10,7 +10,8 @@ export default function Register() {
     const navigate = useNavigate();
     const location = useLocation();
     // Para onde voltar depois do cadastro (ex.: o equipamento que o visitante quis reservar)
-    const from: string | undefined = location.state?.from?.pathname;
+    const fromState = location.state?.from;
+    const from: string | undefined = fromState?.pathname ? fromState.pathname + (fromState.search || '') : undefined;
     const isBookingIntent = location.state?.intent === 'booking';
     const [fullName, setFullName] = useState('');
     const [companyName, setCompanyName] = useState('');

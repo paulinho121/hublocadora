@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, NavLink } from 'react-router-dom';
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { LogOut, LayoutDashboard, Settings, ShoppingBag, BarChart3, Package, CalendarDays, Truck, History, FileText, Heart, FolderOpen, Clapperboard, Globe, LayoutGrid, X } from 'lucide-react';
+import { LogOut, LayoutDashboard, Settings, ShoppingBag, BarChart3, Package, CalendarDays, History, FileText, Heart, FolderOpen, Clapperboard, Globe, LayoutGrid, X, ArrowLeftRight } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -56,10 +56,10 @@ function ProjectNavButton() {
     <button
       onClick={openDrawer}
       className="relative flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-all"
-      title="Meu Projeto"
+      title="Meu Pedido"
     >
       <FolderOpen className="h-4 w-4" />
-      <span className="hidden lg:inline">Projeto</span>
+      <span className="hidden lg:inline">Pedido</span>
       {count > 0 && (
         <span className="absolute -top-1.5 -right-2 lg:static lg:ml-0 w-4 h-4 lg:w-auto lg:h-auto lg:px-1.5 lg:py-0.5 bg-primary text-white text-[9px] font-black rounded-full flex items-center justify-center leading-none">
           {count}
@@ -163,7 +163,7 @@ function ProjectBottomButton() {
       <FolderOpen className="w-4 h-4 shrink-0" />
       {isActive && (
         <span className="text-[10px] font-black uppercase tracking-wider whitespace-nowrap ml-1.5 animate-in fade-in slide-in-from-left-2 duration-300">
-          Projeto
+          Pedido
         </span>
       )}
       {count > 0 && !isActive && (
@@ -180,8 +180,8 @@ function ProjectBottomButton() {
 const DASHBOARD_PRIMARY_TABS = [
   { id: 'overview',  label: 'Visão',      icon: BarChart3 },
   { id: 'bookings',  label: 'Pedidos',    icon: CalendarDays },
-  { id: 'logistics', label: 'Logística',  icon: Truck },
   { id: 'inventory', label: 'Inventário', icon: Package },
+  { id: 'projects',  label: 'Projetos',   icon: Clapperboard },
 ];
 
 function DashboardBottomNav() {
@@ -193,10 +193,10 @@ function DashboardBottomNav() {
 
   const currentTab = new URLSearchParams(location.search).get('tab') || 'overview';
   const moreTabs = [
-    { id: 'projects',  label: 'Projetos',      icon: Clapperboard },
     { id: 'reports',   label: 'Relatórios',    icon: FileText },
     { id: 'history',   label: 'Histórico',     icon: History },
     { id: 'favorites', label: 'Favoritos',     icon: Heart },
+    { id: 'transfers', label: 'Transferências', icon: ArrowLeftRight },
     ...(isAdmin ? [
       { id: 'network', label: 'Minha Rede',    icon: Globe },
       { id: 'audit',   label: 'Auditoria',     icon: History },

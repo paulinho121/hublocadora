@@ -16,6 +16,7 @@ import { useTenant } from '@/contexts/TenantContext';
 import { BookingService } from '@/services/BookingService';
 import { useCreateProject, createOutboundShipment } from '@/hooks/useProjects';
 import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 // ─── Availability per item ────────────────────────────────────────────────────
 
@@ -40,9 +41,20 @@ const brl = (v: number) =>
 export function ProjectDrawer() {
   const {
     state, removeItem, updateQuantity, setDates, setProjectName,
-    closeDrawer, clearCart, isInCart, totalDays, estimatedTotal,
+    openDrawer, closeDrawer, clearCart, isInCart, totalDays, estimatedTotal,
   } = useProject();
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Volta do cadastro/login (link do e-mail ou Google) com ?pedido=abrir: reabre o carrinho
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('pedido') !== 'abrir') return;
+    params.delete('pedido');
+    navigate({ pathname: location.pathname, search: params.toString() }, { replace: true });
+    if (user) openDrawer();
+  }, [location.search, user]); // eslint-disable-line react-hooks/exhaustive-deps
   const { company } = useTenant();
   const queryClient = useQueryClient();
   const createProject = useCreateProject();
@@ -121,7 +133,12 @@ export function ProjectDrawer() {
 
   // ── checkout ───────────────────────────────────────────────────────────────
   const handleCheckout = async () => {
-    if (!user) { toast.error('Faça login para continuar.'); return; }
+    if (!user) {
+      // O carrinho fica salvo no aparelho; depois do cadastro a pessoa volta com ele aberto
+      closeDrawer();
+      navigate('/register', { state: { from: { pathname: '/', search: '?pedido=abrir' }, intent: 'booking' } });
+      return;
+    }
 
     const conflicts = state.items.filter(i => availMap[i.equipment.id] === 'conflict');
     if (conflicts.length > 0) {
@@ -252,7 +269,7 @@ export function ProjectDrawer() {
                 <div>
                   <p className="text-[9px] font-black uppercase tracking-[0.25em] text-zinc-500">Locação em conjunto</p>
                   <h2 className="text-sm font-black uppercase tracking-wider text-white leading-none mt-0.5">
-                    Meu Projeto
+                    Meu Pedido
                   </h2>
                 </div>
               </div>
@@ -275,7 +292,7 @@ export function ProjectDrawer() {
                       <CheckCircle2 className="w-8 h-8 text-emerald-400" />
                     </div>
                     <h3 className="text-lg font-black uppercase tracking-tight text-white">
-                      Projeto enviado!
+                      Pedido enviado!
                     </h3>
                     <p className="text-zinc-500 text-xs mt-1">
                       Acompanhe as reservas no seu painel
@@ -319,7 +336,7 @@ export function ProjectDrawer() {
                   {/* Project name */}
                   <div>
                     <label className="block text-[9px] font-black uppercase tracking-[0.25em] text-zinc-500 mb-2">
-                      Nome do projeto
+                      Nome da produção (opcional)
                     </label>
                     <input
                       type="text"
@@ -396,11 +413,11 @@ export function ProjectDrawer() {
                         <FolderOpen className="w-10 h-10 text-zinc-700" />
                         <div>
                           <p className="text-xs font-black text-zinc-400 uppercase tracking-widest">
-                            Projeto vazio
+                            Pedido vazio
                           </p>
                           <p className="text-[11px] text-zinc-600 mt-1.5 leading-relaxed">
                             Volte ao marketplace e clique em{' '}
-                            <span className="text-primary font-black">+ Projeto</span>{' '}
+                            <span className="text-primary font-black">+ Pedido</span>{' '}
                             em cada equipamento que quiser locar.
                           </p>
                         </div>
@@ -600,9 +617,9 @@ export function ProjectDrawer() {
                 {!user ? (
                   <Button
                     className="w-full h-14 rounded-2xl bg-primary text-white font-black uppercase tracking-widest text-xs shadow-lg shadow-primary/20"
-                    onClick={() => { closeDrawer(); window.location.href = '/login'; }}
+                    onClick={handleCheckout}
                   >
-                    Entrar para confirmar
+                    Cadastre-se para finalizar
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 ) : (
@@ -622,7 +639,7 @@ export function ProjectDrawer() {
                     ) : hasConflict ? (
                       <>Resolva os conflitos de data</>
                     ) : (
-                      <>Confirmar Projeto <ArrowRight className="w-4 h-4 ml-2" /></>
+                      <>Finalizar Pedido <ArrowRight className="w-4 h-4 ml-2" /></>
                     )}
                   </Button>
                 )}

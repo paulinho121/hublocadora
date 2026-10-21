@@ -14,8 +14,6 @@ import {
   Info,
   Loader2,
   Camera,
-  Truck,
-  Store,
   Building2,
   CalendarSearch,
   ChevronDown,
@@ -24,8 +22,6 @@ import {
   Plus,
   Minus,
   CheckCircle2,
-  FolderPlus,
-  StickyNote,
   Hash,
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
@@ -35,14 +31,12 @@ import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 
 import { useEquipmentAvailability } from '@/hooks/useAvailability';
-import { useCreateBooking } from '@/hooks/useBookings';
 import { AvailabilityCalendar } from '@/components/marketplace/AvailabilityCalendar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProject } from '@/contexts/ProjectContext';
 import { ReviewService } from '@/services/ReviewService';
 import { useQuery } from '@tanstack/react-query';
 import { Equipment } from '@/types/database';
-import { savePendingBooking, loadPendingBooking, clearPendingBooking } from '@/lib/pendingBooking';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -67,29 +61,19 @@ const conditionColors: Record<string, string> = {
 function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
   const { id }       = useParams<{ id: string }>();
   const navigate     = useNavigate();
-  const { user }     = useAuth();
   const { state: proj, addItem, setDates: setProjectDates, openDrawer } = useProject();
-
-  const createBooking = useCreateBooking();
 
   const today    = new Date().toISOString().split('T')[0];
   const tomorrow = format(addDays(new Date(), 1), 'yyyy-MM-dd');
 
-  // Reserva iniciada antes do cadastro (visitante sem login) — restaura ao voltar
-  const [draft] = useState(() => loadPendingBooking(id || ''));
-  const draftDatesValid = !!draft && draft.startDate >= today;
-
-  // Pre-fill from project context if user already set dates in the marketplace bar
-  const [startDate, setStartDate] = useState(draftDatesValid ? draft!.startDate : (proj.startDate || today));
-  const [endDate,   setEndDate]   = useState(draftDatesValid ? draft!.endDate : (proj.endDate || format(addDays(new Date(), 7), 'yyyy-MM-dd')));
-  const [quantity,  setQty]       = useState(draft?.quantity ?? 1);
-  const [method,    setMethod]    = useState<'pickup' | 'delivery'>(draft?.method ?? 'pickup');
-  const [address,   setAddress]   = useState(draft?.address ?? '');
-  const [contact,   setContact]   = useState(draft?.contact ?? '');
-  const [notes,     setNotes]     = useState(draft?.notes ?? '');
-  const [showNotes, setShowNotes] = useState(false);
+  // Datas: as que já estão no pedido (carrinho), se ainda forem válidas
+  const cartDatesValid = !!proj.startDate && proj.startDate >= today;
+  const [startDate, setStartDate] = useState(cartDatesValid ? proj.startDate : today);
+  const [endDate,   setEndDate]   = useState(cartDatesValid ? proj.endDate : format(addDays(new Date(), 7), 'yyyy-MM-dd'));
+  const inCartQty = proj.items.find(i => i.equipment.id === equipment.id)?.quantity;
+  const [quantity,  setQty]       = useState(inCartQty ?? 1);
   const [showCal,   setShowCal]   = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [isAdded,   setIsAdded]   = useState(false);
 
   const { data: avail, isLoading: loadingAvail } = useEquipmentAvailability(
     id || '', startDate, endDate,
@@ -106,72 +90,35 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
     if (val >= endDate) setEndDate(format(addDays(parseISO(val), 1), 'yyyy-MM-dd'));
   };
 
-  useEffect(() => {
-    if (user && draft) toast.info('Mantivemos os dados da sua reserva. Confira e confirme.');
-  }, [user?.id]);
-
-  const handleBook = async () => {
+  // Carrinho: o item entra no pedido; o envio às locadoras acontece em "Finalizar pedido".
+  // As datas valem para o pedido inteiro.
+  const handleAddToOrder = () => {
     if (!canBook) return;
-    if (!user) {
-      // Guarda a seleção e leva o visitante para o cadastro; ele volta para cá logado
-      savePendingBooking({ equipmentId: equipment.id, startDate, endDate, quantity, method, address, contact, notes });
-      navigate('/register', { state: { from: { pathname: `/equipment/${equipment.id}` }, intent: 'booking' } });
-      return;
-    }
-    if (method === 'delivery' && !address.trim()) {
-      toast.error('Informe o endereço de entrega.');
-      return;
-    }
-    try {
-      await createBooking.mutateAsync({
-        equipment_id:         equipment.id,
-        renter_id:            user.id,
-        company_id:           equipment.company_id,
-        start_date:           startDate,
-        end_date:             endDate,
-        total_amount:         totalAmount,
-        status:               'pending',
-        notes:                notes || null,
-        quantity,
-        delivery_method:      method,
-        delivery_address:     method === 'delivery' ? address || null : null,
-        delivery_contact:     method === 'delivery' ? contact || null : null,
-        project_id:           null,
-        subrental_company_id: null,
-        origin_branch_id:     null,
-      });
-      clearPendingBooking();
-      setIsSuccess(true);
-    } catch {
-      toast.error('Erro ao realizar a reserva. Tente novamente.');
-    }
-  };
-
-  const handleAddToProject = () => {
-    addItem(equipment);
+    addItem(equipment, quantity);
     setProjectDates(startDate, endDate);
-    toast.success(`${equipment.name} adicionado ao projeto!`, {
-      action: { label: 'Ver projeto', onClick: openDrawer },
-    });
+    setIsAdded(true);
   };
 
   // ── Success state ──────────────────────────────────────────────────────────
-  if (isSuccess) {
+  if (isAdded) {
+    const cartCount = proj.items.length;
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center justify-center py-16 text-center
+        className="flex flex-col items-center justify-center py-14 px-4 text-center
                    bg-emerald-500/5 border border-emerald-500/20 rounded-3xl"
       >
         <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center mb-5">
           <CheckCircle2 className="w-8 h-8 text-emerald-400" />
         </div>
         <h3 className="text-xl font-black uppercase tracking-tighter mb-2 text-white">
-          Reserva Enviada!
+          Item adicionado!
         </h3>
         <p className="text-sm text-zinc-400 max-w-xs mb-2">
-          Sua solicitação foi enviada à locadora. Você receberá uma confirmação em breve.
+          {cartCount > 1
+            ? `Seu pedido tem ${cartCount} equipamentos. Continue locando ou finalize para enviar às locadoras.`
+            : 'Continue locando ou finalize o pedido para enviar à locadora.'}
         </p>
         <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400 mb-6">
           {format(parseISO(startDate), "d 'de' MMM", { locale: ptBR })}
@@ -179,19 +126,19 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
           {format(parseISO(endDate), "d 'de' MMM", { locale: ptBR })}
           {' · '}{quantity}× · {brl(totalAmount)}
         </p>
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           <Button
             variant="outline"
-            onClick={() => navigate('/dashboard?tab=bookings')}
-            className="rounded-xl border-zinc-700 text-zinc-300 font-black uppercase text-[10px] tracking-widest h-10 px-6"
+            onClick={() => navigate('/')}
+            className="rounded-xl border-zinc-700 text-zinc-300 font-black uppercase text-[11px] tracking-widest h-12 px-6"
           >
-            Ver Pedidos
+            Continuar locando
           </Button>
           <Button
-            onClick={() => navigate('/')}
-            className="rounded-xl font-black uppercase text-[10px] tracking-widest h-10 px-6"
+            onClick={openDrawer}
+            className="rounded-xl font-black uppercase text-[11px] tracking-widest h-12 px-6"
           >
-            Continuar Explorando
+            Finalizar pedido <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
         </div>
       </motion.div>
@@ -328,106 +275,6 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
         </div>
       )}
 
-      {/* ── Delivery method ────────────────────────────────────────────────── */}
-      <div className="rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-900/40">
-        <p className="px-4 pt-3.5 pb-2 text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500">
-          Logística
-        </p>
-        <div className="grid grid-cols-2 gap-2 px-3 pb-3">
-          <button
-            onClick={() => setMethod('pickup')}
-            className={`flex items-center justify-center gap-2 py-3 rounded-xl border transition-all
-                        text-[10px] font-black uppercase tracking-widest
-                        ${method === 'pickup'
-                          ? 'bg-primary/10 border-primary/40 text-primary'
-                          : 'bg-zinc-800/40 border-zinc-700/50 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300'}`}
-          >
-            <Store className="w-3.5 h-3.5" />
-            Retirar
-          </button>
-          <button
-            onClick={() => setMethod('delivery')}
-            className={`flex items-center justify-center gap-2 py-3 rounded-xl border transition-all
-                        text-[10px] font-black uppercase tracking-widest
-                        ${method === 'delivery'
-                          ? 'bg-primary/10 border-primary/40 text-primary'
-                          : 'bg-zinc-800/40 border-zinc-700/50 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300'}`}
-          >
-            <Truck className="w-3.5 h-3.5" />
-            Receber
-          </button>
-        </div>
-
-        {/* Delivery address fields */}
-        <AnimatePresence>
-          {method === 'delivery' && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="overflow-hidden"
-            >
-              <div className="px-3 pb-3 space-y-2 border-t border-zinc-800 pt-3">
-                <input
-                  value={address}
-                  onChange={e => setAddress(e.target.value)}
-                  placeholder="Endereço de entrega completo *"
-                  className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2.5
-                             text-xs text-white placeholder:text-zinc-600
-                             focus:outline-none focus:border-primary/50"
-                />
-                <input
-                  value={contact}
-                  onChange={e => setContact(e.target.value)}
-                  placeholder="Nome e telefone do responsável"
-                  className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2.5
-                             text-xs text-white placeholder:text-zinc-600
-                             focus:outline-none focus:border-primary/50"
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* ── Notes (optional) ──────────────────────────────────────────────── */}
-      <button
-        onClick={() => setShowNotes(v => !v)}
-        className="w-full flex items-center justify-between px-4 py-3 rounded-2xl
-                   bg-zinc-900/40 border border-zinc-800/60 hover:border-zinc-700
-                   text-[10px] font-black uppercase tracking-widest text-zinc-500
-                   hover:text-zinc-300 transition-all"
-      >
-        <span className="flex items-center gap-2">
-          <StickyNote className="w-3.5 h-3.5" />
-          Observações {notes && <span className="text-primary">·  preenchido</span>}
-        </span>
-        {showNotes ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-      </button>
-
-      <AnimatePresence>
-        {showNotes && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
-            <textarea
-              value={notes}
-              onChange={e => setNotes(e.target.value)}
-              placeholder="Ex: Preciso dos cabos de 10m, entrega antes das 8h..."
-              rows={3}
-              className="w-full bg-zinc-900/40 border border-zinc-800 rounded-2xl px-4 py-3
-                         text-xs text-white placeholder:text-zinc-600 resize-none
-                         focus:outline-none focus:border-primary/50"
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* ── Cost summary ──────────────────────────────────────────────────── */}
       <div className="rounded-2xl bg-zinc-900/40 border border-zinc-800/60 px-4 py-4 space-y-2">
         <div className="flex items-center justify-between text-[11px] text-zinc-500">
@@ -444,40 +291,30 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
         </div>
       </div>
 
-      {/* ── CTAs ──────────────────────────────────────────────────────────── */}
-      <div className="space-y-2 pt-1">
+      {/* ── CTA ───────────────────────────────────────────────────────────── */}
+      <div className="pt-1">
         <motion.button
           whileHover={canBook ? { scale: 1.01, y: -1 } : {}}
           whileTap={canBook ? { scale: 0.99 } : {}}
-          onClick={handleBook}
-          disabled={!canBook || createBooking.isPending || loadingAvail}
+          onClick={handleAddToOrder}
+          disabled={!canBook || loadingAvail}
           className={`w-full h-14 rounded-2xl font-black uppercase tracking-tighter text-base
                       flex items-center justify-center gap-2 transition-all
                       ${canBook
                         ? 'bg-primary text-white shadow-[0_8px_24px_rgba(234,88,12,0.35)] hover:bg-primary/90'
                         : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'}`}
         >
-          {createBooking.isPending ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : !loadingAvail && !avail?.isAvailable ? (
+          {!loadingAvail && !avail?.isAvailable ? (
             'Indisponível no período'
-          ) : !user ? (
-            <>Cadastre-se para Reservar <ArrowRight className="w-4 h-4" /></>
+          ) : inCartQty ? (
+            <>Atualizar no pedido <ArrowRight className="w-4 h-4" /></>
           ) : (
-            <>Confirmar Reserva <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></>
+            <>Adicionar ao pedido <ArrowRight className="w-4 h-4" /></>
           )}
         </motion.button>
-
-        <button
-          onClick={handleAddToProject}
-          className="w-full h-11 rounded-2xl border border-zinc-700/60 bg-zinc-900/40
-                     text-[11px] font-black uppercase tracking-widest text-zinc-400
-                     hover:text-primary hover:border-primary/30 hover:bg-primary/5
-                     flex items-center justify-center gap-2 transition-all"
-        >
-          <FolderPlus className="w-3.5 h-3.5" />
-          + Adicionar ao Projeto
-        </button>
+        <p className="text-[11px] text-zinc-500 text-center mt-2">
+          Nada é cobrado agora. Você revisa e envia em “Finalizar pedido”.
+        </p>
       </div>
 
       {/* ── Trust badges ──────────────────────────────────────────────────── */}
@@ -525,7 +362,7 @@ function MobileBookingBar({ dailyRate, targetRef }: { dailyRate: number; targetR
         className="h-12 px-5 rounded-xl bg-primary text-white font-black uppercase tracking-tight text-sm
                    flex items-center gap-2 shadow-[0_8px_24px_rgba(234,88,12,0.35)] active:scale-[0.98] transition-transform"
       >
-        {user ? 'Reservar' : 'Cadastre-se e reserve'} <ArrowRight className="w-4 h-4" />
+        Adicionar ao pedido <ArrowRight className="w-4 h-4" />
       </button>
     </div>
   );

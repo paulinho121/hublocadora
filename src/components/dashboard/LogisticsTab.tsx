@@ -21,7 +21,12 @@ import { InventoryStatusReport } from './InventoryStatusReport';
 import { useTenant } from '@/contexts/TenantContext';
 import { DriverTrackingModal } from './DriverTrackingModal';
 
-export function LogisticsTab({ tenantId }: { tenantId: string }) {
+/**
+ * Logística das entregas. Com `bookingId`, roda em modo embutido dentro do detalhe
+ * do pedido: só a entrega desse pedido, sem cabeçalho, abas, transferências ou relatórios.
+ */
+export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookingId?: string }) {
+    const embedded = !!bookingId;
     const { user } = useAuth();
     const { isBranchManager, branchId } = useTenant();
     const { branches } = useBranches();
@@ -30,10 +35,11 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
     const [pendingDelivery, setPendingDelivery] = useState<any>(null);
     const [trackingDelivery, setTrackingDelivery] = useState<any>(null);
     const queryClient = useQueryClient();
-    const { data: deliveries, isLoading, error: fetchError } = useDeliveries({ 
-        tenantId,
-        branchId: isBranchManager ? branchId : undefined
-    });
+    const { data: deliveries, isLoading, error: fetchError } = useDeliveries(
+        embedded
+            ? { bookingId }
+            : { tenantId, branchId: isBranchManager ? branchId : undefined }
+    );
     const updateMutation = useUpdateDeliveryStatus();
     const [updatingId, setUpdatingId] = useState<string | null>(null);
     const [serialNumbers, setSerialNumbers] = useState<Record<string, string>>({});
@@ -94,7 +100,18 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
 
     const toReceiveCount = toReceiveDeliveries.length + toReceiveTransfers.length;
 
-    const activeDeliveries = logisticsMode === 'to_send' ? toSendDeliveries : toReceiveDeliveries;
+    // Embutido: quem só alugou (não é a locadora que envia) vê a entrega pelo lado de "receber"
+    const embeddedAsRenter = embedded && !!deliveries?.[0]
+        && deliveries[0].booking?.renter_id === user?.id
+        && deliveries[0].booking?.company_id !== tenantId
+        && deliveries[0].fulfilling_company_id !== tenantId;
+    useEffect(() => {
+        if (embedded) setLogisticsMode(embeddedAsRenter ? 'to_receive' : 'to_send');
+    }, [embedded, embeddedAsRenter]);
+
+    const activeDeliveries = embedded
+        ? (deliveries || []).filter((d: any) => d.status !== 'cancelled')
+        : logisticsMode === 'to_send' ? toSendDeliveries : toReceiveDeliveries;
 
     useEffect(() => {
         const channel = supabase
@@ -469,6 +486,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
 
     return (
         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+            {!embedded && (
             <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-4 border-b border-white/5">
                 <div className="space-y-1">
                     <h2 className="text-4xl font-black tracking-tighter uppercase leading-none">Logística</h2>
@@ -495,8 +513,10 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                     ))}
                 </div>
             </header>
+            )}
             {activeSubTab === 'deliveries' && (
                 <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    {!embedded && (
                     <div className="flex bg-black/60 p-1.5 rounded-[24px] border border-white/5 backdrop-blur-3xl w-full md:w-fit shadow-2xl">
                         <button
                             onClick={() => setLogisticsMode('to_send')}
@@ -527,6 +547,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                             </div>
                         </button>
                     </div>
+                    )}
 
                     <div className="grid grid-cols-1 gap-10">
                         <AnimatePresence mode="popLayout">
@@ -534,19 +555,23 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                                 <motion.div 
                                     initial={{ opacity: 0, scale: 0.98 }}
                                     animate={{ opacity: 1, scale: 1 }}
-                                    className="bg-zinc-950/20 border border-dashed border-white/5 rounded-[40px] p-32 text-center backdrop-blur-md"
+                                    className={cn("bg-zinc-950/20 border border-dashed border-white/5 rounded-[40px] text-center backdrop-blur-md", embedded ? "p-10" : "p-32")}
                                 >
                                     <div className="relative inline-block mb-6">
                                         <div className="absolute inset-0 bg-zinc-800 blur-2xl rounded-full opacity-20" />
                                         <Truck className="h-16 w-16 text-zinc-800 relative z-10 mx-auto" />
                                     </div>
-                                    <h3 className="text-2xl font-black uppercase tracking-tighter text-zinc-600">Silêncio na Malha</h3>
-                                    <p className="text-zinc-700 text-xs mt-3 font-bold uppercase tracking-widest">Nenhum fluxo {logisticsMode === 'to_send' ? 'de saída' : 'de entrada'} detectado.</p>
+                                    <h3 className="text-2xl font-black uppercase tracking-tighter text-zinc-600">{embedded ? 'Entrega ainda não iniciada' : 'Silêncio na Malha'}</h3>
+                                    <p className="text-zinc-700 text-xs mt-3 font-bold uppercase tracking-widest">
+                                        {embedded
+                                            ? 'A logística começa quando a locadora aprovar o pedido.'
+                                            : `Nenhum fluxo ${logisticsMode === 'to_send' ? 'de saída' : 'de entrada'} detectado.`}
+                                    </p>
                                 </motion.div>
                             ) : (
                                 <div className="space-y-10">
                                     {/* Renderizar Transferências em Entrada primeiro se estiver em modo 'to_receive' */}
-                                    {logisticsMode === 'to_receive' && toReceiveTransfers.map((transfer: any) => (
+                                    {!embedded && logisticsMode === 'to_receive' && toReceiveTransfers.map((transfer: any) => (
                                         <motion.div
                                             key={transfer.id}
                                             layout
@@ -840,7 +865,7 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                 </div>
             )}
 
-            {activeSubTab === 'reverse' && (
+            {(activeSubTab === 'reverse' || (embedded && deliveries?.some((d: any) => d.reverse_logistics_status && d.reverse_logistics_status !== 'not_started'))) && (
                 <div className="space-y-10 animate-in fade-in slide-in-from-top-4 duration-700">
                     <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-indigo-500/5 p-6 rounded-[32px] border border-indigo-500/10 backdrop-blur-xl">
                         <div className="flex items-center gap-4">
@@ -999,11 +1024,11 @@ export function LogisticsTab({ tenantId }: { tenantId: string }) {
                     </div>
                 </div>
             )}
-            {activeSubTab === 'availability' && (
+            {!embedded && activeSubTab === 'availability' && (
                 <InventoryStatusReport companyId={tenantId} />
             )}
 
-            {activeSubTab === 'transfers' && (
+            {!embedded && activeSubTab === 'transfers' && (
                 <InternalTransfersSection />
             )}
 

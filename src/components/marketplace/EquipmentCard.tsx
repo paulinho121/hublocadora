@@ -75,11 +75,11 @@ export function EquipmentCard({
     e.stopPropagation();
     if (inCart) {
       removeItem(item.id);
-      toast.info(`${item.name} removido do projeto`);
+      toast.info(`${item.name} removido do pedido`);
     } else {
       addItem(item);
-      toast.success(`${item.name} adicionado ao projeto!`, {
-        action: { label: 'Ver projeto', onClick: openDrawer },
+      toast.success(`${item.name} adicionado ao pedido!`, {
+        action: { label: 'Ver pedido', onClick: openDrawer },
       });
     }
   };
@@ -254,7 +254,7 @@ export function EquipmentCard({
         {/* ── Action row ── */}
         <div className="flex gap-2 pt-3 border-t border-white/[0.05]">
 
-          {/* + Projeto button */}
+          {/* + Pedido button */}
           <Button
             size="sm"
             onClick={handleToggleProject}
@@ -270,10 +270,10 @@ export function EquipmentCard({
               } disabled:opacity-20 disabled:cursor-not-allowed`}
           >
             {inCart
-              ? <><FolderCheck className="h-3 w-3" /> No projeto</>
+              ? <><FolderCheck className="h-3 w-3" /> No pedido</>
               : isAvailableForDates === false
                 ? <><CalendarX    className="h-3 w-3" /> Ocupado</>
-                : <><FolderPlus   className="h-3 w-3" /> + Projeto</>}
+                : <><FolderPlus   className="h-3 w-3" /> + Pedido</>}
           </Button>
 
           {/* Reserve → */}
