@@ -92,6 +92,8 @@ export function NotificationCenter() {
         <div className="relative" ref={containerRef}>
             <button
                 ref={buttonRef}
+                aria-label={unreadCount > 0 ? `Notificações: ${unreadCount} não lidas` : 'Notificações'}
+                aria-expanded={isOpen}
                 onClick={() => {
                     if (!isOpen && buttonRef.current) {
                         const rect = buttonRef.current.getBoundingClientRect();

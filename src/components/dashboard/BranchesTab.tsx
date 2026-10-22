@@ -347,7 +347,7 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
-                                            <Button
+                                            <Button aria-label="Editar unidade"
                                                 variant="ghost"
                                                 size="sm"
                                                 onClick={() => handleEdit(branch)}
@@ -356,7 +356,7 @@ export function BranchesTab({ tenantId }: { tenantId: string }) {
                                             >
                                                 <ExternalLink className="h-4 w-4 text-zinc-500" />
                                             </Button>
-                                            <Button
+                                            <Button aria-label="Copiar link do convite"
                                                 variant="ghost"
                                                 size="sm"
                                                 onClick={() => copyInviteLink(branch.invite_token, branch.id)}

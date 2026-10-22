@@ -147,7 +147,7 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId, onAssign, acti
             </div>
             
             <div className="flex gap-1">
-              <Button 
+              <Button aria-label="Editar" 
                 variant="ghost" 
                 size="icon" 
                 onClick={() => onEdit(item)} 
@@ -157,7 +157,7 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId, onAssign, acti
                 <Edit2 className="h-4 w-4" />
               </Button>
               {!isBranchManager && onAssign && (
-                <Button 
+                <Button aria-label="Atribuir à filial" 
                   variant="ghost" 
                   size="icon" 
                   onClick={() => onAssign(item)}
@@ -167,7 +167,7 @@ export function InventoryCard({ item, onEdit, onDelete, tenantId, onAssign, acti
                   <Truck className="h-4 w-4" />
                 </Button>
               )}
-              <Button 
+              <Button aria-label="Excluir" 
                 variant="ghost" 
                 size="icon" 
                 onClick={() => onDelete(item.id)}

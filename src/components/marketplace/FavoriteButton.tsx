@@ -24,6 +24,8 @@ export function FavoriteButton({ equipmentId, className }: FavoriteButtonProps) 
       variant="ghost"
       disabled={isPending}
       onClick={handleClick}
+      aria-label={active ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
+      aria-pressed={active}
       className={cn(
         "relative h-10 w-10 rounded-xl backdrop-blur-md border transition-all duration-500 overflow-hidden",
         active 

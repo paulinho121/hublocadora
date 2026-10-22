@@ -112,7 +112,7 @@ export default function ResetPassword() {
                                     required
                                     disabled={loading}
                                 />
-                                <button
+                                <button aria-label="Mostrar ou esconder senha"
                                     type="button"
                                     className="absolute right-3 top-[50%] -translate-y-[50%] text-zinc-500 hover:text-zinc-300 focus:outline-none"
                                     onClick={() => setShowPassword(!showPassword)}
@@ -131,7 +131,7 @@ export default function ResetPassword() {
                                     required
                                     disabled={loading}
                                 />
-                                <button
+                                <button aria-label="Mostrar ou esconder senha"
                                     type="button"
                                     className="absolute right-3 top-[50%] -translate-y-[50%] text-zinc-500 hover:text-zinc-300 focus:outline-none"
                                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}

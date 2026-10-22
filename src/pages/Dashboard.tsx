@@ -72,6 +72,7 @@ import { EditBookingModal } from '@/components/dashboard/EditBookingModal';
 import { InventoryStatusReport } from '@/components/dashboard/InventoryStatusReport';
 import { InternalTransfersSection } from '@/components/dashboard/InternalTransfersSection';
 import { PendingActions } from '@/components/dashboard/PendingActions';
+import { EmptyState } from '@/components/ui/empty-state';
 
 type TabType = 'overview' | 'inventory' | 'bookings' | 'projects' | 'transfers' | 'reports' | 'network' | 'settings' | 'audit' | 'history' | 'favorites';
 const VALID_TABS: TabType[] = ['overview', 'inventory', 'bookings', 'projects', 'transfers', 'reports', 'network', 'settings', 'audit', 'history', 'favorites'];
@@ -579,7 +580,7 @@ export default function Dashboard() {
 
            <div className="flex items-center gap-3">
               {/* Refresh button — visible on mobile (PWA) */}
-              <button
+              <button aria-label="Atualizar aplicativo"
                 onClick={handleRefresh}
                 disabled={isRefreshing}
                 className="md:hidden h-9 w-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500 hover:text-emerald-400 hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-all active:scale-95"
@@ -758,7 +759,12 @@ export default function Dashboard() {
                       </CardHeader>
                       <CardContent className="p-0">
                          {recentOrders.length === 0 ? (
-                           <div className="p-6 text-center text-zinc-400">Nenhum pedido recente.</div>
+                           <EmptyState
+                             compact
+                             icon={Inbox}
+                             title="Nenhum pedido recente"
+                             description="Seus pedidos mais novos aparecem aqui."
+                           />
                          ) : (
                            <div className="divide-y divide-zinc-900/50">
                               {recentOrders.map((booking: any) => {
@@ -1191,9 +1197,15 @@ export default function Dashboard() {
                  </header>
 
                  {orders.length === 0 ? (
-                   <div className="border border-dashed border-zinc-800 rounded-2xl p-6 text-center">
-                     <p className="text-zinc-500 font-bold">Nenhum pedido ainda.</p>
-                   </div>
+                   <EmptyState
+                     icon={Inbox}
+                     title="Nenhum pedido ainda"
+                     description={equipments.length > 0
+                       ? 'Os pedidos que você receber ou fizer aparecem aqui, com a entrega e a localização.'
+                       : 'Quando você alugar um equipamento, o pedido aparece aqui para acompanhar a entrega.'}
+                     action={{ label: 'Explorar equipamentos', onClick: () => { window.location.href = '/'; } }}
+                     secondaryAction={equipments.length === 0 ? { label: 'Cadastrar equipamento', onClick: () => setActiveTab('inventory') } : undefined}
+                   />
                  ) : (
                    <div className="space-y-3">
                      {groups.map(({ key, items }) => {
@@ -1440,19 +1452,12 @@ function FavoritesTabContent({ onSelect }: { onSelect: (eq: any) => void }) {
 
   if (!favoriteIds || favoriteIds.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <div className="h-20 w-20 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-6">
-          <Heart className="h-8 w-8 text-zinc-500" />
-        </div>
-        <h3 className="text-xl font-black uppercase tracking-tighter mb-2">Lista Vazia</h3>
-        <p className="text-zinc-500 max-w-xs mb-8">Você ainda não salvou nenhum equipamento como favorito.</p>
-        <a
-          href="/"
-          className="inline-flex items-center justify-center rounded-xl border border-zinc-800 h-10 px-6 text-sm font-black uppercase tracking-widest transition-colors hover:bg-zinc-900 hover:text-zinc-100 text-zinc-300"
-        >
-          Explorar Marketplace
-        </a>
-      </div>
+      <EmptyState
+        icon={Heart}
+        title="Nenhum favorito ainda"
+        description="Toque no coração de um equipamento no marketplace para salvá-lo aqui."
+        action={{ label: 'Explorar equipamentos', onClick: () => { window.location.href = '/'; } }}
+      />
     );
   }
 

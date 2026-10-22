@@ -113,7 +113,7 @@ export function AvailabilityCalendar({
     <div className="bg-zinc-900/50 rounded-2xl border border-zinc-800 p-5 space-y-4">
       {/* Month navigation */}
       <div className="flex items-center justify-between">
-        <button
+        <button aria-label="Mês anterior"
           onClick={() => setCurrentMonth(prev => subMonths(prev, 1))}
           className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
         >
@@ -122,7 +122,7 @@ export function AvailabilityCalendar({
         <span className="text-sm font-black uppercase tracking-widest text-zinc-200 capitalize">
           {format(currentMonth, 'MMMM yyyy', { locale: ptBR })}
         </span>
-        <button
+        <button aria-label="Próximo mês"
           onClick={() => setCurrentMonth(prev => addMonths(prev, 1))}
           className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
         >

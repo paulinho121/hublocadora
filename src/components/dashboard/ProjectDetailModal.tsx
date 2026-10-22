@@ -887,7 +887,7 @@ export function ProjectDetailModal({ project, isOpen, onClose }: Props) {
                         <Badge className={`text-[11px] font-semibold border ${statusColor}`}>
                             {statusLabel}
                         </Badge>
-                        <button
+                        <button aria-label="Fechar"
                             onClick={onClose}
                             className="w-8 h-8 rounded-xl flex items-center justify-center text-zinc-500 hover:text-white hover:bg-zinc-800 transition-all"
                         >

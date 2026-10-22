@@ -209,7 +209,7 @@ export function AIAssistant() {
                   }
                   className="flex-1 bg-transparent py-2 text-sm text-white outline-none placeholder:text-zinc-500"
                 />
-                <button 
+                <button aria-label="Enviar mensagem" 
                   onClick={handleSend}
                   disabled={loading || !message.trim()}
                   className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-all hover:scale-105 active:scale-95 disabled:opacity-30 disabled:grayscale"

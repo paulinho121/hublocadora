@@ -276,7 +276,7 @@ export function ProjectDrawer() {
                   </h2>
                 </div>
               </div>
-              <button
+              <button aria-label="Fechar pedido"
                 onClick={closeDrawer}
                 className="w-9 h-9 rounded-xl flex items-center justify-center text-zinc-500 hover:text-white hover:bg-zinc-800 transition-all"
               >
@@ -465,7 +465,7 @@ export function ProjectDrawer() {
                                 {/* Quantity + price */}
                                 <div className="flex items-center justify-between mt-2">
                                   <div className="flex items-center gap-1.5 bg-zinc-800/60 rounded-lg p-0.5">
-                                    <button
+                                    <button aria-label={`Diminuir quantidade de ${item.equipment.name}`}
                                       onClick={() => updateQuantity(item.equipment.id, item.quantity - 1)}
                                       disabled={item.quantity <= 1}
                                       className="w-9 h-9 flex items-center justify-center rounded-md hover:bg-zinc-700 disabled:opacity-30 transition-all text-white"
@@ -475,7 +475,7 @@ export function ProjectDrawer() {
                                     <span className="text-xs font-black text-white w-5 text-center">
                                       {item.quantity}
                                     </span>
-                                    <button
+                                    <button aria-label={`Aumentar quantidade de ${item.equipment.name}`}
                                       onClick={() => updateQuantity(item.equipment.id, item.quantity + 1)}
                                       disabled={item.quantity >= (free ?? item.equipment.stock_quantity)}
                                       className="w-9 h-9 flex items-center justify-center rounded-md hover:bg-zinc-700 disabled:opacity-30 transition-all text-white"
@@ -490,7 +490,7 @@ export function ProjectDrawer() {
                               </div>
 
                               {/* Remove */}
-                              <button
+                              <button aria-label={`Remover ${item.equipment.name} do pedido`}
                                 onClick={() => removeItem(item.equipment.id)}
                                 className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-lg text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
                               >

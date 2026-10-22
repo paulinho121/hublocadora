@@ -519,7 +519,7 @@ export function QuickBookingModal({ equipment, isOpen, onClose }: QuickBookingMo
                                             'Equipamento Indisponível'
                                         )}
                                     </Button>
-                                    <Button 
+                                    <Button aria-label="Voltar" 
                                         variant="outline" 
                                         className="h-14 w-14 rounded-2xl border-zinc-800 bg-transparent flex-shrink-0"
                                         onClick={onClose}

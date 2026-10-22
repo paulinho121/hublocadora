@@ -407,9 +407,9 @@ export function ProjectsTab() {
                             Nenhum projeto ainda
                         </p>
                         <p className="text-xs text-zinc-400 leading-relaxed max-w-xs mx-auto">
-                            Vá ao marketplace, adicione equipamentos com{' '}
-                            <span className="text-primary font-black">+ Projeto</span>{' '}
-                            e confirme a locação em conjunto pelo carrinho.
+                            No marketplace, toque em{' '}
+                            <span className="text-primary font-bold">Adicionar ao pedido</span>{' '}
+                            nos equipamentos e finalize pelo carrinho.
                         </p>
                     </div>
                     <Button

@@ -281,7 +281,7 @@ export function EquipmentForm({ equipment, companyId: propCompanyId, onSuccess }
     return (
       <div className="space-y-4 animate-in slide-in-from-right-4 duration-500">
         <div className="flex items-center gap-4 mb-6">
-          <Button variant="ghost" size="icon" onClick={() => setStep('selection')} className="rounded-full">
+          <Button aria-label="Voltar" variant="ghost" size="icon" onClick={() => setStep('selection')} className="rounded-full">
             <ChevronLeft className="h-5 w-5" />
           </Button>
           <h3 className="text-lg font-black uppercase tracking-tighter">Catálogo Oficial</h3>

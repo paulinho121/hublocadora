@@ -173,7 +173,7 @@ export function MasterCatalogSelector({ companyId, onSuccess }: MasterCatalogSel
                 <p className="text-xs text-zinc-400 font-bold mt-1">
                   {existingItem ? `Já possui ${existingItem.stock_quantity} un.` : 'Configurar Adição'}
                 </p>
-              <Button variant="ghost" size="icon" onClick={() => setSelectedItem(null)} className="rounded-full">
+              <Button aria-label="Fechar" variant="ghost" size="icon" onClick={() => setSelectedItem(null)} className="rounded-full">
                 <Plus className="w-5 h-5 rotate-45" />
               </Button>
             </div>

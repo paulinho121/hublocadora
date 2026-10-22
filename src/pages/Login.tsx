@@ -130,7 +130,7 @@ export default function Login() {
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
                                 />
-                                <button
+                                <button aria-label={showPassword ? 'Esconder senha' : 'Mostrar senha'}
                                     type="button"
                                     className="absolute right-1 top-[50%] -translate-y-[50%] h-10 w-10 flex items-center justify-center rounded-lg text-zinc-500 hover:text-zinc-300 focus:outline-none"
                                     onClick={() => setShowPassword(!showPassword)}

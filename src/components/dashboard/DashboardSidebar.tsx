@@ -90,7 +90,7 @@ export function DashboardSidebar({ activeTab, onTabChange, companyName }: Sideba
       isCollapsed ? "w-20" : "w-72"
     )}>
       {/* Floating Toggle Collapse Button on Right Border */}
-      <button 
+      <button aria-label={isCollapsed ? 'Expandir menu' : 'Recolher menu'} 
         onClick={toggleCollapse}
         className="absolute -right-3 top-8 h-6 w-6 rounded-full bg-zinc-900 border border-zinc-800 hover:border-zinc-700 hover:text-white flex items-center justify-center text-zinc-400 shadow-xl transition-all z-50 group/toggle"
       >

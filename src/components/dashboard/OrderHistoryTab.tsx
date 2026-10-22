@@ -22,6 +22,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { PaginationBar } from '@/components/ui/pagination-bar';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export function OrderHistoryTab() {
   const { user } = useAuth();
@@ -143,13 +144,11 @@ export function OrderHistoryTab() {
           <p className="text-zinc-500 font-bold text-xs">Carregando Histórico...</p>
         </div>
       ) : filteredBookings.length === 0 ? (
-        <div className="py-20 text-center border-2 border-dashed border-zinc-900 rounded-2xl">
-          <History className="h-12 w-12 text-zinc-800 mx-auto mb-4" />
-          <h3 className="text-xl font-black text-zinc-500 uppercase tracking-tighter">Nenhum registro encontrado</h3>
-          <p className="text-zinc-400 font-medium max-w-xs mx-auto mt-2">
-            O histórico aparecerá aqui quando houver pedidos finalizados ou cancelados.
-          </p>
-        </div>
+        <EmptyState
+          icon={History}
+          title="Nenhum pedido no histórico"
+          description="Pedidos concluídos, recusados ou cancelados aparecem aqui."
+        />
       ) : (
         <>
         <div className="grid grid-cols-1 gap-4">

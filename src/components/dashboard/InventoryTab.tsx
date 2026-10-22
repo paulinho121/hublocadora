@@ -19,6 +19,7 @@ import { Equipment, Booking } from '@/types/database';
 import { useBookings } from '@/hooks/useBookings';
 
 import { useTenant } from '@/contexts/TenantContext';
+import { EmptyState } from '@/components/ui/empty-state';
 
 const PAGE_SIZE = 12; // 3 colunas × 4 linhas
 
@@ -172,17 +173,21 @@ export function InventoryTab({ tenantId, onAdd, onEdit, onDelete }: InventoryTab
           ))}
         </div>
       ) : equipments.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 bg-zinc-950/20 border border-dashed border-zinc-800 rounded-2xl text-center space-y-6 animate-in zoom-in-95 duration-500">
-          <div className="w-24 h-24 rounded-full bg-zinc-900 flex items-center justify-center shadow-inner">
-             <Package className="h-10 w-10 text-zinc-500" />
-          </div>
-          <div className="space-y-2 max-w-sm">
-            <h3 className="text-xl font-bold">Nenhum item encontrado</h3>
-            <p className="text-zinc-500 text-sm">
-              Não encontramos nenhum equipamento com estes filtros ou seu inventário ainda está vazio.
-            </p>
-          </div>
-        </div>
+        searchQuery || categoryFilter !== 'all' ? (
+          <EmptyState
+            icon={Package}
+            title="Nenhum equipamento encontrado"
+            description="Nenhum item do inventário combina com a busca ou o filtro."
+            action={{ label: 'Limpar filtros', onClick: () => { setSearchQuery(''); setCategoryFilter('all'); } }}
+          />
+        ) : (
+          <EmptyState
+            icon={Package}
+            title="Seu inventário está vazio"
+            description="Cadastre o primeiro equipamento para ele aparecer no marketplace e receber pedidos."
+            action={{ label: 'Cadastrar equipamento', onClick: onAdd }}
+          />
+        )
       ) : (
         <>
           <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">

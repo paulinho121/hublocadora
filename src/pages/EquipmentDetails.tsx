@@ -38,6 +38,8 @@ import { ReviewService } from '@/services/ReviewService';
 import { useQuery } from '@tanstack/react-query';
 import { Equipment } from '@/types/database';
 import { SuggestedEquipments } from '@/components/marketplace/SuggestedEquipments';
+import { EquipmentGallery } from '@/components/marketplace/EquipmentGallery';
+import { CompanyInfoCard } from '@/components/marketplace/CompanyInfoCard';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -252,7 +254,7 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <button
+            <button aria-label="Diminuir quantidade"
               onClick={() => setQty(q => Math.max(1, q - 1))}
               className="w-10 h-10 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 flex items-center justify-center transition-colors disabled:opacity-30"
               disabled={quantity <= 1}
@@ -262,7 +264,7 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
             <span className="text-lg font-black text-white w-6 text-center tabular-nums">
               {quantity}
             </span>
-            <button
+            <button aria-label="Aumentar quantidade"
               onClick={() => setQty(q => Math.min(maxQty, q + 1))}
               className="w-10 h-10 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 flex items-center justify-center transition-colors disabled:opacity-30"
               disabled={quantity >= maxQty}
@@ -363,13 +365,11 @@ export default function EquipmentDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: equipment, isLoading, error } = useEquipment(id || '');
-  const [activeImage, setActiveImage] = useState(0);
   const [showDescription, setShowDescription] = useState(false);
   const bookingPanelRef = useRef<HTMLDivElement>(null);
 
-  // Ao abrir uma sugestão, a página é a mesma: volta para a primeira foto e para o topo
+  // Ao abrir uma sugestão, a página é a mesma: fecha a descrição e volta para o topo
   useEffect(() => {
-    setActiveImage(0);
     setShowDescription(false);
     window.scrollTo({ top: 0 });
   }, [id]);
@@ -452,41 +452,16 @@ export default function EquipmentDetails() {
 
           {/* ── Left: images + info ───────────────────────────────────────── */}
           <div className="space-y-6">
-            {/* Main image */}
-            <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800 relative">
-              {equipment.images?.[activeImage] ? (
-                <img
-                  src={equipment.images[activeImage]}
-                  alt={equipment.name}
-                  className="w-full h-full object-contain p-6 animate-in fade-in duration-500"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-zinc-500">
-                  <Camera className="w-20 h-20" />
-                </div>
-              )}
-              {/* Category badge */}
-              <div className="absolute top-4 left-4">
+            {/* Galeria: desliza no celular, setas no computador, tela cheia ao tocar */}
+            <EquipmentGallery
+              images={equipment.images || []}
+              name={equipment.name}
+              badge={
                 <Badge className="bg-primary/90 backdrop-blur-md text-white border-none font-black uppercase tracking-tighter px-3 py-1">
                   {equipment.category}
                 </Badge>
-              </div>
-            </div>
-
-            {/* Thumbnail strip */}
-            {equipment.images && equipment.images.length > 1 && (
-              <div className="flex gap-3 overflow-x-auto pb-1">
-                {equipment.images.map((img, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setActiveImage(idx)}
-                    className={`relative w-20 h-20 rounded-2xl overflow-hidden border-2 shrink-0 transition-all ${activeImage === idx ? 'border-primary scale-105' : 'border-zinc-800 opacity-50 hover:opacity-100'}`}
-                  >
-                    <img src={img} className="w-full h-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
+              }
+            />
 
             {/* Equipment info */}
             <div>
@@ -563,6 +538,9 @@ export default function EquipmentDetails() {
                 </div>
               </div>
             )}
+
+            {/* Sobre a locadora */}
+            <CompanyInfoCard company={equipment.company} />
           </div>
 
           {/* ── Right: booking panel (sticky on desktop) ───────────────────── */}
