@@ -19,6 +19,17 @@ function dateOverlaps(bStart: string, bEnd: string, pStart: string, pEnd: string
   return bStart <= pEnd && bEnd >= pStart;
 }
 
+const SORT_LABELS = { available: 'Disponíveis', 'price-asc': 'Menor preço', 'price-desc': 'Maior preço' } as const;
+
+/** "2026-10-22" → "22/10" */
+const shortDay = (d: string) => (d ? `${d.slice(8, 10)}/${d.slice(5, 7)}` : '—');
+
+// Campo nativo invisível que cobre o cartão inteiro (abre o seletor de data/lista do aparelho)
+const overlayInput = 'absolute inset-0 w-full h-full opacity-0 cursor-pointer text-base';
+const openPicker = (e: React.MouseEvent<HTMLInputElement>) => {
+  try { e.currentTarget.showPicker?.(); } catch { /* navegador sem showPicker: o toque já abre */ }
+};
+
 export default function Marketplace() {
   const navigate = useNavigate();
   const { state: projectState, setDates } = useProject();
@@ -261,55 +272,37 @@ export default function Marketplace() {
             />
           </div>
 
-          {/* ── Barra de descoberta: Quando? Onde? Ordenar ── */}
-          <div className="w-full max-w-3xl mt-3 grid grid-cols-2 md:grid-cols-[1.4fr_1fr_1fr] gap-2 text-left">
-            <div className="col-span-2 md:col-span-1 grid grid-cols-2 gap-2">
-              <label className="flex flex-col gap-0.5 bg-zinc-900/60 border border-zinc-800 rounded-xl px-3 py-2 cursor-pointer hover:border-zinc-700 transition-colors">
-                <span className="text-[11px] font-semibold text-zinc-500 flex items-center gap-1"><Calendar className="w-3 h-3 text-primary" /> Retirada</span>
-                <input
-                  type="date"
-                  value={projectState.startDate}
-                  min={today}
-                  onChange={e => handleStartDate(e.target.value)}
-                  className="bg-transparent text-sm font-semibold text-white focus:outline-none cursor-pointer w-full"
-                />
+          {/* ── Barra de descoberta: Quando? Onde? Ordenar ──
+               O valor aparece num texto curto (22/10) e o campo nativo fica invisível por cima:
+               ocupa pouco espaço no celular e continua abrindo o seletor do aparelho. */}
+          <div className="w-full max-w-3xl mt-2.5 grid grid-cols-[1fr_1fr_1fr_1.3fr] md:grid-cols-4 gap-1.5 md:gap-2 text-left">
+            {[
+              { label: 'Retirada', icon: <Calendar className="w-3 h-3 text-primary shrink-0" />, value: shortDay(projectState.startDate),
+                input: <input type="date" aria-label="Data de retirada" value={projectState.startDate} min={today} onChange={e => handleStartDate(e.target.value)} onClick={openPicker} className={overlayInput} /> },
+              { label: 'Devolução', icon: <Calendar className="w-3 h-3 shrink-0" />, value: shortDay(projectState.endDate),
+                input: <input type="date" aria-label="Data de devolução" value={projectState.endDate} min={projectState.startDate} onChange={e => handleEndDate(e.target.value)} onClick={openPicker} className={overlayInput} /> },
+              { label: 'Onde?', icon: <MapPin className="w-3 h-3 shrink-0" />, value: city ? city.split(' · ')[0] : 'Todas',
+                input: (
+                  <select aria-label="Cidade" value={city} onChange={e => setCity(e.target.value)} className={overlayInput}>
+                    <option value="">Todas as cidades</option>
+                    {cities.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                ) },
+              { label: 'Ordenar', icon: null, value: SORT_LABELS[sortBy],
+                input: (
+                  <select aria-label="Ordenar" value={sortBy} onChange={e => setSortBy(e.target.value as typeof sortBy)} className={overlayInput}>
+                    <option value="available">Disponíveis primeiro</option>
+                    <option value="price-asc">Menor preço</option>
+                    <option value="price-desc">Maior preço</option>
+                  </select>
+                ) },
+            ].map(field => (
+              <label key={field.label} className="relative flex flex-col gap-0.5 min-w-0 bg-zinc-900/60 border border-zinc-800 rounded-xl px-2.5 py-1.5 md:px-3 md:py-2 cursor-pointer hover:border-zinc-700 focus-within:border-primary/50 transition-colors">
+                <span className="text-[10px] md:text-[11px] font-semibold text-zinc-500 flex items-center gap-1 truncate"><span className="hidden md:inline-flex">{field.icon}</span>{field.label}</span>
+                <span className="text-[13px] md:text-sm font-semibold text-white truncate">{field.value}</span>
+                {field.input}
               </label>
-              <label className="flex flex-col gap-0.5 bg-zinc-900/60 border border-zinc-800 rounded-xl px-3 py-2 cursor-pointer hover:border-zinc-700 transition-colors">
-                <span className="text-[11px] font-semibold text-zinc-500 flex items-center gap-1"><Calendar className="w-3 h-3 text-zinc-500" /> Devolução</span>
-                <input
-                  type="date"
-                  value={projectState.endDate}
-                  min={projectState.startDate}
-                  onChange={e => handleEndDate(e.target.value)}
-                  className="bg-transparent text-sm font-semibold text-white focus:outline-none cursor-pointer w-full"
-                />
-              </label>
-            </div>
-
-            <label className="flex flex-col gap-0.5 bg-zinc-900/60 border border-zinc-800 rounded-xl px-3 py-2 hover:border-zinc-700 transition-colors">
-              <span className="text-[11px] font-semibold text-zinc-500 flex items-center gap-1"><MapPin className="w-3 h-3" /> Onde?</span>
-              <select
-                value={city}
-                onChange={e => setCity(e.target.value)}
-                className="bg-transparent text-sm font-semibold text-white focus:outline-none cursor-pointer w-full"
-              >
-                <option value="">Todas</option>
-                {cities.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </label>
-
-            <label className="flex flex-col gap-0.5 bg-zinc-900/60 border border-zinc-800 rounded-xl px-3 py-2 hover:border-zinc-700 transition-colors">
-              <span className="text-[11px] font-semibold text-zinc-500">Ordenar</span>
-              <select
-                value={sortBy}
-                onChange={e => setSortBy(e.target.value as typeof sortBy)}
-                className="bg-transparent text-sm font-semibold text-white focus:outline-none cursor-pointer w-full"
-              >
-                <option value="available">Disponíveis</option>
-                <option value="price-asc">Menor preço</option>
-                <option value="price-desc">Maior preço</option>
-              </select>
-            </label>
+            ))}
           </div>
         </motion.div>
       </div>

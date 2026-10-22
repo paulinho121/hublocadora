@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, NavLink } from 'react-router-dom';
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { LogOut, LayoutDashboard, Settings, ShoppingBag, BarChart3, Package, CalendarDays, History, FileText, Heart, FolderOpen, Clapperboard, Globe, LayoutGrid, X, ArrowLeftRight } from 'lucide-react';
+import { LogOut, Settings, BarChart3, Package, CalendarDays, History, FileText, Heart, FolderOpen, Clapperboard, Globe, X, ArrowLeftRight, Home, Menu } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -77,7 +77,7 @@ function Navbar() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  // No celular o painel tem cabeçalho próprio; "Sair" e "Marketplace" ficam na gaveta "Mais"
+  // No celular o painel tem cabeçalho próprio; "Sair" fica no "Menu" da barra de baixo
   const hideOnMobile = location.pathname === '/dashboard';
 
   const handleLogout = async () => {
@@ -105,6 +105,8 @@ function Navbar() {
         </div>
 
         <div className="flex items-center gap-3 md:gap-6">
+          {/* Carrinho no topo do celular (o menu de cima some no celular) */}
+          <div className="md:hidden flex items-center h-10 px-2"><ProjectNavButton /></div>
           <ThemeToggle />
           {user ? (
             <div className="flex items-center gap-4">
@@ -152,187 +154,134 @@ function Navbar() {
   );
 }
 
-function ProjectBottomButton() {
-  const { state, openDrawer } = useProject();
-  const count = state.items.length;
-  const isActive = state.isDrawerOpen;
-  return (
-    <button
-      onClick={openDrawer}
-      className={`flex items-center justify-center transition-all duration-300 relative rounded-xl ${
-        isActive
-          ? 'bg-primary text-white px-3.5 py-2.5 shadow-lg shadow-primary/20 scale-105'
-          : 'text-zinc-500 hover:text-zinc-300 p-2.5'
-      }`}
-    >
-      <FolderOpen className="w-4 h-4 shrink-0" />
-      {isActive && (
-        <span className="text-[11px] font-semibold whitespace-nowrap ml-1.5 animate-in fade-in slide-in-from-left-2 duration-300">
-          Pedido
-        </span>
-      )}
-      {count > 0 && !isActive && (
-        <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-primary text-white text-[11px] font-black rounded-full flex items-center justify-center">
-          {count}
-        </span>
-      )}
-    </button>
-  );
-}
-
-// Abas mais usadas ficam na barra; o resto (inclusive as que só existem na
-// barra lateral do desktop) fica na gaveta "Mais".
-const DASHBOARD_PRIMARY_TABS = [
-  { id: 'overview',  label: 'Visão',      icon: BarChart3 },
-  { id: 'bookings',  label: 'Pedidos',    icon: CalendarDays },
-  { id: 'inventory', label: 'Inventário', icon: Package },
-  { id: 'projects',  label: 'Projetos',   icon: Clapperboard },
-];
-
-function DashboardBottomNav() {
+// Barra de baixo do celular (igual no marketplace e no painel):
+// Início · Pedidos · Inventário · Menu (todas as outras áreas)
+function BottomNav() {
+  const { user, profile, signOut } = useAuth();
+  const { isAdmin } = useTenant();
+  const { state: cart, openDrawer } = useProject();
   const location = useLocation();
   const navigate = useNavigate();
-  const { signOut } = useAuth();
-  const { isAdmin } = useTenant();
-  const [moreOpen, setMoreOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const currentTab = new URLSearchParams(location.search).get('tab') || 'overview';
-  const moreTabs = [
-    { id: 'reports',   label: 'Relatórios',    icon: FileText },
-    { id: 'history',   label: 'Histórico',     icon: History },
-    { id: 'favorites', label: 'Favoritos',     icon: Heart },
+  // Fecha o menu ao trocar de página
+  useEffect(() => { setMenuOpen(false); }, [location.pathname, location.search]);
+
+  if (!user) return null;
+
+  const onDashboard = location.pathname === '/dashboard';
+  const currentTab = onDashboard ? (new URLSearchParams(location.search).get('tab') || 'overview') : null;
+
+  const goTab = (id: string) => {
+    setMenuOpen(false);
+    navigate(`/dashboard?tab=${id}`, { replace: onDashboard });
+  };
+
+  const menuTabs = [
+    { id: 'overview',  label: 'Visão geral',    icon: BarChart3 },
+    { id: 'projects',  label: 'Projetos',       icon: Clapperboard },
+    { id: 'reports',   label: 'Relatórios',     icon: FileText },
+    { id: 'history',   label: 'Histórico',      icon: History },
+    { id: 'favorites', label: 'Favoritos',      icon: Heart },
     { id: 'transfers', label: 'Transferências', icon: ArrowLeftRight },
     ...(isAdmin ? [
-      { id: 'network', label: 'Minha Rede',    icon: Globe },
-      { id: 'audit',   label: 'Auditoria',     icon: History },
+      { id: 'network', label: 'Minha Rede',     icon: Globe },
+      { id: 'audit',   label: 'Auditoria',      icon: History },
     ] : []),
-    { id: 'settings',  label: 'Configurações', icon: Settings },
+    { id: 'settings',  label: 'Configurações',  icon: Settings },
   ];
-  const isMoreActive = moreTabs.some(t => t.id === currentTab);
 
-  const goTo = (id: string) => {
-    setMoreOpen(false);
-    navigate(`/dashboard?tab=${id}`, { replace: true });
-  };
+  const isHome = location.pathname === '/' || location.pathname.startsWith('/equipment/');
+  const isMenuActive = menuOpen || (onDashboard && menuTabs.some(t => t.id === currentTab)) || location.pathname === '/admin';
 
   const itemClass = (active: boolean) =>
     `flex-1 flex flex-col items-center justify-center gap-1 min-h-[52px] rounded-xl transition-colors ${
       active ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-500 active:text-zinc-200'
     }`;
 
+  const tileClass = (active: boolean) =>
+    `flex flex-col items-center justify-center gap-2 min-h-[76px] rounded-2xl border transition-colors ${
+      active ? 'bg-primary/15 border-primary/40 text-primary' : 'bg-zinc-900/60 border-zinc-800 text-zinc-300 active:bg-zinc-800'
+    }`;
+
   return (
     <>
-      {moreOpen && (
-        <div className="md:hidden fixed inset-0 z-[60]" onClick={() => setMoreOpen(false)}>
+      {menuOpen && (
+        <div className="md:hidden fixed inset-0 z-[60]" onClick={() => setMenuOpen(false)}>
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           <div
-            className="absolute left-3 right-3 bg-zinc-950 border border-zinc-800 rounded-2xl p-4 shadow-[0_-20px_60px_rgba(0,0,0,0.8)] animate-in slide-in-from-bottom-4 fade-in duration-200"
+            className="absolute left-3 right-3 max-h-[70vh] overflow-y-auto bg-zinc-950 border border-zinc-800 rounded-2xl p-4 shadow-[0_-20px_60px_rgba(0,0,0,0.8)] animate-in slide-in-from-bottom-4 fade-in duration-200"
             style={{ bottom: 'calc(env(safe-area-inset-bottom) + 88px)' }}
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-3 px-1">
-              <span className="text-[11px] font-semibold text-zinc-500">Mais opções</span>
-              <button onClick={() => setMoreOpen(false)} className="h-10 w-10 -mr-2 flex items-center justify-center rounded-xl text-zinc-500" aria-label="Fechar">
+              <span className="text-sm font-semibold text-zinc-300">Menu</span>
+              <button onClick={() => setMenuOpen(false)} className="h-10 w-10 -mr-2 flex items-center justify-center rounded-xl text-zinc-500" aria-label="Fechar menu">
                 <X className="w-5 h-5" />
               </button>
             </div>
+
+            {/* Carrinho (pedido em montagem) */}
+            <button
+              onClick={() => { setMenuOpen(false); openDrawer(); }}
+              className="w-full flex items-center gap-3 h-12 px-4 mb-2 rounded-2xl bg-zinc-900/60 border border-zinc-800 text-zinc-200 text-sm font-semibold active:bg-zinc-800"
+            >
+              <FolderOpen className="w-4 h-4 text-primary" />
+              <span className="flex-1 text-left">Meu carrinho</span>
+              {cart.items.length > 0 && (
+                <span className="min-w-5 h-5 px-1.5 rounded-full bg-primary text-white text-[11px] font-bold flex items-center justify-center">{cart.items.length}</span>
+              )}
+            </button>
+
             <div className="grid grid-cols-3 gap-2">
-              {moreTabs.map(({ id, label, icon: Icon }) => (
-                <button
-                  key={id}
-                  onClick={() => goTo(id)}
-                  className={`flex flex-col items-center justify-center gap-2 min-h-[76px] rounded-2xl border transition-colors ${
-                    currentTab === id ? 'bg-primary/15 border-primary/40 text-primary' : 'bg-zinc-900/60 border-zinc-800 text-zinc-300 active:bg-zinc-800'
-                  }`}
-                >
+              {menuTabs.map(({ id, label, icon: Icon }) => (
+                <button key={id} onClick={() => goTab(id)} className={tileClass(currentTab === id)}>
                   <Icon className="w-5 h-5" />
-                  <span className="text-[11px] font-bold">{label}</span>
+                  <span className="text-[11px] font-bold text-center leading-tight px-1">{label}</span>
                 </button>
               ))}
+              {profile?.role === 'admin' && (
+                <button onClick={() => { setMenuOpen(false); navigate('/admin'); }} className={tileClass(location.pathname === '/admin')}>
+                  <Settings className="w-5 h-5" />
+                  <span className="text-[11px] font-bold">Gestão HUB</span>
+                </button>
+              )}
             </div>
-            <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-zinc-800/60">
-              <button
-                onClick={() => { setMoreOpen(false); navigate('/'); }}
-                className="flex items-center justify-center gap-2 h-12 rounded-2xl bg-zinc-900/60 border border-zinc-800 text-zinc-300 text-[11px] font-bold active:bg-zinc-800"
-              >
-                <ShoppingBag className="w-4 h-4" /> Marketplace
-              </button>
-              <button
-                onClick={async () => { setMoreOpen(false); await signOut(); navigate('/'); }}
-                className="flex items-center justify-center gap-2 h-12 rounded-2xl bg-zinc-900/60 border border-zinc-800 text-red-400 text-[11px] font-bold active:bg-zinc-800"
-              >
-                <LogOut className="w-4 h-4" /> Sair
-              </button>
-            </div>
+
+            <button
+              onClick={async () => { setMenuOpen(false); await signOut(); navigate('/'); }}
+              className="w-full flex items-center justify-center gap-2 h-12 mt-2 rounded-2xl bg-zinc-900/60 border border-zinc-800 text-red-400 text-[11px] font-bold active:bg-zinc-800"
+            >
+              <LogOut className="w-4 h-4" /> Sair
+            </button>
           </div>
         </div>
       )}
 
       <div className="md:hidden fixed left-3 right-3 z-[61] flex justify-center pointer-events-none" style={{ bottom: 'calc(env(safe-area-inset-bottom) + 12px)' }}>
-        <nav className="pointer-events-auto flex items-stretch gap-1 w-full max-w-lg bg-zinc-950/90 backdrop-blur-xl border border-zinc-800/80 p-1.5 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.8)]">
-          {DASHBOARD_PRIMARY_TABS.map(({ id, label, icon: Icon }) => (
-            <button key={id} onClick={() => goTo(id)} className={itemClass(currentTab === id && !moreOpen)}>
-              <Icon className="w-5 h-5 shrink-0" />
-              <span className="text-[11px] font-bold leading-none">{label}</span>
-            </button>
-          ))}
-          <button onClick={() => setMoreOpen(v => !v)} className={itemClass(moreOpen || isMoreActive)} aria-expanded={moreOpen}>
-            <LayoutGrid className="w-5 h-5 shrink-0" />
-            <span className="text-[11px] font-bold leading-none">Mais</span>
+        <nav aria-label="Navegação principal" className="pointer-events-auto flex items-stretch gap-1 w-full max-w-lg bg-zinc-950/90 backdrop-blur-xl border border-zinc-800/80 p-1.5 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.8)]">
+          <button onClick={() => { setMenuOpen(false); navigate('/'); }} className={itemClass(isHome && !menuOpen)}>
+            <Home className="w-5 h-5 shrink-0" />
+            <span className="text-[11px] font-bold leading-none">Início</span>
+          </button>
+          <button onClick={() => goTab('bookings')} className={itemClass(currentTab === 'bookings' && !menuOpen)}>
+            <CalendarDays className="w-5 h-5 shrink-0" />
+            <span className="text-[11px] font-bold leading-none">Pedidos</span>
+          </button>
+          <button onClick={() => goTab('inventory')} className={itemClass(currentTab === 'inventory' && !menuOpen)}>
+            <Package className="w-5 h-5 shrink-0" />
+            <span className="text-[11px] font-bold leading-none">Inventário</span>
+          </button>
+          <button onClick={() => setMenuOpen(v => !v)} className={`relative ${itemClass(isMenuActive)}`} aria-expanded={menuOpen}>
+            <Menu className="w-5 h-5 shrink-0" />
+            <span className="text-[11px] font-bold leading-none">Menu</span>
+            {cart.items.length > 0 && !menuOpen && (
+              <span className="absolute top-1 right-[calc(50%-18px)] w-2.5 h-2.5 rounded-full bg-primary ring-2 ring-zinc-950" aria-label="Itens no carrinho" />
+            )}
           </button>
         </nav>
       </div>
     </>
-  );
-}
-
-function BottomNav() {
-  const { user, profile } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
-  
-  if (!user) return null;
-
-  const isDashboard = location.pathname === '/dashboard';
-
-  // When inside the dashboard, show tab navigation instead of page navigation
-  if (isDashboard) return <DashboardBottomNav />;
-
-  // Non-dashboard pages (e.g. Marketplace, details)
-  const navItems = [
-    { to: '/', label: 'Market', icon: ShoppingBag },
-    { to: '/dashboard', label: 'Painel', icon: LayoutDashboard },
-    ...(profile?.role === 'admin' ? [{ to: '/admin', label: 'Admin', icon: Settings }] : []),
-  ];
-
-  return (
-    <div className="md:hidden fixed left-3 right-3 z-50 flex justify-center pointer-events-none" style={{ bottom: 'calc(env(safe-area-inset-bottom) + 12px)' }}>
-      <nav className="pointer-events-auto flex items-center justify-around w-full max-w-sm bg-zinc-950/80 backdrop-blur-xl border border-zinc-800/80 px-3 py-2 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.8)]">
-        {navItems.map(({ to, label, icon: Icon }) => {
-          const isActive = location.pathname === to;
-          return (
-            <NavLink
-              key={to}
-              to={to}
-              className={`flex items-center justify-center transition-all duration-300 rounded-xl ${
-                isActive 
-                  ? 'bg-primary text-white px-4 py-2.5 shadow-lg shadow-primary/20 scale-105 font-semibold text-[11px] ' 
-                  : 'text-zinc-500 hover:text-zinc-300 p-2.5'
-              }`}
-            >
-              <Icon className={`w-4.5 h-4.5 shrink-0 transition-transform ${isActive ? 'scale-110 mr-1.5' : 'scale-100'}`} />
-              {isActive && (
-                <span className="text-[11px] font-semibold whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-300">
-                  {label}
-                </span>
-              )}
-            </NavLink>
-          );
-        })}
-        
-        <ProjectBottomButton />
-      </nav>
-    </div>
   );
 }
 
