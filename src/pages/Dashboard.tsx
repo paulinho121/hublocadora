@@ -27,6 +27,7 @@ import {
   ArrowLeft,
   ChevronRight,
 } from 'lucide-react';
+import { confirmAction } from '@/components/ui/confirm-dialog';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -168,6 +169,8 @@ export default function Dashboard() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  // Aprovação/recusa do pedido inteiro (vários itens do mesmo carrinho)
+  const [bulkUpdatingKey, setBulkUpdatingKey] = useState<string | null>(null);
 
   // Booking edit/delete state
   const [editingBooking, setEditingBooking] = useState<any | null>(null);
@@ -811,6 +814,52 @@ export default function Dashboard() {
              const orders = [...byId.values()].sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
              const order = openOrderId ? orders.find(o => o.id === openOrderId) : null;
 
+             // Itens finalizados juntos no carrinho (mesmo project_id) aparecem como um pedido só
+             const groupMap = new Map<string, any[]>();
+             orders.forEach(o => {
+               const key = o.project_id || o.id;
+               groupMap.set(key, [...(groupMap.get(key) || []), o]);
+             });
+             const groups = [...groupMap.entries()].map(([key, items]) => ({ key, items }));
+             const openGroup = openOrderId && !order ? groupMap.get(openOrderId) : null;
+             // Status do pedido = o do item menos avançado (recusados/cancelados só contam se forem todos)
+             const STATUS_RANK: Record<string, number> = { pending: 0, approved: 1, active: 2, completed: 3, rejected: 4, cancelled: 5 };
+             const groupLead = (items: any[]) => {
+               const live = items.filter(o => o.status !== 'rejected' && o.status !== 'cancelled');
+               return [...(live.length ? live : items)].sort((a, b) => (STATUS_RANK[a.status] ?? 9) - (STATUS_RANK[b.status] ?? 9))[0];
+             };
+             const projectLabel = (o: any) => {
+               const line = (o.notes || '').split('\n')[0];
+               const name = line.startsWith('Projeto: ') ? line.slice(9).trim() : '';
+               return name && name !== 'Projeto via HUB' ? name : null;
+             };
+             const unitsOf = (items: any[]) => items.reduce((sum, o) => sum + (o.quantity || 1), 0);
+
+             const handleApproveAll = async (key: string, items: any[]) => {
+               setBulkUpdatingKey(key);
+               try {
+                 for (const o of items.filter(o => o.status === 'pending')) await handleApproveBooking(o);
+               } finally {
+                 setBulkUpdatingKey(null);
+               }
+             };
+             const handleRejectAll = async (key: string, items: any[]) => {
+               const pending = items.filter(o => o.status === 'pending');
+               const ok = await confirmAction({
+                 title: 'Recusar o pedido inteiro?',
+                 description: `${pending.length} ${pending.length === 1 ? 'equipamento será recusado' : 'equipamentos serão recusados'}.`,
+                 confirmLabel: 'Recusar tudo',
+                 destructive: true,
+               });
+               if (!ok) return;
+               setBulkUpdatingKey(key);
+               try {
+                 for (const o of pending) await handleUpdateStatus(o.id, 'rejected');
+               } finally {
+                 setBulkUpdatingKey(null);
+               }
+             };
+
              const counterpart = (o: any) => o._direction === 'received'
                ? (o.renter?.company?.name || o.renter?.full_name || 'Cliente')
                : (o.owner_company?.name || 'Locadora');
@@ -878,6 +927,97 @@ export default function Dashboard() {
                return null;
              };
 
+             // ── Pedido com vários itens: resumo + lista de itens ──
+             if (openGroup && openGroup.length > 0) {
+               const lead = groupLead(openGroup);
+               const label = projectLabel(lead);
+               const total = openGroup.reduce((sum, o) => sum + orderAmount(o), 0);
+               const pendingCount = lead._direction === 'received' ? openGroup.filter(o => o.status === 'pending').length : 0;
+               const busy = bulkUpdatingKey === openOrderId;
+               return (
+                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
+                   <button onClick={closeOrder} className="flex items-center gap-2 h-11 -ml-2 px-2 rounded-xl text-zinc-400 hover:text-white transition-colors">
+                     <ArrowLeft className="h-5 w-5" />
+                     <span className="text-sm font-bold uppercase tracking-tighter">Pedidos</span>
+                   </button>
+
+                   <Card className="bg-zinc-900/30 border-zinc-900 rounded-2xl overflow-hidden">
+                     <div className="p-5 md:p-8 space-y-6">
+                       <div className="space-y-1.5">
+                         <div className="flex flex-wrap items-center gap-3">{directionBadge(lead)}{statusBadge(lead)}</div>
+                         <h2 className="text-xl md:text-3xl font-black tracking-tighter uppercase leading-tight">
+                           {label || `Pedido com ${openGroup.length} equipamentos`}
+                         </h2>
+                         <p className="text-sm text-zinc-400 font-medium">
+                           {lead._direction === 'received' ? 'Cliente: ' : 'Locadora: '}
+                           <span className="text-zinc-200 font-bold">{[...new Set(openGroup.map(counterpart))].join(', ')}</span>
+                         </p>
+                       </div>
+
+                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                         {[
+                           { label: 'Período', value: `${shortDate(lead.start_date)} → ${shortDate(lead.end_date)}` },
+                           { label: 'Itens', value: `${openGroup.length} equip. · ${unitsOf(openGroup)} un.` },
+                           { label: 'Valor total', value: formatCurrency(total) },
+                           { label: 'Entrega', value: lead.delivery_method === 'delivery' ? 'Receber no local' : 'Retirada' },
+                         ].map(info => (
+                           <div key={info.label} className="bg-zinc-950/60 border border-zinc-800/60 rounded-2xl p-4 min-w-0">
+                             <p className="text-[11px] font-semibold text-zinc-500 mb-1">{info.label}</p>
+                             <p className="text-sm font-black text-zinc-100 truncate">{info.value}</p>
+                           </div>
+                         ))}
+                       </div>
+
+                       {lead.delivery_method === 'delivery' && lead.delivery_address && (
+                         <p className="text-sm text-zinc-400 flex gap-2"><MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" /> {lead.delivery_address}</p>
+                       )}
+
+                       {pendingCount > 0 && (
+                         <div className="pt-5 border-t border-zinc-800 flex flex-wrap items-center justify-end gap-3">
+                           <p className="flex-1 min-w-[180px] text-sm text-zinc-300">
+                             {pendingCount === openGroup.length ? 'Aprove o pedido inteiro ou cada item abaixo.' : `${pendingCount} ${pendingCount === 1 ? 'item aguarda' : 'itens aguardam'} sua aprovação.`}
+                           </p>
+                           <Button variant="ghost" size="sm" disabled={busy} onClick={() => handleRejectAll(openOrderId!, openGroup)} className="h-11 text-destructive font-semibold text-xs hover:bg-destructive/5">
+                             Recusar tudo
+                           </Button>
+                           <Button size="sm" disabled={busy} onClick={() => handleApproveAll(openOrderId!, openGroup)} className="h-11 bg-emerald-600 hover:bg-emerald-500 font-semibold text-xs rounded-xl px-6">
+                             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : `Aprovar tudo (${pendingCount})`}
+                           </Button>
+                         </div>
+                       )}
+                     </div>
+                   </Card>
+
+                   <div className="space-y-3">
+                     <h3 className="text-lg font-black uppercase tracking-tighter flex items-center gap-2"><Package className="h-4 w-4 text-primary" /> Equipamentos</h3>
+                     <p className="text-sm text-zinc-500 -mt-1">Toque em um item para ver a entrega, a localização e a devolução.</p>
+                     {openGroup.map((o: any) => {
+                       const itemActions = approvalActions(o);
+                       return (
+                         <Card key={o.id} className="bg-zinc-900/30 border-zinc-900 rounded-2xl overflow-hidden hover:border-zinc-700 transition-colors">
+                           <button onClick={() => openOrder(o.id)} className="w-full text-left p-4 md:p-5 flex items-center gap-4">
+                             <div className="h-12 w-12 rounded-2xl bg-zinc-900 border border-zinc-800 overflow-hidden shrink-0 flex items-center justify-center">
+                               {o.equipment?.images?.[0]
+                                 ? <img src={o.equipment.images[0]} alt="" className="h-full w-full object-cover" />
+                                 : <Package className="h-5 w-5 text-zinc-500" />}
+                             </div>
+                             <div className="min-w-0 flex-1 space-y-1">
+                               <p className="font-black text-zinc-100 tracking-tight uppercase truncate">{o.equipment?.name}</p>
+                               <p className="text-xs text-zinc-500 truncate">{o.quantity || 1} un. · {formatCurrency(orderAmount(o))}</p>
+                               <OrderProgress compact bookingStatus={o.status} deliveryStatus={getDelivery(o)?.status} />
+                             </div>
+                             <div className="shrink-0">{statusBadge(o)}</div>
+                             <ChevronRight className="h-5 w-5 text-zinc-400 shrink-0 hidden sm:block" />
+                           </button>
+                           {itemActions && <div className="px-4 md:px-5 py-3 bg-zinc-900/50 border-t border-zinc-800">{itemActions}</div>}
+                         </Card>
+                       );
+                     })}
+                   </div>
+                 </div>
+               );
+             }
+
              // ── Detalhe do pedido (com a logística dentro) ──
              if (openOrderId) {
                if (!order) {
@@ -889,11 +1029,12 @@ export default function Dashboard() {
                  );
                }
                const actions = approvalActions(order);
+               const parentKey = order.project_id && (groupMap.get(order.project_id)?.length || 0) > 1 ? order.project_id : null;
                return (
                  <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
-                   <button onClick={closeOrder} className="flex items-center gap-2 h-11 -ml-2 px-2 rounded-xl text-zinc-400 hover:text-white transition-colors">
+                   <button onClick={() => parentKey ? openOrder(parentKey) : closeOrder()} className="flex items-center gap-2 h-11 -ml-2 px-2 rounded-xl text-zinc-400 hover:text-white transition-colors">
                      <ArrowLeft className="h-5 w-5" />
-                     <span className="text-sm font-bold uppercase tracking-tighter">Pedidos</span>
+                     <span className="text-sm font-bold uppercase tracking-tighter">{parentKey ? 'Pedido completo' : 'Pedidos'}</span>
                    </button>
 
                    <Card className="bg-zinc-900/30 border-zinc-900 rounded-2xl overflow-hidden">
@@ -984,7 +1125,56 @@ export default function Dashboard() {
                    </div>
                  ) : (
                    <div className="space-y-3">
-                     {orders.map((o: any) => {
+                     {groups.map(({ key, items }) => {
+                       if (items.length > 1) {
+                         const lead = groupLead(items);
+                         const label = projectLabel(lead);
+                         const total = items.reduce((sum, o) => sum + orderAmount(o), 0);
+                         const names = items.map(o => o.equipment?.name).filter(Boolean).join(' + ');
+                         const pendingCount = lead._direction === 'received' ? items.filter(o => o.status === 'pending').length : 0;
+                         const busy = bulkUpdatingKey === key;
+                         return (
+                           <Card key={key} className="bg-zinc-900/30 border-zinc-900 rounded-2xl overflow-hidden hover:border-zinc-700 transition-colors">
+                             <button onClick={() => openOrder(key)} className="w-full text-left p-4 md:p-6 flex items-center gap-4">
+                               {/* Fotos empilhadas dos itens */}
+                               <div className="relative h-12 w-12 shrink-0">
+                                 {items.slice(0, 2).map((o, i) => (
+                                   <div key={o.id} className={`absolute h-10 w-10 rounded-xl bg-zinc-900 border border-zinc-800 overflow-hidden flex items-center justify-center ${i === 0 ? 'top-0 left-0' : 'bottom-0 right-0 shadow-sm'}`}>
+                                     {o.equipment?.images?.[0]
+                                       ? <img src={o.equipment.images[0]} alt="" className="h-full w-full object-cover" />
+                                       : <Package className="h-4 w-4 text-zinc-500" />}
+                                   </div>
+                                 ))}
+                                 <span className="absolute -top-1.5 -right-1.5 h-5 min-w-5 px-1 rounded-full bg-primary text-white text-[11px] font-bold flex items-center justify-center">{items.length}</span>
+                               </div>
+                               <div className="min-w-0 flex-1 space-y-1">
+                                 {directionBadge(lead)}
+                                 <p className="font-black text-zinc-100 tracking-tight uppercase truncate">{label || `${items.length} equipamentos`}</p>
+                                 <p className="text-xs text-zinc-500 truncate">{names}</p>
+                                 <p className="text-xs text-zinc-500 truncate">
+                                   {counterpart(lead)} · {shortDate(lead.start_date)} → {shortDate(lead.end_date)} · {unitsOf(items)} un.
+                                 </p>
+                                 <OrderProgress compact bookingStatus={lead.status} deliveryStatus={getDelivery(lead)?.status} />
+                               </div>
+                               <div className="text-right shrink-0 space-y-1.5">
+                                 <p className="text-base md:text-lg font-black text-zinc-100">{formatCurrency(total)}</p>
+                                 {statusBadge(lead)}
+                               </div>
+                               <ChevronRight className="h-5 w-5 text-zinc-400 shrink-0 hidden sm:block" />
+                             </button>
+                             {pendingCount > 0 && (
+                               <div className="px-4 md:px-6 py-3 bg-zinc-900/50 border-t border-zinc-800 flex justify-end gap-3">
+                                 <Button variant="ghost" size="sm" disabled={busy} onClick={() => handleRejectAll(key, items)} className="h-10 text-destructive font-semibold text-[11px] hover:bg-destructive/5">Recusar tudo</Button>
+                                 <Button size="sm" disabled={busy} onClick={() => handleApproveAll(key, items)} className="h-10 bg-emerald-600 hover:bg-emerald-500 font-semibold text-[11px] rounded-lg px-6">
+                                   {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : `Aprovar tudo (${pendingCount})`}
+                                 </Button>
+                               </div>
+                             )}
+                           </Card>
+                         );
+                       }
+
+                       const o = items[0];
                        const actions = approvalActions(o);
                        return (
                          <Card key={o.id} className="bg-zinc-900/30 border-zinc-900 rounded-2xl overflow-hidden hover:border-zinc-700 transition-colors">
