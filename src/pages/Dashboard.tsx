@@ -1179,7 +1179,7 @@ export default function Dashboard() {
 
                    <div className="space-y-3">
                      <h3 className="text-lg font-black uppercase tracking-tighter flex items-center gap-2"><Truck className="h-4 w-4 text-primary" /> Entrega</h3>
-                     <LogisticsTab tenantId={tenantId || ''} bookingId={order.id} />
+                     <LogisticsTab tenantId={tenantId || ''} bookingId={order.id} viewerRole={order._direction === 'sent' ? 'renter' : 'provider'} />
                    </div>
 
                    {/* Logística reversa: devolução e prorrogação */}

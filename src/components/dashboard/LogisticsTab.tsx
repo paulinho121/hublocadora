@@ -23,12 +23,18 @@ import { InventoryStatusReport } from './InventoryStatusReport';
 import { useTenant } from '@/contexts/TenantContext';
 import { DriverTrackingModal } from './DriverTrackingModal';
 import { confirmAction } from '@/components/ui/confirm-dialog';
+import { RenterDeliveryView } from './RenterDeliveryView';
 
 /**
  * Logística das entregas. Com `bookingId`, roda em modo embutido dentro do detalhe
  * do pedido: só a entrega desse pedido, sem cabeçalho, abas, transferências ou relatórios.
  */
-export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookingId?: string }) {
+export function LogisticsTab({ tenantId, bookingId, viewerRole }: {
+    tenantId: string;
+    bookingId?: string;
+    /** No detalhe do pedido: quem está olhando. O cliente nunca vê a operação da locadora. */
+    viewerRole?: 'provider' | 'renter';
+}) {
     const embedded = !!bookingId;
     const { user } = useAuth();
     const { isBranchManager, branchId } = useTenant();
@@ -104,10 +110,10 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
     const toReceiveCount = toReceiveDeliveries.length + toReceiveTransfers.length;
 
     // Embutido: quem só alugou (não é a locadora que envia) vê a entrega pelo lado de "receber"
-    const embeddedAsRenter = embedded && !!deliveries?.[0]
+    const embeddedAsRenter = embedded && (viewerRole === 'renter' || (!viewerRole && !!deliveries?.[0]
         && deliveries[0].booking?.renter_id === user?.id
         && deliveries[0].booking?.company_id !== tenantId
-        && deliveries[0].fulfilling_company_id !== tenantId;
+        && deliveries[0].fulfilling_company_id !== tenantId));
     useEffect(() => {
         if (embedded) setLogisticsMode(embeddedAsRenter ? 'to_receive' : 'to_send');
     }, [embedded, embeddedAsRenter]);
@@ -493,6 +499,11 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
         );
     }
 
+    // Cliente: visão própria, sem separação, nº de série nem botões da locadora
+    if (embeddedAsRenter) {
+        return <RenterDeliveryView deliveries={(deliveries || []).filter((d: any) => d.status !== 'cancelled')} />;
+    }
+
     return (
         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-1000">
             {!embedded && (
@@ -705,12 +716,14 @@ export function LogisticsTab({ tenantId, bookingId }: { tenantId: string; bookin
                                                                         </div>
                                                                     </div>
                                                                 )}
+                                                                {delivery.booking?.renter?.company?.address_city && (
                                                                 <div className="flex items-center gap-3 bg-black/40 p-4 rounded-2xl border border-white/5 hover:border-white/10 transition-colors">
                                                                     <RotateCcw className="h-4 w-4 text-emerald-500/50" />
                                                                     <span className="text-[11px] font-semibold text-emerald-500/80">
-                                                                        RETORNO: {delivery.booking?.renter?.company?.address_city || 'AV. IPIRANGA, 1097'}
+                                                                        RETORNO: {delivery.booking.renter.company.address_city}
                                                                     </span>
                                                                 </div>
+                                                                )}
                                                             </div>
 
                                                             {/* Status Logístico Principal */}
