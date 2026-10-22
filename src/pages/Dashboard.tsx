@@ -71,6 +71,7 @@ import { CompanyProfileSettings } from '@/components/dashboard/CompanyProfileSet
 import { EditBookingModal } from '@/components/dashboard/EditBookingModal';
 import { InventoryStatusReport } from '@/components/dashboard/InventoryStatusReport';
 import { InternalTransfersSection } from '@/components/dashboard/InternalTransfersSection';
+import { PendingActions } from '@/components/dashboard/PendingActions';
 
 type TabType = 'overview' | 'inventory' | 'bookings' | 'projects' | 'transfers' | 'reports' | 'network' | 'settings' | 'audit' | 'history' | 'favorites';
 const VALID_TABS: TabType[] = ['overview', 'inventory', 'bookings', 'projects', 'transfers', 'reports', 'network', 'settings', 'audit', 'history', 'favorites'];
@@ -402,6 +403,27 @@ export default function Dashboard() {
   const pendingBookingsCount = bookingsReceived?.filter(b => b.status === 'pending').length || 0;
   const maintenanceCount    = equipments?.filter(e => e.status === 'maintenance').length || 0;
 
+  // Perfil: quem ainda não tem equipamento nem pedido recebido usa o app só para alugar
+  const isRenterOnly = !isLoadingEquipments && !isLoadingReceived
+    && equipments.length === 0 && (bookingsReceived?.length || 0) === 0;
+  const sentLive = (bookingsRequested || []).filter((b: any) => !['rejected', 'cancelled'].includes(b.status));
+  const sentInProgress = sentLive.filter((b: any) => b.status === 'approved' || b.status === 'active').length;
+  const sentAwaiting = sentLive.filter((b: any) => b.status === 'pending').length;
+  const sentTotal = sentLive.reduce((acc: number, b: any) => acc + (b.total_amount || 0), 0);
+
+  // Mais alugados (pedidos recebidos confirmados, por equipamento)
+  type TopItem = { name: string; image?: string; count: number };
+  const topRented = Object.values<TopItem>(
+    (bookingsReceived || [])
+      .filter((b: any) => ['approved', 'active', 'completed'].includes(b.status))
+      .reduce((acc: Record<string, TopItem>, b: any) => {
+        const key = b.equipment?.name || b.equipment_id;
+        acc[key] = acc[key] || { name: b.equipment?.name || 'Equipamento', image: b.equipment?.images?.[0], count: 0 };
+        acc[key].count += b.quantity || 1;
+        return acc;
+      }, {}),
+  ).sort((a, b) => b.count - a.count).slice(0, 3);
+
   // Handlers
   const handleAddEquipment = () => {
     setEditingEquipment(undefined);
@@ -595,10 +617,41 @@ export default function Dashboard() {
                  <div className="space-y-10">
                 <header>
                    <h2 className="text-2xl md:text-3xl font-black tracking-tighter uppercase mb-1">Visão Geral</h2>
-                   <p className="text-sm text-zinc-500 font-medium">Resumo da sua locadora hoje.</p>
+                   <p className="text-sm text-zinc-500 font-medium">
+                     {isRenterOnly ? 'Seus pedidos e locações.' : 'Resumo da sua locadora hoje.'}
+                   </p>
                 </header>
 
+                {/* O que precisa ser feito agora (aprovar, separar, entregar, devolver…) */}
+                <PendingActions
+                  bookingsReceived={bookingsReceived || []}
+                  bookingsRequested={bookingsRequested || []}
+                  pendingExtensionIds={pendingExtensionIds}
+                  tenantId={tenantId}
+                  onOpen={openOrder}
+                />
+
                 {/* Stats Grid */}
+                {isRenterOnly ? (
+                  <div className="grid grid-cols-3 gap-2 md:gap-4">
+                    {[
+                      { label: 'Em andamento', value: String(sentInProgress), sub: 'aprovados ou com você', icon: CalendarDays },
+                      { label: 'Aguardando', value: String(sentAwaiting), sub: 'aprovação da locadora', icon: AlertCircle },
+                      { label: 'Total locado', value: formatCurrency(sentTotal), sub: `${sentLive.length} ${sentLive.length === 1 ? 'item' : 'itens'}`, icon: TrendingUp },
+                    ].map(({ label, value, sub, icon: Icon }) => (
+                      <Card key={label} className="clay-card">
+                        <CardHeader className="p-3 md:p-4 pb-1 md:pb-1 flex flex-row items-start justify-between gap-2 space-y-0">
+                          <CardTitle className="text-[11px] md:text-xs font-semibold text-zinc-500 leading-tight">{label}</CardTitle>
+                          <Icon className="h-3.5 w-3.5 md:h-4 md:w-4 shrink-0 text-zinc-400" />
+                        </CardHeader>
+                        <CardContent className="p-3 md:p-4 pt-0 md:pt-0">
+                          <div className="text-lg md:text-2xl font-bold tracking-tight text-zinc-100 mb-1 truncate">{value}</div>
+                          <p className="text-[11px] md:text-xs leading-snug text-zinc-400 font-medium">{sub}</p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
                  <div className="grid grid-cols-6 lg:grid-cols-5 gap-2 md:gap-4">
                     <Card className="clay-card col-span-3 lg:col-span-1">
                        <CardHeader className="p-3 md:p-4 pb-1 md:pb-1 flex flex-row items-start justify-between gap-2 space-y-0">
@@ -695,6 +748,7 @@ export default function Dashboard() {
                        </CardContent>
                     </Card>
                  </div>
+                )}
 
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6">
                    <Card className="xl:col-span-2 bg-zinc-950 border-zinc-900 rounded-2xl">
@@ -776,18 +830,34 @@ export default function Dashboard() {
                    </Card>
 
                    <Card className="bg-zinc-950 border-zinc-900 rounded-2xl">
-                      <CardHeader className="p-8 border-b border-zinc-900">
-                         <CardTitle className="text-xl font-black tracking-tighter uppercase">Destaques</CardTitle>
+                      <CardHeader className="p-4 md:p-6 border-b border-zinc-900">
+                         <CardTitle className="text-lg font-black tracking-tighter uppercase">{isRenterOnly ? 'Tem equipamentos?' : 'Mais alugados'}</CardTitle>
                       </CardHeader>
-                      <CardContent className="p-8 space-y-6 text-center">
-                         <div className="p-6 bg-zinc-900/50 rounded-2xl border border-dashed border-zinc-800">
-                            <Package className="h-8 w-8 text-zinc-500 mx-auto mb-3" />
-                            <p className="text-xs text-zinc-500 leading-relaxed font-medium">
-                               Seus itens mais alugados aparecerão aqui em breve.
-                            </p>
-                         </div>
+                      <CardContent className="p-4 md:p-6 space-y-4">
+                         {isRenterOnly ? (
+                           <p className="text-sm text-zinc-400 leading-relaxed">
+                             Cadastre o seu inventário e comece a receber pedidos de outras produtoras.
+                           </p>
+                         ) : topRented.length === 0 ? (
+                           <p className="text-sm text-zinc-500 leading-relaxed">
+                             Assim que seus pedidos forem aprovados, os equipamentos mais alugados aparecem aqui.
+                           </p>
+                         ) : (
+                           <ol className="space-y-3">
+                             {topRented.map((item, i) => (
+                               <li key={item.name} className="flex items-center gap-3">
+                                 <span className="text-sm font-bold text-zinc-500 w-4">{i + 1}</span>
+                                 <div className="h-10 w-10 rounded-xl bg-zinc-900 border border-zinc-800 overflow-hidden shrink-0 flex items-center justify-center">
+                                   {item.image ? <img src={item.image} alt="" className="h-full w-full object-cover" /> : <Package className="h-4 w-4 text-zinc-500" />}
+                                 </div>
+                                 <span className="flex-1 min-w-0 text-sm font-semibold text-zinc-200 truncate">{item.name}</span>
+                                 <span className="text-xs font-semibold text-zinc-500 shrink-0">{item.count} {item.count === 1 ? 'locação' : 'locações'}</span>
+                               </li>
+                             ))}
+                           </ol>
+                         )}
                          <Button onClick={() => setActiveTab('inventory')} className="w-full rounded-xl font-semibold h-12 text-xs group">
-                            Gerenciar Inventário <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                            {isRenterOnly ? 'Cadastrar equipamento' : 'Gerenciar inventário'} <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                          </Button>
                       </CardContent>
                    </Card>
