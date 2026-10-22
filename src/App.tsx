@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, NavLink } from 'react-router-dom';
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { LogOut, Settings, BarChart3, Package, CalendarDays, History, FileText, Heart, FolderOpen, Clapperboard, Globe, X, ArrowLeftRight, Home, Menu } from 'lucide-react';
+import { LogOut, Settings, ShoppingBag, Package, CalendarDays, History, FileText, Heart, FolderOpen, Clapperboard, Globe, X, ArrowLeftRight, Home, Menu } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -167,6 +167,13 @@ function BottomNav() {
   // Fecha o menu ao trocar de página
   useEffect(() => { setMenuOpen(false); }, [location.pathname, location.search]);
 
+  // O atalho "Ver mais" da Visão geral abre este menu
+  useEffect(() => {
+    const open = () => setMenuOpen(true);
+    window.addEventListener('cinehub-open-menu', open);
+    return () => window.removeEventListener('cinehub-open-menu', open);
+  }, []);
+
   if (!user) return null;
 
   const onDashboard = location.pathname === '/dashboard';
@@ -178,7 +185,6 @@ function BottomNav() {
   };
 
   const menuTabs = [
-    { id: 'overview',  label: 'Visão geral',    icon: BarChart3 },
     { id: 'projects',  label: 'Projetos',       icon: Clapperboard },
     { id: 'reports',   label: 'Relatórios',     icon: FileText },
     { id: 'history',   label: 'Histórico',      icon: History },
@@ -191,12 +197,12 @@ function BottomNav() {
     { id: 'settings',  label: 'Configurações',  icon: Settings },
   ];
 
-  const isHome = location.pathname === '/' || location.pathname.startsWith('/equipment/');
   const isMenuActive = menuOpen || (onDashboard && menuTabs.some(t => t.id === currentTab)) || location.pathname === '/admin';
 
+  // Estilo app de banco: o item ativo vira uma pílula com nome; os outros mostram só o ícone
   const itemClass = (active: boolean) =>
-    `flex-1 flex flex-col items-center justify-center gap-1 min-h-[52px] rounded-xl transition-colors ${
-      active ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-500 active:text-zinc-200'
+    `relative h-12 flex items-center justify-center gap-2 rounded-full transition-all duration-200 ${
+      active ? 'px-4 bg-primary/10 text-primary' : 'w-12 text-zinc-400 active:bg-zinc-900'
     }`;
 
   const tileClass = (active: boolean) =>
@@ -234,6 +240,10 @@ function BottomNav() {
             </button>
 
             <div className="grid grid-cols-3 gap-2">
+              <button onClick={() => { setMenuOpen(false); navigate('/'); }} className={tileClass(location.pathname === '/')}>
+                <ShoppingBag className="w-5 h-5" />
+                <span className="text-[11px] font-bold">Marketplace</span>
+              </button>
               {menuTabs.map(({ id, label, icon: Icon }) => (
                 <button key={id} onClick={() => goTab(id)} className={tileClass(currentTab === id)}>
                   <Icon className="w-5 h-5" />
@@ -259,24 +269,27 @@ function BottomNav() {
       )}
 
       <div className="md:hidden fixed left-3 right-3 z-[61] flex justify-center pointer-events-none" style={{ bottom: 'calc(env(safe-area-inset-bottom) + 12px)' }}>
-        <nav aria-label="Navegação principal" className="pointer-events-auto flex items-stretch gap-1 w-full max-w-lg bg-zinc-950/90 backdrop-blur-xl border border-zinc-800/80 p-1.5 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.8)]">
-          <button onClick={() => { setMenuOpen(false); navigate('/'); }} className={itemClass(isHome && !menuOpen)}>
-            <Home className="w-5 h-5 shrink-0" />
-            <span className="text-[11px] font-bold leading-none">Início</span>
-          </button>
-          <button onClick={() => goTab('bookings')} className={itemClass(currentTab === 'bookings' && !menuOpen)}>
-            <CalendarDays className="w-5 h-5 shrink-0" />
-            <span className="text-[11px] font-bold leading-none">Pedidos</span>
-          </button>
-          <button onClick={() => goTab('inventory')} className={itemClass(currentTab === 'inventory' && !menuOpen)}>
-            <Package className="w-5 h-5 shrink-0" />
-            <span className="text-[11px] font-bold leading-none">Inventário</span>
-          </button>
-          <button onClick={() => setMenuOpen(v => !v)} className={`relative ${itemClass(isMenuActive)}`} aria-expanded={menuOpen}>
+        <nav aria-label="Navegação principal" className="pointer-events-auto flex items-center justify-around w-full max-w-lg bg-zinc-950 border border-zinc-800 p-1.5 rounded-[28px] shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
+          {[
+            { key: 'home',      label: 'Início',     icon: Home,         active: currentTab === 'overview', onClick: () => goTab('overview') },
+            { key: 'bookings',  label: 'Pedidos',    icon: CalendarDays, active: currentTab === 'bookings', onClick: () => goTab('bookings') },
+            { key: 'inventory', label: 'Inventário', icon: Package,      active: currentTab === 'inventory', onClick: () => goTab('inventory') },
+          ].map(({ key, label, icon: Icon, active, onClick }) => {
+            const on = active && !menuOpen;
+            return (
+              <button key={key} onClick={onClick} className={itemClass(on)} aria-label={label} aria-current={on ? 'page' : undefined}>
+                <Icon className="w-5 h-5 shrink-0" />
+                {on && <span className="text-sm font-semibold leading-none">{label}</span>}
+              </button>
+            );
+          })}
+          <button onClick={() => setMenuOpen(v => !v)} className={itemClass(isMenuActive)} aria-label="Menu" aria-expanded={menuOpen}>
             <Menu className="w-5 h-5 shrink-0" />
-            <span className="text-[11px] font-bold leading-none">Menu</span>
+            {isMenuActive && <span className="text-sm font-semibold leading-none">Menu</span>}
             {cart.items.length > 0 && !menuOpen && (
-              <span className="absolute top-1 right-[calc(50%-18px)] w-2.5 h-2.5 rounded-full bg-primary ring-2 ring-zinc-950" aria-label="Itens no carrinho" />
+              <span className="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-amber-400 text-zinc-950 text-[11px] font-bold flex items-center justify-center" aria-label={`${cart.items.length} no carrinho`}>
+                {cart.items.length}
+              </span>
             )}
           </button>
         </nav>

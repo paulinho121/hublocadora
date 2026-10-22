@@ -71,7 +71,10 @@ import { CompanyProfileSettings } from '@/components/dashboard/CompanyProfileSet
 import { EditBookingModal } from '@/components/dashboard/EditBookingModal';
 import { InventoryStatusReport } from '@/components/dashboard/InventoryStatusReport';
 import { InternalTransfersSection } from '@/components/dashboard/InternalTransfersSection';
-import { PendingActions } from '@/components/dashboard/PendingActions';
+import { PendingActions, buildPendingActions } from '@/components/dashboard/PendingActions';
+import { OverviewHero } from '@/components/dashboard/OverviewHero';
+import { QuickShortcuts } from '@/components/dashboard/QuickShortcuts';
+import { FileText, History, Settings, LayoutGrid, Clapperboard, ShoppingBag } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 
 type TabType = 'overview' | 'inventory' | 'bookings' | 'projects' | 'transfers' | 'reports' | 'network' | 'settings' | 'audit' | 'history' | 'favorites';
@@ -562,14 +565,14 @@ export default function Dashboard() {
       <main className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0">
         {/* Top Header Section (Mobile Visible) */}
         {/* No celular (app instalado) o topo começa abaixo da barra de status do aparelho */}
-        <header className="box-content h-16 md:h-20 pt-[env(safe-area-inset-top)] md:pt-0 border-b border-zinc-900 flex items-center justify-between px-4 md:px-10 shrink-0">
+        <header className={`box-content h-16 md:h-20 pt-[env(safe-area-inset-top)] md:pt-0 border-b flex items-center justify-between px-4 md:px-10 shrink-0 ${activeTab === 'overview' ? 'max-md:bg-primary max-md:text-white max-md:border-transparent border-zinc-900' : 'border-zinc-900'}`}>
            <div className="flex items-center gap-3 md:hidden">
               {company?.logo_url ? (
                  <div className="h-8 w-8 rounded-lg overflow-hidden border border-zinc-800 flex items-center justify-center shrink-0">
                     <img src={company.logo_url} alt="" className="h-full w-full object-cover" />
                  </div>
               ) : (
-                 <Package className="h-6 w-6 text-primary shrink-0" />
+                 <Package className={`h-6 w-6 shrink-0 ${activeTab === 'overview' ? 'text-primary max-md:text-white' : 'text-primary'}`} />
               )}
               <span className="font-black uppercase tracking-tighter text-lg">{isBranchManager ? branch?.name : company?.name}</span>
            </div>
@@ -615,13 +618,55 @@ export default function Dashboard() {
                className="h-full"
              >
                {activeTab === 'overview' && (
-                 <div className="space-y-10">
-                <header>
-                   <h2 className="text-2xl md:text-3xl font-black tracking-tighter uppercase mb-1">Visão Geral</h2>
-                   <p className="text-sm text-zinc-500 font-medium">
-                     {isRenterOnly ? 'Seus pedidos e locações.' : 'Resumo da sua locadora hoje.'}
-                   </p>
-                </header>
+                 <div>
+                <h2 className="sr-only">Visão geral</h2>
+                {isRenterOnly ? (
+                  <OverviewHero
+                    label="Total em locações"
+                    value={formatCurrency(sentTotal)}
+                    sub={`${sentInProgress} em andamento · ${sentAwaiting} aguardando aprovação`}
+                    actions={[
+                      { label: 'Alugar equipamento', onClick: () => { window.location.href = '/'; } },
+                      { label: 'Meus pedidos', onClick: () => setActiveTab('bookings') },
+                    ]}
+                  />
+                ) : (
+                  <OverviewHero
+                    label="Ganhos líquidos"
+                    value={formatCurrency(totalRevenue)}
+                    sub={pendingRevenue > 0
+                      ? `+ ${formatCurrency(pendingRevenue)} a confirmar`
+                      : thisMonthRevenue > 0
+                        ? `${formatCurrency(thisMonthRevenue)} este mês`
+                        : 'Nenhuma receita confirmada ainda'}
+                    actions={[
+                      { label: 'Ver pedidos', onClick: () => setActiveTab('bookings') },
+                      { label: 'Novo equipamento', onClick: () => { setActiveTab('inventory'); handleAddEquipment(); } },
+                    ]}
+                  />
+                )}
+
+                {/* Folha clara com cantos arredondados que sobe por cima do topo (no celular) */}
+                <div className="relative -mt-8 md:mt-8 -mx-4 md:mx-0 px-4 md:px-0 pt-5 md:pt-0 rounded-t-3xl md:rounded-none bg-zinc-950 md:bg-transparent space-y-8 md:space-y-10">
+
+                {/* Atalhos (no computador a barra lateral faz esse papel) */}
+                <div className="md:hidden">
+                  <QuickShortcuts
+                    items={[
+                      { id: 'bookings',  label: 'Pedidos',     icon: CalendarDays, onClick: () => setActiveTab('bookings'),
+                        badge: buildPendingActions({ bookingsReceived: bookingsReceived || [], bookingsRequested: bookingsRequested || [], pendingExtensionIds, tenantId }).length },
+                      isRenterOnly
+                        ? { id: 'favorites', label: 'Favoritos',  icon: Heart,        onClick: () => setActiveTab('favorites') }
+                        : { id: 'inventory', label: 'Inventário', icon: Package,      onClick: () => setActiveTab('inventory') },
+                      { id: 'market',    label: 'Marketplace', icon: ShoppingBag,  onClick: () => { window.location.href = '/'; } },
+                      { id: 'projects',  label: 'Projetos',    icon: Clapperboard, onClick: () => setActiveTab('projects') },
+                      { id: 'reports',   label: 'Relatórios',  icon: FileText,     onClick: () => setActiveTab('reports') },
+                      { id: 'history',   label: 'Histórico',   icon: History,      onClick: () => setActiveTab('history') },
+                      { id: 'settings',  label: 'Ajustes',     icon: Settings,     onClick: () => setActiveTab('settings') },
+                      { id: 'more',      label: 'Ver mais',    icon: LayoutGrid,   onClick: () => window.dispatchEvent(new Event('cinehub-open-menu')) },
+                    ]}
+                  />
+                </div>
 
                 {/* O que precisa ser feito agora (aprovar, separar, entregar, devolver…) */}
                 <PendingActions
@@ -634,11 +679,10 @@ export default function Dashboard() {
 
                 {/* Stats Grid */}
                 {isRenterOnly ? (
-                  <div className="grid grid-cols-3 gap-2 md:gap-4">
+                  <div className="grid grid-cols-2 gap-2 md:gap-4">
                     {[
                       { label: 'Em andamento', value: String(sentInProgress), sub: 'aprovados ou com você', icon: CalendarDays },
                       { label: 'Aguardando', value: String(sentAwaiting), sub: 'aprovação da locadora', icon: AlertCircle },
-                      { label: 'Total locado', value: formatCurrency(sentTotal), sub: `${sentLive.length} ${sentLive.length === 1 ? 'item' : 'itens'}`, icon: TrendingUp },
                     ].map(({ label, value, sub, icon: Icon }) => (
                       <Card key={label} className="clay-card">
                         <CardHeader className="p-3 md:p-4 pb-1 md:pb-1 flex flex-row items-start justify-between gap-2 space-y-0">
@@ -653,34 +697,8 @@ export default function Dashboard() {
                     ))}
                   </div>
                 ) : (
-                 <div className="grid grid-cols-6 lg:grid-cols-5 gap-2 md:gap-4">
-                    <Card className="clay-card col-span-3 lg:col-span-1">
-                       <CardHeader className="p-3 md:p-4 pb-1 md:pb-1 flex flex-row items-start justify-between gap-2 space-y-0">
-                          <CardTitle className="text-[11px] md:text-xs font-semibold text-zinc-500 leading-tight">Ganhos Líquidos</CardTitle>
-                          <TrendingUp className="h-3.5 w-3.5 md:h-4 md:w-4 shrink-0 text-emerald-500" />
-                       </CardHeader>
-                       <CardContent className="p-3 md:p-4 pt-0 md:pt-0">
-                          <div className="text-lg md:text-2xl font-bold tracking-tight text-zinc-100 mb-1">
-                             {formatCurrency(totalRevenue)}
-                          </div>
-                          <div className="flex flex-col gap-0.5">
-                            {pendingRevenue > 0 && (
-                              <p className="text-[11px] md:text-xs leading-snug text-amber-500/80 font-medium">
-                                + {formatCurrency(pendingRevenue)} a confirmar
-                              </p>
-                            )}
-                            <p className="text-[11px] md:text-xs leading-snug text-zinc-400 font-medium">
-                              {thisMonthRevenue > 0
-                                ? `${formatCurrency(thisMonthRevenue)} este mês`
-                                : completedRevenue > 0
-                                  ? `${formatCurrency(completedRevenue)} realizados`
-                                  : 'Nenhuma receita confirmada'}
-                            </p>
-                          </div>
-                       </CardContent>
-                    </Card>
-
-                    <Card className="clay-card col-span-3 lg:col-span-1">
+                 <div className="grid grid-cols-6 lg:grid-cols-4 gap-2 md:gap-4">
+                    <Card className="clay-card col-span-6 lg:col-span-1">
                        <CardHeader className="p-3 md:p-4 pb-1 md:pb-1 flex flex-row items-start justify-between gap-2 space-y-0">
                           <CardTitle className="text-[11px] md:text-xs font-semibold text-zinc-500 leading-tight">Taxas e repasses</CardTitle>
                           <AlertCircle className="h-3.5 w-3.5 md:h-4 md:w-4 shrink-0 text-red-500" />
@@ -867,6 +885,7 @@ export default function Dashboard() {
                          </Button>
                       </CardContent>
                    </Card>
+                </div>
                 </div>
              </div>
            )}
