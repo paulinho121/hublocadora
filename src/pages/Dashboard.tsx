@@ -30,7 +30,7 @@ import {
 import { confirmAction } from '@/components/ui/confirm-dialog';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { weekdayShort } from '@/lib/schedule';
+import { weekdayShort, formatShootDays } from '@/lib/schedule';
 
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
@@ -988,9 +988,11 @@ export default function Dashboard() {
                : <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-400"><Send className="h-3 w-3" /> Enviado</span>;
              const shortDate = (d: string) => format(new Date(d + 'T00:00'), 'dd/MM');
              // Gravação (cobrada) quando o pedido tem; pedidos antigos mostram retirada → devolução
-             const shootLabel = (o: any) => o.shoot_start_date
-               ? `${shortDate(o.shoot_start_date)}${o.shoot_end_date && o.shoot_end_date !== o.shoot_start_date ? ` a ${shortDate(o.shoot_end_date)}` : ''}`
-               : `${shortDate(o.start_date)} → ${shortDate(o.end_date)}`;
+             const shootLabel = (o: any) => o.shoot_dates?.length
+               ? formatShootDays(o.shoot_dates)
+               : o.shoot_start_date
+                 ? `${shortDate(o.shoot_start_date)}${o.shoot_end_date && o.shoot_end_date !== o.shoot_start_date ? ` a ${shortDate(o.shoot_end_date)}` : ''}`
+                 : `${shortDate(o.start_date)} → ${shortDate(o.end_date)}`;
              const periodLine = (o: any) => o.shoot_start_date
                ? `grava ${shootLabel(o)}`
                : `${shortDate(o.start_date)} → ${shortDate(o.end_date)}`;

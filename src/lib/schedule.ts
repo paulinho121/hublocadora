@@ -1,8 +1,10 @@
 /**
  * Agenda da locação: retirada → dias de gravação → devolução.
  *
- * - Cobra-se só os dias de gravação (primeiro e último incluídos).
- * - O equipamento fica ocupado da retirada até a devolução.
+ * - O cliente marca os dias de gravação, que podem ser espaçados (ex.: 26, 27 e 30).
+ * - Cobra-se só os dias de gravação marcados.
+ * - O equipamento fica com o cliente da retirada até a devolução (inclusive nos
+ *   dias sem gravação no meio, que não são cobrados).
  * - Retirada e devolução só em dia útil: sábado e domingo as locadoras fecham.
  *   Gravar no fim de semana pode.
  *
@@ -11,6 +13,9 @@
 
 export interface RentalSchedule {
   pickupDate: string;
+  /** Dias de gravação marcados, em ordem e sem repetição */
+  shootDates: string[];
+  /** Primeiro e último dia de gravação (atalhos para shootDates) */
   shootStartDate: string;
   shootEndDate: string;
   returnDate: string;
@@ -56,7 +61,19 @@ export function nextOpenDay(d: string) {
   return x;
 }
 
-/** Diárias cobradas: dias de gravação, contando o primeiro e o último */
+/** Todos os dias de start a end (inclusive) */
+export function dateRange(start: string, end: string) {
+  const out: string[] = [];
+  for (let d = start; d <= end; d = addDaysStr(d, 1)) out.push(d);
+  return out;
+}
+
+/** Ordena e tira repetidos */
+export function normalizeDates(dates: string[]) {
+  return [...new Set(dates.filter(Boolean))].sort();
+}
+
+/** Diárias de um período contínuo (primeiro e último incluídos) */
 export function shootDays(start: string, end: string) {
   const diff = Math.round((toDate(end).getTime() - toDate(start).getTime()) / 86_400_000);
   return Math.max(1, diff + 1);
@@ -75,21 +92,32 @@ export function suggestedReturn(shootEnd: string) {
   return nextOpenDay(addDaysStr(shootEnd, 1));
 }
 
-/** Agenda a partir dos dias de gravação, com retirada e devolução sugeridas */
+/** Agenda a partir dos dias de gravação marcados, com retirada e devolução sugeridas */
+export function scheduleForShootDays(dates: string[], today = todayStr()): RentalSchedule {
+  let days = normalizeDates(dates).filter(d => d >= today);
+  if (days.length === 0) days = [addDaysStr(today, 1)];
+  const pickupDate = suggestedPickup(days[0], today);
+  // Se a retirada só puder ser depois do primeiro dia (ex.: hoje é sábado), esses dias saem
+  days = days.filter(d => d >= pickupDate);
+  if (days.length === 0) days = [pickupDate];
+  return {
+    pickupDate,
+    shootDates: days,
+    shootStartDate: days[0],
+    shootEndDate: days[days.length - 1],
+    returnDate: suggestedReturn(days[days.length - 1]),
+  };
+}
+
+/** Agenda para um período contínuo de gravação */
 export function scheduleForShoot(shootStart: string, shootEnd: string, today = todayStr()): RentalSchedule {
-  const start = shootStart < today ? today : shootStart;
-  const end = shootEnd < start ? start : shootEnd;
-  let pickupDate = suggestedPickup(start, today);
-  // Se a retirada só puder ser depois do início (ex.: hoje é sábado), a gravação começa nela
-  const shootStartDate = pickupDate > start ? pickupDate : start;
-  const shootEndDate = end < shootStartDate ? shootStartDate : end;
-  if (pickupDate > shootStartDate) pickupDate = shootStartDate;
-  return { pickupDate, shootStartDate, shootEndDate, returnDate: suggestedReturn(shootEndDate) };
+  const end = shootEnd < shootStart ? shootStart : shootEnd;
+  return scheduleForShootDays(dateRange(shootStart, end), today);
 }
 
 /** Agenda padrão: gravação amanhã (1 diária) */
 export function defaultSchedule(today = todayStr()): RentalSchedule {
-  return scheduleForShoot(addDaysStr(today, 1), addDaysStr(today, 1), today);
+  return scheduleForShootDays([addDaysStr(today, 1)], today);
 }
 
 /**
@@ -121,4 +149,19 @@ export function weekdayShort(d: string) {
 /** "29/10" */
 export function dayMonth(d: string) {
   return `${d.slice(8, 10)}/${d.slice(5, 7)}`;
+}
+
+/** "26, 27 e 30/10" · "30/10, 02 e 03/11" */
+export function formatShootDays(dates: string[]) {
+  const days = normalizeDates(dates);
+  if (days.length === 0) return '—';
+  const byMonth: { month: string; days: string[] }[] = [];
+  for (const d of days) {
+    const month = d.slice(5, 7);
+    const last = byMonth[byMonth.length - 1];
+    if (last && last.month === month) last.days.push(d.slice(8, 10));
+    else byMonth.push({ month, days: [d.slice(8, 10)] });
+  }
+  const join = (list: string[]) => (list.length > 1 ? `${list.slice(0, -1).join(', ')} e ${list[list.length - 1]}` : list[0]);
+  return byMonth.map(g => `${join(g.days)}/${g.month}`).join(', ');
 }

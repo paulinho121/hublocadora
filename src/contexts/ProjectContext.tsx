@@ -1,7 +1,7 @@
 import { createContext, useContext, useReducer, useEffect, useMemo, ReactNode } from 'react';
 import { Equipment } from '@/types/database';
 import {
-  RentalSchedule, defaultSchedule, scheduleForShoot, clampPickup, clampReturn, shootDays, todayStr,
+  RentalSchedule, defaultSchedule, scheduleForShoot, scheduleForShootDays, clampPickup, clampReturn, dateRange, todayStr,
 } from '@/lib/schedule';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -17,7 +17,9 @@ interface ProjectState {
   startDate: string;
   /** Devolução (o equipamento volta) */
   endDate: string;
-  /** Dias de gravação: só eles são cobrados */
+  /** Dias de gravação marcados (podem ser espaçados): só eles são cobrados */
+  shootDates: string[];
+  /** Primeiro e último dia de gravação */
   shootStartDate: string;
   shootEndDate: string;
   projectName: string;
@@ -43,6 +45,8 @@ interface ProjectContextType {
   /** Agenda completa (retirada, gravação e devolução), já validada */
   setSchedule: (schedule: RentalSchedule) => void;
   /** Escolhe os dias de gravação; retirada e devolução são sugeridas (dias úteis) */
+  setShootDays: (dates: string[]) => void;
+  /** Atalho para um período contínuo de gravação */
   setShootDates: (shootStart: string, shootEnd: string) => void;
   /** Muda a retirada (vai para o dia útil válido mais próximo) */
   setPickupDate: (date: string) => void;
@@ -63,11 +67,11 @@ interface ProjectContextType {
 const STORAGE_KEY = 'cinehub_project_cart';
 
 function scheduleToState(s: RentalSchedule) {
-  return { startDate: s.pickupDate, endDate: s.returnDate, shootStartDate: s.shootStartDate, shootEndDate: s.shootEndDate };
+  return { startDate: s.pickupDate, endDate: s.returnDate, shootDates: s.shootDates, shootStartDate: s.shootStartDate, shootEndDate: s.shootEndDate };
 }
 
 function stateToSchedule(s: ProjectState): RentalSchedule {
-  return { pickupDate: s.startDate, shootStartDate: s.shootStartDate, shootEndDate: s.shootEndDate, returnDate: s.endDate };
+  return { pickupDate: s.startDate, shootDates: s.shootDates, shootStartDate: s.shootStartDate, shootEndDate: s.shootEndDate, returnDate: s.endDate };
 }
 
 const makeDefaultState = (): ProjectState => ({
@@ -115,7 +119,7 @@ function projectReducer(state: ProjectState, action: ProjectAction): ProjectStat
       return { ...state, isDrawerOpen: false };
     case 'CLEAR_CART':
       // Mantém a agenda escolhida (a pessoa costuma montar outro pedido para as mesmas datas)
-      return { ...makeDefaultState(), startDate: state.startDate, endDate: state.endDate, shootStartDate: state.shootStartDate, shootEndDate: state.shootEndDate };
+      return { ...makeDefaultState(), startDate: state.startDate, endDate: state.endDate, shootDates: state.shootDates, shootStartDate: state.shootStartDate, shootEndDate: state.shootEndDate };
     default:
       return state;
   }
@@ -140,6 +144,10 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
             const shoot = merged.shootStartDate && merged.shootStartDate >= todayStr() ? merged.shootStartDate : init.shootStartDate;
             return { ...merged, ...scheduleToState(scheduleForShoot(shoot, merged.shootEndDate && merged.shootEndDate >= shoot ? merged.shootEndDate : shoot)) };
           }
+          // Carrinho salvo antes dos dias espaçados: o período vira a lista de dias
+          if (!Array.isArray(parsed.shootDates) || parsed.shootDates.length === 0) {
+            return { ...merged, shootDates: dateRange(merged.shootStartDate, merged.shootEndDate) };
+          }
           return merged;
         }
       } catch {
@@ -159,11 +167,8 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     }
   }, [state]);
 
-  // Cobra-se só os dias de gravação
-  const totalDays = useMemo(
-    () => shootDays(state.shootStartDate, state.shootEndDate),
-    [state.shootStartDate, state.shootEndDate],
-  );
+  // Cobra-se só os dias de gravação marcados
+  const totalDays = Math.max(1, state.shootDates.length);
 
   const estimatedTotal = useMemo(
     () =>
@@ -180,6 +185,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     removeItem:     (equipmentId)          => dispatch({ type: 'REMOVE_ITEM', equipmentId }),
     updateQuantity: (equipmentId, quantity)=> dispatch({ type: 'UPDATE_QUANTITY', equipmentId, quantity }),
     setSchedule:    (schedule)             => dispatch({ type: 'SET_SCHEDULE', schedule }),
+    setShootDays:   (dates)                => dispatch({ type: 'SET_SCHEDULE', schedule: scheduleForShootDays(dates) }),
     setShootDates:  (shootStart, shootEnd) => dispatch({ type: 'SET_SCHEDULE', schedule: scheduleForShoot(shootStart, shootEnd) }),
     setPickupDate:  (date) => {
       const s = stateToSchedule(state);

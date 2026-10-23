@@ -79,6 +79,8 @@ export interface Booking {
     /** Dias de gravação (cobrados). Pedidos antigos não têm. */
     shoot_start_date?: string | null;
     shoot_end_date?: string | null;
+    /** Dias de gravação marcados (podem ser espaçados) */
+    shoot_dates?: string[] | null;
     total_amount: number;
     status: 'pending' | 'approved' | 'rejected' | 'active' | 'completed' | 'cancelled';
     notes: string | null;

@@ -38,7 +38,8 @@ import { ReviewService } from '@/services/ReviewService';
 import { useQuery } from '@tanstack/react-query';
 import { Equipment } from '@/types/database';
 import { SuggestedEquipments } from '@/components/marketplace/SuggestedEquipments';
-import { RentalSchedule, defaultSchedule, scheduleForShoot, shootDays, todayStr, weekdayShort, dayMonth } from '@/lib/schedule';
+import { RentalSchedule, defaultSchedule, scheduleForShoot, scheduleForShootDays, todayStr, weekdayShort, formatShootDays } from '@/lib/schedule';
+import { ShootDaysPicker } from '@/components/marketplace/ShootDaysPicker';
 import { EquipmentGallery } from '@/components/marketplace/EquipmentGallery';
 import { CompanyInfoCard } from '@/components/marketplace/CompanyInfoCard';
 
@@ -79,7 +80,7 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
   // gravação; retirada e devolução (dias úteis) vêm sugeridas e podem ser ajustadas no carrinho.
   const [schedule, setSchedule] = useState<RentalSchedule>(() =>
     proj.shootStartDate && proj.shootStartDate >= today && proj.startDate >= today
-      ? { pickupDate: proj.startDate, shootStartDate: proj.shootStartDate, shootEndDate: proj.shootEndDate, returnDate: proj.endDate }
+      ? { pickupDate: proj.startDate, shootDates: proj.shootDates, shootStartDate: proj.shootStartDate, shootEndDate: proj.shootEndDate, returnDate: proj.endDate }
       : defaultSchedule(),
   );
   // O equipamento fica ocupado da retirada à devolução
@@ -94,20 +95,14 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
     id || '', startDate, endDate,
   );
 
-  // Cobra-se só os dias de gravação
-  const totalDays   = shootDays(schedule.shootStartDate, schedule.shootEndDate);
+  // Cobra-se só os dias de gravação marcados
+  const totalDays   = Math.max(1, schedule.shootDates.length);
+  const [showDays, setShowDays] = useState(false);
   const totalAmount = equipment.daily_rate * quantity * totalDays;
   const maxQty      = avail?.available ?? equipment.stock_quantity ?? 1;
   const canBook     = avail?.isAvailable && quantity <= maxQty;
 
-  const handleShootStart = (val: string) => {
-    if (!val) return;
-    setSchedule(scheduleForShoot(val, val > schedule.shootEndDate ? val : schedule.shootEndDate));
-  };
-  const handleShootEnd = (val: string) => {
-    if (!val) return;
-    setSchedule(scheduleForShoot(schedule.shootStartDate, val < schedule.shootStartDate ? schedule.shootStartDate : val));
-  };
+
 
   // Carrinho: o item entra no pedido; o envio às locadoras acontece em "Finalizar pedido".
   // As datas valem para o pedido inteiro.
@@ -139,8 +134,7 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
             : 'Continue locando ou finalize o pedido para enviar à locadora.'}
         </p>
         <p className="text-[11px] font-semibold text-emerald-400 mb-6">
-          Gravação {dayMonth(schedule.shootStartDate)}
-          {schedule.shootEndDate !== schedule.shootStartDate && ` a ${dayMonth(schedule.shootEndDate)}`}
+          Gravação {formatShootDays(schedule.shootDates)}
           {' · '}{quantity}× · {brl(totalAmount)}
         </p>
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
@@ -167,34 +161,29 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
 
       {/* ── Dates ─────────────────────────────────────────────────────────── */}
       <div className="rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-900/40">
-        <div className="grid grid-cols-2 divide-x divide-zinc-800">
-          {/* Dias de gravação (são os cobrados) */}
-          <label className="flex flex-col gap-1 px-4 py-3.5 cursor-pointer hover:bg-zinc-900/60 transition-colors">
-            <span className="text-[11px] font-semibold text-zinc-500">
-              Gravação de
-            </span>
-            <input
-              type="date"
-              value={schedule.shootStartDate}
-              min={today}
-              onChange={e => handleShootStart(e.target.value)}
-              className="bg-transparent text-sm font-black text-white focus:outline-none cursor-pointer w-full"
+        {/* Dias de gravação (são os cobrados): toque para abrir o calendário */}
+        <button
+          type="button"
+          onClick={() => setShowDays(v => !v)}
+          aria-expanded={showDays}
+          className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left hover:bg-zinc-900/60 transition-colors"
+        >
+          <span className="min-w-0">
+            <span className="block text-[11px] font-semibold text-zinc-500">Dias de gravação</span>
+            <span className="block text-sm font-black text-white truncate">{formatShootDays(schedule.shootDates)}</span>
+          </span>
+          {showDays ? <ChevronUp className="w-4 h-4 text-zinc-500 shrink-0" /> : <ChevronDown className="w-4 h-4 text-zinc-500 shrink-0" />}
+        </button>
+        {showDays && (
+          <div className="px-3 pb-3">
+            <ShootDaysPicker
+              value={schedule.shootDates}
+              onChange={dates => setSchedule(scheduleForShootDays(dates))}
+              pickupDate={startDate}
+              returnDate={endDate}
             />
-          </label>
-
-          <label className="flex flex-col gap-1 px-4 py-3.5 cursor-pointer hover:bg-zinc-900/60 transition-colors">
-            <span className="text-[11px] font-semibold text-zinc-500">
-              Até
-            </span>
-            <input
-              type="date"
-              value={schedule.shootEndDate}
-              min={schedule.shootStartDate}
-              onChange={e => handleShootEnd(e.target.value)}
-              className="bg-transparent text-sm font-black text-white focus:outline-none cursor-pointer w-full"
-            />
-          </label>
-        </div>
+          </div>
+        )}
 
         {/* Retirada e devolução sugeridas (dias úteis) */}
         <div className="px-4 py-2.5 border-t border-zinc-800 text-[11px] text-zinc-400">

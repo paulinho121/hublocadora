@@ -11,7 +11,8 @@ import { Equipment } from '@/types/database';
 import { motion } from 'motion/react';
 import { EquipmentCard } from '@/components/marketplace/EquipmentCard';
 import { useProject } from '@/contexts/ProjectContext';
-import { todayStr, weekdayShort, shootDays } from '@/lib/schedule';
+import { todayStr, weekdayShort, formatShootDays } from '@/lib/schedule';
+import { ShootDaysPicker } from '@/components/marketplace/ShootDaysPicker';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -33,7 +34,8 @@ const openPicker = (e: React.MouseEvent<HTMLInputElement>) => {
 
 export default function Marketplace() {
   const navigate = useNavigate();
-  const { state: projectState, setShootDates } = useProject();
+  const { state: projectState, setShootDates, setShootDays } = useProject();
+  const [showShootDays, setShowShootDays] = useState(false);
   const [search, setSearch] = useState('');
   // Filtros da barra de descoberta
   const [city, setCity] = useState<string>('');
@@ -228,16 +230,6 @@ export default function Marketplace() {
     setSelectedSubCategory(undefined);
   };
 
-  // Dias de gravação: retirada e devolução (dias úteis) são calculadas a partir deles
-  const handleStartDate = (val: string) => {
-    if (!val) return;
-    setShootDates(val, val > projectState.shootEndDate ? val : projectState.shootEndDate);
-  };
-  const handleEndDate = (val: string) => {
-    if (!val) return;
-    setShootDates(projectState.shootStartDate, val < projectState.shootStartDate ? projectState.shootStartDate : val);
-  };
-
   const handleSearch = () => {
     if (equipments && equipments.length === 1) {
       navigate(`/equipment/${equipments[0].id}`);
@@ -277,12 +269,18 @@ export default function Marketplace() {
           {/* ── Barra de descoberta: Quando? Onde? Ordenar ──
                O valor aparece num texto curto (22/10) e o campo nativo fica invisível por cima:
                ocupa pouco espaço no celular e continua abrindo o seletor do aparelho. */}
-          <div className="w-full max-w-3xl mt-2.5 grid grid-cols-[1fr_1fr_1fr_1.3fr] md:grid-cols-4 gap-1.5 md:gap-2 text-left">
+          <div className="w-full max-w-3xl mt-2.5 grid grid-cols-[2fr_1fr_1.3fr] md:grid-cols-4 gap-1.5 md:gap-2 text-left">
+            {/* Dias de gravação: abre o calendário (os dias podem ser espaçados) */}
+            <button
+              type="button"
+              onClick={() => setShowShootDays(v => !v)}
+              aria-expanded={showShootDays}
+              className={`md:col-span-2 flex flex-col gap-0.5 min-w-0 text-left bg-zinc-900/60 border rounded-xl px-2.5 py-1.5 md:px-3 md:py-2 transition-colors ${showShootDays ? 'border-primary/50' : 'border-zinc-800 hover:border-zinc-700'}`}
+            >
+              <span className="text-[10px] md:text-[11px] font-semibold text-zinc-500 flex items-center gap-1 truncate"><span className="hidden md:inline-flex"><Calendar className="w-3 h-3 text-primary shrink-0" /></span>Dias de gravação</span>
+              <span className="text-[13px] md:text-sm font-semibold text-white truncate">{formatShootDays(projectState.shootDates)}</span>
+            </button>
             {[
-              { label: 'Gravação', icon: <Calendar className="w-3 h-3 text-primary shrink-0" />, value: shortDay(projectState.shootStartDate),
-                input: <input type="date" aria-label="Primeiro dia de gravação" value={projectState.shootStartDate} min={today} onChange={e => handleStartDate(e.target.value)} onClick={openPicker} className={overlayInput} /> },
-              { label: 'Até', icon: <Calendar className="w-3 h-3 shrink-0" />, value: shortDay(projectState.shootEndDate),
-                input: <input type="date" aria-label="Último dia de gravação" value={projectState.shootEndDate} min={projectState.shootStartDate} onChange={e => handleEndDate(e.target.value)} onClick={openPicker} className={overlayInput} /> },
               { label: 'Onde?', icon: <MapPin className="w-3 h-3 shrink-0" />, value: city ? city.split(' · ')[0] : 'Todas',
                 input: (
                   <select aria-label="Cidade" value={city} onChange={e => setCity(e.target.value)} className={overlayInput}>
@@ -306,16 +304,30 @@ export default function Marketplace() {
               </label>
             ))}
           </div>
+          {showShootDays && (
+            <div className="w-full max-w-3xl mt-2 text-left">
+              <ShootDaysPicker
+                value={projectState.shootDates}
+                onChange={setShootDays}
+                pickupDate={projectState.startDate}
+                returnDate={projectState.endDate}
+              />
+              <div className="flex justify-end mt-2">
+                <Button size="sm" onClick={() => setShowShootDays(false)} className="h-10 rounded-xl px-5 font-semibold">Pronto</Button>
+              </div>
+            </div>
+          )}
+
           {/* Agenda calculada: o que é cobrado e quando o equipamento sai/volta */}
           <p className="w-full max-w-3xl mt-1.5 text-xs text-zinc-500 text-left">
-            {(() => { const n = shootDays(projectState.shootStartDate, projectState.shootEndDate); return `${n} ${n === 1 ? 'diária' : 'diárias'}`; })()}
+            {(() => { const n = projectState.shootDates.length || 1; return `${n} ${n === 1 ? 'diária' : 'diárias'}`; })()}
             {' · '}retirada {weekdayShort(projectState.startDate)} · devolução {weekdayShort(projectState.endDate)}
           </p>
         </motion.div>
       </div>
 
       {/* ── Resultados ───────────────────────────────────────────────────── */}
-      <div className="w-full max-w-7xl mx-auto px-4 md:px-6 mb-20 mt-6">
+      <div className="w-full max-w-7xl mx-auto px-4 md:px-6 mb-6 md:mb-20 mt-6">
         <div id="results-section" className="w-full scroll-mt-24">
 
           <div className="flex items-end justify-between gap-4 mb-6">

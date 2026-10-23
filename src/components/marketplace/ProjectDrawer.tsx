@@ -17,7 +17,8 @@ import { BookingService } from '@/services/BookingService';
 import { useCreateProject, createOutboundShipment } from '@/hooks/useProjects';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { isClosedDay, todayStr, weekdayShort } from '@/lib/schedule';
+import { isClosedDay, todayStr, weekdayShort, formatShootDays } from '@/lib/schedule';
+import { ShootDaysPicker } from './ShootDaysPicker';
 
 // ─── Availability per item ────────────────────────────────────────────────────
 
@@ -41,7 +42,7 @@ const brl = (v: number) =>
 
 export function ProjectDrawer() {
   const {
-    state, removeItem, updateQuantity, setShootDates, setPickupDate, setReturnDate, setProjectName,
+    state, removeItem, updateQuantity, setShootDays, setPickupDate, setReturnDate, setProjectName,
     openDrawer, closeDrawer, clearCart, isInCart, totalDays, estimatedTotal,
   } = useProject();
   const { user } = useAuth();
@@ -119,14 +120,6 @@ export function ProjectDrawer() {
   useEffect(() => { checkAvailability(); }, [checkAvailability]);
 
   // ── agenda: gravação define retirada e devolução (dias úteis) ──────────────
-  const handleShootStart = (v: string) => {
-    if (!v) return;
-    setShootDates(v, v > state.shootEndDate ? v : state.shootEndDate);
-  };
-  const handleShootEnd = (v: string) => {
-    if (!v) return;
-    setShootDates(state.shootStartDate, v < state.shootStartDate ? state.shootStartDate : v);
-  };
   const handlePickup = (v: string) => {
     if (!v) return;
     if (isClosedDay(v)) toast.info('Sábado e domingo as locadoras não abrem. A retirada foi para o dia útil anterior.');
@@ -197,6 +190,7 @@ export function ProjectDrawer() {
           end_date:             state.endDate,
           shoot_start_date:     state.shootStartDate,
           shoot_end_date:       state.shootEndDate,
+          shoot_dates:          state.shootDates,
           total_amount:         item.equipment.daily_rate * item.quantity * totalDays,
           status:               'pending',
           quantity:             item.quantity,
@@ -519,20 +513,14 @@ export function ProjectDrawer() {
                         <CalendarDays className="w-3.5 h-3.5 text-primary" />
                         <span className="text-[11px] font-semibold text-zinc-500">Dias de gravação</span>
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label htmlFor="shoot-start" className="block text-[11px] font-semibold text-zinc-400 mb-1.5">De</label>
-                          <input id="shoot-start" type="date" value={state.shootStartDate} min={todayStr()}
-                            onChange={e => handleShootStart(e.target.value)} className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all" />
-                        </div>
-                        <div>
-                          <label htmlFor="shoot-end" className="block text-[11px] font-semibold text-zinc-400 mb-1.5">Até</label>
-                          <input id="shoot-end" type="date" value={state.shootEndDate} min={state.shootStartDate}
-                            onChange={e => handleShootEnd(e.target.value)} className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all" />
-                        </div>
-                      </div>
+                      <ShootDaysPicker
+                        value={state.shootDates}
+                        onChange={setShootDays}
+                        pickupDate={state.startDate}
+                        returnDate={state.endDate}
+                      />
                       <p className="text-[11px] text-zinc-500 mt-2 font-semibold">
-                        {totalDays} {totalDays === 1 ? 'diária cobrada' : 'diárias cobradas'} · só os dias de gravação
+                        {formatShootDays(state.shootDates)} · {totalDays} {totalDays === 1 ? 'diária cobrada' : 'diárias cobradas'}
                       </p>
                     </div>
 
