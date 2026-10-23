@@ -9,7 +9,7 @@ import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
-export function NotificationCenter() {
+export function NotificationCenter({ onBrand = false }: { onBrand?: boolean } = {}) {
     const { user } = useAuth();
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [isOpen, setIsOpen] = useState(false);
@@ -106,16 +106,21 @@ export function NotificationCenter() {
                     setIsOpen(prev => !prev);
                 }}
                 className={cn(
-                    "h-12 w-12 flex items-center justify-center rounded-2xl transition-all duration-500 relative group",
-                    isOpen 
-                        ? "bg-primary text-black shadow-[0_0_30px_rgba(163,230,53,0.3)]" 
-                        : "bg-zinc-900 border border-white/5 text-zinc-500 hover:border-white/10 hover:text-zinc-100"
+                    "flex items-center justify-center transition-all duration-500 relative group",
+                    onBrand
+                        ? cn("h-10 w-10 rounded-full text-white", isOpen ? "bg-white/30" : "bg-white/15 hover:bg-white/25")
+                        : cn("h-12 w-12 rounded-2xl", isOpen
+                            ? "bg-primary text-black shadow-[0_0_30px_rgba(163,230,53,0.3)]"
+                            : "bg-zinc-900 border border-white/5 text-zinc-500 hover:border-white/10 hover:text-zinc-100")
                 )}
             >
                 <Bell className={cn("h-5 w-5 transition-transform duration-500", isOpen && "scale-110")} />
                 
                 {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-[11px] font-black flex items-center justify-center rounded-full border-2 border-black animate-pulse">
+                    <span className={cn(
+                        "absolute -top-1 -right-1 h-5 w-5 text-[11px] font-black flex items-center justify-center rounded-full border-2 animate-pulse",
+                        onBrand ? "bg-amber-400 text-zinc-950 border-primary" : "bg-red-500 text-white border-black"
+                    )}>
                         {unreadCount > 9 ? '+9' : unreadCount}
                     </span>
                 )}

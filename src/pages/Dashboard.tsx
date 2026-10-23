@@ -407,6 +407,9 @@ export default function Dashboard() {
   const pendingBookingsCount = bookingsReceived?.filter(b => b.status === 'pending').length || 0;
   const maintenanceCount    = equipments?.filter(e => e.status === 'maintenance').length || 0;
 
+  // Na Visão geral (celular) o cabeçalho usa a cor da marca, emendado com o topo
+  const onBrandHeader = activeTab === 'overview';
+
   // Perfil: quem ainda não tem equipamento nem pedido recebido usa o app só para alugar
   const isRenterOnly = !isLoadingEquipments && !isLoadingReceived
     && equipments.length === 0 && (bookingsReceived?.length || 0) === 0;
@@ -565,37 +568,44 @@ export default function Dashboard() {
       <main className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0">
         {/* Top Header Section (Mobile Visible) */}
         {/* No celular (app instalado) o topo começa abaixo da barra de status do aparelho */}
-        <header className={`box-content h-16 md:h-20 pt-[env(safe-area-inset-top)] md:pt-0 border-b flex items-center justify-between px-4 md:px-10 shrink-0 ${activeTab === 'overview' ? 'max-md:bg-primary max-md:text-white max-md:border-transparent border-zinc-900' : 'border-zinc-900'}`}>
-           <div className="flex items-center gap-3 md:hidden">
-              {company?.logo_url ? (
-                 <div className="h-8 w-8 rounded-lg overflow-hidden border border-zinc-800 flex items-center justify-center shrink-0">
-                    <img src={company.logo_url} alt="" className="h-full w-full object-cover" />
-                 </div>
-              ) : (
-                 <Package className={`h-6 w-6 shrink-0 ${activeTab === 'overview' ? 'text-primary max-md:text-white' : 'text-primary'}`} />
-              )}
-              <span className="font-black uppercase tracking-tighter text-lg">{isBranchManager ? branch?.name : company?.name}</span>
+        {/* Na Visão geral o cabeçalho do celular faz parte do topo colorido: sem linha divisória.
+            (sem a classe border-zinc-900, que o tema claro pinta de cinza; --color-white volta a ser branco) */}
+        <header className={`box-content h-16 md:h-20 pt-[env(safe-area-inset-top)] md:pt-0 flex items-center justify-between px-4 md:px-10 shrink-0 ${onBrandHeader
+          ? 'max-md:bg-primary max-md:text-white max-md:[--color-white:#fff] md:border-b md:border-zinc-800'
+          : 'border-b border-zinc-900'}`}>
+           <div className="flex items-center gap-3 md:hidden min-w-0">
+              <div className={`h-10 w-10 rounded-full overflow-hidden flex items-center justify-center shrink-0 ${onBrandHeader ? 'bg-white/15' : 'bg-zinc-900 border border-zinc-800'}`}>
+                {company?.logo_url
+                  ? <img src={company.logo_url} alt="" className="h-full w-full object-cover" />
+                  : <span className={`text-sm font-bold ${onBrandHeader ? 'text-white' : 'text-primary'}`}>{(company?.name || 'C').trim().charAt(0).toUpperCase()}</span>}
+              </div>
+              <div className="min-w-0 leading-tight">
+                <p className={`text-xs ${onBrandHeader ? 'text-white/75' : 'text-zinc-500'}`}>Olá,</p>
+                <p className="text-base font-semibold truncate">{isBranchManager ? branch?.name : company?.name}</p>
+              </div>
            </div>
            
            <div className="hidden md:block">
               <h1 className="text-sm font-black uppercase tracking-wider text-zinc-500">Área de Gestão</h1>
            </div>
 
-           <div className="flex items-center gap-3">
+           <div className="flex items-center gap-2 md:gap-3">
               {/* Refresh button — visible on mobile (PWA) */}
               <button aria-label="Atualizar aplicativo"
                 onClick={handleRefresh}
                 disabled={isRefreshing}
-                className="md:hidden h-9 w-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500 hover:text-emerald-400 hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-all active:scale-95"
+                className={`md:hidden h-10 w-10 flex items-center justify-center transition-all active:scale-95 ${onBrandHeader
+                  ? 'rounded-full bg-white/15 text-white hover:bg-white/25'
+                  : 'rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-500 hover:text-emerald-400 hover:border-emerald-500/30 hover:bg-emerald-500/5'}`}
                 title="Atualizar aplicativo"
               >
                 <RefreshCw className={`h-4 w-4 transition-transform duration-700 ${isRefreshing ? 'animate-spin text-emerald-400' : ''}`} />
               </button>
 
               {/* No celular o menu do topo some no painel: tema e sino ficam aqui */}
-              <ThemeToggle className="md:hidden" />
+              <ThemeToggle className="md:hidden" onBrand={onBrandHeader} />
               <div className="md:hidden">
-                 <NotificationCenter />
+                 <NotificationCenter onBrand={onBrandHeader} />
               </div>
 
               <div className="hidden md:flex h-8 w-8 rounded-full bg-zinc-900 border border-zinc-800 items-center justify-center">

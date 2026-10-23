@@ -37,9 +37,12 @@ export function OverviewHero({ label, value, sub, actions }: OverviewHeroProps) 
   return (
     <section
       aria-label={label}
-      className="bg-primary text-white -mx-4 -mt-4 px-5 pt-6 pb-16 md:mx-0 md:mt-0 md:pb-8 md:rounded-3xl md:px-8 md:pt-8"
+      className="relative overflow-hidden bg-primary text-white -mx-4 -mt-4 px-5 pt-4 pb-16 md:mx-0 md:mt-0 md:pb-8 md:rounded-3xl md:px-8 md:pt-8"
     >
-      <div className="max-w-lg mx-auto md:max-w-none text-center md:text-left">
+      {/* Sombra suave só embaixo: dá profundidade sem criar emenda com o cabeçalho */}
+      <div aria-hidden className="pointer-events-none absolute -bottom-28 -left-16 h-56 w-56 rounded-full bg-black/10 blur-3xl" />
+      <div aria-hidden className="pointer-events-none absolute -bottom-32 -right-10 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
+      <div className="relative max-w-lg mx-auto md:max-w-none text-center md:text-left">
         <div className="flex items-center justify-center md:justify-start gap-2">
           <p className="text-sm font-medium text-white/85">{label}</p>
           <button
@@ -63,7 +66,7 @@ export function OverviewHero({ label, value, sub, actions }: OverviewHeroProps) 
               <button
                 key={a.label}
                 onClick={a.onClick}
-                className="h-10 px-4 rounded-full border border-white/45 text-sm font-semibold text-white hover:bg-white/10 active:bg-white/15 transition-colors"
+                className="h-10 px-4 rounded-full bg-white/15 text-sm font-semibold text-white hover:bg-white/25 active:bg-white/30 backdrop-blur-sm transition-colors"
               >
                 {a.label}
               </button>
