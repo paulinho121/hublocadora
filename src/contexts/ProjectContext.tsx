@@ -1,6 +1,8 @@
 import { createContext, useContext, useReducer, useEffect, useMemo, ReactNode } from 'react';
 import { Equipment } from '@/types/database';
-import { format, addDays, differenceInDays, parseISO } from 'date-fns';
+import {
+  RentalSchedule, defaultSchedule, scheduleForShoot, clampPickup, clampReturn, shootDays, todayStr,
+} from '@/lib/schedule';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -11,8 +13,13 @@ export interface ProjectItem {
 
 interface ProjectState {
   items: ProjectItem[];
+  /** Retirada (o equipamento sai da locadora) */
   startDate: string;
+  /** Devolução (o equipamento volta) */
   endDate: string;
+  /** Dias de gravação: só eles são cobrados */
+  shootStartDate: string;
+  shootEndDate: string;
   projectName: string;
   isDrawerOpen: boolean;
 }
@@ -21,7 +28,7 @@ type ProjectAction =
   | { type: 'ADD_ITEM'; equipment: Equipment; quantity?: number }
   | { type: 'REMOVE_ITEM'; equipmentId: string }
   | { type: 'UPDATE_QUANTITY'; equipmentId: string; quantity: number }
-  | { type: 'SET_DATES'; startDate: string; endDate: string }
+  | { type: 'SET_SCHEDULE'; schedule: RentalSchedule }
   | { type: 'SET_PROJECT_NAME'; name: string }
   | { type: 'OPEN_DRAWER' }
   | { type: 'CLOSE_DRAWER' }
@@ -33,12 +40,20 @@ interface ProjectContextType {
   addItem: (equipment: Equipment, quantity?: number) => void;
   removeItem: (equipmentId: string) => void;
   updateQuantity: (equipmentId: string, quantity: number) => void;
-  setDates: (startDate: string, endDate: string) => void;
+  /** Agenda completa (retirada, gravação e devolução), já validada */
+  setSchedule: (schedule: RentalSchedule) => void;
+  /** Escolhe os dias de gravação; retirada e devolução são sugeridas (dias úteis) */
+  setShootDates: (shootStart: string, shootEnd: string) => void;
+  /** Muda a retirada (vai para o dia útil válido mais próximo) */
+  setPickupDate: (date: string) => void;
+  /** Muda a devolução (vai para o dia útil válido mais próximo) */
+  setReturnDate: (date: string) => void;
   setProjectName: (name: string) => void;
   openDrawer: () => void;
   closeDrawer: () => void;
   clearCart: () => void;
   isInCart: (equipmentId: string) => boolean;
+  /** Diárias cobradas = dias de gravação */
   totalDays: number;
   estimatedTotal: number;
 }
@@ -47,13 +62,21 @@ interface ProjectContextType {
 
 const STORAGE_KEY = 'cinehub_project_cart';
 
-const defaultState: ProjectState = {
+function scheduleToState(s: RentalSchedule) {
+  return { startDate: s.pickupDate, endDate: s.returnDate, shootStartDate: s.shootStartDate, shootEndDate: s.shootEndDate };
+}
+
+function stateToSchedule(s: ProjectState): RentalSchedule {
+  return { pickupDate: s.startDate, shootStartDate: s.shootStartDate, shootEndDate: s.shootEndDate, returnDate: s.endDate };
+}
+
+const makeDefaultState = (): ProjectState => ({
   items: [],
-  startDate: format(new Date(), 'yyyy-MM-dd'),
-  endDate: format(addDays(new Date(), 1), 'yyyy-MM-dd'),
+  ...scheduleToState(defaultSchedule()),
   projectName: '',
   isDrawerOpen: false,
-};
+});
+const defaultState: ProjectState = makeDefaultState();
 
 // ─── Reducer ──────────────────────────────────────────────────────────────────
 
@@ -82,8 +105,8 @@ function projectReducer(state: ProjectState, action: ProjectAction): ProjectStat
             : i,
         ),
       };
-    case 'SET_DATES':
-      return { ...state, startDate: action.startDate, endDate: action.endDate };
+    case 'SET_SCHEDULE':
+      return { ...state, ...scheduleToState(action.schedule) };
     case 'SET_PROJECT_NAME':
       return { ...state, projectName: action.name };
     case 'OPEN_DRAWER':
@@ -91,7 +114,8 @@ function projectReducer(state: ProjectState, action: ProjectAction): ProjectStat
     case 'CLOSE_DRAWER':
       return { ...state, isDrawerOpen: false };
     case 'CLEAR_CART':
-      return { ...defaultState };
+      // Mantém a agenda escolhida (a pessoa costuma montar outro pedido para as mesmas datas)
+      return { ...makeDefaultState(), startDate: state.startDate, endDate: state.endDate, shootStartDate: state.shootStartDate, shootEndDate: state.shootEndDate };
     default:
       return state;
   }
@@ -110,7 +134,13 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) {
           const parsed = JSON.parse(raw) as Partial<ProjectState>;
-          return { ...init, ...parsed, isDrawerOpen: false };
+          const merged = { ...init, ...parsed, isDrawerOpen: false };
+          // Carrinho salvo antes da agenda de gravação, ou com datas no passado: recalcula
+          if (!parsed.shootStartDate || !parsed.shootEndDate || merged.shootStartDate < todayStr() || merged.startDate < todayStr()) {
+            const shoot = merged.shootStartDate && merged.shootStartDate >= todayStr() ? merged.shootStartDate : init.shootStartDate;
+            return { ...merged, ...scheduleToState(scheduleForShoot(shoot, merged.shootEndDate && merged.shootEndDate >= shoot ? merged.shootEndDate : shoot)) };
+          }
+          return merged;
         }
       } catch {
         // corrupted storage — use defaults
@@ -129,10 +159,11 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     }
   }, [state]);
 
-  const totalDays = useMemo(() => {
-    const diff = differenceInDays(parseISO(state.endDate), parseISO(state.startDate));
-    return Math.max(1, diff === 0 ? 1 : diff);
-  }, [state.startDate, state.endDate]);
+  // Cobra-se só os dias de gravação
+  const totalDays = useMemo(
+    () => shootDays(state.shootStartDate, state.shootEndDate),
+    [state.shootStartDate, state.shootEndDate],
+  );
 
   const estimatedTotal = useMemo(
     () =>
@@ -148,7 +179,16 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     addItem:        (equipment, quantity)  => dispatch({ type: 'ADD_ITEM', equipment, quantity }),
     removeItem:     (equipmentId)          => dispatch({ type: 'REMOVE_ITEM', equipmentId }),
     updateQuantity: (equipmentId, quantity)=> dispatch({ type: 'UPDATE_QUANTITY', equipmentId, quantity }),
-    setDates:       (startDate, endDate)   => dispatch({ type: 'SET_DATES', startDate, endDate }),
+    setSchedule:    (schedule)             => dispatch({ type: 'SET_SCHEDULE', schedule }),
+    setShootDates:  (shootStart, shootEnd) => dispatch({ type: 'SET_SCHEDULE', schedule: scheduleForShoot(shootStart, shootEnd) }),
+    setPickupDate:  (date) => {
+      const s = stateToSchedule(state);
+      dispatch({ type: 'SET_SCHEDULE', schedule: { ...s, pickupDate: clampPickup(date, s) } });
+    },
+    setReturnDate:  (date) => {
+      const s = stateToSchedule(state);
+      dispatch({ type: 'SET_SCHEDULE', schedule: { ...s, returnDate: clampReturn(date, s) } });
+    },
     setProjectName: (name)                 => dispatch({ type: 'SET_PROJECT_NAME', name }),
     openDrawer:     ()                     => dispatch({ type: 'OPEN_DRAWER' }),
     closeDrawer:    ()                     => dispatch({ type: 'CLOSE_DRAWER' }),

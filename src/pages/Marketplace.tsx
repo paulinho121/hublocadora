@@ -11,6 +11,7 @@ import { Equipment } from '@/types/database';
 import { motion } from 'motion/react';
 import { EquipmentCard } from '@/components/marketplace/EquipmentCard';
 import { useProject } from '@/contexts/ProjectContext';
+import { todayStr, weekdayShort, shootDays } from '@/lib/schedule';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -32,7 +33,7 @@ const openPicker = (e: React.MouseEvent<HTMLInputElement>) => {
 
 export default function Marketplace() {
   const navigate = useNavigate();
-  const { state: projectState, setDates } = useProject();
+  const { state: projectState, setShootDates } = useProject();
   const [search, setSearch] = useState('');
   // Filtros da barra de descoberta
   const [city, setCity] = useState<string>('');
@@ -53,7 +54,8 @@ export default function Marketplace() {
   // Usa RPC com SECURITY DEFINER para bypassar RLS — a query direta em bookings
   // é filtrada por usuário, fazendo items com reserva de outro usuário aparecerem
   // como disponíveis, permitindo dupla locação na mesma data.
-  const today = new Date().toISOString().split('T')[0];
+  // Data local (toISOString daria o dia seguinte depois das 21h no Brasil)
+  const today = todayStr();
   const { data: activeBookings } = useQuery({
     queryKey: ['marketplace-active-bookings', today],
     queryFn: async () => {
@@ -157,9 +159,9 @@ export default function Marketplace() {
     [availabilityMap],
   );
 
-  // Datas guardadas no carrinho podem ter ficado no passado: volta para hoje → amanhã
+  // Gravação guardada no carrinho pode ter ficado no passado: recalcula a agenda
   useEffect(() => {
-    if (projectState.startDate < today) setDates(today, format(addDays(parseISO(today), 1), 'yyyy-MM-dd'));
+    if (projectState.shootStartDate < today) setShootDates(today, today);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Cidades reais do catálogo (para o filtro "Onde?")
@@ -226,14 +228,14 @@ export default function Marketplace() {
     setSelectedSubCategory(undefined);
   };
 
+  // Dias de gravação: retirada e devolução (dias úteis) são calculadas a partir deles
   const handleStartDate = (val: string) => {
     if (!val) return;
-    const end = val >= projectState.endDate ? format(addDays(parseISO(val), 1), 'yyyy-MM-dd') : projectState.endDate;
-    setDates(val, end);
+    setShootDates(val, val > projectState.shootEndDate ? val : projectState.shootEndDate);
   };
   const handleEndDate = (val: string) => {
-    if (!val || val <= projectState.startDate) return;
-    setDates(projectState.startDate, val);
+    if (!val) return;
+    setShootDates(projectState.shootStartDate, val < projectState.shootStartDate ? projectState.shootStartDate : val);
   };
 
   const handleSearch = () => {
@@ -277,10 +279,10 @@ export default function Marketplace() {
                ocupa pouco espaço no celular e continua abrindo o seletor do aparelho. */}
           <div className="w-full max-w-3xl mt-2.5 grid grid-cols-[1fr_1fr_1fr_1.3fr] md:grid-cols-4 gap-1.5 md:gap-2 text-left">
             {[
-              { label: 'Retirada', icon: <Calendar className="w-3 h-3 text-primary shrink-0" />, value: shortDay(projectState.startDate),
-                input: <input type="date" aria-label="Data de retirada" value={projectState.startDate} min={today} onChange={e => handleStartDate(e.target.value)} onClick={openPicker} className={overlayInput} /> },
-              { label: 'Devolução', icon: <Calendar className="w-3 h-3 shrink-0" />, value: shortDay(projectState.endDate),
-                input: <input type="date" aria-label="Data de devolução" value={projectState.endDate} min={projectState.startDate} onChange={e => handleEndDate(e.target.value)} onClick={openPicker} className={overlayInput} /> },
+              { label: 'Gravação', icon: <Calendar className="w-3 h-3 text-primary shrink-0" />, value: shortDay(projectState.shootStartDate),
+                input: <input type="date" aria-label="Primeiro dia de gravação" value={projectState.shootStartDate} min={today} onChange={e => handleStartDate(e.target.value)} onClick={openPicker} className={overlayInput} /> },
+              { label: 'Até', icon: <Calendar className="w-3 h-3 shrink-0" />, value: shortDay(projectState.shootEndDate),
+                input: <input type="date" aria-label="Último dia de gravação" value={projectState.shootEndDate} min={projectState.shootStartDate} onChange={e => handleEndDate(e.target.value)} onClick={openPicker} className={overlayInput} /> },
               { label: 'Onde?', icon: <MapPin className="w-3 h-3 shrink-0" />, value: city ? city.split(' · ')[0] : 'Todas',
                 input: (
                   <select aria-label="Cidade" value={city} onChange={e => setCity(e.target.value)} className={overlayInput}>
@@ -304,6 +306,11 @@ export default function Marketplace() {
               </label>
             ))}
           </div>
+          {/* Agenda calculada: o que é cobrado e quando o equipamento sai/volta */}
+          <p className="w-full max-w-3xl mt-1.5 text-xs text-zinc-500 text-left">
+            {(() => { const n = shootDays(projectState.shootStartDate, projectState.shootEndDate); return `${n} ${n === 1 ? 'diária' : 'diárias'}`; })()}
+            {' · '}retirada {weekdayShort(projectState.startDate)} · devolução {weekdayShort(projectState.endDate)}
+          </p>
         </motion.div>
       </div>
 

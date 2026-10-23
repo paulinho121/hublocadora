@@ -17,6 +17,7 @@ import { BookingService } from '@/services/BookingService';
 import { useCreateProject, createOutboundShipment } from '@/hooks/useProjects';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { isClosedDay, todayStr, weekdayShort } from '@/lib/schedule';
 
 // ─── Availability per item ────────────────────────────────────────────────────
 
@@ -40,7 +41,7 @@ const brl = (v: number) =>
 
 export function ProjectDrawer() {
   const {
-    state, removeItem, updateQuantity, setDates, setProjectName,
+    state, removeItem, updateQuantity, setShootDates, setPickupDate, setReturnDate, setProjectName,
     openDrawer, closeDrawer, clearCart, isInCart, totalDays, estimatedTotal,
   } = useProject();
   const { user } = useAuth();
@@ -117,22 +118,26 @@ export function ProjectDrawer() {
 
   useEffect(() => { checkAvailability(); }, [checkAvailability]);
 
-  // ── guard: start date must not be after end date ───────────────────────────
-  const handleStartDateChange = (v: string) => {
-    const start = v;
-    let end = state.endDate;
-    if (!isBefore(startOfDay(parseISO(start)), startOfDay(parseISO(end)))) {
-      end = format(addDays(parseISO(start), 1), 'yyyy-MM-dd');
-    }
-    setDates(start, end);
+  // ── agenda: gravação define retirada e devolução (dias úteis) ──────────────
+  const handleShootStart = (v: string) => {
+    if (!v) return;
+    setShootDates(v, v > state.shootEndDate ? v : state.shootEndDate);
   };
-
-  const handleEndDateChange = (v: string) => {
-    let end = v;
-    if (!isBefore(startOfDay(parseISO(state.startDate)), startOfDay(parseISO(end)))) {
-      end = format(addDays(parseISO(state.startDate), 1), 'yyyy-MM-dd');
-    }
-    setDates(state.startDate, end);
+  const handleShootEnd = (v: string) => {
+    if (!v) return;
+    setShootDates(state.shootStartDate, v < state.shootStartDate ? state.shootStartDate : v);
+  };
+  const handlePickup = (v: string) => {
+    if (!v) return;
+    if (isClosedDay(v)) toast.info('Sábado e domingo as locadoras não abrem. A retirada foi para o dia útil anterior.');
+    else if (v > state.shootStartDate) toast.info('A retirada precisa ser até o primeiro dia de gravação.');
+    setPickupDate(v);
+  };
+  const handleReturn = (v: string) => {
+    if (!v) return;
+    if (isClosedDay(v)) toast.info('Sábado e domingo as locadoras não abrem. A devolução foi para o próximo dia útil.');
+    else if (v < state.shootEndDate) toast.info('A devolução precisa ser depois do último dia de gravação.');
+    setReturnDate(v);
   };
 
   // ── checkout ───────────────────────────────────────────────────────────────
@@ -187,8 +192,11 @@ export function ProjectDrawer() {
           company_id:           item.equipment.company_id,
           renter_id:            user.id,
           project_id:           projectId,
+          // Ocupação: da retirada à devolução. Cobrança: só os dias de gravação.
           start_date:           state.startDate,
           end_date:             state.endDate,
+          shoot_start_date:     state.shootStartDate,
+          shoot_end_date:       state.shootEndDate,
           total_amount:         item.equipment.daily_rate * item.quantity * totalDays,
           status:               'pending',
           quantity:             item.quantity,
@@ -503,47 +511,48 @@ export function ProjectDrawer() {
                     )}
                   </div>
 
-                  {/* Period */}
+                  {/* Agenda: gravação (cobrada) + retirada e devolução (dias úteis) */}
                   {state.items.length > 0 && (
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <CalendarDays className="w-3.5 h-3.5 text-primary" />
-                      <span className="text-[11px] font-semibold text-zinc-500">
-                        Período da locação
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-[11px] font-semibold text-zinc-400 mb-1.5">
-                          Início
-                        </label>
-                        <input
-                          type="date"
-                          value={state.startDate}
-                          min={format(new Date(), 'yyyy-MM-dd')}
-                          onChange={e => handleStartDateChange(e.target.value)}
-                          className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
-                        />
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <CalendarDays className="w-3.5 h-3.5 text-primary" />
+                        <span className="text-[11px] font-semibold text-zinc-500">Dias de gravação</span>
                       </div>
-                      <div>
-                        <label className="block text-[11px] font-semibold text-zinc-400 mb-1.5">
-                          Devolução
-                        </label>
-                        <input
-                          type="date"
-                          value={state.endDate}
-                          min={format(addDays(parseISO(state.startDate), 1), 'yyyy-MM-dd')}
-                          onChange={e => handleEndDateChange(e.target.value)}
-                          className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
-                        />
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label htmlFor="shoot-start" className="block text-[11px] font-semibold text-zinc-400 mb-1.5">De</label>
+                          <input id="shoot-start" type="date" value={state.shootStartDate} min={todayStr()}
+                            onChange={e => handleShootStart(e.target.value)} className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all" />
+                        </div>
+                        <div>
+                          <label htmlFor="shoot-end" className="block text-[11px] font-semibold text-zinc-400 mb-1.5">Até</label>
+                          <input id="shoot-end" type="date" value={state.shootEndDate} min={state.shootStartDate}
+                            onChange={e => handleShootEnd(e.target.value)} className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all" />
+                        </div>
                       </div>
+                      <p className="text-[11px] text-zinc-500 mt-2 font-semibold">
+                        {totalDays} {totalDays === 1 ? 'diária cobrada' : 'diárias cobradas'} · só os dias de gravação
+                      </p>
                     </div>
-                    <p className="text-[11px] text-zinc-500 mt-2 font-semibold">
-                      {totalDays} {totalDays === 1 ? 'diária' : 'diárias'} ·{' '}
-                      {format(parseISO(state.startDate), "d 'de' MMM", { locale: ptBR })}
-                      {' → '}
-                      {format(parseISO(state.endDate), "d 'de' MMM", { locale: ptBR })}
-                    </p>
+
+                    <div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label htmlFor="pickup-date" className="block text-[11px] font-semibold text-zinc-400 mb-1.5">Retirada</label>
+                          <input id="pickup-date" type="date" value={state.startDate} min={todayStr()} max={state.shootStartDate}
+                            onChange={e => handlePickup(e.target.value)} className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all" />
+                          <p className="text-[11px] text-zinc-500 mt-1 capitalize">{weekdayShort(state.startDate)}</p>
+                        </div>
+                        <div>
+                          <label htmlFor="return-date" className="block text-[11px] font-semibold text-zinc-400 mb-1.5">Devolução</label>
+                          <input id="return-date" type="date" value={state.endDate} min={state.shootEndDate}
+                            onChange={e => handleReturn(e.target.value)} className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all" />
+                          <p className="text-[11px] text-zinc-500 mt-1 capitalize">{weekdayShort(state.endDate)}</p>
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-zinc-500 mt-2">Retirada e devolução de segunda a sexta. Não são cobradas.</p>
+                    </div>
                   </div>
                   )}
 

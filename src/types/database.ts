@@ -72,8 +72,13 @@ export interface Booking {
     renter_id: string;
     company_id: string;
     project_id: string | null;
+    /** Retirada (o equipamento sai) */
     start_date: string;
+    /** Devolução (o equipamento volta) */
     end_date: string;
+    /** Dias de gravação (cobrados). Pedidos antigos não têm. */
+    shoot_start_date?: string | null;
+    shoot_end_date?: string | null;
     total_amount: number;
     status: 'pending' | 'approved' | 'rejected' | 'active' | 'completed' | 'cancelled';
     notes: string | null;

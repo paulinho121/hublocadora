@@ -66,7 +66,7 @@ export function buildPendingActions({ bookingsReceived, bookingsRequested, pendi
       tone: first.start_date <= tomorrow ? 'urgent' : 'normal',
       icon: Inbox,
       title: 'Aprovar pedido',
-      detail: `${client(first)} · ${items.length > 1 ? `${items.length} equipamentos` : name(first)} · ${shortDate(first.start_date)} → ${shortDate(first.end_date)}`,
+      detail: `${client(first)} · ${items.length > 1 ? `${items.length} equipamentos` : name(first)} · ${first.shoot_start_date ? `grava ${shortDate(first.shoot_start_date)}` : `${shortDate(first.start_date)} → ${shortDate(first.end_date)}`}`,
       openKey: key,
     });
   });

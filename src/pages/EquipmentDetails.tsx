@@ -38,6 +38,7 @@ import { ReviewService } from '@/services/ReviewService';
 import { useQuery } from '@tanstack/react-query';
 import { Equipment } from '@/types/database';
 import { SuggestedEquipments } from '@/components/marketplace/SuggestedEquipments';
+import { RentalSchedule, defaultSchedule, scheduleForShoot, shootDays, todayStr, weekdayShort, dayMonth } from '@/lib/schedule';
 import { EquipmentGallery } from '@/components/marketplace/EquipmentGallery';
 import { CompanyInfoCard } from '@/components/marketplace/CompanyInfoCard';
 
@@ -70,15 +71,20 @@ const conditionColors: Record<string, string> = {
 function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
   const { id }       = useParams<{ id: string }>();
   const navigate     = useNavigate();
-  const { state: proj, addItem, setDates: setProjectDates, openDrawer } = useProject();
+  const { state: proj, addItem, setSchedule: setProjectSchedule, openDrawer } = useProject();
 
-  const today    = new Date().toISOString().split('T')[0];
-  const tomorrow = format(addDays(new Date(), 1), 'yyyy-MM-dd');
+  const today = todayStr();
 
-  // Datas: as que já estão no pedido (carrinho), se ainda forem válidas
-  const cartDatesValid = !!proj.startDate && proj.startDate >= today;
-  const [startDate, setStartDate] = useState(cartDatesValid ? proj.startDate : today);
-  const [endDate,   setEndDate]   = useState(cartDatesValid ? proj.endDate : format(addDays(new Date(), 7), 'yyyy-MM-dd'));
+  // Agenda: a do pedido (carrinho), se ainda for válida. A pessoa escolhe os dias de
+  // gravação; retirada e devolução (dias úteis) vêm sugeridas e podem ser ajustadas no carrinho.
+  const [schedule, setSchedule] = useState<RentalSchedule>(() =>
+    proj.shootStartDate && proj.shootStartDate >= today && proj.startDate >= today
+      ? { pickupDate: proj.startDate, shootStartDate: proj.shootStartDate, shootEndDate: proj.shootEndDate, returnDate: proj.endDate }
+      : defaultSchedule(),
+  );
+  // O equipamento fica ocupado da retirada à devolução
+  const startDate = schedule.pickupDate;
+  const endDate   = schedule.returnDate;
   const inCartQty = proj.items.find(i => i.equipment.id === equipment.id)?.quantity;
   const [quantity,  setQty]       = useState(inCartQty ?? 1);
   const [showCal,   setShowCal]   = useState(false);
@@ -88,15 +94,19 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
     id || '', startDate, endDate,
   );
 
-  const totalDays   = Math.max(1, differenceInDays(parseISO(endDate), parseISO(startDate)));
+  // Cobra-se só os dias de gravação
+  const totalDays   = shootDays(schedule.shootStartDate, schedule.shootEndDate);
   const totalAmount = equipment.daily_rate * quantity * totalDays;
   const maxQty      = avail?.available ?? equipment.stock_quantity ?? 1;
   const canBook     = avail?.isAvailable && quantity <= maxQty;
 
-  const handleStart = (val: string) => {
+  const handleShootStart = (val: string) => {
     if (!val) return;
-    setStartDate(val);
-    if (val >= endDate) setEndDate(format(addDays(parseISO(val), 1), 'yyyy-MM-dd'));
+    setSchedule(scheduleForShoot(val, val > schedule.shootEndDate ? val : schedule.shootEndDate));
+  };
+  const handleShootEnd = (val: string) => {
+    if (!val) return;
+    setSchedule(scheduleForShoot(schedule.shootStartDate, val < schedule.shootStartDate ? schedule.shootStartDate : val));
   };
 
   // Carrinho: o item entra no pedido; o envio às locadoras acontece em "Finalizar pedido".
@@ -104,7 +114,7 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
   const handleAddToOrder = () => {
     if (!canBook) return;
     addItem(equipment, quantity);
-    setProjectDates(startDate, endDate);
+    setProjectSchedule(schedule);
     setIsAdded(true);
   };
 
@@ -129,9 +139,8 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
             : 'Continue locando ou finalize o pedido para enviar à locadora.'}
         </p>
         <p className="text-[11px] font-semibold text-emerald-400 mb-6">
-          {format(parseISO(startDate), "d 'de' MMM", { locale: ptBR })}
-          {' → '}
-          {format(parseISO(endDate), "d 'de' MMM", { locale: ptBR })}
+          Gravação {dayMonth(schedule.shootStartDate)}
+          {schedule.shootEndDate !== schedule.shootStartDate && ` a ${dayMonth(schedule.shootEndDate)}`}
           {' · '}{quantity}× · {brl(totalAmount)}
         </p>
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
@@ -159,33 +168,39 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
       {/* ── Dates ─────────────────────────────────────────────────────────── */}
       <div className="rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-900/40">
         <div className="grid grid-cols-2 divide-x divide-zinc-800">
-          {/* Start date */}
+          {/* Dias de gravação (são os cobrados) */}
           <label className="flex flex-col gap-1 px-4 py-3.5 cursor-pointer hover:bg-zinc-900/60 transition-colors">
             <span className="text-[11px] font-semibold text-zinc-500">
-              Retirada
+              Gravação de
             </span>
             <input
               type="date"
-              value={startDate}
+              value={schedule.shootStartDate}
               min={today}
-              onChange={e => handleStart(e.target.value)}
+              onChange={e => handleShootStart(e.target.value)}
               className="bg-transparent text-sm font-black text-white focus:outline-none cursor-pointer w-full"
             />
           </label>
 
-          {/* End date */}
           <label className="flex flex-col gap-1 px-4 py-3.5 cursor-pointer hover:bg-zinc-900/60 transition-colors">
             <span className="text-[11px] font-semibold text-zinc-500">
-              Devolução
+              Até
             </span>
             <input
               type="date"
-              value={endDate}
-              min={startDate || tomorrow}
-              onChange={e => setEndDate(e.target.value)}
+              value={schedule.shootEndDate}
+              min={schedule.shootStartDate}
+              onChange={e => handleShootEnd(e.target.value)}
               className="bg-transparent text-sm font-black text-white focus:outline-none cursor-pointer w-full"
             />
           </label>
+        </div>
+
+        {/* Retirada e devolução sugeridas (dias úteis) */}
+        <div className="px-4 py-2.5 border-t border-zinc-800 text-[11px] text-zinc-400">
+          Retirada <span className="font-semibold text-zinc-200">{weekdayShort(startDate)}</span>
+          {' · '}Devolução <span className="font-semibold text-zinc-200">{weekdayShort(endDate)}</span>
+          <span className="block text-zinc-500 mt-0.5">De segunda a sexta. Dá para ajustar no carrinho.</span>
         </div>
 
         {/* Days count + availability */}
@@ -233,9 +248,9 @@ function InlineBookingPanel({ equipment }: { equipment: Equipment }) {
               <AvailabilityCalendar
                 equipmentId={id}
                 stockQuantity={equipment.stock_quantity || 1}
-                selectedStart={startDate}
-                selectedEnd={endDate}
-                onRangeChange={(s, e) => { setStartDate(s); setEndDate(e); }}
+                selectedStart={schedule.shootStartDate}
+                selectedEnd={schedule.shootEndDate}
+                onRangeChange={(s, e) => setSchedule(scheduleForShoot(s, e))}
               />
             </div>
           </motion.div>

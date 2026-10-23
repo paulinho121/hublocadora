@@ -30,6 +30,7 @@ import {
 import { confirmAction } from '@/components/ui/confirm-dialog';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { weekdayShort } from '@/lib/schedule';
 
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
@@ -986,6 +987,14 @@ export default function Dashboard() {
                ? <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400"><Inbox className="h-3 w-3" /> Recebido</span>
                : <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-400"><Send className="h-3 w-3" /> Enviado</span>;
              const shortDate = (d: string) => format(new Date(d + 'T00:00'), 'dd/MM');
+             // Gravação (cobrada) quando o pedido tem; pedidos antigos mostram retirada → devolução
+             const shootLabel = (o: any) => o.shoot_start_date
+               ? `${shortDate(o.shoot_start_date)}${o.shoot_end_date && o.shoot_end_date !== o.shoot_start_date ? ` a ${shortDate(o.shoot_end_date)}` : ''}`
+               : `${shortDate(o.start_date)} → ${shortDate(o.end_date)}`;
+             const periodLine = (o: any) => o.shoot_start_date
+               ? `grava ${shootLabel(o)}`
+               : `${shortDate(o.start_date)} → ${shortDate(o.end_date)}`;
+             const pickupReturn = (o: any) => `Retirada ${weekdayShort(o.start_date)} · Devolução ${weekdayShort(o.end_date)}`;
 
              // Ações rápidas de aprovação (locadora) e aceite de sub-locação
              const approvalActions = (o: any) => {
@@ -1062,7 +1071,7 @@ export default function Dashboard() {
 
                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                          {[
-                           { label: 'Período', value: `${shortDate(lead.start_date)} → ${shortDate(lead.end_date)}` },
+                           { label: lead.shoot_start_date ? 'Gravação' : 'Período', value: shootLabel(lead) },
                            { label: 'Itens', value: `${openGroup.length} equip. · ${unitsOf(openGroup)} un.` },
                            { label: 'Valor total', value: formatCurrency(total) },
                            { label: 'Entrega', value: lead.delivery_method === 'delivery' ? 'Receber no local' : 'Retirada' },
@@ -1073,6 +1082,8 @@ export default function Dashboard() {
                            </div>
                          ))}
                        </div>
+
+                       <p className="text-sm text-zinc-400 flex gap-2"><CalendarDays className="h-4 w-4 text-primary shrink-0 mt-0.5" /> {pickupReturn(lead)}</p>
 
                        {lead.delivery_method === 'delivery' && lead.delivery_address && (
                          <p className="text-sm text-zinc-400 flex gap-2"><MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" /> {lead.delivery_address}</p>
@@ -1165,7 +1176,7 @@ export default function Dashboard() {
 
                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                          {[
-                           { label: 'Período', value: `${shortDate(order.start_date)} → ${shortDate(order.end_date)}` },
+                           { label: order.shoot_start_date ? 'Gravação' : 'Período', value: shootLabel(order) },
                            { label: 'Quantidade', value: `${order.quantity || 1} un.` },
                            { label: 'Valor', value: formatCurrency(orderAmount(order)) },
                            { label: 'Entrega', value: order.delivery_method === 'delivery' ? 'Receber no local' : 'Retirada' },
@@ -1176,6 +1187,8 @@ export default function Dashboard() {
                            </div>
                          ))}
                        </div>
+
+                       <p className="text-sm text-zinc-400 flex gap-2"><CalendarDays className="h-4 w-4 text-primary shrink-0 mt-0.5" /> {pickupReturn(order)}</p>
 
                        {order.delivery_method === 'delivery' && order.delivery_address && (
                          <p className="text-sm text-zinc-400 flex gap-2"><MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" /> {order.delivery_address}</p>
@@ -1264,7 +1277,7 @@ export default function Dashboard() {
                                  <p className="font-black text-zinc-100 tracking-tight uppercase truncate">{label || `${items.length} equipamentos`}</p>
                                  <p className="text-xs text-zinc-500 truncate">{names}</p>
                                  <p className="text-xs text-zinc-500 truncate">
-                                   {counterpart(lead)} · {shortDate(lead.start_date)} → {shortDate(lead.end_date)} · {unitsOf(items)} un.
+                                   {counterpart(lead)} · {periodLine(lead)} · {unitsOf(items)} un.
                                  </p>
                                  <OrderProgress compact bookingStatus={lead.status} deliveryStatus={getDelivery(lead)?.status} />
                                </div>
@@ -1300,7 +1313,7 @@ export default function Dashboard() {
                                {directionBadge(o)}
                                <p className="font-black text-zinc-100 tracking-tight uppercase truncate">{o.equipment?.name}</p>
                                <p className="text-xs text-zinc-500 truncate">
-                                 {counterpart(o)} · {shortDate(o.start_date)} → {shortDate(o.end_date)} · {o.quantity || 1} un.
+                                 {counterpart(o)} · {periodLine(o)} · {o.quantity || 1} un.
                                </p>
                                <OrderProgress compact bookingStatus={o.status} deliveryStatus={getDelivery(o)?.status} />
                                {(() => {
