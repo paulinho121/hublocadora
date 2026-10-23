@@ -571,7 +571,7 @@ export default function Dashboard() {
         {/* Na Visão geral o cabeçalho do celular faz parte do topo colorido: sem linha divisória.
             (sem a classe border-zinc-900, que o tema claro pinta de cinza; --color-white volta a ser branco) */}
         <header className={`box-content h-16 md:h-20 pt-[env(safe-area-inset-top)] md:pt-0 flex items-center justify-between px-4 md:px-10 shrink-0 ${onBrandHeader
-          ? 'max-md:bg-primary max-md:text-white max-md:[--color-white:#fff] md:border-b md:border-zinc-800'
+          ? 'max-md:bg-[#2b2b30] max-md:text-white max-md:[--color-white:#fff] md:border-b md:border-zinc-800'
           : 'border-b border-zinc-900'}`}>
            <div className="flex items-center gap-3 md:hidden min-w-0">
               <div className={`h-10 w-10 rounded-full overflow-hidden flex items-center justify-center shrink-0 ${onBrandHeader ? 'bg-white/15' : 'bg-zinc-900 border border-zinc-800'}`}>

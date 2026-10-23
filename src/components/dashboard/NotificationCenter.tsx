@@ -119,7 +119,7 @@ export function NotificationCenter({ onBrand = false }: { onBrand?: boolean } = 
                 {unreadCount > 0 && (
                     <span className={cn(
                         "absolute -top-1 -right-1 h-5 w-5 text-[11px] font-black flex items-center justify-center rounded-full border-2 animate-pulse",
-                        onBrand ? "bg-amber-400 text-zinc-950 border-primary" : "bg-red-500 text-white border-black"
+                        onBrand ? "bg-amber-400 text-zinc-950 border-[#2b2b30]" : "bg-red-500 text-white border-black"
                     )}>
                         {unreadCount > 9 ? '+9' : unreadCount}
                     </span>

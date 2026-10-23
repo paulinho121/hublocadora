@@ -37,7 +37,7 @@ export function OverviewHero({ label, value, sub, actions }: OverviewHeroProps) 
   return (
     <section
       aria-label={label}
-      className="relative overflow-hidden bg-primary text-white -mx-4 -mt-4 px-5 pt-4 pb-16 md:mx-0 md:mt-0 md:pb-8 md:rounded-3xl md:px-8 md:pt-8"
+      className="relative overflow-hidden bg-gradient-to-b from-[#2b2b30] to-[#1c1c20] text-white [--color-white:#fff] [--color-black:#000] -mx-4 -mt-4 px-5 pt-4 pb-16 md:mx-0 md:mt-0 md:pb-8 md:rounded-3xl md:px-8 md:pt-8"
     >
       {/* Sombra suave só embaixo: dá profundidade sem criar emenda com o cabeçalho */}
       <div aria-hidden className="pointer-events-none absolute -bottom-28 -left-16 h-56 w-56 rounded-full bg-black/10 blur-3xl" />
