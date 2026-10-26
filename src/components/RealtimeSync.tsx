@@ -11,17 +11,18 @@ import { useAuth } from '@/contexts/AuthContext';
  * Cada mudança invalida as consultas afetadas; várias mudanças seguidas (ex.: aprovar
  * um pedido cria a entrega) viram uma só atualização.
  *
- * Requer as tabelas na publicação supabase_realtime (V43).
+ * Requer as tabelas na publicação supabase_realtime (V43; contratos na V46).
  */
 
 const KEYS_BY_TABLE: Record<string, string[]> = {
   bookings: [
     'bookings', 'all-bookings', 'admin-bookings', 'admin-stats', 'projects',
     'marketplace-active-bookings', 'availability', 'equipment-occupied',
-    'reports-bookings', 'network-report-bookings', 'payments-approved',
+    'reports-bookings', 'network-report-bookings', 'payments-approved', 'rental-contracts',
   ],
   deliveries: ['deliveries', 'bookings', 'projects'],
   booking_extensions: ['booking-extensions', 'booking-extensions-pending', 'bookings'],
+  rental_contracts: ['rental-contracts'],
 };
 
 const BATCH_MS = 300;

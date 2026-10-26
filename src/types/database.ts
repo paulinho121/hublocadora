@@ -81,6 +81,8 @@ export interface Booking {
     shoot_end_date?: string | null;
     /** Dias de gravação marcados (podem ser espaçados) */
     shoot_dates?: string[] | null;
+    /** Exige contrato assinado pelas duas partes antes da retirada (V46) */
+    contract_required?: boolean;
     total_amount: number;
     status: 'pending' | 'approved' | 'rejected' | 'active' | 'completed' | 'cancelled';
     notes: string | null;

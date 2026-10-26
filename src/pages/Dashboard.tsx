@@ -77,6 +77,9 @@ import { OverviewHero } from '@/components/dashboard/OverviewHero';
 import { QuickShortcuts } from '@/components/dashboard/QuickShortcuts';
 import { FileText, History, Settings, LayoutGrid, Clapperboard, ShoppingBag } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
+import { OrderContracts } from '@/components/contracts/ContractPanel';
+import { useContracts } from '@/hooks/useContracts';
+import { contractFor, isMyTurn } from '@/lib/contract';
 
 type TabType = 'overview' | 'inventory' | 'bookings' | 'projects' | 'transfers' | 'reports' | 'network' | 'settings' | 'audit' | 'history' | 'favorites';
 const VALID_TABS: TabType[] = ['overview', 'inventory', 'bookings', 'projects', 'transfers', 'reports', 'network', 'settings', 'audit', 'history', 'favorites'];
@@ -117,6 +120,9 @@ export default function Dashboard() {
   const { data: bookingsRequested } = useBookings({
     renterId: user?.id
   });
+
+  // Contratos de locação (V46): status no pedido e nas ações pendentes
+  const { data: contracts } = useContracts();
 
   // Prorrogações aguardando resposta (selo na lista de pedidos). Sem a V41 a tabela
   // não existe: a consulta falha e a lista só fica sem o selo.
@@ -665,7 +671,7 @@ export default function Dashboard() {
                   <QuickShortcuts
                     items={[
                       { id: 'bookings',  label: 'Pedidos',     icon: CalendarDays, onClick: () => setActiveTab('bookings'),
-                        badge: buildPendingActions({ bookingsReceived: bookingsReceived || [], bookingsRequested: bookingsRequested || [], pendingExtensionIds, tenantId }).length },
+                        badge: buildPendingActions({ bookingsReceived: bookingsReceived || [], bookingsRequested: bookingsRequested || [], pendingExtensionIds, tenantId, contracts }).length },
                       isRenterOnly
                         ? { id: 'favorites', label: 'Favoritos',  icon: Heart,        onClick: () => setActiveTab('favorites') }
                         : { id: 'inventory', label: 'Inventário', icon: Package,      onClick: () => setActiveTab('inventory') },
@@ -685,6 +691,7 @@ export default function Dashboard() {
                   bookingsRequested={bookingsRequested || []}
                   pendingExtensionIds={pendingExtensionIds}
                   tenantId={tenantId}
+                  contracts={contracts}
                   onOpen={openOrder}
                 />
 
@@ -997,6 +1004,20 @@ export default function Dashboard() {
                ? `grava ${shootLabel(o)}`
                : `${shortDate(o.start_date)} → ${shortDate(o.end_date)}`;
              const pickupReturn = (o: any) => `Retirada ${weekdayShort(o.start_date)} · Devolução ${weekdayShort(o.end_date)}`;
+             // Selo do contrato na lista: a vez de quem assinar
+             const contractTag = (items: any[]) => {
+               const role = items[0]._direction === 'sent' ? 'renter' : 'provider';
+               // Um contrato por locadora: mostra primeiro o que depende de quem está olhando
+               const open = [...new Set(items.filter(o => o.contract_required).map(o => o.company_id))]
+                 .map(cid => contractFor(contracts, items.filter(o => o.company_id === cid).map(o => o.id)))
+                 .filter((c): c is NonNullable<typeof c> => !!c && c.status !== 'signed')
+                 .sort((a, b) => Number(isMyTurn(b, role)) - Number(isMyTurn(a, role)));
+               const c = open[0];
+               if (!c) return null;
+               return isMyTurn(c, role)
+                 ? <p className="text-[11px] font-bold text-amber-400 truncate">Contrato: falta sua assinatura</p>
+                 : <p className="text-[11px] font-semibold text-zinc-500 truncate">Contrato: aguardando {c.status === 'awaiting_renter' ? 'o cliente' : 'a locadora'}</p>;
+             };
 
              // Ações rápidas de aprovação (locadora) e aceite de sub-locação
              const approvalActions = (o: any) => {
@@ -1107,6 +1128,8 @@ export default function Dashboard() {
                      </div>
                    </Card>
 
+                   <OrderContracts bookings={openGroup} role={lead._direction === 'sent' ? 'renter' : 'provider'} />
+
                    <div className="space-y-3">
                      <h3 className="text-lg font-black uppercase tracking-tighter flex items-center gap-2"><Package className="h-4 w-4 text-primary" /> Equipamentos</h3>
                      <p className="text-sm text-zinc-500 -mt-1">Toque em um item para ver a entrega, a localização e a devolução.</p>
@@ -1215,6 +1238,9 @@ export default function Dashboard() {
                      </div>
                    </Card>
 
+                   {/* Contrato do pedido: o equipamento só sai com as duas assinaturas */}
+                   <OrderContracts bookings={[order]} role={order._direction === 'sent' ? 'renter' : 'provider'} />
+
                    {/* Localização ao vivo: visível para a locadora e para o cliente */}
                    <OrderLiveLocation
                      bookingId={order.id}
@@ -1282,6 +1308,7 @@ export default function Dashboard() {
                                    {counterpart(lead)} · {periodLine(lead)} · {unitsOf(items)} un.
                                  </p>
                                  <OrderProgress compact bookingStatus={lead.status} deliveryStatus={getDelivery(lead)?.status} />
+                                 {contractTag(items)}
                                </div>
                                <div className="text-right shrink-0 space-y-1.5">
                                  <p className="text-base md:text-lg font-black text-zinc-100">{formatCurrency(total)}</p>
@@ -1329,6 +1356,7 @@ export default function Dashboard() {
                                    <p className="text-[11px] font-bold text-amber-400 truncate">{tags.join(' · ')}</p>
                                  );
                                })()}
+                               {contractTag([o])}
                              </div>
                              <div className="text-right shrink-0 space-y-1.5">
                                <p className="text-base md:text-lg font-black text-zinc-100">{formatCurrency(orderAmount(o))}</p>

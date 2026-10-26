@@ -1,8 +1,9 @@
 import { format, addDays } from 'date-fns';
 import { formatShootDays } from '@/lib/schedule';
+import { RentalContract } from '@/lib/contract';
 import {
   CheckCircle2, ClipboardCheck, PackageCheck, Truck, Store, Undo2, CalendarPlus,
-  AlertTriangle, Inbox, Handshake, ChevronRight,
+  AlertTriangle, Inbox, Handshake, ChevronRight, FileSignature,
 } from 'lucide-react';
 
 /**
@@ -27,6 +28,8 @@ interface PendingActionsProps {
   bookingsRequested: any[];
   pendingExtensionIds?: Set<string>;
   tenantId?: string | null;
+  /** Contratos de locação (V46): assinar é uma ação pendente */
+  contracts?: RentalContract[];
   onOpen: (key: string) => void;
 }
 
@@ -37,7 +40,7 @@ const getDelivery = (b: any) => {
 
 const shortDate = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
 
-export function buildPendingActions({ bookingsReceived, bookingsRequested, pendingExtensionIds, tenantId }: Omit<PendingActionsProps, 'onOpen'>): Action[] {
+export function buildPendingActions({ bookingsReceived, bookingsRequested, pendingExtensionIds, tenantId, contracts }: Omit<PendingActionsProps, 'onOpen'>): Action[] {
   const today = format(new Date(), 'yyyy-MM-dd');
   const tomorrow = format(addDays(new Date(), 1), 'yyyy-MM-dd');
   const received = bookingsReceived;
@@ -106,6 +109,25 @@ export function buildPendingActions({ bookingsReceived, bookingsRequested, pendi
     if (pendingExtensionIds?.has(b.id)) {
       actions.push({ id: `ext-${b.id}`, tone: 'normal', icon: CalendarPlus, title: 'Responder prorrogação', detail: `${name(b)} · ${client(b)}`, openKey: b.id });
     }
+  });
+
+  // ── Contratos: a vez de quem está olhando assinar ─────────────────────────
+  const byId = new Map<string, any>();
+  [...received, ...bookingsRequested].forEach(b => byId.set(b.id, b));
+  (contracts || []).forEach(c => {
+    const first = c.booking_ids.map(id => byId.get(id)).find(Boolean);
+    if (!first) return;
+    const asRenter = c.status === 'awaiting_renter' && bookingsRequested.some(b => b.id === first.id);
+    const asProvider = c.status === 'awaiting_company' && received.some(b => b.id === first.id);
+    if (!asRenter && !asProvider) return;
+    actions.push({
+      id: `contract-${c.id}`,
+      tone: first.start_date <= tomorrow ? 'urgent' : 'normal',
+      icon: FileSignature,
+      title: asRenter ? 'Assinar contrato' : 'Contra-assinar contrato',
+      detail: `${c.code} · ${asRenter ? rental(first) : client(first)} · retirada ${shortDate(first.start_date)}`,
+      openKey: keyOf(first),
+    });
   });
 
   // ── Cliente (pedidos que eu fiz) ──────────────────────────────────────────

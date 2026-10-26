@@ -10,6 +10,7 @@ const TECHNICAL: [RegExp, string][] = [
   [/violates (check|foreign key|not-null) constraint|invalid input syntax|column .* does not exist|relation .* does not exist/i,
     'Não foi possível salvar: algum dado não foi aceito. Confira e tente de novo.'],
   [/duplicate key|already exists/i, 'Este registro já existe.'],
+  [/Could not find the function|schema cache|Bucket not found/i, 'Este recurso ainda não está disponível. Tente de novo mais tarde.'],
   [/Failed to fetch|NetworkError|network|timeout/i, 'Sem conexão no momento. Verifique a internet e tente de novo.'],
 ];
 
